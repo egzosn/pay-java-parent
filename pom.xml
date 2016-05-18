@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>in.egan</groupId>
+    <artifactId>pay-java-parent</artifactId>
+    <packaging>pom</packaging>
+    <version>1.0-SNAPSHOT</version>
+
+    <name>Pay Java Tools - Parent</name>
+    <description>支付宝支付、微信支付上级POM</description>
+    <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <name>Egan</name>
+            <email>egzosn@gmail.com</email>
+        </developer>
+    </developers>
+
+    <modules>
+        <module>pay-java-common</module>
+        <module>pay-java-ali</module>
+    </modules>
+
+    <repositories>
+
+
+        <repository>
+            <id>cloudHopper</id>
+            <name>cloud Repository</name>
+            <url>http://maven.cloudhopper.com/repos/third-party/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>nexus-osc-thirdparty</id>
+            <name>nexus-osc-thirdparty</name>
+            <url>http://maven.oschina.net/content/repositories/thirdparty/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+
+        <repository>
+            <id>ibiblio</id>
+            <name>cloud Repository</name>
+            <url>http://mirrors.ibiblio.org/pub/mirrors/maven2/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <properties>
+        <org.apache.commons.version>3.1</org.apache.commons.version>
+        <jackson-databind.version>2.3.2</jackson-databind.version>
+        <httpclient.version>4.3.5</httpclient.version>
+        <org.slf4j.version>1.7.1</org.slf4j.version>
+        <logback.version>1.1.3</logback.version>
+    </properties>
+
+
+    <dependencyManagement>
+        <dependencies>
+
+            <!-- pay-java  -->
+            <dependency>
+                <groupId>in.egan</groupId>
+                <artifactId>pay-java-common</artifactId>
+                <version>1.0-SNAPSHOT</version>
+            </dependency>
+            <!-- /pay-java  -->
+            <!-- servlet  -->
+            <dependency>
+                <groupId>javax.servlet</groupId>
+                <artifactId>javax.servlet-api</artifactId>
+                <scope>provided</scope>
+                <version>3.1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.servlet</groupId>
+                <artifactId>jsp-api</artifactId>
+                <version>2.0</version>
+                <scope>provided</scope>
+            </dependency>
+            <!-- /servlet  -->
+
+
+
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${org.apache.commons.version}</version>
+            </dependency>
+            <!--json-->
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson-databind.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>fastjson</artifactId>
+                <version>1.2.4</version>
+            </dependency>
+            <!--/json-->
+            <dependency>
+                <groupId>commons-configuration</groupId>
+                <artifactId>commons-configuration</artifactId>
+                <version>1.9</version>
+            </dependency>
+            <!--httpcomponents-->
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>${httpclient.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpmime</artifactId>
+                <version>${httpclient.version}</version>
+            </dependency>
+            <!--/httpcomponents-->
+
+            <dependency>
+                <groupId>com.google.code.gson</groupId>
+                <artifactId>gson</artifactId>
+                <version>2.2.2</version>
+            </dependency>
+
+            <!-- logback  -->
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${org.slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>${logback.version}</version>
+            </dependency>
+            <!-- / logback -->
+
+        </dependencies>
+    </dependencyManagement>
+
+</project>
