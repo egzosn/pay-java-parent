@@ -6,7 +6,6 @@ import in.egan.pay.common.api.PayService;
 import in.egan.pay.common.api.RequestExecutor;
 import in.egan.pay.common.bean.result.PayError;
 import in.egan.pay.common.exception.PayErrorException;
-import in.egan.pay.common.util.encrypt.Base64;
 import in.egan.pay.common.util.encrypt.RSA;
 import in.egan.pay.common.util.http.SimpleGetRequestExecutor;
 import org.apache.commons.lang3.StringUtils;
@@ -23,9 +22,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.security.KeyFactory;
-import java.security.PrivateKey;
-import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Map;
 
 /**
@@ -79,6 +75,11 @@ public class AliPayService implements PayService {
         } else {
             return false;
         }
+    }
+
+    @Override
+    public boolean checkSignature(Map<String, String> params) {
+        return verify(params);
     }
 
     /**

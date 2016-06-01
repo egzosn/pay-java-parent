@@ -2,8 +2,6 @@ package in.egan.pay.common.api;
 
 import in.egan.pay.common.exception.PayErrorException;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.Map;
 
 /**
@@ -18,6 +16,7 @@ public interface PayService {
         public void setPayConfigStorage(PayConfigStorage payConfigStorage) ;
         public PayConfigStorage getPayConfigStorage() ;
         public boolean verify(Map<String, String> params);
+        public boolean checkSignature(Map<String, String> params);
         public boolean getSignVeryfy(Map<String, String> Params, String sign);
         public String verifyUrl(String notify_id) throws PayErrorException;
         public <T, E> T execute(RequestExecutor<T, E> executor, String uri, E data) throws PayErrorException;
@@ -38,5 +37,6 @@ public interface PayService {
      * @return
      */
     public String createSign(String content, String characterEncoding);
+
 
 }
