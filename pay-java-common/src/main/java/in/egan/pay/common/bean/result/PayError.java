@@ -5,8 +5,7 @@ import in.egan.pay.common.util.json.WxGsonBuilder;
 import java.io.Serializable;
 
 /**
- * 微信错误码说明
- * http://mp.weixin.qq.com/wiki/index.php?title=全局返回码说明
+ * 支付错误码说明
  * @author Daniel Qian
  *
  */
@@ -17,6 +16,14 @@ public class PayError implements Serializable {
     private String errorMsg;
 
     private String json;
+
+    public PayError(int errorCode, String errorMsg) {
+        this.errorCode = errorCode;
+        this.errorMsg = errorMsg;
+    }
+
+    public PayError() {
+    }
 
     public int getErrorCode() {
         return errorCode;

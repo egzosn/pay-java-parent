@@ -26,6 +26,6 @@ public interface RequestExecutor<T, E> {
      * @throws ClientProtocolException
      * @throws java.io.IOException
      */
-    public T execute(CloseableHttpClient httpclient, HttpHost httpProxy, String uri, E data) throws PayErrorException, ClientProtocolException, IOException;
+    public T execute(CloseableHttpClient httpclient, HttpHost httpProxy, String uri, E data) throws PayErrorException, ClientProtocolException,IOException;
 
 }

@@ -48,12 +48,32 @@
             <artifactId>logback-classic</artifactId>
         </dependency>
         <!-- / logback -->
+        <!--httpcomponents-->
+<!--        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpmime</artifactId>
+        </dependency>-->
+        <dependency>
+            <groupId>commons-httpclient</groupId>
+            <artifactId>commons-httpclient</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+        </dependency>
+
+        <!--/httpcomponents-->
+
     </dependencies>
 
-    <build>
+    <!--<build>
 
         <plugins>
-            <!-- 这种方式可以单独执行 -->
+            &lt;!&ndash; 这种方式可以单独执行 &ndash;&gt;
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
@@ -81,7 +101,7 @@
         </plugins>
 
 
-    </build>
+    </build>-->
 
 
 </project>

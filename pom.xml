@@ -129,6 +129,17 @@
                 <artifactId>httpmime</artifactId>
                 <version>${httpclient.version}</version>
             </dependency>
+            <dependency>
+                <groupId>commons-httpclient</groupId>
+                <artifactId>commons-httpclient</artifactId>
+                <version>3.0.1</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-codec</groupId>
+                <artifactId>commons-codec</artifactId>
+                <version>1.6</version>
+            </dependency>
+
             <!--/httpcomponents-->
 
             <dependency>

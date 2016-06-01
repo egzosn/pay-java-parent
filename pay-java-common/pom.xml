@@ -28,6 +28,15 @@
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpmime</artifactId>
         </dependency>
+        <dependency>
+            <groupId>commons-httpclient</groupId>
+            <artifactId>commons-httpclient</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+        </dependency>
+
         <!--/httpcomponents-->
 
         <dependency>
