@@ -31,6 +31,7 @@ public class AliPayConfigStorage implements PayConfigStorage{
     protected volatile String http_proxy_password;
     protected volatile String logPath;
     protected volatile Boolean showLog;
+    protected volatile Short payType;
 
 
 
@@ -169,5 +170,13 @@ public class AliPayConfigStorage implements PayConfigStorage{
 
     public void setHttp_proxy_password(String http_proxy_password) {
         this.http_proxy_password = http_proxy_password;
+    }
+
+    public Short getPayType() {
+        return payType;
+    }
+
+    public void setPayType(Short payType) {
+        this.payType = payType;
     }
 }

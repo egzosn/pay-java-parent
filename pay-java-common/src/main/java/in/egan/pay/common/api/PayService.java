@@ -16,6 +16,7 @@ public interface PayService {
 
         public String getHttpsVerifyUrl();
         public void setPayConfigStorage(PayConfigStorage payConfigStorage) ;
+        public PayConfigStorage getPayConfigStorage() ;
         public boolean verify(Map<String, String> params);
         public boolean getSignVeryfy(Map<String, String> Params, String sign);
         public String verifyUrl(String notify_id) throws PayErrorException;
@@ -37,4 +38,5 @@ public interface PayService {
      * @return
      */
     public String createSign(String content, String characterEncoding);
+
 }

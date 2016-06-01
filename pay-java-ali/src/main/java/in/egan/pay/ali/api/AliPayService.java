@@ -269,4 +269,9 @@ public class AliPayService implements PayService {
             httpClient = HttpClients.createDefault();
         }
     }
+
+    @Override
+    public PayConfigStorage getPayConfigStorage() {
+        return payConfigStorage;
+    }
 }

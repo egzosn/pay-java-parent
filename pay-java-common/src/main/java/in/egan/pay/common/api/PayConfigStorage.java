@@ -36,6 +36,7 @@ public interface PayConfigStorage {
     public String getRsa_private();
     public String getLogPath();
     public Boolean isShowLog();
+    public Short getPayType();
 
 
 }
