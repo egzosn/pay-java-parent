@@ -28,7 +28,7 @@ public interface PayService {
      * @param tradeNo 商户单号
      * @return
      */
-    public  String orderInfo(String subject, String body, String price,String tradeNo);
+    public Object orderInfo(String subject, String body, String price,String tradeNo);
 
     /**
      * 创建签名

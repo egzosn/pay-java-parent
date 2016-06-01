@@ -17,23 +17,23 @@ public interface PayConfigStorage {
     //授权令牌
     public String getToken();
     //服务端回调Url
-    public String getNotify_url();
+    public String getNotifyUrl();
     //签名方式
-    public String getSign_type();
+    public String getSignType();
     // 字符编码格式 目前支持 gbk 或 utf-8
-    public String getInput_charset();
+    public String getInputCharset();
     //获取公钥
     public String getSecretKey();
 
-    public String getHttp_proxy_host();
+    public String getHttpProxyHost();
 
-    public int getHttp_proxy_port();
+    public int getHttpProxyPort();
 
-    public String getHttp_proxy_username();
+    public String getHttpProxyUsername();
 
-    public String getHttp_proxy_password();
-    public String getRsa_public();
-    public String getRsa_private();
+    public String getHttpProxyPassword();
+    public String getKeyPublic();
+    public String getKeyPrivate();
     public String getLogPath();
     public Boolean isShowLog();
     public Short getPayType();

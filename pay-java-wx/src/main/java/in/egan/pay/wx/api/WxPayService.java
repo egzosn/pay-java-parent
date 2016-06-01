@@ -1,6 +1,5 @@
-package in.egan.pay.ali.api;
+package in.egan.pay.wx.api;
 
-import in.egan.pay.ali.bean.AlipayCore;
 import in.egan.pay.common.api.PayConfigStorage;
 import in.egan.pay.common.api.PayService;
 import in.egan.pay.common.api.RequestExecutor;
@@ -8,6 +7,7 @@ import in.egan.pay.common.bean.result.PayError;
 import in.egan.pay.common.exception.PayErrorException;
 import in.egan.pay.common.util.encrypt.RSA;
 import in.egan.pay.common.util.http.SimpleGetRequestExecutor;
+import in.egan.pay.wx.bean.WxpayCore;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
@@ -20,9 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.Map;
+import java.util.*;
 
 /**
  *  支付宝支付通知
@@ -30,8 +28,8 @@ import java.util.Map;
  * @email egzosn@gmail.com
  * @date 2016-5-18 14:09:01
  */
-public class AliPayService implements PayService {
-    protected final Logger log = LoggerFactory.getLogger(AliPayService.class);
+public class WxPayService implements PayService {
+    protected final Logger log = LoggerFactory.getLogger(WxPayService.class);
 
     protected PayConfigStorage payConfigStorage;
 
@@ -90,12 +88,12 @@ public class AliPayService implements PayService {
      */
     public   boolean getSignVeryfy(Map<String, String> Params, String sign) {
         //过滤空值、sign与sign_type参数
-        Map<String, String> sParaNew = AlipayCore.paraFilter(Params);
+        Map<String, String> sParaNew = WxpayCore.paraFilter(Params);
         //获取待签名字符串
-        String preSignStr = AlipayCore.createLinkString(sParaNew);
+        String preSignStr = WxpayCore.createLinkString(sParaNew);
         //获得签名验证结果
         boolean isSign = false;
-        if(payConfigStorage.getSignType().equals("RSA")){
+        if(payConfigStorage.getSignType().equals("md5")){
             isSign = RSA.verify(preSignStr, sign, payConfigStorage.getSecretKey(), payConfigStorage.getInputCharset());
         }
         return isSign;
@@ -143,85 +141,110 @@ public class AliPayService implements PayService {
     }
 
     @Override
-    public String orderInfo(String subject, String body, String price, String tradeNo) {
-        String orderInfo = getOrderInfo(subject,body,price,tradeNo);
-        String sign = createSign(orderInfo, "UTF-8");
+    public Object orderInfo(String subject, String body, String price, String tradeNo) {
 
-        try {
-            sign = URLEncoder.encode(sign, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
 
-        final String payInfo = orderInfo + "&sign=\"" + sign + "\"&" + "sign_type=\"RSA\"";
+        Map<String, Object> results = new HashMap<String, Object>();
+        // System.out.println("微信支付"+openId);
+        // Map<String, String> params = this.getConfigParams();
+        // 返回格式
+        String format = "xml";
+        // 必填，不需要修改
+        // 请求号
+        //String req_id = UtilDate.getOrderNum();
+        // 必填，须保证每次请求都是唯一
 
-        return payInfo;
+        // req_data详细信息
+
+
+        // 用户付款中途退出返回商户的地址。需http://格式的完整路径，不允许加?id=123这类自定义参数
+        String time = "";
+
+
+        // log.info("base path=" + basePath);
+        // log.info("go pay come in the openId=" + openId
+        // +"==time="+time);
+        SortedMap<String, Object> parameters = new TreeMap<String, Object>();
+        parameters.put("appid", payConfigStorage.getAppid());
+        parameters.put("body", "ceshi");// 购买支付信息
+        parameters.put("mch_id", payConfigStorage.getPartner());
+//        parameters.put("nonce_str", new Date().getTime() + "");
+        parameters.put("notify_url", payConfigStorage.getNotifyUrl());
+        parameters.put("out_trade_no", tradeNo);// 订单号
+//        parameters.put("spbill_create_ip", "192.168.0.1");
+        parameters.put("total_fee", price);// 总金额单位为分
+        parameters.put("trade_type", "JSAPI");
+//        parameters.put("openid", wxMember.getOpenid());
+
+
+        String sign = createSign(getOrderInfo(parameters), payConfigStorage.getInputCharset());
+        parameters.put("sign", sign);
+        System.out.println("parameters:" + parameters);
+       /* String requestXML = WxUtils.getRequestXml(parameters);
+        System.out.println("requestXML：" + requestXML);
+        String result = WxUtils.httpsRequest2(WxUtils.WXPAY_GATEWAY, "POST", requestXML);//
+        System.out.println("获取预支付订单返回结果33:" + result);
+        Map<String, String> map = WxUtils.doXMLParse(result);
+        System.out.println("213");
+        SortedMap<Object, Object> params = new TreeMap<Object, Object>();
+        long timeStamp = new Date().getTime();
+        params.put("appId", WxUtils.APPID);
+        params.put("timeStamp", timeStamp);
+        params.put("nonceStr", map.get("nonce_str"));
+        params.put("package", "prepay_id=" + map.get("prepay_id"));
+        params.put("signType", "MD5");
+        String paySign = WxUtils.createSign("", params);
+        params.put("packageValue", "prepay_id=" + map.get("prepay_id")); // 这里用packageValue是预防package是关键字在js获取值出错
+        params.put("paySign", paySign); // paySign的生成规则和Sign的生成规则一致
+        params.put("sendUrl", notify_url + "?openId=" + wxMember.getOpenid() + "&time=" + timeStamp); // 付款成功后跳转的*/
+           /* // 方法
+            String userAgent = request.getHeader("user-agent");
+            char agent = userAgent.charAt(userAgent.indexOf("MicroMessenger") + 15);
+            params.put("agent", new String(new char[] { agent }));// 微信版本号，用于前面提到的判断用户手机微信的版本是否是5.0以上版本。
+            String json = JSONArray.fromObject(params).toString();
+            System.out.println(json);*/
+
+      /*  results.put("appId", WxUtils.APPID);
+        results.put("timeStamp", timeStamp);
+        results.put("nonceStr", map.get("nonce_str"));
+        results.put("signType", "MD5");
+        results.put("package", "prepay_id=" + map.get("prepay_id"));
+        results.put("paySign", paySign);*/
+        return results;
     }
 
 
     /**
      * 支付宝创建订单信息
      * create the order info
-     * @param subject
-     * @param body
-     * @param price
-     * @Param tradeNo 订单号
+     * @param  parameters 排序后包装好的订单信息与账户信息
      * @return
      */
-    private  String getOrderInfo(String subject, String body, String price,String tradeNo) {
+    private  String getOrderInfo(SortedMap<String, Object> parameters) {
 
-        // 签约合作者身份ID
-        String orderInfo = "partner=" + "\"" + payConfigStorage.getPartner() + "\"";
+        StringBuffer sb = new StringBuffer();
+        Set es = parameters.entrySet();
+        Iterator it = es.iterator();
+        while (it.hasNext()) {
+            Map.Entry entry = (Map.Entry) it.next();
+            String k = (String) entry.getKey();
+            Object v = entry.getValue();
+            if (null != v && !"".equals(v) && !"sign".equals(k) && !"key".equals(k)) {
+                sb.append(k + "=" + v + "&");
+            }
+        }
+        sb.append("key=" + payConfigStorage.getSecretKey());
+        System.out.println("请求参数拼接："+sb.toString());
 
-        // 签约卖家支付宝账号
-        orderInfo += "&seller_id=" + "\"" + payConfigStorage.getSeller() + "\"";
-
-        // 商户网站唯一订单号
-        orderInfo += "&out_trade_no=" + "\"" +tradeNo + "\"";
-
-        // 商品名称
-        orderInfo += "&subject=" + "\"" + subject + "\"";
-
-        // 商品详情
-        orderInfo += "&body=" + "\"" + body + "\"";
-
-        // 商品金额
-        orderInfo += "&total_fee=" + "\"" + price + "\"";
-
-        // 服务器异步通知页面路径
-        orderInfo += "&notify_url=" + "\"" + payConfigStorage.getNotifyUrl() + "\"";
-
-        // 服务接口名称， 固定值
-        orderInfo += "&service=\"mobile.securitypay.pay\"";
-
-        // 支付类型， 固定值
-        orderInfo += "&payment_type=\"1\"";
-
-        // 参数编码， 固定值
-        orderInfo += "&_input_charset=\"utf-8\"";
-
-        // 设置未付款交易的超时时间
-        // 默认30分钟，一旦超时，该笔交易就会自动被关闭。
-        // 取值范围：1m～15d。
-        // m-分钟，h-小时，d-天，1c-当天（无论交易何时创建，都在0点关闭）。
-        // 该参数数值不接受小数点，如1.5h，可转换为90m。
-        orderInfo += "&it_b_pay=\"30m\"";
-
-        // extern_token为经过快登授权获取到的alipay_open_id,带上此参数用户将使用授权的账户进行支付
-        // orderInfo += "&extern_token=" + "\"" + extern_token + "\"";
-
-        // 支付宝处理完请求后，当前页面跳转到商户指定页面的路径，可空
-        orderInfo += "&return_url=\"m.alipay.com\"";
-
-        // 调用银行卡支付，需配置此参数，参与签名， 固定值 （需要签约《无线银行卡快捷支付》才能使用）
-        // orderInfo += "&paymethod=\"expressGateway\"";
-
-        return orderInfo;
+        return sb.toString();
     }
 
     @Override
     public String createSign(String content, String characterEncoding) {
-        return RSA.sign(content, payConfigStorage.getKeyPrivate(), payConfigStorage.getSignType(), characterEncoding);
+
+
+        String sign = WxpayCore.MD5Encode(content, characterEncoding).toUpperCase();
+        return sign;
     }
 
     protected <T, E> T executeInternal(RequestExecutor<T, E> executor, String uri, E data) throws PayErrorException {
