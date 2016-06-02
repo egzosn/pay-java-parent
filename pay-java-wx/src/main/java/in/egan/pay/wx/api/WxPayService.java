@@ -5,9 +5,9 @@ import in.egan.pay.common.api.PayService;
 import in.egan.pay.common.api.RequestExecutor;
 import in.egan.pay.common.bean.result.PayError;
 import in.egan.pay.common.exception.PayErrorException;
-import in.egan.pay.common.util.encrypt.RSA;
-import in.egan.pay.common.util.http.SimpleGetRequestExecutor;
 import in.egan.pay.wx.bean.WxpayCore;
+import in.egan.pay.wx.utils.SimplePostRequestExecutor;
+import in.egan.pay.wx.utils.XML;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
@@ -41,8 +41,8 @@ public class WxPayService implements PayService {
 
     private int maxRetryTimes = 5;
 
-    private String httpsVerifyUrl = "https://mapi.alipay.com/gateway.do?service=";
-
+//    private String httpsVerifyUrl = "https://mapi.alipay.com/gateway.do?service=";
+    public final static String httpsVerifyUrl = "https://api.mch.weixin.qq.com/pay/unifiedorder";
 
     @Override
     public String getHttpsVerifyUrl() {
@@ -51,28 +51,7 @@ public class WxPayService implements PayService {
 
     @Override
     public boolean verify(Map<String, String> params) {
-        String responseTxt = "false";
-        if(params.get("notify_id") != null) {
-            String notify_id = params.get("notify_id");
-            try {
-                responseTxt = verifyUrl(notify_id);
-            } catch (PayErrorException e) {
-                e.printStackTrace();
-            }
-        }
-        String sign = "";
-        if(params.get("sign") != null) {sign = params.get("sign");}
-        boolean isSign = getSignVeryfy(params, sign);
-
-        //写日志记录（若要调试，请取消下面两行注释）
-        //String sWord = "responseTxt=" + responseTxt + "\n isSign=" + isSign + "\n 返回回来的参数：" + AlipayCore.createLinkString(params);
-        //AlipayCore.logResult(sWord);
-
-        if (isSign && responseTxt.equals("true")) {
-            return true;
-        } else {
-            return false;
-        }
+        return params.get("result_code").toString().equalsIgnoreCase("SUCCESS");
     }
 
     @Override
@@ -94,15 +73,20 @@ public class WxPayService implements PayService {
         //获得签名验证结果
         boolean isSign = false;
         if(payConfigStorage.getSignType().equals("md5")){
-            isSign = RSA.verify(preSignStr, sign, payConfigStorage.getSecretKey(), payConfigStorage.getInputCharset());
+//            isSign = RSA.verify(preSignStr, sign, payConfigStorage.getSecretKey(), payConfigStorage.getInputCharset());
         }
         return isSign;
     }
 
-
+    /**
+     * 支付宝需要，暂时预留
+     * @param notify_id
+     * @return
+     * @throws PayErrorException
+     */
     @Override
     public String verifyUrl(String notify_id) throws PayErrorException {
-        return execute(new SimpleGetRequestExecutor(), getHttpsVerifyUrl(), "partner=" + payConfigStorage.getPartner() + "&notify_id=" + notify_id);
+        return execute(new SimplePostRequestExecutor(), getHttpsVerifyUrl(), "partner=" + payConfigStorage.getPartner() + "&notify_id=" + notify_id);
     }
 
 
@@ -126,7 +110,7 @@ public class WxPayService implements PayService {
                 if (error.getErrorCode() == -1) {
                     int sleepMillis = retrySleepMillis * (1 << retryTimes);
                     try {
-                        log.debug("支付宝系统繁忙，{}ms 后重试(第{}次)", sleepMillis, retryTimes + 1);
+                        log.debug("微信支付系统繁忙，{}ms 后重试(第{}次)", sleepMillis, retryTimes + 1);
                         Thread.sleep(sleepMillis);
                     } catch (InterruptedException e1) {
                         throw new RuntimeException(e1);
@@ -137,80 +121,76 @@ public class WxPayService implements PayService {
             }
         } while (++retryTimes < maxRetryTimes);
 
-        throw new RuntimeException("支付宝服务端异常，超出重试次数");
+        throw new RuntimeException("微信支付服务端异常，超出重试次数");
     }
 
+
+    /**
+     * 获取支付平台所需的订单信息
+     * @param subject 商品名称
+     * @param body 商品详情
+     * @param price 价格
+     * @param tradeNo 商户单号
+     * @return
+     */
     @Override
     public Object orderInfo(String subject, String body, String price, String tradeNo) {
 
 
-        Map<String, Object> results = new HashMap<String, Object>();
-        // System.out.println("微信支付"+openId);
-        // Map<String, String> params = this.getConfigParams();
-        // 返回格式
-        String format = "xml";
-        // 必填，不需要修改
-        // 请求号
-        //String req_id = UtilDate.getOrderNum();
-        // 必填，须保证每次请求都是唯一
-
-        // req_data详细信息
-
-
-        // 用户付款中途退出返回商户的地址。需http://格式的完整路径，不允许加?id=123这类自定义参数
-        String time = "";
-
-
-        // log.info("base path=" + basePath);
-        // log.info("go pay come in the openId=" + openId
-        // +"==time="+time);
+//        Map<String, Object> results = new HashMap<String, Object>();
+        ////统一下单
         SortedMap<String, Object> parameters = new TreeMap<String, Object>();
         parameters.put("appid", payConfigStorage.getAppid());
-        parameters.put("body", "ceshi");// 购买支付信息
         parameters.put("mch_id", payConfigStorage.getPartner());
-//        parameters.put("nonce_str", new Date().getTime() + "");
+        parameters.put("nonce_str", System.currentTimeMillis() + "");
+        parameters.put("body", body);// 购买支付信息
         parameters.put("notify_url", payConfigStorage.getNotifyUrl());
         parameters.put("out_trade_no", tradeNo);// 订单号
-//        parameters.put("spbill_create_ip", "192.168.0.1");
+        parameters.put("spbill_create_ip", "192.168.1.150");
         parameters.put("total_fee", price);// 总金额单位为分
-        parameters.put("trade_type", "JSAPI");
-//        parameters.put("openid", wxMember.getOpenid());
-
-
+        parameters.put("trade_type", "APP");
         String sign = createSign(getOrderInfo(parameters), payConfigStorage.getInputCharset());
         parameters.put("sign", sign);
-        System.out.println("parameters:" + parameters);
-       /* String requestXML = WxUtils.getRequestXml(parameters);
-        System.out.println("requestXML：" + requestXML);
-        String result = WxUtils.httpsRequest2(WxUtils.WXPAY_GATEWAY, "POST", requestXML);//
-        System.out.println("获取预支付订单返回结果33:" + result);
-        Map<String, String> map = WxUtils.doXMLParse(result);
-        System.out.println("213");
-        SortedMap<Object, Object> params = new TreeMap<Object, Object>();
-        long timeStamp = new Date().getTime();
-        params.put("appId", WxUtils.APPID);
-        params.put("timeStamp", timeStamp);
-        params.put("nonceStr", map.get("nonce_str"));
-        params.put("package", "prepay_id=" + map.get("prepay_id"));
-        params.put("signType", "MD5");
-        String paySign = WxUtils.createSign("", params);
-        params.put("packageValue", "prepay_id=" + map.get("prepay_id")); // 这里用packageValue是预防package是关键字在js获取值出错
-        params.put("paySign", paySign); // paySign的生成规则和Sign的生成规则一致
-        params.put("sendUrl", notify_url + "?openId=" + wxMember.getOpenid() + "&time=" + timeStamp); // 付款成功后跳转的*/
-           /* // 方法
-            String userAgent = request.getHeader("user-agent");
-            char agent = userAgent.charAt(userAgent.indexOf("MicroMessenger") + 15);
-            params.put("agent", new String(new char[] { agent }));// 微信版本号，用于前面提到的判断用户手机微信的版本是否是5.0以上版本。
-            String json = JSONArray.fromObject(params).toString();
-            System.out.println(json);*/
 
-      /*  results.put("appId", WxUtils.APPID);
-        results.put("timeStamp", timeStamp);
+       log.debug("parameters:" + parameters);
+       String requestXML = WxpayCore.getMap2Xml(parameters);
+        log.debug("requestXML：" + requestXML);
+        String result = null;
+        /*try {
+             result = execute(new SimplePostRequestExecutor(), httpsVerifyUrl, requestXML);
+            log.debug("获取预支付订单返回结果33:" + result);
+
+
+        } catch (PayErrorException e) {
+            e.printStackTrace();
+        }*/
+
+        result = WxpayCore.httpsRequest2(httpsVerifyUrl, "POST", requestXML);
+    //////////////////////////
+
+    /////////APP端调起支付的参数列表
+        Map map = null;
+        map = XML.toMap(result);
+        Map data = (Map)map.get("xml");
+        SortedMap<String, Object> params = new TreeMap<String, Object>();
+        params.put("appId", payConfigStorage.getAppid());
+        params.put("nonceStr", data.get("nonce_str"));
+        params.put("package", "Sign=WXPay");
+        params.put("partnerid", payConfigStorage.getPartner());
+        params.put("prepayid", data.get("prepay_id"));
+        params.put("timeStamp", System.currentTimeMillis());
+        params.put("signType", "MD5");
+        String paySign = createSign(getOrderInfo(params), payConfigStorage.getInputCharset());
+        params.put("paySign", paySign);
+        params.remove("prepayid");
+        params.remove("partnerid");
+   /*     results.put("appId", WxUtils.APPID);
         results.put("nonceStr", map.get("nonce_str"));
-        results.put("signType", "MD5");
         results.put("package", "prepay_id=" + map.get("prepay_id"));
+        results.put("timeStamp", timeStamp);
+        results.put("signType", "MD5");
         results.put("paySign", paySign);*/
-        return results;
+        return params;
     }
 
 
@@ -239,13 +219,18 @@ public class WxPayService implements PayService {
         return sb.toString();
     }
 
+    /**
+     * 签名
+     * @param content 需要签名的内容
+     * @param characterEncoding 字符编码
+     * @return
+     */
     @Override
     public String createSign(String content, String characterEncoding) {
-
-
         String sign = WxpayCore.MD5Encode(content, characterEncoding).toUpperCase();
         return sign;
     }
+
 
     protected <T, E> T executeInternal(RequestExecutor<T, E> executor, String uri, E data) throws PayErrorException {
 
@@ -264,6 +249,10 @@ public class WxPayService implements PayService {
         return httpClient;
     }
 
+    /**
+     * 设置支付配置
+     * @param payConfigStorage 支付配置
+     */
     public void setPayConfigStorage(PayConfigStorage payConfigStorage) {
         this.payConfigStorage = payConfigStorage;
 
@@ -297,5 +286,12 @@ public class WxPayService implements PayService {
     @Override
     public PayConfigStorage getPayConfigStorage() {
         return payConfigStorage;
+    }
+
+    public WxPayService() {
+    }
+
+    public WxPayService(PayConfigStorage payConfigStorage) {
+        setPayConfigStorage(payConfigStorage);
     }
 }

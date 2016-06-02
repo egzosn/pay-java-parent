@@ -275,4 +275,11 @@ public class AliPayService implements PayService {
     public PayConfigStorage getPayConfigStorage() {
         return payConfigStorage;
     }
+
+    public AliPayService() {
+    }
+
+    public AliPayService(PayConfigStorage payConfigStorage) {
+        setPayConfigStorage(payConfigStorage);
+    }
 }

@@ -17,9 +17,9 @@ public class TextBuilder extends BaseBuilder<TextBuilder, PayTextOutMessage> {
 
     @Override
     public PayTextOutMessage build() {
-        PayOutMessage message = new PayTextOutMessage();
+        PayTextOutMessage message = new PayTextOutMessage();
         setCommon(message);
         message.setContent(content);
-        return null;
+        return message;
     }
 }

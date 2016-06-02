@@ -11,7 +11,7 @@ import java.io.Serializable;
  * @email egzosn@gmail.com
  * @date 2016-6-1 11:40:30
  */
-public  class PayOutMessage implements Serializable {
+public abstract class PayOutMessage implements Serializable {
     protected String content;
     protected String msgType;
 
@@ -46,5 +46,5 @@ public  class PayOutMessage implements Serializable {
     public static XmlBuilder XML() {
         return new XmlBuilder();
     }
-
+    public abstract String toMessage();
 }

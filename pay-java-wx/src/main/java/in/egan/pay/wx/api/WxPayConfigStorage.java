@@ -13,10 +13,7 @@ public class WxPayConfigStorage extends BasePayConfigStorage {
 
     public volatile String appSecret;
     public volatile String appid ;
-    public volatile String mchId;// 商家HAO
-
-
-
+    public volatile String mchId;// 商户号
 
 
     @Override

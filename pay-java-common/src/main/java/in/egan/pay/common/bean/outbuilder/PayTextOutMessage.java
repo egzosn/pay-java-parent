@@ -14,4 +14,8 @@ public class PayTextOutMessage extends PayOutMessage{
         this.msgType = PayConsts.OUT_MSG_TEXT;
     }
 
+    @Override
+    public String toMessage() {
+        return getContent();
+    }
 }

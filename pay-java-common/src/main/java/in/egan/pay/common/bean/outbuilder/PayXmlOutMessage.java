@@ -23,4 +23,10 @@ public class PayXmlOutMessage extends PayOutMessage{
     public void setCode(String code) {
         this.code = code;
     }
+
+    @Override
+    public String toMessage() {
+       return "<xml><return_code><![CDATA[" + code + "]]></return_code><return_msg><![CDATA[" + content
+                + "]]></return_msg></xml>";
+    }
 }

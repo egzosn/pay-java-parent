@@ -50,7 +50,7 @@ public class SimpleGetRequestExecutor implements RequestExecutor<String, String>
 
             if ("true".equals(responseContent)){ return responseContent; }
 
-            throw new PayErrorException(new PayError(100101, "校验失败"));
+            throw new PayErrorException(new PayError(100101, responseContent));
        /* PayError error = PayError.fromJson(responseContent);
             if (error.getErrorCode() != 0) {
                 throw new PayErrorException(error);

@@ -1,8 +1,6 @@
 package in.egan.pay.ali.bean;
 
-import com.alibaba.fastjson.JSON;
 import in.egan.pay.common.bean.PayCallMessage;
-
 import java.math.BigDecimal;
 import java.util.Date;
 
