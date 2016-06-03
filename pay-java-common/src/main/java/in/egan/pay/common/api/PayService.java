@@ -2,6 +2,8 @@ package in.egan.pay.common.api;
 
 import in.egan.pay.common.exception.PayErrorException;
 
+import javax.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
 import java.util.Map;
 
 /**
@@ -28,7 +30,7 @@ public interface PayService {
      * @param tradeNo 商户单号
      * @return
      */
-    public Object orderInfo(String subject, String body, String price,String tradeNo);
+    public Object orderInfo(String subject, String body, BigDecimal price,String tradeNo);
 
     /**
      * 创建签名
@@ -37,6 +39,4 @@ public interface PayService {
      * @return
      */
     public String createSign(String content, String characterEncoding);
-
-
 }

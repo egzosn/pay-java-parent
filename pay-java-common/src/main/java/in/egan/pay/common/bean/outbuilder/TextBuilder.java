@@ -7,7 +7,7 @@ import in.egan.pay.common.bean.PayOutMessage;
  * @email egzosn@gmail.com
  * @date 2016-6-1 11:40:30
  */
-public class TextBuilder extends BaseBuilder<TextBuilder, PayTextOutMessage> {
+public class TextBuilder extends BaseBuilder<TextBuilder, PayOutMessage> {
     private String content;
 
     public TextBuilder content(String content) {
@@ -16,7 +16,7 @@ public class TextBuilder extends BaseBuilder<TextBuilder, PayTextOutMessage> {
     }
 
     @Override
-    public PayTextOutMessage build() {
+    public PayOutMessage build() {
         PayTextOutMessage message = new PayTextOutMessage();
         setCommon(message);
         message.setContent(content);

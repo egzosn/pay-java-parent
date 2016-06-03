@@ -1,11 +1,14 @@
 package in.egan.pay.common.bean;
 
+import in.egan.pay.common.api.PayConsts;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -63,6 +66,8 @@ public class PayMessage implements Serializable {
         this.fromPay = fromPay;
     }
 
+
+    //////////////////支付宝
     public Date getNotifyTime(){
         return parseDate(payMessage.get("notify_time"));
     }
@@ -78,12 +83,8 @@ public class PayMessage implements Serializable {
         return payMessage.get("sign_type");
     }
 
-    public String getSign(){
-        return payMessage.get("sign");
-    }
-    public String getOutTradeNo(){
-        return payMessage.get("out_trade_no");
-    }
+
+
 
     public String getSubject(){
         return payMessage.get("subject");
@@ -113,14 +114,6 @@ public class PayMessage implements Serializable {
         return payMessage.get("buyer_email");
     }
 
-    public Number getTotalFee(){
-        String total_fee = payMessage.get("total_fee");
-        if (null == total_fee || "".equals(total_fee)){    return 0;      }
-        if (isNumber(total_fee)){
-            return  new BigDecimal(total_fee);
-        }
-        return 0;
-    }
 
     public Number getQuantity(){
         String quantity = payMessage.get("quantity");
@@ -172,11 +165,94 @@ public class PayMessage implements Serializable {
 
     }
     public Date getGmtRefund(){
-
         return parseDate(payMessage.get("gmt_refund"));
 
     }
+    /////////////////支付宝
 
+
+
+    //////////////////微信
+    public String getIsSubscribe(){
+        return payMessage.get("is_subscribe");
+    }
+    public String getAppid(){
+        return payMessage.get("appid");
+    }
+
+    public String getFeeType(){
+        return payMessage.get("fee_type");
+    }
+    public String getNonceStr(){
+        return payMessage.get("nonce_str");
+    }
+    public String getTransactionId(){
+        return payMessage.get("transaction_id");
+    }
+
+    public String getTradeType(){
+        return payMessage.get("trade_type");
+    }
+
+    public String getResultCode(){
+        return payMessage.get("result_code");
+    }
+
+    public String getMchId(){
+        return payMessage.get("mch_id");
+    }
+
+    public String getAttach(){
+        return payMessage.get("attach");
+    }
+
+    public String getTimeEnd(){
+        return payMessage.get("time_end");
+    }
+    public String getBankType(){
+        return payMessage.get("bank_type");
+    }
+    public String getOpenid(){
+        return payMessage.get("openid");
+    }
+    public String getReturnCode(){
+        return payMessage.get("return_code");
+    }
+    public Number getCashFee(){
+        String cashFee = payMessage.get("cash_fee");
+        if (null == cashFee || "".equals(cashFee)){    return 0;      }
+        if (isNumber(cashFee)){
+            return  new BigDecimal(cashFee).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP);
+        }
+        return 0;
+    }
+    //////////////////微信
+
+
+
+    /////////微信与支付宝共用
+    public String getOutTradeNo(){
+        return payMessage.get("out_trade_no");
+    }
+
+    public String getSign(){
+        return payMessage.get("sign");
+    }
+
+    public Number getTotalFee(){
+        String total_fee = payMessage.get("total_fee");
+        if (null == total_fee || "".equals(total_fee)){    return 0;      }
+        if (isNumber(total_fee)){
+            BigDecimal totalFee = new BigDecimal(total_fee);
+            if (event == PayConsts.MSG_WXPAY){
+                totalFee.divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP);
+            }
+            return totalFee;
+        }
+        return 0;
+    }
+
+    /////////微信与支付宝共用
 
 
 
@@ -196,6 +272,16 @@ public class PayMessage implements Serializable {
             e.printStackTrace();
         }
         return null;
-
     }
+
+    @Override
+    public String toString() {
+        return payMessage.toString();
+    }
+
+    public Map<String, String> getPayMessage() {
+        return payMessage;
+    }
+
+
 }

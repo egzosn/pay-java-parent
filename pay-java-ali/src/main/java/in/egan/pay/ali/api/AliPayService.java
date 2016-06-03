@@ -19,9 +19,13 @@ import org.apache.http.impl.client.HttpClients;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.net.URLEncoder;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -125,7 +129,7 @@ public class AliPayService implements PayService {
                 return executeInternal(executor, uri, data);
             } catch (PayErrorException e) {
                 PayError error = e.getError();
-                if (error.getErrorCode() == -1) {
+                if (error.getErrorCode() == 404) {
                     int sleepMillis = retrySleepMillis * (1 << retryTimes);
                     try {
                         log.debug("支付宝系统繁忙，{}ms 后重试(第{}次)", sleepMillis, retryTimes + 1);
@@ -143,7 +147,7 @@ public class AliPayService implements PayService {
     }
 
     @Override
-    public String orderInfo(String subject, String body, String price, String tradeNo) {
+    public String orderInfo(String subject, String body, BigDecimal price, String tradeNo) {
         String orderInfo = getOrderInfo(subject,body,price,tradeNo);
         String sign = createSign(orderInfo, "UTF-8");
 
@@ -168,7 +172,7 @@ public class AliPayService implements PayService {
      * @Param tradeNo 订单号
      * @return
      */
-    private  String getOrderInfo(String subject, String body, String price,String tradeNo) {
+    private  String getOrderInfo(String subject, String body, BigDecimal price,String tradeNo) {
 
         // 签约合作者身份ID
         String orderInfo = "partner=" + "\"" + payConfigStorage.getPartner() + "\"";
@@ -186,7 +190,7 @@ public class AliPayService implements PayService {
         orderInfo += "&body=" + "\"" + body + "\"";
 
         // 商品金额
-        orderInfo += "&total_fee=" + "\"" + price + "\"";
+        orderInfo += "&total_fee=" + "\"" + price.setScale(2, BigDecimal.ROUND_HALF_UP) + "\"";
 
         // 服务器异步通知页面路径
         orderInfo += "&notify_url=" + "\"" + payConfigStorage.getNotifyUrl() + "\"";
@@ -223,6 +227,7 @@ public class AliPayService implements PayService {
     public String createSign(String content, String characterEncoding) {
         return RSA.sign(content, payConfigStorage.getKeyPrivate(), payConfigStorage.getSignType(), characterEncoding);
     }
+
 
     protected <T, E> T executeInternal(RequestExecutor<T, E> executor, String uri, E data) throws PayErrorException {
 

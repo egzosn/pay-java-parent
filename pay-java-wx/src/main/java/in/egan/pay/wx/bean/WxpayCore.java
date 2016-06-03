@@ -7,6 +7,7 @@ import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
+import sun.security.provider.MD5;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -175,7 +176,7 @@ public class WxpayCore {
      * @param content
      * @return
      */
-    public static Map<String, Object> toMap(String content){
+    public static Map<String, String> toMap(String content){
 
         if (null == content || "".equals(content)) {
             return null;
@@ -183,6 +184,20 @@ public class WxpayCore {
 
         Map m = new HashMap();
         InputStream in = new ByteArrayInputStream(content.getBytes());
+        return toMap(in);
+
+    }
+
+
+
+    /**
+     * 解析xml文件流并转化为Map<String,String>值
+     * @param in
+     * @return
+     */
+    public static Map<String, String> toMap(InputStream in){
+
+        Map m = new HashMap();
         SAXBuilder builder = new SAXBuilder();
         Document doc = null;
         try {
@@ -217,7 +232,6 @@ public class WxpayCore {
         return m;
 
     }
-
 
     /**
      * 获取子结点的xml
@@ -256,7 +270,7 @@ public class WxpayCore {
         StringBuffer sb = new StringBuffer();
         sb.append("<xml>");
         for (String key : parameters.keySet()){
-            if ("attach".equalsIgnoreCase(key) || "body".equalsIgnoreCase(key) || "sign".equalsIgnoreCase(key)) {
+            if ("attach".equalsIgnoreCase(key) || "body".equalsIgnoreCase(key) || "attach".equalsIgnoreCase(key) || "sign".equalsIgnoreCase(key)) {
                 sb.append("<" + key + ">" + "<![CDATA[" + parameters.get(key) + "]]></" + key + ">");
             } else {
                 sb.append("<" + key + ">" +  parameters.get(key) + "</" + key + ">");
@@ -323,6 +337,13 @@ public class WxpayCore {
         }
         return null;
     }
-
+    /**
+     * 获取随机字符串
+     * @return
+     */
+    public static String genNonceStr() {
+        Random random = new Random();
+        return DigestUtils.md5Hex(String.valueOf(random.nextInt(10000)).getBytes());
+    }
 
 }

@@ -6,7 +6,7 @@ import in.egan.pay.common.bean.PayOutMessage;
  * @email egzosn@gmail.com
  * @date 2016-6-1 11:40:30
  */
-public class XmlBuilder extends BaseBuilder<XmlBuilder, PayXmlOutMessage> {
+public class XmlBuilder extends BaseBuilder<XmlBuilder, PayOutMessage> {
     private String content;
     private String code;
     public XmlBuilder content(String content) {
@@ -21,7 +21,7 @@ public class XmlBuilder extends BaseBuilder<XmlBuilder, PayXmlOutMessage> {
 
 
     @Override
-    public PayXmlOutMessage build() {
+    public PayOutMessage build() {
         PayXmlOutMessage message = new PayXmlOutMessage();
         setCommon(message);
         message.setContent(content);

@@ -62,8 +62,11 @@ public class PayError implements Serializable {
     }
 
     public static PayError fromMap(Map<String, Object> map) {
-        if (null == map.get("return_code") || "FAIL".equals( map.get("return_code") )){
-            PayError error = new PayError(-1, null == map.get("return_msg") ? "未知错误！" : map.get("return_msg").toString());
+        if (null == map.get("return_code")){
+            PayError error = new PayError(403, null == map.get("return_msg") ? "未知错误！" : map.get("return_msg").toString());
+            return error;
+        }else if ("FAIL".equals( map.get("return_code"))){
+            PayError error = new PayError(-1,  map.get("return_msg").toString());
             return error;
         }
         return null;
