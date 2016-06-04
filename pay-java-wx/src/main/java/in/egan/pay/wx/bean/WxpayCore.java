@@ -1,21 +1,11 @@
 package in.egan.pay.wx.bean;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.httpclient.methods.multipart.FilePartSource;
-import org.apache.commons.httpclient.methods.multipart.PartSource;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
-import sun.security.provider.MD5;
-
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
 import java.io.*;
-import java.net.ConnectException;
-import java.net.URL;
 import java.security.MessageDigest;
 import java.util.*;
 
@@ -84,51 +74,6 @@ public class WxpayCore {
 
         return prestr;
     }
-
-    /** 
-     * 写日志，方便测试（看网站需求，也可以改成把记录存入数据库）
-     * @param logPath 要写入日志里的文本路径
-     * @param sWord 要写入日志里的文本内容
-     */
-    public static void logResult(String logPath, String sWord) {
-        FileWriter writer = null;
-        try {
-            writer = new FileWriter(logPath + "alipay_log_" + System.currentTimeMillis()+".txt");
-            writer.write(sWord);
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (writer != null) {
-                try {
-                    writer.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
-    /** 
-     * 生成文件摘要
-     * @param strFilePath 文件路径
-     * @param file_digest_type 摘要算法
-     * @return 文件摘要结果
-     */
-    public static String getAbstract(String strFilePath, String file_digest_type) throws IOException {
-        PartSource file = new FilePartSource(new File(strFilePath));
-    	if(file_digest_type.equals("MD5")){
-    		return DigestUtils.md5Hex(file.createInputStream());
-    	}
-    	else if(file_digest_type.equals("SHA")) {
-    		return DigestUtils.sha256Hex(file.createInputStream());
-    	}
-    	else {
-    		return "";
-    	}
-    }
-
-
-
 
 
     public static String MD5Encode(String origin, String charsetname) {
@@ -281,62 +226,7 @@ public class WxpayCore {
         sb.append("</xml>");
         return sb.toString();
     }
-    /**
-     * 发送https请求
-     * @param requestUrl 请求地址
-     * @param requestMethod 请求方式（GET、POST）
-     * @param outputStr 提交的数据
-     * @return 返回微信服务器响应的信息
-     */
-    public static String httpsRequest2(String requestUrl, String requestMethod, String outputStr) {
-        try {
-            // 创建SSLContext对象，并使用我们指定的信任管理器初始化
-            TrustManager[] tm = { new MyX509TrustManager() };
-            SSLContext sslContext = SSLContext.getInstance("SSL", "SunJSSE");
-            sslContext.init(null, tm, new java.security.SecureRandom());
-            // 从上述SSLContext对象中得到SSLSocketFactory对象
-            SSLSocketFactory ssf = sslContext.getSocketFactory();
-            URL url = new URL(requestUrl);
-            HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
-            conn.setSSLSocketFactory(ssf);
-            conn.setDoOutput(true);
-            conn.setDoInput(true);
-            conn.setUseCaches(false);
-            // 设置请求方式（GET/POST）
-            conn.setRequestMethod(requestMethod);
-            conn.setRequestProperty("content-type", "application/x-www-form-urlencoded");
-            // 当outputStr不为null时向输出流写数据
-            if (null != outputStr) {
-                OutputStream outputStream = conn.getOutputStream();
-                // 注意编码格式
-                outputStream.write(outputStr.getBytes("UTF-8"));
-                outputStream.close();
-            }
-            // 从输入流读取返回内容
-            InputStream inputStream = conn.getInputStream();
-            InputStreamReader inputStreamReader = new InputStreamReader(inputStream, "utf-8");
-            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-            String str = null;
-            StringBuffer buffer = new StringBuffer();
-            while ((str = bufferedReader.readLine()) != null) {
-                buffer.append(str);
-            }
-            // 释放资源
-            bufferedReader.close();
-            inputStreamReader.close();
-            inputStream.close();
-            inputStream = null;
-            conn.disconnect();
-            return buffer.toString();
-        } catch (ConnectException ce) {
-            // log.error("连接超时：{}", ce);
-            System.out.println("连接超时："+ce);
-        } catch (Exception e) {
-            System.out.println("https请求异常："+ e);
-            // log.error("https请求异常：{}", e);
-        }
-        return null;
-    }
+
     /**
      * 获取随机字符串
      * @return

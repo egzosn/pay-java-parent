@@ -12,33 +12,15 @@
 
 
     <dependencies>
-        <!-- servlet  -->
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>jsp-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <!-- /servlet  -->
+
         <!-- pay-java  -->
         <dependency>
             <groupId>in.egan</groupId>
             <artifactId>pay-java-common</artifactId>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
         <!-- /pay-java  -->
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-        </dependency>
 
-        <dependency>
-            <groupId>commons-configuration</groupId>
-            <artifactId>commons-configuration</artifactId>
-        </dependency>
         <!-- logback  -->
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -50,59 +32,22 @@
         </dependency>
         <!-- / logback -->
         <!--httpcomponents-->
-<!--        <dependency>
+        <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpmime</artifactId>
-        </dependency>-->
-        <dependency>
+        <!--<dependency>
             <groupId>commons-httpclient</groupId>
             <artifactId>commons-httpclient</artifactId>
-        </dependency>
-        <dependency>
+        </dependency>-->
+    <!--    <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
-        </dependency>
+        </dependency>-->
 
         <!--/httpcomponents-->
 
     </dependencies>
-
-    <!--<build>
-
-        <plugins>
-            &lt;!&ndash; 这种方式可以单独执行 &ndash;&gt;
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>1.2.1</version>
-                <executions>
-                    <execution>
-                        <id>buildDb</id>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <executable>java</executable>
-                    <arguments>
-                        <argument>-classpath</argument>
-                        <classpath/>
-                        <argument>in.egan.pay.ali.bean.AliPayCallMessage</argument>
-                    </arguments>
-                </configuration>
-            </plugin>
-
-
-        </plugins>
-
-
-    </build>-->
 
 
 </project>

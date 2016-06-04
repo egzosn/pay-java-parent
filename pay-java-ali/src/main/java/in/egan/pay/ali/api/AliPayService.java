@@ -8,7 +8,7 @@ import in.egan.pay.common.bean.result.PayError;
 import in.egan.pay.common.exception.PayErrorException;
 import in.egan.pay.common.util.encrypt.RSA;
 import in.egan.pay.common.util.http.SimpleGetRequestExecutor;
-import org.apache.commons.lang3.StringUtils;
+import in.egan.pay.common.util.str.StringUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -19,13 +19,10 @@ import org.apache.http.impl.client.HttpClients;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 /**

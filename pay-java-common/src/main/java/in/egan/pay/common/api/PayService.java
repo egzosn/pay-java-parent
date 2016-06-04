@@ -1,8 +1,6 @@
 package in.egan.pay.common.api;
 
 import in.egan.pay.common.exception.PayErrorException;
-
-import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.Map;
 

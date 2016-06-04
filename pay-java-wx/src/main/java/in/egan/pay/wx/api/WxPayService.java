@@ -5,10 +5,10 @@ import in.egan.pay.common.api.PayService;
 import in.egan.pay.common.api.RequestExecutor;
 import in.egan.pay.common.bean.result.PayError;
 import in.egan.pay.common.exception.PayErrorException;
+import in.egan.pay.common.util.str.StringUtils;
 import in.egan.pay.wx.bean.WxpayCore;
 import in.egan.pay.wx.utils.SimplePostRequestExecutor;
 import in.egan.pay.wx.utils.XML;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -18,13 +18,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.helpers.BasicMarker;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.*;
 
