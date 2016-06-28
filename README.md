@@ -142,12 +142,14 @@ public class PayResponse {
         Integer payId = null;
         if ( "0".equals(params.remove("payType"))){
             String subject  = params.get("body");
+              // 摘要部分：@_%s_@中的'%s'用户替代账户id，获取账户id
             payId = Integer.parseInt(subject.substring(subject.indexOf("@_") + 2, subject.indexOf("_@")));
         }else {
             String attach  = params.get("attach");
+             // 摘要部分：@_%s_@中的'%s'用户替代账户id，获取账户id
             payId = Integer.parseInt(attach.substring(attach.indexOf("@_") + 2, attach.indexOf("_@")));
         }
-
+        //根据账户id，获取对应的支付账户操作工具
         PayResponse payResponse = service.getPayResponse(payId);
         if (payResponse.getService().verify(params)){
             PayConfigStorage storage = payResponse.getStorage();
