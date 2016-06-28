@@ -1,14 +1,11 @@
 package in.egan.pay.common.bean;
 
 import in.egan.pay.common.api.PayConsts;
-
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 
 /**

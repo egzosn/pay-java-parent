@@ -1,10 +1,8 @@
 package in.egan.pay.ali.bean;
 
-import in.egan.pay.common.api.PayConfigStorage;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.httpclient.methods.multipart.FilePartSource;
 import org.apache.commons.httpclient.methods.multipart.PartSource;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
