@@ -135,32 +135,19 @@ public class PayResponse {
     @ResponseBody
     @RequestMapping(value = "payBack.json")
     public String payBack(HttpServletRequest request){
-        Map<String, String> params = request2Params(request);
+               Map<String, String> params = request2Params(request);
         if (null == params){
             return "fail";
         }
-        //已经回调
-        AmtApply amtApply=amtApplyService.getAmtApplyByApplyId(params.get("out_trade_no"));
         Integer payId = null;
         if ( "0".equals(params.remove("payType"))){
             String subject  = params.get("body");
-             // 摘要部分：@_%s_@中的'%s'用户替代账户id，获取账户id
             payId = Integer.parseInt(subject.substring(subject.indexOf("@_") + 2, subject.indexOf("_@")));
-            // 设置外部单号
-            amtApplyService.fillApplyoutId(amtApply, params.get("trade_no"));
         }else {
             String attach  = params.get("attach");
-             // 摘要部分：@_%s_@中的'%s'用户替代账户id，获取账户id
             payId = Integer.parseInt(attach.substring(attach.indexOf("@_") + 2, attach.indexOf("_@")));
-            // 设置外部单号
-            amtApplyService.fillApplyoutId(amtApply, params.get("transaction_id"));
         }
 
-        if(amtApply.getApplyState().shortValue()== ApplyStateEnum.success.getCode()){
-            return "success";
-        }
-	
-	//根据账户id，获取对应的支付账户操作工具	
         PayResponse payResponse = service.getPayResponse(payId);
         if (payResponse.getService().verify(params)){
             PayConfigStorage storage = payResponse.getStorage();
@@ -175,8 +162,6 @@ public class PayResponse {
             return outMessage.toMessage();
         }
 
-        amtPaylogService.createAmtPaylogByCheckFail(amtApply, params.toString());
-        amtApplyService.payNotPass(amtApply.getApplyId());
         return "fail";
     }
 
@@ -234,10 +219,4 @@ public class PayResponse {
         }
         
 ```
-
-
-
-
-
-
 
