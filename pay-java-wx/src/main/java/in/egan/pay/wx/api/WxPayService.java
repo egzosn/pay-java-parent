@@ -5,6 +5,7 @@ import in.egan.pay.common.api.PayService;
 import in.egan.pay.common.api.RequestExecutor;
 import in.egan.pay.common.bean.result.PayError;
 import in.egan.pay.common.exception.PayErrorException;
+import in.egan.pay.common.util.str.StringUtils;
 import in.egan.pay.wx.bean.WxpayCore;
 import in.egan.pay.wx.utils.SimplePostRequestExecutor;
 import in.egan.pay.wx.utils.XML;
