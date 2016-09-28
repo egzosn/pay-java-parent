@@ -39,6 +39,7 @@ public class PayResponse {
 
     /**
      * 根据不同的账户类型 初始化支付配置
+     * 一个账户类型可支持多个账户
      * @param apyAccount 账户信息
      */
     public PayService getPayService(ApyAccount apyAccount){
