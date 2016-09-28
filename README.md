@@ -114,11 +114,57 @@ public class PayResponse {
 
 ```
 
+支付响应PayResponse的获取
+
+```java
+
+
+public class ApyAccountService {
+
+
+    @Inject
+    private ApyAccountDao dao;
+
+    @Inject
+    private AutowireCapableBeanFactory spring;
+
+    private final static Map<Integer, PayResponse> payResponses = new HashMap<Integer, PayResponse>();
+
+
+    /**
+     *  获取支付响应
+     * @param id 账户id
+     * @return
+     */
+    public PayResponse getPayResponse(Integer id) {
+
+        PayResponse payResponse = payResponses.get(id);
+        if (mpResponse == null) {
+            ApyAccount apyAccount = dao.get(id);
+            if (apyAccount == null) {
+                throwError(-1, "无法查询");
+            }
+            payResponse = new PayResponse();
+            spring.autowireBean(payResponse);
+            payResponse.init(apyAccount);
+            payResponses.put(id, payResponse);
+            // 查询
+        }
+        return payResponse;
+    }
+
+
+
+}
+
+```
+
+
 2.  根据账户id与业务id，组拼订单信息（支付宝、微信支付订单）获取支付信息所需的数据
 
 ```java
   //获取对应的支付账户操作工具（可根据账户id）
-  PayResponse payResponse = /** service.getPayResponse(payId);**/;
+  PayResponse payResponse =  service.getPayResponse(payId);;
   //这里之所以用Object，因为微信需返回Map， 支付吧String。
   Object orderInfo = payResponse.getService().orderInfo("订单title", "摘要", new BigDecimal(0.01), "tradeNo");
   System.out.println(orderInfo);
@@ -142,7 +188,7 @@ public class PayResponse {
         }
 
         //根据账户id，获取对应的支付账户操作工具
-        PayResponse payResponse =/** service.getPayResponse(payId);**/;
+        PayResponse payResponse = service.getPayResponse(payId);;
         if (payResponse.getService().verify(params)){
             PayConfigStorage storage = payResponse.getStorage();
             String msgType = null;
