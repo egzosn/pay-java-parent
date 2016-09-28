@@ -117,9 +117,9 @@ public class PayResponse {
 
 ```java
   //获取对应的支付账户操作工具（可根据账户id）
-  PayResponse payResponse = null;
-  //这里之所以用Object，因为微信需返回Map， 支付吧String。 摘要部分：@_%s_@中的'%s'用户替代账户id，支付回调得知账户信息
-  Object orderInfo = payResponse.getService().orderInfo("订单title", String.format("@_%s_@摘要", body.getPayId()), new BigDecimal(0.01), "tradeNo");
+  PayResponse payResponse = /** service.getPayResponse(payId);**/;
+  //这里之所以用Object，因为微信需返回Map， 支付吧String。
+  Object orderInfo = payResponse.getService().orderInfo("订单title", "摘要", new BigDecimal(0.01), "tradeNo");
   System.out.println(orderInfo);
   
 ```
@@ -133,24 +133,15 @@ public class PayResponse {
      * @return
      */
     @ResponseBody
-    @RequestMapping(value = "payBack.json")
-    public String payBack(HttpServletRequest request){
+    @RequestMapping(value = "payBack{payId}.json")
+    public String payBack(HttpServletRequest request, @PathVariable Integer payId){
                Map<String, String> params = request2Params(request);
         if (null == params){
             return "fail";
         }
-        Integer payId = null;
-        if ( "0".equals(params.remove("payType"))){
-            String subject  = params.get("body");
-              // 摘要部分：@_%s_@中的'%s'用户替代账户id，获取账户id
-            payId = Integer.parseInt(subject.substring(subject.indexOf("@_") + 2, subject.indexOf("_@")));
-        }else {
-            String attach  = params.get("attach");
-             // 摘要部分：@_%s_@中的'%s'用户替代账户id，获取账户id
-            payId = Integer.parseInt(attach.substring(attach.indexOf("@_") + 2, attach.indexOf("_@")));
-        }
+
         //根据账户id，获取对应的支付账户操作工具
-        PayResponse payResponse = service.getPayResponse(payId);
+        PayResponse payResponse =/** service.getPayResponse(payId);**/;
         if (payResponse.getService().verify(params)){
             PayConfigStorage storage = payResponse.getStorage();
             String msgType = null;
@@ -183,8 +174,6 @@ public class PayResponse {
             if (null == data || data.size() == 0){
                 return null;
             }
-            //设置支付类型
-            data.put("payType", "1");
             return data;
         }
         Map<String,String> params = new HashMap<String,String>();
@@ -200,8 +189,7 @@ public class PayResponse {
             //valueStr = new String(valueStr.getBytes("ISO-8859-1"), "gbk");
             params.put(name, valueStr);
         }
-        //  设置支付类型
-        params.put("payType", "0");
+
         return params;
     }
 
