@@ -1,8 +1,9 @@
 /*
 SQLyog 企业版 - MySQL GUI v8.14 
-MySQL - 5.5.50-MariaDB-wsrep : Database - huodou
+MySQL - 5.5.50-MariaDB-wsrep : Database - pay
 *********************************************************************
-*/
+*/
+
 
 /*Table structure for table `apy_account` */
 
