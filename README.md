@@ -185,15 +185,17 @@ public class ApyAccountService {
     @ResponseBody
     @RequestMapping(value = "payBack{payId}.json")
     public String payBack(HttpServletRequest request, @PathVariable Integer payId){
-               Map<String, String> params = request2Params(request);
+        //根据账户id，获取对应的支付账户操作工具
+        PayResponse payResponse = service.getPayResponse(payId);
+        PayConfigStorage storage = payResponse.getStorage();
+        Map<String, String> params = request2Params(request, storage.getPayType());
         if (null == params){
             return "fail";
         }
 
-        //根据账户id，获取对应的支付账户操作工具
-        PayResponse payResponse = service.getPayResponse(payId);;
+
         if (payResponse.getService().verify(params)){
-            PayConfigStorage storage = payResponse.getStorage();
+
             String msgType = null;
             if (0 == storage.getPayType()){
                 msgType = PayConsts.MSG_TEXT;
@@ -214,18 +216,19 @@ public class ApyAccountService {
      * @param request
      * @return
      */
-    public Map<String, String> request2Params(HttpServletRequest request){
+    public Map<String, String> request2Params(HttpServletRequest request, Short payType){
 
-        Map<String, String[]> requestParams = request.getParameterMap();
-        //微信在请求参数里面获取不到对应的参数信息
-        if (0 == requestParams.size()){
+         if (1 == storage.getPayType()){
             //根据请求文件流里获取
             Map<String, String> data = inputStream2Map(request);
             if (null == data || data.size() == 0){
                 return null;
             }
             return data;
-        }
+         }
+
+        Map<String, String[]> requestParams = request.getParameterMap();
+
         Map<String,String> params = new HashMap<String,String>();
         for (Iterator iter = requestParams.keySet().iterator(); iter.hasNext();) {
             String name = (String) iter.next();
