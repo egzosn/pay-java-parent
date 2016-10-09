@@ -19,6 +19,7 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -244,7 +245,11 @@ public class WxPayService implements PayService {
         return sign;
     }
 
+    @Override
+    public Map<String, String> getParameter2Map(Map<String, String[]> parameterMap, InputStream is) {
 
+        return WxpayCore.toMap(is);
+    }
 
 
     protected <T, E> T executeInternal(RequestExecutor<T, E> executor, String uri, E data) throws PayErrorException {

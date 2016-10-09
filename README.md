@@ -38,7 +38,6 @@ public class PayResponse {
      */
     public void init(ApyAccount apyAccount) {
 
-
         this.service = getPayService(apyAccount);
         this.storage = service.getPayConfigStorage();
 
@@ -50,6 +49,7 @@ public class PayResponse {
      * 根据不同的账户类型 初始化支付配置
      * 一个账户类型可支持多个账户
      * @param apyAccount 账户信息
+     * @describe 还需要优化
      */
     public PayService getPayService(ApyAccount apyAccount){
 
@@ -64,6 +64,7 @@ public class PayResponse {
                 aliPayConfigStorage.setSignType(apyAccount.getSignType());
                 aliPayConfigStorage.setSeller(apyAccount.getSeller());
                 aliPayConfigStorage.setPayType(apyAccount.getPayType());
+                aliPayConfigStorage.setMsgType(apyAccount.getMsgType());
                 return new AliPayService(aliPayConfigStorage);
             case 1:
                 WxPayConfigStorage wxPayConfigStorage = new WxPayConfigStorage();
@@ -75,6 +76,7 @@ public class PayResponse {
                 wxPayConfigStorage.setNotifyUrl(apyAccount.getNotifyUrl());
                 wxPayConfigStorage.setSignType(apyAccount.getSignType());
                 wxPayConfigStorage.setPayType(apyAccount.getPayType());
+                wxPayConfigStorage.setMsgType(apyAccount.getMsgType());
                 return  new WxPayService(wxPayConfigStorage);
             default:
 
@@ -197,21 +199,14 @@ public class ApyAccountService {
         //根据账户id，获取对应的支付账户操作工具
         PayResponse payResponse = service.getPayResponse(payId);
         PayConfigStorage storage = payResponse.getStorage();
-        Map<String, String> params = request2Params(request, storage.getPayType());
+        Map<String, String> params = payResponse.getService().getParameter2Map(request.getParameterMap(), request.getInputStream());
         if (null == params){
             return "fail";
         }
 
 
         if (payResponse.getService().verify(params)){
-
-            String msgType = null;
-            if (0 == storage.getPayType()){
-                msgType = PayConsts.MSG_TEXT;
-            }else {
-                msgType = PayConsts.MSG_XML;
-            }
-            PayMessage message = new PayMessage(params, storage.getPayType(), msgType);
+            PayMessage message = new PayMessage(params, storage.getPayType(), storage.getMsgType());
             PayOutMessage outMessage = payResponse.getRouter().route(message);
             return outMessage.toMessage();
         }
@@ -220,55 +215,6 @@ public class ApyAccountService {
     }
 
 
-    /**
-     * 根据请求获取参数Map
-     * @param request
-     * @return
-     */
-    public Map<String, String> request2Params(HttpServletRequest request, Short payType){
-
-         if (1 == storage.getPayType()){
-            //根据请求文件流里获取
-            Map<String, String> data = inputStream2Map(request);
-            if (null == data || data.size() == 0){
-                return null;
-            }
-            return data;
-         }
-
-        Map<String, String[]> requestParams = request.getParameterMap();
-
-        Map<String,String> params = new HashMap<String,String>();
-        for (Iterator iter = requestParams.keySet().iterator(); iter.hasNext();) {
-            String name = (String) iter.next();
-            String[] values = requestParams.get(name);
-            String valueStr = "";
-            for (int i = 0; i < values.length; i++) {
-                valueStr = (i == values.length - 1) ? valueStr + values[i]
-                        : valueStr + values[i] + ",";
-            }
-            //乱码解决，这段代码在出现乱码时使用。如果mysign和sign不相等也可以使用这段代码转化
-            //valueStr = new String(valueStr.getBytes("ISO-8859-1"), "gbk");
-            params.put(name, valueStr);
-        }
-
-        return params;
-    }
-
-    /**
-     * 从请求中获取xml文件流，转化为map
-     * @param request
-     * @return
-     */
-        public Map<String, String> inputStream2Map(HttpServletRequest request) {
-            Map<String, String> map = null;//将微信发出的Xml转Map
-            try {
-                map = WxpayCore.toMap(request.getInputStream());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return map;
-        }
         
 ```
 

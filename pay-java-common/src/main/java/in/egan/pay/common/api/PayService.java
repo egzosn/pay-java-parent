@@ -1,6 +1,8 @@
 package in.egan.pay.common.api;
 
 import in.egan.pay.common.exception.PayErrorException;
+
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.Map;
 
@@ -37,4 +39,12 @@ public interface PayService {
      * @return
      */
     public String createSign(String content, String characterEncoding);
+
+    /**
+     * 将请求参数或者请求流转化为 Map
+     * @param parameterMap 请求参数
+     * @param is 请求流
+     * @return
+     */
+    public Map<String, String> getParameter2Map(Map<String, String[]> parameterMap, InputStream is);
 }

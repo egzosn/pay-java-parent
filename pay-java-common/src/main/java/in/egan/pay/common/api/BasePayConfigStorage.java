@@ -29,6 +29,12 @@ public abstract class BasePayConfigStorage implements PayConfigStorage{
 
     //支付类型 0支付宝， 1微信
     protected volatile Short payType;
+    /**
+     * 消息来源类型
+     * @see PayConsts#MSG_XML
+     * @see PayConsts#MSG_TEXT
+     */
+    protected volatile String msgType;
     protected volatile String httpProxyHost;
     protected volatile int httpProxyPort;
     protected volatile String httpProxyUsername;
@@ -147,5 +153,14 @@ public abstract class BasePayConfigStorage implements PayConfigStorage{
 
     public void setPayType(Short payType) {
         this.payType = payType;
+    }
+
+    @Override
+    public String getMsgType() {
+        return msgType;
+    }
+
+    public void setMsgType(String msgType) {
+        this.msgType = msgType;
     }
 }

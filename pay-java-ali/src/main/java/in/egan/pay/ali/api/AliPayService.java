@@ -18,10 +18,14 @@ import org.apache.http.client.CredentialsProvider;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -221,6 +225,27 @@ public class AliPayService implements PayService {
     @Override
     public String createSign(String content, String characterEncoding) {
         return RSA.sign(content, payConfigStorage.getKeyPrivate(), payConfigStorage.getSignType(), characterEncoding);
+    }
+
+
+    @Override
+    public Map<String, String> getParameter2Map(Map<String, String[]> parameterMap, InputStream is) {
+
+        Map<String,String> params = new HashMap<String,String>();
+        for (Iterator iter = parameterMap.keySet().iterator(); iter.hasNext();) {
+            String name = (String) iter.next();
+            String[] values = parameterMap.get(name);
+            String valueStr = "";
+            for (int i = 0; i < values.length; i++) {
+                valueStr = (i == values.length - 1) ? valueStr + values[i]
+                        : valueStr + values[i] + ",";
+            }
+            //乱码解决，这段代码在出现乱码时使用。如果mysign和sign不相等也可以使用这段代码转化
+            //valueStr = new String(valueStr.getBytes("ISO-8859-1"), "gbk");
+            params.put(name, valueStr);
+        }
+
+        return params;
     }
 
 

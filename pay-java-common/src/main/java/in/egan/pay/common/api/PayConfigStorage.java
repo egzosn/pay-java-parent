@@ -38,5 +38,14 @@ public interface PayConfigStorage {
     public Boolean isShowLog();
     public Short getPayType();
 
+    /**
+     *  @see #getMsgType
+     *  @see PayConsts
+     * @return "text" 或者 "xml"
+     * @see PayConsts#MSG_XML
+     * @see PayConsts#MSG_TEXT
+     */
+    public String getMsgType();
+
 
 }
