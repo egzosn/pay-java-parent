@@ -29,48 +29,6 @@
         <module>pay-java-wx</module>
     </modules>
 
-    <distributionManagement>
-        <snapshotRepository>
-            <id>huodull-snapshot</id>
-            <url>http://192.168.1.13:8081/nexus/content/repositories/hd-Snapshot/</url>
-        </snapshotRepository>
-
-        <repository>
-            <id>huodull-release</id>
-            <url>http://192.168.1.13:8081/nexus/content/repositories/hd-Releases/</url>
-        </repository>
-    </distributionManagement>
-
-
-    <repositories>
-        <repository>
-            <id>hd-Snapshot</id>
-            <name>hd-Snapshot</name>
-            <url>http://192.168.1.13:8081/nexus/content/repositories/hd-Snapshot/</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-
-        </repository>
-        <repository>
-            <id>hd-Releases</id>
-            <name>hd-Releases</name>
-            <url>http://192.168.1.13:8081/nexus/content/repositories/hd-Releases/</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-
-        </repository>
-        <repository>
-            <id>central</id>
-            <name>Central</name>
-            <url>http://192.168.1.13:8081/nexus/content/repositories/central/</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-
-    </repositories>
 
     <properties>
         <org.apache.commons.version>3.1</org.apache.commons.version>
