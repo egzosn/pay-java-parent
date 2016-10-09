@@ -6,7 +6,7 @@
     <groupId>in.egan</groupId>
     <artifactId>pay-java-parent</artifactId>
     <packaging>pom</packaging>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.RELEASE</version>
 
     <name>Pay Java Tools - Parent</name>
     <description>支付宝支付、微信支付上级POM</description>
@@ -29,34 +29,47 @@
         <module>pay-java-wx</module>
     </modules>
 
+    <distributionManagement>
+        <snapshotRepository>
+            <id>huodull-snapshot</id>
+            <url>http://192.168.1.13:8081/nexus/content/repositories/hd-Snapshot/</url>
+        </snapshotRepository>
+
+        <repository>
+            <id>huodull-release</id>
+            <url>http://192.168.1.13:8081/nexus/content/repositories/hd-Releases/</url>
+        </repository>
+    </distributionManagement>
+
+
     <repositories>
-
-
         <repository>
-            <id>cloudHopper</id>
-            <name>cloud Repository</name>
-            <url>http://maven.cloudhopper.com/repos/third-party/</url>
+            <id>hd-Snapshot</id>
+            <name>hd-Snapshot</name>
+            <url>http://192.168.1.13:8081/nexus/content/repositories/hd-Snapshot/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+
+        </repository>
+        <repository>
+            <id>hd-Releases</id>
+            <name>hd-Releases</name>
+            <url>http://192.168.1.13:8081/nexus/content/repositories/hd-Releases/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+
+        </repository>
+        <repository>
+            <id>central</id>
+            <name>Central</name>
+            <url>http://192.168.1.13:8081/nexus/content/repositories/central/</url>
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
         </repository>
-        <repository>
-            <id>nexus-osc-thirdparty</id>
-            <name>nexus-osc-thirdparty</name>
-            <url>http://maven.oschina.net/content/repositories/thirdparty/</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
 
-        <repository>
-            <id>ibiblio</id>
-            <name>cloud Repository</name>
-            <url>http://mirrors.ibiblio.org/pub/mirrors/maven2/</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
     </repositories>
 
     <properties>
@@ -65,6 +78,7 @@
         <httpclient.version>4.3.5</httpclient.version>
         <org.slf4j.version>1.7.1</org.slf4j.version>
         <logback.version>1.1.3</logback.version>
+        <httpmime.version>4.5.1</httpmime.version>
     </properties>
 
 
@@ -73,8 +87,8 @@
             <!--httpcomponents-->
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpclient</artifactId>
-                <version>${httpclient.version}</version>
+                <artifactId>httpmime</artifactId>
+                <version>${httpmime.version}</version>
             </dependency>
          <!--   <dependency>
                 <groupId>commons-httpclient</groupId>
@@ -92,27 +106,33 @@
             <dependency>
                 <groupId>com.google.code.gson</groupId>
                 <artifactId>gson</artifactId>
-                <version>2.2.2</version>
+                <version>2.3</version>
             </dependency>
 
-            <!-- logback  -->
+            <!-- log4j  -->
             <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>${org.slf4j.version}</version>
+                <groupId>log4j</groupId>
+                <artifactId>log4j</artifactId>
+                <version>1.2.16</version>
             </dependency>
+            <!-- / log4j -->
             <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-classic</artifactId>
-                <version>${logback.version}</version>
-            </dependency>
-            <!-- / logback -->
-            <dependency>
-                <groupId>jdom</groupId>
+                <groupId>org.jdom</groupId>
                 <artifactId>jdom</artifactId>
-                <version>1.1</version>
+                <version>2.0.2</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
-
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.7</source>
+                    <target>1.7</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

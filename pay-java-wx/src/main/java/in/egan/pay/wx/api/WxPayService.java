@@ -9,6 +9,8 @@ import in.egan.pay.common.util.str.StringUtils;
 import in.egan.pay.wx.bean.WxpayCore;
 import in.egan.pay.wx.utils.SimplePostRequestExecutor;
 import in.egan.pay.wx.utils.XML;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -16,9 +18,6 @@ import org.apache.http.client.CredentialsProvider;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
@@ -30,7 +29,7 @@ import java.util.*;
  * @date 2016-5-18 14:09:01
  */
 public class WxPayService implements PayService {
-    protected final Logger log = LoggerFactory.getLogger(WxPayService.class);
+    protected final Log log = LogFactory.getLog(WxPayService.class);
 
     protected PayConfigStorage payConfigStorage;
 
@@ -57,7 +56,7 @@ public class WxPayService implements PayService {
     @Override
     public boolean verify(Map<String, String> params) {
         if (!"SUCCESS".equals(params.get("return_code"))){
-            log.debug("微信支付异常：return_code={},参数集=" , params.get("return_code"), params);
+            log.debug(String.format("微信支付异常：return_code=%s,参数集=%s", params.get("return_code"), params));
             return false;
         }
         SortedMap<String, Object> data = new TreeMap<String, Object>();
@@ -128,7 +127,7 @@ public class WxPayService implements PayService {
                 if (error.getErrorCode() == 403) {
                     int sleepMillis = retrySleepMillis * (1 << retryTimes);
                     try {
-                        log.debug("微信支付系统繁忙，{}ms 后重试(第{}次)", sleepMillis, retryTimes + 1);
+                        log.debug(String.format("微信支付系统繁忙，(%s)ms 后重试(第%s次)", sleepMillis, retryTimes + 1));
                         Thread.sleep(sleepMillis);
                     } catch (InterruptedException e1) {
                         throw new RuntimeException(e1);

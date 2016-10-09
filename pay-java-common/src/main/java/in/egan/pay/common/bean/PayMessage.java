@@ -20,6 +20,7 @@ public class PayMessage implements Serializable {
     private Short event;
     private String eventKey;
     private String fromPay;
+    private String describe;
 
     public PayMessage(Map<String, String> payMessage) {
         this.payMessage = payMessage;
@@ -63,6 +64,13 @@ public class PayMessage implements Serializable {
         this.fromPay = fromPay;
     }
 
+    public String getDescribe() {
+        return describe;
+    }
+
+    public void setDescribe(String describe) {
+        this.describe = describe;
+    }
 
     //////////////////支付宝
     public Date getNotifyTime(){

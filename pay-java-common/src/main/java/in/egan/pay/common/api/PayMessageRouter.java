@@ -3,8 +3,8 @@ package in.egan.pay.common.api;
 import in.egan.pay.common.bean.PayMessage;
 import in.egan.pay.common.bean.PayOutMessage;
 import in.egan.pay.common.util.LogExceptionHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +15,7 @@ import java.util.concurrent.Future;
 
 /**
  * <pre>
- * 微信消息路由器，通过代码化的配置，把来自微信的消息交给handler处理
+ * 支付消息路由器，通过代码化的配置，把来自支付的消息交给handler处理
  * 
  * 说明：
  * 1. 配置路由规则时要按照从细到粗的原则，否则可能消息可能会被提前处理
@@ -38,12 +38,13 @@ import java.util.concurrent.Future;
  * router.route(message);
  * 
  * </pre>
- * @author Daniel Qian
+ *  @source Daniel Qian
+ *  @author  egan
  *
  */
 public class PayMessageRouter {
 
-    protected final Logger log = LoggerFactory.getLogger(PayMessageRouter.class);
+    protected final Log log = LogFactory.getLog(PayMessageRouter.class);
 
   private static final int DEFAULT_THREAD_POOL_SIZE = 100;
 
@@ -98,7 +99,7 @@ public class PayMessageRouter {
   }
 
   /**
-   * 处理微信消息
+   * 处理支付消息
    * @param payMessage
    */
   public PayOutMessage route(final PayMessage payMessage) {
@@ -133,7 +134,7 @@ public class PayMessageRouter {
       } else {
         res = rule.service(payMessage, payService, exceptionHandler);
         // 在同步操作结束，session访问结束
-        log.debug("End session access: async=false, fromPay={}", payMessage.getFromPay());
+        log.debug("End session access: async=false, fromPay=" + payMessage.getFromPay());
       }
     }
 
@@ -144,7 +145,7 @@ public class PayMessageRouter {
           for (Future future : futures) {
             try {
               future.get();
-              log.debug("End session access: async=true, fromPay={}", payMessage.getFromPay());
+              log.debug("End session access: async=true, fromPay=" + payMessage.getFromPay());
 
             } catch (InterruptedException e) {
               log.error("Error happened when wait task finish", e);

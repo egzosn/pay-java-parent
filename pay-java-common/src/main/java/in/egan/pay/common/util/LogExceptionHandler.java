@@ -2,8 +2,8 @@ package in.egan.pay.common.util;
 
 import in.egan.pay.common.api.PayErrorExceptionHandler;
 import in.egan.pay.common.exception.PayErrorException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 
 
@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
  */
 public class LogExceptionHandler implements PayErrorExceptionHandler {
 
-    private Logger log = LoggerFactory.getLogger(PayErrorExceptionHandler.class);
+    protected final Log log = LogFactory.getLog(PayErrorExceptionHandler.class);
 
     @Override
     public void handle(PayErrorException e) {

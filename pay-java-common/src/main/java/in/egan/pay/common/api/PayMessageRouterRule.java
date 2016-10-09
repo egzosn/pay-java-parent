@@ -40,6 +40,7 @@ public class PayMessageRouterRule {
 
     private String rSubject;
 
+
     private boolean reEnter = false;
 
     private List<PayMessageHandler> handlers = new ArrayList<PayMessageHandler>();

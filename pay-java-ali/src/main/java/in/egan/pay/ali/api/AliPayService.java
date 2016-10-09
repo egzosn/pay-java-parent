@@ -9,6 +9,8 @@ import in.egan.pay.common.exception.PayErrorException;
 import in.egan.pay.common.util.encrypt.RSA;
 import in.egan.pay.common.util.http.SimpleGetRequestExecutor;
 import in.egan.pay.common.util.str.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -16,8 +18,6 @@ import org.apache.http.client.CredentialsProvider;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
@@ -31,7 +31,7 @@ import java.util.Map;
  * @date 2016-5-18 14:09:01
  */
 public class AliPayService implements PayService {
-    protected final Logger log = LoggerFactory.getLogger(AliPayService.class);
+    protected final Log log = LogFactory.getLog(AliPayService.class);
 
     protected PayConfigStorage payConfigStorage;
 
@@ -46,7 +46,6 @@ public class AliPayService implements PayService {
     private String httpsVerifyUrl = "https://mapi.alipay.com/gateway.do?service=";
 
 
-    @Override
     public String getHttpsVerifyUrl() {
         return httpsVerifyUrl + "notify_verify";
     }
@@ -128,7 +127,7 @@ public class AliPayService implements PayService {
                 if (error.getErrorCode() == 404) {
                     int sleepMillis = retrySleepMillis * (1 << retryTimes);
                     try {
-                        log.debug("支付宝系统繁忙，{}ms 后重试(第{}次)", sleepMillis, retryTimes + 1);
+                        log.debug(String.format("支付宝系统繁忙，(%s)ms 后重试(第%s次)", sleepMillis, retryTimes + 1));
                         Thread.sleep(sleepMillis);
                     } catch (InterruptedException e1) {
                         throw new RuntimeException(e1);
