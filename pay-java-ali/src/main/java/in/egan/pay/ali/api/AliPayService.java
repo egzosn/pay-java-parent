@@ -4,6 +4,7 @@ import in.egan.pay.ali.bean.AlipayCore;
 import in.egan.pay.common.api.PayConfigStorage;
 import in.egan.pay.common.api.PayService;
 import in.egan.pay.common.api.RequestExecutor;
+import in.egan.pay.common.bean.PayOrder;
 import in.egan.pay.common.bean.result.PayError;
 import in.egan.pay.common.exception.PayErrorException;
 import in.egan.pay.common.util.encrypt.RSA;
@@ -145,9 +146,16 @@ public class AliPayService implements PayService {
         throw new RuntimeException("支付宝服务端异常，超出重试次数");
     }
 
+    /**
+     * 返回创建的订单信息
+     *
+     * @param order 支付订单
+     * @return
+     * @see in.egan.pay.common.bean.PayOrder
+     */
     @Override
-    public String orderInfo(String subject, String body, BigDecimal price, String tradeNo) {
-        String orderInfo = getOrderInfo(subject,body,price,tradeNo);
+    public String orderInfo(PayOrder order) {
+        String orderInfo = getOrderInfo(order);
         String sign = createSign(orderInfo, "UTF-8");
 
         try {
@@ -165,13 +173,12 @@ public class AliPayService implements PayService {
     /**
      * 支付宝创建订单信息
      * create the order info
-     * @param subject
-     * @param body
-     * @param price
-     * @Param tradeNo 订单号
+     *
+     * @param order 支付订单
      * @return
+     * @see in.egan.pay.common.bean.PayOrder
      */
-    private  String getOrderInfo(String subject, String body, BigDecimal price,String tradeNo) {
+    private  String getOrderInfo(PayOrder order) {
 
         // 签约合作者身份ID
         String orderInfo = "partner=" + "\"" + payConfigStorage.getPartner() + "\"";
@@ -180,22 +187,22 @@ public class AliPayService implements PayService {
         orderInfo += "&seller_id=" + "\"" + payConfigStorage.getSeller() + "\"";
 
         // 商户网站唯一订单号
-        orderInfo += "&out_trade_no=" + "\"" +tradeNo + "\"";
+        orderInfo += "&out_trade_no=" + "\"" +order.getTradeNo() + "\"";
 
         // 商品名称
-        orderInfo += "&subject=" + "\"" + subject + "\"";
+        orderInfo += "&subject=" + "\"" + order.getSubject() + "\"";
 
         // 商品详情
-        orderInfo += "&body=" + "\"" + body + "\"";
+        orderInfo += "&body=" + "\"" + order.getBody() + "\"";
 
         // 商品金额
-        orderInfo += "&total_fee=" + "\"" + price.setScale(2, BigDecimal.ROUND_HALF_UP) + "\"";
+        orderInfo += "&total_fee=" + "\"" + order.getPrice().setScale(2, BigDecimal.ROUND_HALF_UP) + "\"";
 
         // 服务器异步通知页面路径
         orderInfo += "&notify_url=" + "\"" + payConfigStorage.getNotifyUrl() + "\"";
 
         // 服务接口名称， 固定值
-        orderInfo += "&service=\"mobile.securitypay.pay\"";
+        orderInfo += "&service=\"" + order.getTransactionType().getType() + "\"";
 
         // 支付类型， 固定值
         orderInfo += "&payment_type=\"1\"";

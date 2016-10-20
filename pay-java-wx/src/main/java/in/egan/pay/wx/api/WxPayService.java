@@ -3,6 +3,7 @@ package in.egan.pay.wx.api;
 import in.egan.pay.common.api.PayConfigStorage;
 import in.egan.pay.common.api.PayService;
 import in.egan.pay.common.api.RequestExecutor;
+import in.egan.pay.common.bean.PayOrder;
 import in.egan.pay.common.bean.result.PayError;
 import in.egan.pay.common.exception.PayErrorException;
 import in.egan.pay.common.util.str.StringUtils;
@@ -145,14 +146,13 @@ public class WxPayService implements PayService {
 
     /**
      * 获取支付平台所需的订单信息
-     * @param body 商品名称
-     * @param attach 附加参数
-     * @param price 价格
-     * @param tradeNo 商户单号
+     *
+     * @param order 支付订单
      * @return
+     * @see in.egan.pay.common.bean.PayOrder
      */
     @Override
-    public Object orderInfo(String body, String attach, BigDecimal price, String tradeNo) {
+    public Object orderInfo(PayOrder order) {
 
 
 //        Map<String, Object> results = new HashMap<String, Object>();
@@ -161,13 +161,13 @@ public class WxPayService implements PayService {
         parameters.put("appid", payConfigStorage.getAppid());
         parameters.put("mch_id", payConfigStorage.getPartner());
         parameters.put("nonce_str", WxpayCore.genNonceStr());
-        parameters.put("body", body);// 购买支付信息
+        parameters.put("body", order.getBody());// 购买支付信息
         parameters.put("notify_url", payConfigStorage.getNotifyUrl());
-        parameters.put("out_trade_no", tradeNo);// 订单号
+        parameters.put("out_trade_no", order.getTradeNo());// 订单号
         parameters.put("spbill_create_ip", "192.168.1.150");
-        parameters.put("total_fee", price.multiply(new BigDecimal(100)).intValue());// 总金额单位为分
-        parameters.put("trade_type", "APP");
-        parameters.put("attach", attach);
+        parameters.put("total_fee", order.getPrice().multiply(new BigDecimal(100)).intValue());// 总金额单位为分
+        parameters.put("trade_type", order.getTransactionType().getType());
+        parameters.put("attach", order.getAttach());
         String sign = createSign(getOrderInfo(parameters), payConfigStorage.getInputCharset());
         parameters.put("sign", sign);
 
@@ -191,12 +191,7 @@ public class WxPayService implements PayService {
 //            params.put("signType", "MD5");
             String paySign = createSign(getOrderInfo(params), payConfigStorage.getInputCharset());
             params.put("sign", paySign);
-   /*     results.put("appId", WxUtils.APPID);
-        results.put("nonceStr", map.get("nonce_str"));
-        results.put("package", "prepay_id=" + map.get("prepay_id"));
-        results.put("timeStamp", timeStamp);
-        results.put("signType", "MD5");
-        results.put("paySign", paySign);*/
+
             return params;
         } catch (PayErrorException e) {
             e.printStackTrace();
