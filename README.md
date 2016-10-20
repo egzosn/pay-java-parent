@@ -14,8 +14,8 @@
 ###使用  
 这里不多说直接上代码
 
-#### 一.  快速入门
-1. 支付整合配置
+### 快速入门
+#####1.支付整合配置
 ```java
 public class PayResponse {
     @Resource
@@ -128,7 +128,9 @@ public class PayResponse {
 
 ```
 
-支付响应PayResponse的获取
+
+#####2.支付响应PayResponse的获取
+
 
 ```java
 
@@ -174,7 +176,7 @@ public class ApyAccountService {
 ```
 
 
-2.  根据账户id与业务id，组拼订单信息（支付宝、微信支付订单）获取支付信息所需的数据
+#####3.根据账户id与业务id，组拼订单信息（支付宝、微信支付订单）获取支付信息所需的数据
 
 ```java
   //获取对应的支付账户操作工具（可根据账户id）
@@ -185,7 +187,7 @@ public class ApyAccountService {
   
 ```
 
-3. 支付回调
+#####4.支付回调
 ```java
      
      /**
