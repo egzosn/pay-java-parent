@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>pay-java-parent</artifactId>
+        <groupId>in.egan</groupId>
+        <version>1.0.RELEASE</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>in.egan</groupId>
+    <artifactId>pay-java-demo</artifactId>
+
+    <properties>
+        <spring.version>4.0.6.RELEASE</spring.version>
+        <junit.version>4.10</junit.version>
+        <hibernate.version>4.3.6.Final</hibernate.version>
+        <jackson-databind.version>2.3.2</jackson-databind.version>
+    </properties>
+
+
+    <dependencies>
+        <!--支付-->
+        <dependency>
+            <groupId>in.egan</groupId>
+            <artifactId>pay-java-wx</artifactId>
+            <version>1.0.RELEASE</version>
+        </dependency>
+
+        <dependency>
+            <groupId>in.egan</groupId>
+            <artifactId>pay-java-ali</artifactId>
+            <version>1.0.RELEASE</version>
+        </dependency>
+        <!--/支付-->
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <scope>provided</scope>
+            <version>3.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>jsp-api</artifactId>
+            <version>2.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson-databind.version}</version>
+        </dependency>
+        <!-- spring -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+            <version>${spring.version}</version>
+            <type>jar</type>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+            <version>${spring.version}</version>
+            <type>jar</type>
+            <scope>compile</scope>
+        </dependency>
+        <!-- /spring -->
+    </dependencies>
+
+</project>

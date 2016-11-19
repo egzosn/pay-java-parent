@@ -1,0 +1,70 @@
+package in.egan.pay.demo.entity;
+
+import in.egan.pay.ali.api.AliPayConfigStorage;
+import in.egan.pay.ali.api.AliPayService;
+import in.egan.pay.common.api.PayService;
+import in.egan.pay.common.bean.BasePayType;
+import in.egan.pay.common.bean.TransactionType;
+import in.egan.pay.wx.api.WxPayConfigStorage;
+import in.egan.pay.wx.api.WxPayService;
+import in.egan.pay.wx.bean.WxTransactionType;
+
+/**
+ * 支付类型
+ * @author egan
+ * @email egzosn@gmail.com
+ * @date 2016/11/20 0:30
+ */
+public enum PayType implements BasePayType{
+
+    aliPay{
+        @Override
+        public PayService getPayService(ApyAccount apyAccount) {
+            AliPayConfigStorage aliPayConfigStorage = new AliPayConfigStorage();
+            aliPayConfigStorage.setPartner(apyAccount.getPartner());
+            aliPayConfigStorage.setAli_public_key(apyAccount.getPublicKey());
+            aliPayConfigStorage.setKeyPrivate(apyAccount.getPrivateKey());
+            aliPayConfigStorage.setNotifyUrl(apyAccount.getNotifyUrl());
+            aliPayConfigStorage.setSignType(apyAccount.getSignType());
+            aliPayConfigStorage.setSeller(apyAccount.getSeller());
+            aliPayConfigStorage.setPayType(apyAccount.getPayType().toString());
+            aliPayConfigStorage.setMsgType(apyAccount.getMsgType());
+            return new AliPayService(aliPayConfigStorage);
+        }
+
+        @Override
+        public TransactionType getTransactionType(String transactionType) {
+            return null;
+        }
+    },wxPay {
+        @Override
+        public PayService getPayService(ApyAccount apyAccount) {
+            WxPayConfigStorage wxPayConfigStorage = new WxPayConfigStorage();
+            wxPayConfigStorage.setMchId(apyAccount.getPartner());
+            wxPayConfigStorage.setAppSecret(apyAccount.getPublicKey());
+            wxPayConfigStorage.setAppid(apyAccount.getAppid());
+            wxPayConfigStorage.setKeyPrivate(apyAccount.getPrivateKey());
+            wxPayConfigStorage.setNotifyUrl(apyAccount.getNotifyUrl());
+            wxPayConfigStorage.setSignType(apyAccount.getSignType());
+            wxPayConfigStorage.setPayType(apyAccount.getPayType().toString());
+            wxPayConfigStorage.setMsgType(apyAccount.getMsgType());
+            return  new WxPayService(wxPayConfigStorage);
+        }
+
+        /**
+         * 根据支付类型获取交易类型
+         * @param transactionType 类型值
+         * @see WxTransactionType
+         * @return
+         */
+        @Override
+        public TransactionType getTransactionType(String transactionType) {
+
+            return WxTransactionType.valueOf(transactionType);
+        }
+    };
+
+    public abstract PayService getPayService(ApyAccount apyAccount);
+
+
+}
