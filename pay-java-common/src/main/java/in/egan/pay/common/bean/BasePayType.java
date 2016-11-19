@@ -15,4 +15,5 @@ public interface BasePayType {
      * @return
      */
     public abstract TransactionType getTransactionType(String transactionType);
+
 }

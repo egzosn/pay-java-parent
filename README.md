@@ -38,51 +38,15 @@ public class PayResponse {
      */
     public void init(ApyAccount apyAccount) {
 
-        this.service = getPayService(apyAccount);
+        //根据不同的账户类型 初始化支付配置
+        this.service = apyAccount.getPayType().getPayService(apyAccount);
         this.storage = service.getPayConfigStorage();
 
         buildRouter(apyAccount.getPayId());
     }
 
 
-    /**
-     * 根据不同的账户类型 初始化支付配置
-     * 一个账户类型可支持多个账户
-     * @param apyAccount 账户信息
-     * @describe 还需要优化
-     */
-    public PayService getPayService(ApyAccount apyAccount){
 
-        switch (apyAccount.getPayType()){
-            case 0:
-                AliPayConfigStorage aliPayConfigStorage = new AliPayConfigStorage();
-                aliPayConfigStorage.setPartner(apyAccount.getPartner());
-                aliPayConfigStorage.setAli_public_key(apyAccount.getPublicKey());
-                aliPayConfigStorage.setKeyPrivate(apyAccount.getPrivateKey());
-                aliPayConfigStorage.setInputCharset(apyAccount.getInputCharset());
-                aliPayConfigStorage.setNotifyUrl(apyAccount.getNotifyUrl());
-                aliPayConfigStorage.setSignType(apyAccount.getSignType());
-                aliPayConfigStorage.setSeller(apyAccount.getSeller());
-                aliPayConfigStorage.setPayType(apyAccount.getPayType());
-                aliPayConfigStorage.setMsgType(apyAccount.getMsgType());
-                return new AliPayService(aliPayConfigStorage);
-            case 1:
-                WxPayConfigStorage wxPayConfigStorage = new WxPayConfigStorage();
-                wxPayConfigStorage.setMchId(apyAccount.getPartner());
-                wxPayConfigStorage.setAppSecret(apyAccount.getPublicKey());
-                wxPayConfigStorage.setAppid(apyAccount.getAppid());
-                wxPayConfigStorage.setKeyPrivate(apyAccount.getPrivateKey());
-                wxPayConfigStorage.setInputCharset(apyAccount.getInputCharset());
-                wxPayConfigStorage.setNotifyUrl(apyAccount.getNotifyUrl());
-                wxPayConfigStorage.setSignType(apyAccount.getSignType());
-                wxPayConfigStorage.setPayType(apyAccount.getPayType());
-                wxPayConfigStorage.setMsgType(apyAccount.getMsgType());
-                return  new WxPayService(wxPayConfigStorage);
-            default:
-
-        }
-        return null;
-    }
 
 
     /**
@@ -158,7 +122,7 @@ public class ApyAccountService {
         if (payResponse  == null) {
             ApyAccount apyAccount = dao.get(id);
             if (apyAccount == null) {
-                throwError(-1, "无法查询");
+               throw new IllegalArgumentException ("无法查询");
             }
             payResponse = new PayResponse();
             spring.autowireBean(payResponse);
@@ -179,43 +143,55 @@ public class ApyAccountService {
 #####3.根据账户id与业务id，组拼订单信息（支付宝、微信支付订单）获取支付信息所需的数据
 
 ```java
-  //获取对应的支付账户操作工具（可根据账户id）
-  PayResponse payResponse =  service.getPayResponse(payId);;
-  //这里之所以用Object，因为微信需返回Map， 支付吧String。
-  Object orderInfo = payResponse.getService().orderInfo("订单title", "摘要", new BigDecimal(0.01), "tradeNo");
-  System.out.println(orderInfo);
+    /**
+     *  获取支付预订单信息
+     * @param payId 支付账户id
+     * @param transactionType 交易类型
+     * @return
+     */
+    @RequestMapping("getOrderInfo")
+    public Object getOrderInfo( Integer payId, String transactionType){
+        //获取对应的支付账户操作工具（可根据账户id）
+        PayResponse payResponse =  service.getPayResponse(payId);;
+
+        //这里之所以用Object，因为微信需返回Map， 支付吧String。
+        Object orderInfo = payResponse.getService().orderInfo(new PayOrder("订单title", "摘要", new BigDecimal(0.01), "tradeNo", PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType)));
+
+        return orderInfo;
+    }
   
 ```
 
 #####4.支付回调
 ```java
      
-     /**
+
+    /**
      * 微信或者支付宝回调地址
      * @param request
      * @return
      */
     @ResponseBody
     @RequestMapping(value = "payBack{payId}.json")
-    public String payBack(HttpServletRequest request, @PathVariable Integer payId){
+    public String payBack(HttpServletRequest request, @PathVariable Integer payId) throws IOException {
         //根据账户id，获取对应的支付账户操作工具
         PayResponse payResponse = service.getPayResponse(payId);
         PayConfigStorage storage = payResponse.getStorage();
+
         Map<String, String> params = payResponse.getService().getParameter2Map(request.getParameterMap(), request.getInputStream());
         if (null == params){
             return "fail";
         }
 
-
+        //校验
         if (payResponse.getService().verify(params)){
-            PayMessage message = new PayMessage(params, storage.getPayType(), storage.getMsgType());
+            PayMessage message = new PayMessage(params, storage.getPayType(), storage.getMsgType().name());
             PayOutMessage outMessage = payResponse.getRouter().route(message);
             return outMessage.toMessage();
         }
 
         return "fail";
     }
-
 
         
 ```

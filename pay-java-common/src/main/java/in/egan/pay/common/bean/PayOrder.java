@@ -14,8 +14,6 @@ public class PayOrder {
     private String subject;
     //商品描述
     private String body;
-    //附加数据
-    private String attach;
     //价格
     private BigDecimal price;
     //商户单号
@@ -38,14 +36,6 @@ public class PayOrder {
 
     public void setBody(String body) {
         this.body = body;
-    }
-
-    public String getAttach() {
-        return attach;
-    }
-
-    public void setAttach(String attach) {
-        this.attach = attach;
     }
 
     public BigDecimal getPrice() {
@@ -76,9 +66,9 @@ public class PayOrder {
     }
 
     public PayOrder(String subject, String body, BigDecimal price, String tradeNo, TransactionType transactionType) {
+
         this.subject = subject;
         this.body = body;
-        this.attach = attach;
         this.price = price;
         this.tradeNo = tradeNo;
         this.transactionType = transactionType;

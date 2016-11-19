@@ -28,7 +28,7 @@ public class PayMessageRouterRule {
 
     private String msgType;
 
-    private Short event;
+    private String event;
 
     private String eventKey;
 
@@ -79,7 +79,7 @@ public class PayMessageRouterRule {
      * @param event
      * @return
      */
-    public PayMessageRouterRule event(Short event) {
+    public PayMessageRouterRule event(String event) {
         this.event = event;
         return this;
     }
@@ -318,11 +318,11 @@ public class PayMessageRouterRule {
         this.msgType = msgType;
     }
 
-    public Short getEvent() {
+    public String getEvent() {
         return event;
     }
 
-    public void setEvent(Short event) {
+    public void setEvent(String event) {
         this.event = event;
     }
 

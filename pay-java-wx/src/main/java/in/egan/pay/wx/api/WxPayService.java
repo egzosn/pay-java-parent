@@ -161,13 +161,13 @@ public class WxPayService implements PayService {
         parameters.put("appid", payConfigStorage.getAppid());
         parameters.put("mch_id", payConfigStorage.getPartner());
         parameters.put("nonce_str", WxpayCore.genNonceStr());
-        parameters.put("body", order.getBody());// 购买支付信息
+        parameters.put("body", order.getSubject());// 购买支付信息
         parameters.put("notify_url", payConfigStorage.getNotifyUrl());
         parameters.put("out_trade_no", order.getTradeNo());// 订单号
         parameters.put("spbill_create_ip", "192.168.1.150");
         parameters.put("total_fee", order.getPrice().multiply(new BigDecimal(100)).intValue());// 总金额单位为分
         parameters.put("trade_type", order.getTransactionType().getType());
-        parameters.put("attach", order.getAttach());
+        parameters.put("attach", order.getBody());
         String sign = createSign(getOrderInfo(parameters), payConfigStorage.getInputCharset());
         parameters.put("sign", sign);
 
