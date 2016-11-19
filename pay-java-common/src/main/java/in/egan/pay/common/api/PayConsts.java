@@ -21,8 +21,8 @@ public class PayConsts {
     ///////////////
     //支付消息事件
     /////////////
-    public static final Short MSG_ALIPAY = 0;
-    public static final Short MSG_WXPAY = 1;
+    public static String  MSG_ALIPAY = "aliPay";
+    public static String  MSG_WXPAY = "wxPay";
 
 
 

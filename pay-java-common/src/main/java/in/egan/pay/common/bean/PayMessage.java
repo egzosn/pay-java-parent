@@ -17,7 +17,7 @@ import java.util.Map;
 public class PayMessage implements Serializable {
     private Map<String, String> payMessage = null;
     private String msgType;
-    private Short event;
+    private String event;
     private String eventKey;
     private String fromPay;
     private String describe;
@@ -26,7 +26,7 @@ public class PayMessage implements Serializable {
         this.payMessage = payMessage;
     }
 
-    public PayMessage(Map<String, String> payMessage, Short event, String msgType) {
+    public PayMessage(Map<String, String> payMessage, String event, String msgType) {
         this(payMessage);
         this.event = event;
         this.msgType = msgType;
@@ -40,11 +40,11 @@ public class PayMessage implements Serializable {
         this.msgType = msgType;
     }
 
-    public Short getEvent() {
+    public String getEvent() {
         return event;
     }
 
-    public void setEvent(Short event) {
+    public void setEvent(String event) {
         this.event = event;
     }
 

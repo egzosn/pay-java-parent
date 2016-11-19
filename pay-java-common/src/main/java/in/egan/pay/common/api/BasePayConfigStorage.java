@@ -1,5 +1,7 @@
 package in.egan.pay.common.api;
 
+import in.egan.pay.common.bean.MsgType;
+
 /**
  * 支付基础配置存储
  * @author  egan
@@ -27,14 +29,14 @@ public abstract class BasePayConfigStorage implements PayConfigStorage{
     //是否显示日志
     protected volatile Boolean showLog;
 
-    //支付类型 0支付宝， 1微信
-    protected volatile Short payType;
+    //支付类型 aliPay 支付宝， wxPay微信
+    protected volatile String payType;
     /**
      * 消息来源类型
      * @see PayConsts#MSG_XML
      * @see PayConsts#MSG_TEXT
      */
-    protected volatile String msgType;
+    protected volatile MsgType msgType;
     protected volatile String httpProxyHost;
     protected volatile int httpProxyPort;
     protected volatile String httpProxyUsername;
@@ -147,20 +149,25 @@ public abstract class BasePayConfigStorage implements PayConfigStorage{
         return showLog;
     }
 
-    public Short getPayType() {
+    /**
+     * 支付类型 自定义
+     * 这里暂定 aliPay 支付宝， wxPay微信支付
+     * @return
+     */
+    public String getPayType() {
         return payType;
     }
 
-    public void setPayType(Short payType) {
+    public void setPayType(String payType) {
         this.payType = payType;
     }
 
     @Override
-    public String getMsgType() {
+    public MsgType getMsgType() {
         return msgType;
     }
 
-    public void setMsgType(String msgType) {
+    public void setMsgType(MsgType msgType) {
         this.msgType = msgType;
     }
 }

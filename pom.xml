@@ -27,6 +27,7 @@
         <module>pay-java-common</module>
         <module>pay-java-ali</module>
         <module>pay-java-wx</module>
+        <module>pay-java-demo</module>
     </modules>
 
 

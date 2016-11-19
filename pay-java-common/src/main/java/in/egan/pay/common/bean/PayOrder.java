@@ -71,4 +71,16 @@ public class PayOrder {
     public void setTransactionType(TransactionType transactionType) {
         this.transactionType = transactionType;
     }
+
+    public PayOrder() {
+    }
+
+    public PayOrder(String subject, String body, BigDecimal price, String tradeNo, TransactionType transactionType) {
+        this.subject = subject;
+        this.body = body;
+        this.attach = attach;
+        this.price = price;
+        this.tradeNo = tradeNo;
+        this.transactionType = transactionType;
+    }
 }

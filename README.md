@@ -155,7 +155,7 @@ public class ApyAccountService {
     public PayResponse getPayResponse(Integer id) {
 
         PayResponse payResponse = payResponses.get(id);
-        if (mpResponse == null) {
+        if (payResponse  == null) {
             ApyAccount apyAccount = dao.get(id);
             if (apyAccount == null) {
                 throwError(-1, "无法查询");

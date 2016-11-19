@@ -1,5 +1,7 @@
 package in.egan.pay.common.api;
 
+import in.egan.pay.common.bean.MsgType;
+
 /**
  * 支付客户端配置存储
  * @author  egan
@@ -36,16 +38,22 @@ public interface PayConfigStorage {
     public String getKeyPrivate();
     public String getLogPath();
     public Boolean isShowLog();
-    public Short getPayType();
+
+    /**
+     * 支付类型 自定义
+     * 这里暂定 aliPay 支付宝， wxPay微信支付
+     * @return
+     */
+    public String getPayType();
 
     /**
      *  @see #getMsgType
-     *  @see PayConsts
+     *  @see MsgType
      * @return "text" 或者 "xml"
-     * @see PayConsts#MSG_XML
-     * @see PayConsts#MSG_TEXT
+     * @see MsgType#xml
+     * @see MsgType#text
      */
-    public String getMsgType();
+    public MsgType getMsgType();
 
 
 }
