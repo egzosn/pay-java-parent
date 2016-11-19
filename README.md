@@ -34,7 +34,7 @@ public class PayResponse {
     /**
      * 初始化支付配置
      * @param apyAccount 账户信息
-     * @see ApyAccount 对应表结构详情--》 /db/apy_account.sql
+     * @see ApyAccount 对应表结构详情--》 pay-java-demo/resources/apy_account.sql
      */
     public void init(ApyAccount apyAccount) {
 
