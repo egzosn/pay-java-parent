@@ -10,6 +10,7 @@ import java.util.Map;
 
 /**
  * 支付回调消息
+ * 基础实现，具体可根据具体支付回调的消息去实现
  * @author egan
  * @email egzosn@gmail.com
  * @date 2016-6-1 14:2:3
@@ -71,9 +72,14 @@ public class PayMessage implements Serializable {
     public void setDescribe(String describe) {
         this.describe = describe;
     }
-
+    public String getDiscount(){
+        return payMessage.get("discount");
+    }
+    public String getSubject(){
+        return payMessage.get("subject");
+    }
     //////////////////支付宝
-    public Date getNotifyTime(){
+/*    public Date getNotifyTime(){
         return parseDate(payMessage.get("notify_time"));
     }
 
@@ -91,9 +97,7 @@ public class PayMessage implements Serializable {
 
 
 
-    public String getSubject(){
-        return payMessage.get("subject");
-    }
+
     public String getPaymentType(){
         return payMessage.get("payment_type");
     }
@@ -161,10 +165,7 @@ public class PayMessage implements Serializable {
         return payMessage.get("use_coupon");
 
     }
-    public String getDiscount(){
-        return payMessage.get("discount");
 
-    }
     public String getRefundStatus(){
         return payMessage.get("refund_status");
 
@@ -172,13 +173,13 @@ public class PayMessage implements Serializable {
     public Date getGmtRefund(){
         return parseDate(payMessage.get("gmt_refund"));
 
-    }
+    }*/
     /////////////////支付宝
 
 
 
     //////////////////微信
-    public String getIsSubscribe(){
+   /* public String getIsSubscribe(){
         return payMessage.get("is_subscribe");
     }
     public String getAppid(){
@@ -230,7 +231,7 @@ public class PayMessage implements Serializable {
             return  new BigDecimal(cashFee).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP);
         }
         return 0;
-    }
+    }*/
     //////////////////微信
 
 
@@ -249,9 +250,6 @@ public class PayMessage implements Serializable {
         if (null == total_fee || "".equals(total_fee)){    return 0;      }
         if (isNumber(total_fee)){
             BigDecimal totalFee = new BigDecimal(total_fee);
-            if (event == PayConsts.MSG_WXPAY){
-                totalFee.divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP);
-            }
             return totalFee;
         }
         return 0;

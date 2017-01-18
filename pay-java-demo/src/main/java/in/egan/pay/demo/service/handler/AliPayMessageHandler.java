@@ -25,7 +25,7 @@ public class AliPayMessageHandler extends BasePayMessageHandler {
         //交易状态
        String trade_status = null;
         try {
-            trade_status = new String(payMessage.getTradeStatus().getBytes("ISO-8859-1"),"UTF-8");
+            trade_status = new String(payMessage.getPayMessage().get("trade_status").getBytes("ISO-8859-1"),"UTF-8");
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }

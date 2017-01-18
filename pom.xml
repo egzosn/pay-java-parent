@@ -20,6 +20,7 @@
         <developer>
             <name>Egan</name>
             <email>egzosn@gmail.com</email>
+            <url>https://github.com/egzosn/pay-java-parent</url>
         </developer>
     </developers>
 
@@ -28,16 +29,15 @@
         <module>pay-java-ali</module>
         <module>pay-java-wx</module>
         <module>pay-java-demo</module>
+        <module>pay-java-wx-youdian</module>
     </modules>
 
 
     <properties>
         <org.apache.commons.version>3.1</org.apache.commons.version>
-        <jackson-databind.version>2.3.2</jackson-databind.version>
-        <httpclient.version>4.3.5</httpclient.version>
-        <org.slf4j.version>1.7.1</org.slf4j.version>
-        <logback.version>1.1.3</logback.version>
-        <httpmime.version>4.5.1</httpmime.version>
+        <httpclient.version>4.5.2</httpclient.version>
+        <httpmime.version>4.5.2</httpmime.version>
+        <log4j.version>1.2.17</log4j.version>
     </properties>
 
 
@@ -49,30 +49,20 @@
                 <artifactId>httpmime</artifactId>
                 <version>${httpmime.version}</version>
             </dependency>
-         <!--   <dependency>
-                <groupId>commons-httpclient</groupId>
-                <artifactId>commons-httpclient</artifactId>
-                <version>3.0.1</version>
-            </dependency>-->
-        <!--    <dependency>
-                <groupId>commons-codec</groupId>
-                <artifactId>commons-codec</artifactId>
-                <version>1.6</version>
-            </dependency>-->
-
             <!--/httpcomponents-->
 
             <dependency>
-                <groupId>com.google.code.gson</groupId>
-                <artifactId>gson</artifactId>
-                <version>2.3</version>
+                <groupId>com.alibaba</groupId>
+                <artifactId>fastjson</artifactId>
+                <version>1.2.17</version>
             </dependency>
+
 
             <!-- log4j  -->
             <dependency>
                 <groupId>log4j</groupId>
                 <artifactId>log4j</artifactId>
-                <version>1.2.16</version>
+                <version>${log4j.version}</version>
             </dependency>
             <!-- / log4j -->
             <dependency>
@@ -80,7 +70,9 @@
                 <artifactId>jdom</artifactId>
                 <version>2.0.2</version>
             </dependency>
+
         </dependencies>
+
     </dependencyManagement>
     <build>
         <plugins>

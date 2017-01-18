@@ -2,6 +2,9 @@ package in.egan.pay.common.api;
 
 import in.egan.pay.common.bean.MsgType;
 
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 /**
  * 支付基础配置存储
  * @author  egan
@@ -13,34 +16,40 @@ public abstract class BasePayConfigStorage implements PayConfigStorage{
 
     // ali rsa_private 商户私钥，pkcs8格式
     //wx api_key 商户密钥
-    protected volatile String keyPrivate ;
+    protected volatile  String keyPrivate ;
     // 支付公钥
-    protected volatile String keyPublic;
+    protected volatile  String keyPublic;
     //回调地址
-    protected volatile String notifyUrl;
-    //加密类型
-    protected volatile String signType;
+    protected volatile  String notifyUrl;
+    //签名加密类型
+    protected volatile  String signType;
     //字符类型
-    protected volatile String inputCharset;
+    protected volatile  String inputCharset;
 
-    //日志的存放路径
-    @Deprecated
-    protected volatile String logPath;
-    //是否显示日志
-    protected volatile Boolean showLog;
 
-    //支付类型 aliPay 支付宝， wxPay微信
-    protected volatile String payType;
+    //支付类型 aliPay 支付宝， wxPay微信..等等，开发者自定义，唯一
+    protected volatile  String payType;
     /**
      * 消息来源类型
      * @see PayConsts#MSG_XML
      * @see PayConsts#MSG_TEXT
+     * @see PayConsts#MSG_JSON
      */
-    protected volatile MsgType msgType;
-    protected volatile String httpProxyHost;
-    protected volatile int httpProxyPort;
-    protected volatile String httpProxyUsername;
-    protected volatile String httpProxyPassword;
+    protected volatile  MsgType msgType;
+
+
+    // 访问令牌 每次请求其他方法都要传入的值
+    protected volatile String accessToken;
+    // access token 到期时间时间戳
+    protected volatile long expiresTime;
+    //授权码锁
+    protected Lock accessTokenLock = new ReentrantLock();
+
+
+    protected volatile  String httpProxyHost;
+    protected volatile  int httpProxyPort;
+    protected volatile  String httpProxyUsername;
+    protected volatile  String httpProxyPassword;
 
 
 
@@ -54,23 +63,7 @@ public abstract class BasePayConfigStorage implements PayConfigStorage{
         this.inputCharset = inputCharset;
     }
 
-    @Override
-    public String getLogPath() {
-        return logPath;
-    }
 
-    public void setLogPath(String logPath) {
-        this.logPath = logPath;
-    }
-
-    @Override
-    public Boolean isShowLog() {
-        return showLog;
-    }
-
-    public void setShowLog(Boolean showLog) {
-        this.showLog = showLog;
-    }
 
     @Override
     public String getNotifyUrl() {
@@ -145,9 +138,13 @@ public abstract class BasePayConfigStorage implements PayConfigStorage{
         this.keyPublic = keyPublic;
     }
 
-    public Boolean getShowLog() {
-        return showLog;
+
+
+    @Override
+    public String getToken() {
+        return null;
     }
+
 
     /**
      * 支付类型 自定义
@@ -170,4 +167,44 @@ public abstract class BasePayConfigStorage implements PayConfigStorage{
     public void setMsgType(MsgType msgType) {
         this.msgType = msgType;
     }
+
+
+    @Override
+    public String getAccessToken() {
+        return this.accessToken;
+    }
+
+    @Override
+    public Lock getAccessTokenLock() {
+        return this.accessTokenLock;
+    }
+
+    @Override
+    public long getExpiresTime() {
+        return expiresTime;
+    }
+
+    @Override
+    public boolean isAccessTokenExpired() {
+        return System.currentTimeMillis() > this.expiresTime;
+    }
+
+
+    @Override
+    public synchronized void updateAccessToken(String accessToken, int expiresInSeconds) {
+        this.accessToken = accessToken;
+        this.expiresTime = System.currentTimeMillis() + (expiresInSeconds - 600) * 1000L;
+    }
+
+    @Override
+    public synchronized void updateAccessToken(String accessToken, long expiresTime) {
+        this.accessToken = accessToken;
+        this.expiresTime = expiresTime;
+    }
+
+    @Override
+    public void expireAccessToken() {
+        this.expiresTime = 0;
+    }
+
 }

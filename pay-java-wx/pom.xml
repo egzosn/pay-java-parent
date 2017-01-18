@@ -10,7 +10,6 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>pay-java-wx</artifactId>
 
-
     <dependencies>
 
 
@@ -23,13 +22,6 @@
         <!-- /pay-java  -->
 
 
-        <!--json-->
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-        </dependency>
-        <!--/json-->
-
         <!-- log4j  -->
         <dependency>
             <groupId>log4j</groupId>
@@ -37,29 +29,12 @@
         </dependency>
         <!-- / log4j -->
 
-
-        <!--httpcomponents-->
-<!--       <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-        </dependency>-->
-<!--        <dependency>
-            <groupId>commons-httpclient</groupId>
-            <artifactId>commons-httpclient</artifactId>
-        </dependency>-->
-      <!--  <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-        </dependency>-->
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpmime</artifactId>
         </dependency>
         <!--/httpcomponents-->
-        <dependency>
-            <groupId>org.jdom</groupId>
-            <artifactId>jdom</artifactId>
-        </dependency>
+
     </dependencies>
 
 

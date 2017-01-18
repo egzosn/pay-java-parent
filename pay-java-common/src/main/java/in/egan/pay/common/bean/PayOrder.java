@@ -18,6 +18,10 @@ public class PayOrder {
     private BigDecimal price;
     //商户单号
     private String tradeNo;
+    //银行卡类型
+    private String bankType;
+    //设备号
+    private String deviceInfo;
     //交易类型
     private TransactionType transactionType;
 
@@ -62,8 +66,25 @@ public class PayOrder {
         this.transactionType = transactionType;
     }
 
+    public String getBankType() {
+        return bankType;
+    }
+
+    public void setBankType(String bankType) {
+        this.bankType = bankType;
+    }
+
+    public String getDeviceInfo() {
+        return deviceInfo;
+    }
+
+    public void setDeviceInfo(String deviceInfo) {
+        this.deviceInfo = deviceInfo;
+    }
+
     public PayOrder() {
     }
+
 
     public PayOrder(String subject, String body, BigDecimal price, String tradeNo, TransactionType transactionType) {
 

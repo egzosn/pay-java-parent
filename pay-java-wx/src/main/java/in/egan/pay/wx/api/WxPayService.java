@@ -4,12 +4,13 @@ import in.egan.pay.common.api.PayConfigStorage;
 import in.egan.pay.common.api.PayService;
 import in.egan.pay.common.api.RequestExecutor;
 import in.egan.pay.common.bean.PayOrder;
+import in.egan.pay.common.bean.PayOutMessage;
 import in.egan.pay.common.bean.result.PayError;
 import in.egan.pay.common.exception.PayErrorException;
+import in.egan.pay.common.util.sign.SignUtils;
 import in.egan.pay.common.util.str.StringUtils;
-import in.egan.pay.wx.bean.WxpayCore;
 import in.egan.pay.wx.utils.SimplePostRequestExecutor;
-import in.egan.pay.wx.utils.XML;
+import in.egan.pay.common.util.XML;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHost;
@@ -45,11 +46,14 @@ public class WxPayService implements PayService {
 
     public final static String httpsVerifyUrl = "https://gw.tenpay.com/gateway";
     public final static String unifiedOrderUrl = "https://api.mch.weixin.qq.com/pay/unifiedorder";
+//    public final static String orderqueryUrl = "https://api.mch.weixin.qq.com/pay/orderquery";
 
     /**
      *  微信支付V2版本所需
+     *  当前版本不需要
      * @return
      */
+    @Deprecated
     @Override
     public String getHttpsVerifyUrl() {
         return httpsVerifyUrl + "/verifynotifyid.xml";
@@ -61,56 +65,48 @@ public class WxPayService implements PayService {
             log.debug(String.format("微信支付异常：return_code=%s,参数集=%s", params.get("return_code"), params));
             return false;
         }
-        SortedMap<String, Object> data = new TreeMap<String, Object>();
-        for (String key : params.keySet()){
-            data.put(key, params.get(key).trim());
+
+        if(params.get("sign") == null) {
+
+            log.debug("微信支付异常：签名为空！out_trade_no=" + params.get("out_trade_no"));
         }
-        String sign = createSign(getOrderInfo(data), "UTF-8");
-        String tenpaySign = params.get("sign");
-        log.debug( " => sign:" + sign + " tenpaySign:" + tenpaySign);
-        return tenpaySign.equals(sign);
+
+        try {
+            return getSignVeryfy(params, params.get("sign")) && "true".equals(verifyUrl(params.get("out_trade_no")));
+        } catch (PayErrorException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
-    @Override
-    public boolean checkSignature(Map<String, String> params) {
-        return verify(params);
-    }
+
 
     /**
      * 根据反馈回来的信息，生成签名结果
-     * @param Params 通知返回来的参数数组
+     * @param params 通知返回来的参数数组
      * @param sign 比对的签名结果
      * @return 生成的签名结果
      */
-    public   boolean getSignVeryfy(Map<String, String> Params, String sign) {
-        //过滤空值、sign与sign_type参数
-        Map<String, String> sParaNew = WxpayCore.paraFilter(Params);
-        //获取待签名字符串
-        String preSignStr = WxpayCore.createLinkString(sParaNew);
-        //获得签名验证结果
-        boolean isSign = false;
-        if(payConfigStorage.getSignType().equals("md5")){
-//            isSign = RSA.verify(preSignStr, sign, payConfigStorage.getSecretKey(), payConfigStorage.getInputCharset());
-        }
-        return isSign;
+    public boolean getSignVeryfy(Map<String, String> params, String sign) {
+       return SignUtils.valueOf(payConfigStorage.getSignType()).verify(params,  sign, "&key=" +  payConfigStorage.getKeyPrivate(), payConfigStorage.getInputCharset());
     }
 
     /**
      * 支付宝需要，暂时预留
-     * @param notify_id
+     * @param out_trade_no 商户单号
      * @return
      * @throws PayErrorException
      */
     @Override
-    public String verifyUrl(String notify_id) throws PayErrorException {
+    public String verifyUrl(String out_trade_no) throws PayErrorException {
 //        return execute(new SimplePostRequestExecutor(), getHttpsVerifyUrl(), "partner=" + payConfigStorage.getPartner() + "&notify_id=" + notify_id);
 
-        return null;
+        return "true";
     }
 
 
     /**
-     * 向支付宝端发送请求，在这里执行的策略是当发生access_token过期时才去刷新，然后重新执行请求，而不是全局定时请求
+     * 向支付端发送请求，在这里执行的策略是当发生access_token过期时才去刷新，然后重新执行请求，而不是全局定时请求
      *
      * @param executor
      * @param uri
@@ -160,7 +156,7 @@ public class WxPayService implements PayService {
         SortedMap<String, Object> parameters = new TreeMap<String, Object>();
         parameters.put("appid", payConfigStorage.getAppid());
         parameters.put("mch_id", payConfigStorage.getPartner());
-        parameters.put("nonce_str", WxpayCore.genNonceStr());
+        parameters.put("nonce_str", SignUtils.randomStr());
         parameters.put("body", order.getSubject());// 购买支付信息
         parameters.put("notify_url", payConfigStorage.getNotifyUrl());
         parameters.put("out_trade_no", order.getTradeNo());// 订单号
@@ -168,11 +164,10 @@ public class WxPayService implements PayService {
         parameters.put("total_fee", order.getPrice().multiply(new BigDecimal(100)).intValue());// 总金额单位为分
         parameters.put("trade_type", order.getTransactionType().getType());
         parameters.put("attach", order.getBody());
-        String sign = createSign(getOrderInfo(parameters), payConfigStorage.getInputCharset());
+        String sign = createSign(SignUtils.parameterText(parameters), payConfigStorage.getInputCharset());
         parameters.put("sign", sign);
 
-       log.debug("parameters:" + parameters);
-       String requestXML = WxpayCore.getMap2Xml(parameters);
+       String requestXML = XML.getMap2Xml(parameters);
         log.debug("requestXML：" + requestXML);
         String result = null;
         try {
@@ -180,7 +175,7 @@ public class WxPayService implements PayService {
             log.debug("获取预支付订单返回结果33:" + result);
 
             /////////APP端调起支付的参数列表
-            Map map  = XML.toMap(result);
+            Map map  = XML.toJSONObject(result);
             SortedMap<String, Object> params = new TreeMap<String, Object>();
             params.put("appid", payConfigStorage.getAppid());
             params.put("timestamp", System.currentTimeMillis() / 1000);
@@ -189,7 +184,7 @@ public class WxPayService implements PayService {
             params.put("partnerid", payConfigStorage.getPartner());
             params.put("prepayid", map.get("prepay_id"));
 //            params.put("signType", "MD5");
-            String paySign = createSign(getOrderInfo(params), payConfigStorage.getInputCharset());
+            String paySign = createSign(SignUtils.parameterText(parameters), payConfigStorage.getInputCharset());
             params.put("sign", paySign);
 
             return params;
@@ -203,47 +198,33 @@ public class WxPayService implements PayService {
     }
 
 
-    /**
-     * 支付宝创建订单信息
-     * create the order info
-     * @param  parameters 排序后包装好的订单信息与账户信息
-     * @return
-     */
-    private  String getOrderInfo(SortedMap<String, Object> parameters) {
-
-        StringBuffer sb = new StringBuffer();
-        Set es = parameters.entrySet();
-        Iterator it = es.iterator();
-        while (it.hasNext()) {
-            Map.Entry entry = (Map.Entry) it.next();
-            String k = (String) entry.getKey();
-            Object v = entry.getValue();
-            if (null != v && !"".equals(v) && !"sign".equals(k) && !"key".equals(k)) {
-                sb.append(k + "=" + v + "&");
-            }
-        }
-        sb.append("key=" + payConfigStorage.getKeyPrivate());
-        log.debug("请求参数拼接："+sb.toString());
-
-        return sb.toString();
-    }
 
     /**
      * 签名
-     * @param content 需要签名的内容
+     * @param content 需要签名的内容 不包含key
      * @param characterEncoding 字符编码
      * @return
      */
     @Override
     public String createSign(String content, String characterEncoding) {
-        String sign = WxpayCore.MD5Encode(content, characterEncoding).toUpperCase();
-        return sign;
+       return SignUtils.valueOf(payConfigStorage.getSignType().toUpperCase()).createSign(content, "&key=" + payConfigStorage.getKeyPublic(), characterEncoding);
     }
 
     @Override
     public Map<String, String> getParameter2Map(Map<String, String[]> parameterMap, InputStream is) {
+        TreeMap<String, String> map = new TreeMap();
+        try {
+            return  XML.inputStream2Map(is, map);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return map;
+    }
 
-        return WxpayCore.toMap(is);
+
+    @Override
+    public PayOutMessage getPayOutMessage(String code, String message) {
+        return PayOutMessage.XML().code(code.toUpperCase()).content(message).build();
     }
 
 

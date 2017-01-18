@@ -23,7 +23,7 @@ public class WxPayMessageHandler extends BasePayMessageHandler {
     @Override
     public PayOutMessage handle(PayMessage payMessage, Map<String, Object> context, PayService payService) throws PayErrorException {
         //交易状态
-        if ("SUCCESS".equals(payMessage.getResultCode())){
+        if ("SUCCESS".equals(payMessage.getPayMessage().get("result_code"))){
             /////这里进行成功的处理
 
             return PayOutMessage.XML().code("Success").content("成功").build();

@@ -11,25 +11,25 @@ import in.egan.pay.common.api.BasePayConfigStorage;
 public class AliPayConfigStorage extends BasePayConfigStorage {
 
     // 商户PID
-    public  volatile String partner ;
+    public volatile  String partner ;
     // 商户收款账号
-    public  volatile String seller;
-    private  volatile String ali_public_key;
+    public volatile  String seller;
+    //公钥
+    private volatile String aliPublicKey;
 
 
-
-    public String getAli_public_key() {
-        return ali_public_key;
+    public String getAliPublicKey() {
+        return aliPublicKey;
     }
 
-    public void setAli_public_key(String ali_public_key) {
-        this.ali_public_key = ali_public_key;
+    public void setAliPublicKey(String aliPublicKey) {
+        setKeyPublic(aliPublicKey);
+        this.aliPublicKey = aliPublicKey;
     }
-
 
     @Override
     public String getSecretKey() {
-        return ali_public_key;
+        return aliPublicKey;
     }
 
 
@@ -44,10 +44,6 @@ public class AliPayConfigStorage extends BasePayConfigStorage {
         return partner;
     }
 
-    @Override
-    public String getToken() {
-        return null;
-    }
 
     public void setPartner(String partner) {
         this.partner = partner;

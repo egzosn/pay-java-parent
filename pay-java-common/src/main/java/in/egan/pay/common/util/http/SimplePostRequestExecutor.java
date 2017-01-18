@@ -13,54 +13,49 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * @author  egan
  * @email egzosn@gmail.com
  * @date 2016-5-18 14:09:01
  */
-public class SimplePostRequestExecutor implements RequestExecutor<String, String> {
+public class SimplePostRequestExecutor implements RequestExecutor<String, Object> {
 
     @Override
-    public String execute(CloseableHttpClient httpclient, HttpHost httpProxy, String uri, String postEntity) throws PayErrorException, ClientProtocolException, IOException {
+    public String execute(CloseableHttpClient httpclient, HttpHost httpProxy, String uri, Object postEntity) throws PayErrorException, ClientProtocolException, IOException {
         HttpPost httpPost = new HttpPost(uri);
         if (httpProxy != null) {
             RequestConfig config = RequestConfig.custom().setProxy(httpProxy).build();
             httpPost.setConfig(config);
         }
 
-        if (postEntity != null) {
-            StringEntity entity = new StringEntity(postEntity, Consts.UTF_8);
+
+        if (postEntity instanceof Map) {
+            StringBuilder builder = new StringBuilder();
+            Map pe = (Map) postEntity;
+            for (Object key : pe.keySet()) {
+                builder.append(key).append("=").append(pe.get(key)).append("&");
+            }
+            if (builder.length() > 1) {
+                builder.deleteCharAt(builder.length() - 1);
+            }
+            StringEntity entity = new StringEntity(builder.toString(), Consts.UTF_8);
+            httpPost.setEntity(entity);
+        } else if (postEntity instanceof String) {
+
+            StringEntity entity = new StringEntity((String) postEntity, Consts.UTF_8);
             httpPost.setEntity(entity);
         }
 
 
-      /*  try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
+        try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
             String responseContent = Utf8ResponseHandler.INSTANCE.handleResponse(response);
-            PayError error = PayError.fromJson(responseContent);
-            if (error.getErrorCode() != 0) {
-                throw new PayErrorException(error);
-            }
-            return responseContent;
-        }*/
 
-        CloseableHttpResponse response = null;
-        try {
-            response = httpclient.execute(httpPost);
-            String responseContent = Utf8ResponseHandler.INSTANCE.handleResponse(response);
-            PayError error = PayError.fromJson(responseContent);
-            if (error.getErrorCode() != 0) {
-                throw new PayErrorException(error);
-            }
             return responseContent;
-        } catch (IOException e) {
-            e.printStackTrace();
         }finally {
-            if (response != null) {
-                response.close();
-            }
+            httpPost.releaseConnection();
         }
-        return null;
     }
 
 }

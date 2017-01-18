@@ -9,6 +9,10 @@ import in.egan.pay.common.bean.TransactionType;
 import in.egan.pay.wx.api.WxPayConfigStorage;
 import in.egan.pay.wx.api.WxPayService;
 import in.egan.pay.wx.bean.WxTransactionType;
+import in.egan.pay.wx.youdian.api.WxYouDianPayConfigStorage;
+import in.egan.pay.wx.youdian.api.WxYouDianPayService;
+import in.egan.pay.wx.youdian.bean.YoudianTransactionType;
+
 
 /**
  * 支付类型
@@ -23,13 +27,14 @@ public enum PayType implements BasePayType{
         public PayService getPayService(ApyAccount apyAccount) {
             AliPayConfigStorage aliPayConfigStorage = new AliPayConfigStorage();
             aliPayConfigStorage.setPartner(apyAccount.getPartner());
-            aliPayConfigStorage.setAli_public_key(apyAccount.getPublicKey());
+            aliPayConfigStorage.setAliPublicKey(apyAccount.getPublicKey());
             aliPayConfigStorage.setKeyPrivate(apyAccount.getPrivateKey());
             aliPayConfigStorage.setNotifyUrl(apyAccount.getNotifyUrl());
             aliPayConfigStorage.setSignType(apyAccount.getSignType());
             aliPayConfigStorage.setSeller(apyAccount.getSeller());
             aliPayConfigStorage.setPayType(apyAccount.getPayType().toString());
             aliPayConfigStorage.setMsgType(apyAccount.getMsgType());
+            aliPayConfigStorage.setInputCharset(apyAccount.getInputCharset());
             return new AliPayService(aliPayConfigStorage);
         }
 
@@ -51,6 +56,7 @@ public enum PayType implements BasePayType{
             wxPayConfigStorage.setSignType(apyAccount.getSignType());
             wxPayConfigStorage.setPayType(apyAccount.getPayType().toString());
             wxPayConfigStorage.setMsgType(apyAccount.getMsgType());
+            wxPayConfigStorage.setInputCharset(apyAccount.getInputCharset());
             return  new WxPayService(wxPayConfigStorage);
         }
 
@@ -64,6 +70,31 @@ public enum PayType implements BasePayType{
         public TransactionType getTransactionType(String transactionType) {
 
             return WxTransactionType.valueOf(transactionType);
+        }
+    },youdianPay {
+        @Override
+        public PayService getPayService(ApyAccount apyAccount) {
+            WxYouDianPayConfigStorage wxPayConfigStorage = new WxYouDianPayConfigStorage();
+            wxPayConfigStorage.setKeyPrivate(apyAccount.getPrivateKey());
+            wxPayConfigStorage.setNotifyUrl(apyAccount.getNotifyUrl());
+            wxPayConfigStorage.setSignType(apyAccount.getSignType());
+            wxPayConfigStorage.setPayType(apyAccount.getPayType().toString());
+            wxPayConfigStorage.setMsgType(apyAccount.getMsgType());
+            wxPayConfigStorage.setSeller(apyAccount.getSeller());
+            wxPayConfigStorage.setInputCharset(apyAccount.getInputCharset());
+            return  new WxYouDianPayService(wxPayConfigStorage);
+        }
+
+        /**
+         * 根据支付类型获取交易类型
+         * @param transactionType 类型值
+         * @see YoudianTransactionType
+         * @return
+         */
+        @Override
+        public TransactionType getTransactionType(String transactionType) {
+
+            return YoudianTransactionType.valueOf(transactionType);
         }
     };
 

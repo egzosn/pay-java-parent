@@ -1,6 +1,7 @@
 package in.egan.pay.common.api;
 
 import in.egan.pay.common.bean.PayOrder;
+import in.egan.pay.common.bean.PayOutMessage;
 import in.egan.pay.common.exception.PayErrorException;
 
 import java.io.InputStream;
@@ -13,23 +14,59 @@ import java.util.Map;
  * @email egzosn@gmail.com
  * @date 2016-5-18 14:09:01
  */
-public interface PayService {
+ public interface PayService {
+    /**
+     * 回调校验URL
+     * @return
+     */
+     String getHttpsVerifyUrl();
 
-    public String getHttpsVerifyUrl();
+    /**
+     * 设置支付配置
+     * @param payConfigStorage
+     */
+     void setPayConfigStorage(PayConfigStorage payConfigStorage);
 
-    public void setPayConfigStorage(PayConfigStorage payConfigStorage);
+    /**
+     * 获取支付配置
+     * @return
+     */
+     PayConfigStorage getPayConfigStorage();
 
-    public PayConfigStorage getPayConfigStorage();
+    /**
+     * 回调校验
+     * @param params 回调回来的参数集
+     * @return
+     */
+     boolean verify(Map<String, String> params);
 
-    public boolean verify(Map<String, String> params);
+    /**
+     * 签名校验
+     * @param params 参数集
+     * @param sign 签名
+     * @return
+     */
+     boolean getSignVeryfy(Map<String, String> params, String sign);
 
-    public boolean checkSignature(Map<String, String> params);
+    /**
+     * URL校验
+     * @param notify_id
+     * @return
+     * @throws PayErrorException
+     */
+     String verifyUrl(String notify_id) throws PayErrorException;
 
-    public boolean getSignVeryfy(Map<String, String> Params, String sign);
-
-    public String verifyUrl(String notify_id) throws PayErrorException;
-
-    public <T, E> T execute(RequestExecutor<T, E> executor, String uri, E data) throws PayErrorException;
+    /**
+     *  请求接口
+     * @param executor 请求的具体执行者
+     * @param uri 请求地址
+     * @param data 请求数据
+     * @param <T> 返回类型
+     * @param <E> 请求数据类型
+     * @return
+     * @throws PayErrorException
+     */
+     <T, E> T execute(RequestExecutor<T, E> executor, String uri, E data) throws PayErrorException;
 
     /**
      * 返回创建的订单信息
@@ -38,7 +75,7 @@ public interface PayService {
      * @return
      * @see in.egan.pay.common.bean.PayOrder
      */
-    public Object orderInfo(PayOrder order);
+     Object orderInfo(PayOrder order);
 
     /**
      * 创建签名
@@ -47,7 +84,7 @@ public interface PayService {
      * @param characterEncoding 字符编码
      * @return
      */
-    public String createSign(String content, String characterEncoding);
+     String createSign(String content, String characterEncoding);
 
     /**
      * 将请求参数或者请求流转化为 Map
@@ -56,5 +93,13 @@ public interface PayService {
      * @param is           请求流
      * @return
      */
-    public Map<String, String> getParameter2Map(Map<String, String[]> parameterMap, InputStream is);
+     Map<String, String> getParameter2Map(Map<String, String[]> parameterMap, InputStream is);
+
+    /**
+     * 获取输出消息，用户返回给支付端
+     * @param code
+     * @param message
+     * @return
+     */
+    PayOutMessage getPayOutMessage(String code, String message);
 }

@@ -53,6 +53,9 @@ public class ApyAccount {
     // 签名类型
 //    @Column(name = "sign_type")
     private String signType;
+    // 编码类型
+//    @Column(name = "input_charset")
+    private String inputCharset;
     //支付类型 aliPay 支付宝， wxPay微信
 //    @Enumerated(EnumType.STRING)
 //    @Column(name = "pay_type")
@@ -140,5 +143,13 @@ public class ApyAccount {
 
     public void setMsgType(MsgType msgType) {
         this.msgType = msgType;
+    }
+
+    public String getInputCharset() {
+        return inputCharset;
+    }
+
+    public void setInputCharset(String inputCharset) {
+        this.inputCharset = inputCharset;
     }
 }

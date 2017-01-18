@@ -4,6 +4,29 @@ package in.egan.pay.common.util.str;
  * Created by ZaoSheng on 2016/6/4.
  */
 public class StringUtils {
+
+    /**
+     * 比较两个字符串（大小写敏感）。
+     * <pre>
+     * StringUtil.equals(null, null)   = true
+     * StringUtil.equals(null, "abc")  = false
+     * StringUtil.equals("abc", null)  = false
+     * StringUtil.equals("abc", "abc") = true
+     * StringUtil.equals("abc", "ABC") = false
+     * </pre>
+     *
+     * @param str1 要比较的字符串1
+     * @param str2 要比较的字符串2
+     *
+     * @return 如果两个字符串相同，或者都是<code>null</code>，则返回<code>true</code>
+     */
+    public static boolean equals(String str1, String str2) {
+        if (str1 == null) {
+            return str2 == null;
+        }
+
+        return str1.equals(str2);
+    }
     // Empty checks
     //-----------------------------------------------------------------------
     /**

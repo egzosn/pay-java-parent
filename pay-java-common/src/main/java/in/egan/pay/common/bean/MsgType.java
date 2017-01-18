@@ -24,5 +24,5 @@ package in.egan.pay.common.bean;
  * @date 2016/11/18 0:59
  */
 public enum MsgType {
-    text, xml
+    text, xml,json
 }

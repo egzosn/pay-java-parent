@@ -42,26 +42,12 @@ public class SimpleGetRequestExecutor implements RequestExecutor<String, String>
             httpGet.setConfig(config);
         }
 
-        CloseableHttpResponse response = null;
-        try {
-            response = httpclient.execute(httpGet);
+        try (CloseableHttpResponse response = httpclient.execute(httpGet)) {
             String responseContent = Utf8ResponseHandler.INSTANCE.handleResponse(response);
-
-            if ("true".equals(responseContent)){ return responseContent; }
-
-            throw new PayErrorException(new PayError(100101, responseContent));
-       /* PayError error = PayError.fromJson(responseContent);
-            if (error.getErrorCode() != 0) {
-                throw new PayErrorException(error);
-            }*/
-        } catch (IOException e) {
-            e.printStackTrace();
+            return responseContent;
         }finally {
-            if (response != null) {
-                response.close();
-            }
+            httpGet.releaseConnection();
         }
-    return null;
 
     }
 

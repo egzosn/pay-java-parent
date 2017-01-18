@@ -19,7 +19,7 @@ public class Utf8ResponseHandler implements ResponseHandler<String> {
 
     public static final ResponseHandler<String> INSTANCE = new Utf8ResponseHandler();
 
-    public String handleResponse(final HttpResponse response) throws HttpResponseException, IOException {
+    public String handleResponse(final HttpResponse response) throws IOException {
         final StatusLine statusLine = response.getStatusLine();
         final HttpEntity entity = response.getEntity();
         if (statusLine.getStatusCode() >= 300) {

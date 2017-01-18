@@ -11,9 +11,9 @@ import in.egan.pay.common.api.BasePayConfigStorage;
 public class WxPayConfigStorage extends BasePayConfigStorage {
 
 
-    public volatile String appSecret;
-    public volatile String appid ;
-    public volatile String mchId;// 商户号
+    public  String appSecret;
+    public  String appid ;
+    public  String mchId;// 商户号
 
 
     @Override

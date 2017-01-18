@@ -3,6 +3,7 @@ package in.egan.pay.wx.utils;
 import in.egan.pay.common.api.RequestExecutor;
 import in.egan.pay.common.bean.result.PayError;
 import in.egan.pay.common.exception.PayErrorException;
+import in.egan.pay.common.util.XML;
 import in.egan.pay.common.util.http.Utf8ResponseHandler;
 import org.apache.http.Consts;
 import org.apache.http.HttpHost;
@@ -37,16 +38,18 @@ public class SimplePostRequestExecutor implements RequestExecutor<String, String
         }
 
 
-      /*  try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
+        try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
             String responseContent = Utf8ResponseHandler.INSTANCE.handleResponse(response);
-            PayError error = PayError.fromJson(responseContent);
-            if (error.getErrorCode() != 0) {
-                throw new PayErrorException(error);
-            }
-            return responseContent;
-        }*/
+          /*  Map<String, Object> map = XML.toMap(responseContent);
 
-        CloseableHttpResponse response = null;
+            PayError error = PayError.fromMap(map);
+            if (null != error) {
+                throw new PayErrorException(error);
+            }*/
+            return responseContent;
+        }
+
+      /*  CloseableHttpResponse response = null;
         try {
             response = httpclient.execute(httpPost);
 //            String responseContent = Utf8ResponseHandler.INSTANCE.handleResponse(response);
@@ -65,7 +68,7 @@ public class SimplePostRequestExecutor implements RequestExecutor<String, String
                 response.close();
             }
         }
-        return null;
+        return null;*/
     }
 
 }

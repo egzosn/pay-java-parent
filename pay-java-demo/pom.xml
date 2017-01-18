@@ -13,7 +13,7 @@
     <artifactId>pay-java-demo</artifactId>
 
     <properties>
-        <spring.version>4.0.6.RELEASE</spring.version>
+        <spring.version>4.2.7.RELEASE</spring.version>
         <junit.version>4.10</junit.version>
         <hibernate.version>4.3.6.Final</hibernate.version>
         <jackson-databind.version>2.3.2</jackson-databind.version>
@@ -31,6 +31,11 @@
         <dependency>
             <groupId>in.egan</groupId>
             <artifactId>pay-java-ali</artifactId>
+            <version>1.0.RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>in.egan</groupId>
+            <artifactId>pay-java-wx-youdian</artifactId>
             <version>1.0.RELEASE</version>
         </dependency>
         <!--/支付-->
