@@ -72,7 +72,7 @@ public class WxPayService implements PayService {
         }
 
         try {
-            return getSignVeryfy(params, params.get("sign")) && "true".equals(verifyUrl(params.get("out_trade_no")));
+            return getSignVerify(params, params.get("sign")) && "true".equals(verifyUrl(params.get("out_trade_no")));
         } catch (PayErrorException e) {
             e.printStackTrace();
         }
@@ -87,8 +87,8 @@ public class WxPayService implements PayService {
      * @param sign 比对的签名结果
      * @return 生成的签名结果
      */
-    public boolean getSignVeryfy(Map<String, String> params, String sign) {
-       return SignUtils.valueOf(payConfigStorage.getSignType()).verify(params,  sign, "&key=" +  payConfigStorage.getKeyPrivate(), payConfigStorage.getInputCharset());
+    public boolean getSignVerify(Map<String, String> params, String sign) {
+        return SignUtils.valueOf(payConfigStorage.getSignType()).verify(params,  sign, "&key=" +  payConfigStorage.getKeyPrivate(), payConfigStorage.getInputCharset());
     }
 
     /**
@@ -167,11 +167,11 @@ public class WxPayService implements PayService {
         String sign = createSign(SignUtils.parameterText(parameters), payConfigStorage.getInputCharset());
         parameters.put("sign", sign);
 
-       String requestXML = XML.getMap2Xml(parameters);
+        String requestXML = XML.getMap2Xml(parameters);
         log.debug("requestXML：" + requestXML);
         String result = null;
         try {
-             result = execute(new SimplePostRequestExecutor(), unifiedOrderUrl, requestXML);
+            result = execute(new SimplePostRequestExecutor(), unifiedOrderUrl, requestXML);
             log.debug("获取预支付订单返回结果33:" + result);
 
             /////////APP端调起支付的参数列表
@@ -193,7 +193,7 @@ public class WxPayService implements PayService {
         }
 
 //        result = WxpayCore.httpsRequest2(httpsVerifyUrl, "POST", requestXML);
-    //////////////////////////
+        //////////////////////////
         return null;
     }
 
@@ -207,7 +207,7 @@ public class WxPayService implements PayService {
      */
     @Override
     public String createSign(String content, String characterEncoding) {
-       return SignUtils.valueOf(payConfigStorage.getSignType().toUpperCase()).createSign(content, "&key=" + payConfigStorage.getKeyPublic(), characterEncoding);
+        return SignUtils.valueOf(payConfigStorage.getSignType().toUpperCase()).createSign(content, "&key=" + payConfigStorage.getKeyPublic(), characterEncoding);
     }
 
     @Override

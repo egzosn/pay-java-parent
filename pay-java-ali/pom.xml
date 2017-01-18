@@ -21,18 +21,6 @@
         </dependency>
         <!-- /pay-java  -->
 
-        <!-- log4j  -->
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-        </dependency>
-        <!-- / log4j -->
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpmime</artifactId>
-        </dependency>
-        <!--/httpcomponents-->
-
     </dependencies>
 
 

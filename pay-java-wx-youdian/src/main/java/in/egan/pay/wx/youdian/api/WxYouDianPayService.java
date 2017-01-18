@@ -1,6 +1,5 @@
 package in.egan.pay.wx.youdian.api;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import in.egan.pay.common.api.BasePayService;
 import in.egan.pay.common.api.PayConfigStorage;
@@ -16,7 +15,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import java.io.InputStream;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.locks.Lock;
 
 /**
@@ -63,7 +64,7 @@ public class WxYouDianPayService extends BasePayService {
 
             if (payConfigStorage.isAccessTokenExpired()) {
                 String apbNonce = SignUtils.randomStr();
-               StringBuilder param = new StringBuilder().append("access_token=").append(payConfigStorage.getAccessToken());
+                StringBuilder param = new StringBuilder().append("access_token=").append(payConfigStorage.getAccessToken());
                 String sign = createSign(param.toString() + apbNonce, payConfigStorage.getInputCharset());
                 param.append("&apb_nonce=").append(apbNonce).append("&sign=").append(sign);
                 JSONObject json =  execute(new SimpleGetRequestExecutor(), resetLoginUrl, param.toString());
@@ -120,21 +121,21 @@ public class WxYouDianPayService extends BasePayService {
      * @return
      * @throws PayErrorException
      */
-     public JSONObject login() throws PayErrorException {
-         TreeMap<String, String> data = new TreeMap<>();
-         data.put("username",  payConfigStorage.getSeller());
-         data.put("password", payConfigStorage.getKeyPrivate());
-         String apbNonce = SignUtils.randomStr();
+    public JSONObject login() throws PayErrorException {
+        TreeMap<String, String> data = new TreeMap<>();
+        data.put("username",  payConfigStorage.getSeller());
+        data.put("password", payConfigStorage.getKeyPrivate());
+        String apbNonce = SignUtils.randomStr();
 //         1、确定请求主体为用户登录，即需要传登录的用户名username和密码password并且要生成唯一的随机数命名为apb_nonce，长度为32位
 //         2、将所有的参数集进行key排序
 //         3、将排序后的数组从起始位置拼接成字符串如：password=XXXXXXXusername=XXXXX
 //         4、将拼接出来的字符串连接上apb_nonce的值即AAAAAAAAAA。再连接  password=XXXXXXXusername=XXXXXAAAAAAAAAA
-         String sign = createSign(SignUtils.parameterText(data, "") + apbNonce, payConfigStorage.getInputCharset());
-         String queryParam =  SignUtils.parameterText(data) +  "&apb_nonce=" + apbNonce + "&sign=" + sign;
-         JSONObject json = execute(new SimpleGetRequestExecutor(), loginUrl, queryParam);
-         payConfigStorage.updateAccessToken(json.getString("access_token"), json.getLongValue("viptime"));
-         return json;
-     }
+        String sign = createSign(SignUtils.parameterText(data, "") + apbNonce, payConfigStorage.getInputCharset());
+        String queryParam =  SignUtils.parameterText(data) +  "&apb_nonce=" + apbNonce + "&sign=" + sign;
+        JSONObject json = execute(new SimpleGetRequestExecutor(), loginUrl, queryParam);
+        payConfigStorage.updateAccessToken(json.getString("access_token"), json.getLongValue("viptime"));
+        return json;
+    }
 
 
 
@@ -156,7 +157,7 @@ public class WxYouDianPayService extends BasePayService {
         if(params.get("sign") == null) {log.debug("友店微信支付异常：签名为空！out_trade_no=" + params.get("out_trade_no"));}
 
         try {
-            return getSignVeryfy(params, params.get("sign")) && "0".equals(verifyUrl(params.get("out_trade_no")));
+            return getSignVerify(params, params.get("sign")) && "0".equals(verifyUrl(params.get("out_trade_no")));
         } catch (PayErrorException e) {
             e.printStackTrace();
         }
@@ -169,8 +170,8 @@ public class WxYouDianPayService extends BasePayService {
      * @param sign 比对的签名结果
      * @return 生成的签名结果
      */
-    public boolean getSignVeryfy(Map<String, String> params, String sign) {
-       return SignUtils.valueOf(payConfigStorage.getSignType()).verify(params, sign, "&key=" + payConfigStorage.getKeyPrivate(), payConfigStorage.getInputCharset());
+    public boolean getSignVerify(Map<String, String> params, String sign) {
+        return SignUtils.valueOf(payConfigStorage.getSignType()).verify(params, sign, "&key=" + payConfigStorage.getKeyPrivate(), payConfigStorage.getInputCharset());
     }
 
     /**

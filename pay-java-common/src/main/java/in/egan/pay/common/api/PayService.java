@@ -14,31 +14,31 @@ import java.util.Map;
  * @email egzosn@gmail.com
  * @date 2016-5-18 14:09:01
  */
- public interface PayService {
+public interface PayService {
     /**
      * 回调校验URL
      * @return
      */
-     String getHttpsVerifyUrl();
+    String getHttpsVerifyUrl();
 
     /**
      * 设置支付配置
      * @param payConfigStorage
      */
-     void setPayConfigStorage(PayConfigStorage payConfigStorage);
+    void setPayConfigStorage(PayConfigStorage payConfigStorage);
 
     /**
      * 获取支付配置
      * @return
      */
-     PayConfigStorage getPayConfigStorage();
+    PayConfigStorage getPayConfigStorage();
 
     /**
      * 回调校验
      * @param params 回调回来的参数集
      * @return
      */
-     boolean verify(Map<String, String> params);
+    boolean verify(Map<String, String> params);
 
     /**
      * 签名校验
@@ -46,7 +46,7 @@ import java.util.Map;
      * @param sign 签名
      * @return
      */
-     boolean getSignVeryfy(Map<String, String> params, String sign);
+    boolean getSignVerify(Map<String, String> params, String sign);
 
     /**
      * URL校验
@@ -54,7 +54,7 @@ import java.util.Map;
      * @return
      * @throws PayErrorException
      */
-     String verifyUrl(String notify_id) throws PayErrorException;
+    String verifyUrl(String notify_id) throws PayErrorException;
 
     /**
      *  请求接口
@@ -66,7 +66,7 @@ import java.util.Map;
      * @return
      * @throws PayErrorException
      */
-     <T, E> T execute(RequestExecutor<T, E> executor, String uri, E data) throws PayErrorException;
+    <T, E> T execute(RequestExecutor<T, E> executor, String uri, E data) throws PayErrorException;
 
     /**
      * 返回创建的订单信息
@@ -75,7 +75,7 @@ import java.util.Map;
      * @return
      * @see in.egan.pay.common.bean.PayOrder
      */
-     Object orderInfo(PayOrder order);
+    Object orderInfo(PayOrder order);
 
     /**
      * 创建签名
@@ -84,7 +84,7 @@ import java.util.Map;
      * @param characterEncoding 字符编码
      * @return
      */
-     String createSign(String content, String characterEncoding);
+    String createSign(String content, String characterEncoding);
 
     /**
      * 将请求参数或者请求流转化为 Map
@@ -93,7 +93,7 @@ import java.util.Map;
      * @param is           请求流
      * @return
      */
-     Map<String, String> getParameter2Map(Map<String, String[]> parameterMap, InputStream is);
+    Map<String, String> getParameter2Map(Map<String, String[]> parameterMap, InputStream is);
 
     /**
      * 获取输出消息，用户返回给支付端

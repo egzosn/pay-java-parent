@@ -64,7 +64,7 @@ public class AliPayService implements PayService {
         }
 
         try {
-            return getSignVeryfy(params, params.get("sign")) && "true".equals(verifyUrl(params.get("notify_id")));
+            return getSignVerify(params, params.get("sign")) && "true".equals(verifyUrl(params.get("notify_id")));
         } catch (PayErrorException e) {
             e.printStackTrace();
         }
@@ -79,7 +79,7 @@ public class AliPayService implements PayService {
      * @param sign 比对的签名结果
      * @return 生成的签名结果
      */
-    public   boolean getSignVeryfy(Map<String, String> params, String sign) {
+    public   boolean getSignVerify(Map<String, String> params, String sign) {
 
         return SignUtils.valueOf(payConfigStorage.getSignType()).verify(params,  sign,  payConfigStorage.getKeyPublic(), payConfigStorage.getInputCharset());
     }
@@ -163,44 +163,44 @@ public class AliPayService implements PayService {
         orderInfo.append( "partner=").append( "\"").append( payConfigStorage.getPartner() ).append("\"");
 
         // 签约卖家支付宝账号
-         orderInfo.append("&seller_id=" ) .append("\"" ) .append(payConfigStorage.getSeller() ) .append("\"");
+        orderInfo.append("&seller_id=" ) .append("\"" ) .append(payConfigStorage.getSeller() ) .append("\"");
 
         // 商户网站唯一订单号
-         orderInfo.append("&out_trade_no=" ) .append("\"" ).append(order.getTradeNo() ) .append("\"");
+        orderInfo.append("&out_trade_no=" ) .append("\"" ).append(order.getTradeNo() ) .append("\"");
 
         // 商品名称
-         orderInfo.append("&subject=" ) .append("\"" ) .append(order.getSubject() ) .append("\"");
+        orderInfo.append("&subject=" ) .append("\"" ) .append(order.getSubject() ) .append("\"");
 
         // 商品详情
-         orderInfo.append("&body=" ) .append("\"" ) .append(order.getBody() ) .append("\"");
+        orderInfo.append("&body=" ) .append("\"" ) .append(order.getBody() ) .append("\"");
 
         // 商品金额
-         orderInfo.append("&total_fee=" ) .append("\"" ) .append(order.getPrice().setScale(2, BigDecimal.ROUND_HALF_UP) ) .append("\"");
+        orderInfo.append("&total_fee=" ) .append("\"" ) .append(order.getPrice().setScale(2, BigDecimal.ROUND_HALF_UP) ) .append("\"");
 
         // 服务器异步通知页面路径
-         orderInfo.append("&notify_url=" ) .append("\"" ).append( payConfigStorage.getNotifyUrl() ) .append("\"");
+        orderInfo.append("&notify_url=" ) .append("\"" ).append( payConfigStorage.getNotifyUrl() ) .append("\"");
 
         // 服务接口名称， 固定值
-         orderInfo.append("&service=\"" ).append( order.getTransactionType().getType() ).append("\"");
+        orderInfo.append("&service=\"" ).append( order.getTransactionType().getType() ).append("\"");
 
         // 支付类型， 固定值
-         orderInfo.append("&payment_type=\"1\"");
+        orderInfo.append("&payment_type=\"1\"");
 
         // 参数编码， 固定值
-         orderInfo.append("&_input_charset=\"utf-8\"");
+        orderInfo.append("&_input_charset=\"utf-8\"");
 
         // 设置未付款交易的超时时间
         // 默认30分钟，一旦超时，该笔交易就会自动被关闭。
         // 取值范围：1m～15d。
         // m-分钟，h-小时，d-天，1c-当天（无论交易何时创建，都在0点关闭）。
         // 该参数数值不接受小数点，如1.5h，可转换为90m。
-         orderInfo.append("&it_b_pay=\"30m\"");
+        orderInfo.append("&it_b_pay=\"30m\"");
 
         // extern_token为经过快登授权获取到的alipay_open_id,带上此参数用户将使用授权的账户进行支付
         //  orderInfo.append("&extern_token=" ) .append("\"" ) extern_token ) .append("\"");
 
         // 支付宝处理完请求后，当前页面跳转到商户指定页面的路径，可空
-         orderInfo.append("&return_url=\"m.alipay.com\"");
+        orderInfo.append("&return_url=\"m.alipay.com\"");
 
         // 调用银行卡支付，需配置此参数，参与签名， 固定值 （需要签约《无线银行卡快捷支付》才能使用）
 //        if (order.getTransactionType().getType())
