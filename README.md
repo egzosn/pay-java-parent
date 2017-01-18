@@ -97,6 +97,7 @@ public class PayResponse {
 
 #####2.支付处理器与拦截器简单实现
 
+```java
     /**
      * 微信支付回调处理器
      * Created by ZaoSheng on 2016/6/1.
@@ -141,10 +142,6 @@ public class PayResponse {
             return true;
         }
     }
-
-
-```java
-
 
 ```
 
