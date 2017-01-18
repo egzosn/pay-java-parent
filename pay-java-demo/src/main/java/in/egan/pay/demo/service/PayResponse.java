@@ -19,8 +19,10 @@ package in.egan.pay.demo.service;
 import in.egan.pay.common.api.*;
 import in.egan.pay.common.bean.MsgType;
 import in.egan.pay.demo.entity.ApyAccount;
+import in.egan.pay.demo.entity.PayType;
 import in.egan.pay.demo.service.handler.AliPayMessageHandler;
 import in.egan.pay.demo.service.handler.WxPayMessageHandler;
+import in.egan.pay.demo.service.interceptor.AliPayMessageInterceptor;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 
 import javax.annotation.Resource;
@@ -107,14 +109,15 @@ public class PayResponse {
         router
                 .rule()
                 .async(false)
-                .msgType(MsgType.text.name())
-                .event("aliPay")
-                .handler(autowire(new AliPayMessageHandler(payId)))
+                .msgType(MsgType.text.name()) //消息类型
+                .event(PayType.aliPay.name()) //支付账户事件类型
+                .interceptor(new AliPayMessageInterceptor()) //拦截器
+                .handler(autowire(new AliPayMessageHandler(payId))) //处理器
                 .end()
                 .rule()
                 .async(false)
                 .msgType(MsgType.xml.name())
-                .event("wxPay")
+                .event(PayType.wxPay.name())
                 .handler(autowire(new WxPayMessageHandler(payId)))
                 .end()
         ;

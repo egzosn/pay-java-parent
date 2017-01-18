@@ -13,14 +13,15 @@ import java.util.Map;
 public interface PayMessageInterceptor {
 
     /**
-     * 拦截微信消息
+     * 拦截支付消息
      *
-     * @param wxMessage
+     * @param payMessage     支付回调消息
      * @param context        上下文，如果handler或interceptor之间有信息要传递，可以用这个
      * @param payService
-     * @return true代表OK，false代表不OK
+     * @return true代表OK，false代表不OK并直接中断对应的支付处理器
+     * @see PayMessageHandler 支付处理器
      */
-    public boolean intercept(PayMessage wxMessage,
+    public boolean intercept(PayMessage payMessage,
                              Map<String, Object> context,
                              PayService payService
                             ) throws PayErrorException;

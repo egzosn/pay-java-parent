@@ -49,6 +49,6 @@ public class AliPayMessageHandler extends BasePayMessageHandler {
             // 	交易创建
         }
 
-        return PayOutMessage.TEXT().content("success").build();
+        return payService.getPayOutMessage("success", "成功");
     }
 }

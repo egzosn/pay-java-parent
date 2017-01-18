@@ -91,10 +91,10 @@ public class PayController {
         //根据账户id，获取对应的支付账户操作工具
         PayResponse payResponse = service.getPayResponse(payId);
         PayConfigStorage storage = payResponse.getStorage();
-
+        //获取支付方返回的对应参数
         Map<String, String> params = payResponse.getService().getParameter2Map(request.getParameterMap(), request.getInputStream());
         if (null == params){
-            return "fail";
+            return payResponse.getService().getPayOutMessage("fail","失败").toMessage();
         }
 
         //校验
@@ -104,7 +104,7 @@ public class PayController {
             return outMessage.toMessage();
         }
 
-        return "fail";
+        return payResponse.getService().getPayOutMessage("fail","失败").toMessage();
     }
 
 

@@ -19,8 +19,8 @@ CREATE TABLE `apy_account` (
   `seller` varchar(256) DEFAULT NULL COMMENT '收款账号',
   `sign_type` varchar(16) DEFAULT NULL COMMENT '签名类型',
   `input_charset` varchar(16) DEFAULT NULL COMMENT '枚举值，字符编码 utf-8,gbk等等',
-  `pay_type` tinyint(1) DEFAULT NULL COMMENT '支付类型,0：支付宝，1微信',
-  `msg_type` varchar(8) DEFAULT NULL COMMENT '消息类型，text,xml',
+  `pay_type` char(16) DEFAULT NULL COMMENT '支付类型,aliPay：支付宝，wxPay：微信, youdianPay: 友店微信,此处用户自定义对应in.egan.pay.demo.entity.PayType枚举值',
+  `msg_type` char(8) DEFAULT NULL COMMENT '消息类型，text,xml,json',
   `create_by` char(32) DEFAULT NULL COMMENT '创建人',
   `create_time` timestamp NULL DEFAULT NULL COMMENT '创建时间',
   PRIMARY KEY (`pay_id`)

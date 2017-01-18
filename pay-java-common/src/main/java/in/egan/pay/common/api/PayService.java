@@ -87,6 +87,7 @@ public interface PayService {
     String createSign(String content, String characterEncoding);
 
     /**
+     * 获取支付方返回的对应参数
      * 将请求参数或者请求流转化为 Map
      *
      * @param parameterMap 请求参数

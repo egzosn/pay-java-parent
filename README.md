@@ -10,7 +10,9 @@
     2.控制层统一异常处理
     3.LogBack日志记录
     4.简单快速完成支付模块的开发
-    5.支持多种支付类型多支付账户扩展（目前已支持微信支付与支付宝支付）
+    5.支持多种支付类型多支付账户扩展（目前已支持微信支付，支付宝支付，友店支付）
+    6.支持http代理
+
 ###使用  
 这里不多说直接上代码
 
@@ -53,23 +55,24 @@ public class PayResponse {
      * 配置路由
      * @param payId 指定账户id，用户多微信支付多支付宝支付
      */
-    private void buildRouter(Integer payId) {
-        router = new PayMessageRouter(this.service);
-        router
-                .rule()
-                .async(false)
-                .msgType(PayConsts.MSG_TEXT)
-                .event(PayConsts.MSG_ALIPAY)
-                .handler(autowire(new AliPayMessageHandler(payId)))
-                .end()
-                .rule()
-                .async(false)
-                .msgType(PayConsts.MSG_XML)
-                .event(PayConsts.MSG_WXPAY)
-                .handler(autowire(new WxPayMessageHandler(payId)))
-                .end()
-        ;
-    }
+      private void buildRouter(Integer payId) {
+            router = new PayMessageRouter(this.service);
+            router
+                    .rule()
+                    .async(false)
+                    .msgType(MsgType.text.name()) //消息类型
+                    .event(PayType.aliPay.name()) //支付账户事件类型
+                    .interceptor(new AliPayMessageInterceptor()) //拦截器
+                    .handler(autowire(new AliPayMessageHandler(payId))) //处理器
+                    .end()
+                    .rule()
+                    .async(false)
+                    .msgType(MsgType.xml.name())
+                    .event(PayType.wxPay.name())
+                    .handler(autowire(new WxPayMessageHandler(payId)))
+                    .end()
+            ;
+      }
 
     
     private PayMessageHandler autowire(PayMessageHandler handler) {
@@ -92,8 +95,61 @@ public class PayResponse {
 
 ```
 
+#####2.支付处理器与拦截器简单实现
 
-#####2.支付响应PayResponse的获取
+    /**
+     * 微信支付回调处理器
+     * Created by ZaoSheng on 2016/6/1.
+     */
+    public class WxPayMessageHandler extends BasePayMessageHandler {
+        public WxPayMessageHandler(Integer payId) {
+            super(payId);
+        }
+        @Override
+        public PayOutMessage handle(PayMessage payMessage, Map<String, Object> context, PayService payService) throws PayErrorException {
+            //交易状态
+            if ("SUCCESS".equals(payMessage.getPayMessage().get("result_code"))){
+                /////这里进行成功的处理
+
+                return  payService.getPayOutMessage("SUCCESS", "OK");
+            }
+
+            return  payService.getPayOutMessage("FAIL", "失败");
+        }
+    }
+
+    /**
+     * 支付宝回调信息拦截器
+     * @author: egan
+     * @email egzosn@gmail.com
+     * @date 2017/1/18 19:28
+     */
+    public class AliPayMessageInterceptor implements PayMessageInterceptor {
+        /**
+         * 拦截支付消息
+         *
+         * @param payMessage     支付回调消息
+         * @param context        上下文，如果handler或interceptor之间有信息要传递，可以用这个
+         * @param payService
+         * @return true代表OK，false代表不OK并直接中断对应的支付处理器
+         * @see PayMessageHandler 支付处理器
+         */
+        @Override
+        public boolean intercept(PayMessage payMessage, Map<String, Object> context, PayService payService) throws PayErrorException {
+
+            //这里进行拦截器处理，自行实现
+            return true;
+        }
+    }
+
+
+```java
+
+
+```
+
+
+#####3.支付响应PayResponse的获取
 
 
 ```java
@@ -140,7 +196,7 @@ public class ApyAccountService {
 ```
 
 
-#####3.根据账户id与业务id，组拼订单信息（支付宝、微信支付订单）获取支付信息所需的数据
+#####4.根据账户id与业务id，组拼订单信息（支付宝、微信支付订单）获取支付信息所需的数据
 
 ```java
     /**
@@ -162,7 +218,7 @@ public class ApyAccountService {
   
 ```
 
-#####4.支付回调
+#####5.支付回调
 ```java
      
 
@@ -172,26 +228,27 @@ public class ApyAccountService {
      * @return
      */
     @ResponseBody
-    @RequestMapping(value = "payBack{payId}.json")
-    public String payBack(HttpServletRequest request, @PathVariable Integer payId) throws IOException {
-        //根据账户id，获取对应的支付账户操作工具
-        PayResponse payResponse = service.getPayResponse(payId);
-        PayConfigStorage storage = payResponse.getStorage();
+      @RequestMapping(value = "payBack{payId}.json")
+      public String payBack(HttpServletRequest request, @PathVariable Integer payId) throws IOException {
+          //根据账户id，获取对应的支付账户操作工具
+          PayResponse payResponse = service.getPayResponse(payId);
+          PayConfigStorage storage = payResponse.getStorage();
+            //
+          Map<String, String> params = payResponse.getService().getParameter2Map(request.getParameterMap(), request.getInputStream());
+          if (null == params){
+              return payResponse.getService().getPayOutMessage("fail","失败").toMessage();
+          }
 
-        Map<String, String> params = payResponse.getService().getParameter2Map(request.getParameterMap(), request.getInputStream());
-        if (null == params){
-            return "fail";
-        }
+          //校验
+          if (payResponse.getService().verify(params)){
+              PayMessage message = new PayMessage(params, storage.getPayType(), storage.getMsgType().name());
+              PayOutMessage outMessage = payResponse.getRouter().route(message);
+              return outMessage.toMessage();
+          }
 
-        //校验
-        if (payResponse.getService().verify(params)){
-            PayMessage message = new PayMessage(params, storage.getPayType(), storage.getMsgType().name());
-            PayOutMessage outMessage = payResponse.getRouter().route(message);
-            return outMessage.toMessage();
-        }
+          return payResponse.getService().getPayOutMessage("fail","失败").toMessage();
+      }
 
-        return "fail";
-    }
 
         
 ```

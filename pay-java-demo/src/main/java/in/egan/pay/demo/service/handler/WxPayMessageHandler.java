@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Map;
 
 /**
+ * 微信支付回调处理器
  * Created by ZaoSheng on 2016/6/1.
  */
 public class WxPayMessageHandler extends BasePayMessageHandler {
@@ -26,9 +27,9 @@ public class WxPayMessageHandler extends BasePayMessageHandler {
         if ("SUCCESS".equals(payMessage.getPayMessage().get("result_code"))){
             /////这里进行成功的处理
 
-            return PayOutMessage.XML().code("Success").content("成功").build();
+            return  payService.getPayOutMessage("SUCCESS", "OK");
         }
 
-        return PayOutMessage.XML().code("Fail").content("失败").build();
+        return  payService.getPayOutMessage("FAIL", "失败");
     }
 }

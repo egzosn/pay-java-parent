@@ -3,6 +3,7 @@ package in.egan.pay.demo.service.handler;
 import in.egan.pay.common.api.PayMessageHandler;
 
 /**
+ *
  * Created by ZaoSheng on 2016/6/1.
  */
 public abstract class BasePayMessageHandler implements PayMessageHandler {
