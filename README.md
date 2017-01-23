@@ -351,7 +351,7 @@ public class ApyAccountService {
 ##交流
 很希望更多志同道合友友一起扩展新的的支付接口。
 
-微信：zzs1134842433
+非常欢迎和感谢对本项目发起Pull Request的同学，不过本项目基于git flow开发流程，因此在发起Pull Request的时候请选择develop分支。
 
 E-Mail：egzosn@gmail.com
 
