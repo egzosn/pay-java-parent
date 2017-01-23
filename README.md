@@ -81,6 +81,7 @@ public enum PayType implements BasePayType{
     },youdianPay {
         @Override
         public PayService getPayService(ApyAccount apyAccount) {
+           // TODO 2017/1/23 14:12 author: egan  集群的话,友店可能会有bug。暂未测试集群环境
             WxYouDianPayConfigStorage wxPayConfigStorage = new WxYouDianPayConfigStorage();
             wxPayConfigStorage.setKeyPrivate(apyAccount.getPrivateKey());
             wxPayConfigStorage.setNotifyUrl(apyAccount.getNotifyUrl());
