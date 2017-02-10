@@ -14,6 +14,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class WxYouDianPayConfigStorage extends BasePayConfigStorage {
 
     public volatile String secretKey;
+    //账号
     public volatile String seller;
 
 

@@ -4,15 +4,19 @@ import com.alibaba.fastjson.JSONObject;
 import in.egan.pay.common.api.BasePayService;
 import in.egan.pay.common.api.PayConfigStorage;
 import in.egan.pay.common.api.RequestExecutor;
+import in.egan.pay.common.bean.MethodType;
 import in.egan.pay.common.bean.PayOrder;
 import in.egan.pay.common.bean.PayOutMessage;
 import in.egan.pay.common.bean.outbuilder.JsonBuilder;
 import in.egan.pay.common.bean.result.PayError;
 import in.egan.pay.common.exception.PayErrorException;
+import in.egan.pay.common.util.MatrixToImageWriter;
 import in.egan.pay.common.util.sign.SignUtils;
 import in.egan.pay.wx.youdian.utils.SimpleGetRequestExecutor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import java.awt.image.BufferedImage;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.Iterator;
@@ -63,6 +67,10 @@ public class WxYouDianPayService extends BasePayService {
             }
 
             if (payConfigStorage.isAccessTokenExpired()) {
+                if (null == payConfigStorage.getAccessToken()){
+                    login();
+                    return payConfigStorage.getAccessToken();
+                }
                 String apbNonce = SignUtils.randomStr();
                 StringBuilder param = new StringBuilder().append("access_token=").append(payConfigStorage.getAccessToken());
                 String sign = createSign(param.toString() + apbNonce, payConfigStorage.getInputCharset());
@@ -121,21 +129,21 @@ public class WxYouDianPayService extends BasePayService {
      * @return
      * @throws PayErrorException
      */
-    public JSONObject login() throws PayErrorException {
-        TreeMap<String, String> data = new TreeMap<>();
-        data.put("username",  payConfigStorage.getSeller());
-        data.put("password", payConfigStorage.getKeyPrivate());
-        String apbNonce = SignUtils.randomStr();
+     public JSONObject login() throws PayErrorException {
+         TreeMap<String, String> data = new TreeMap<>();
+         data.put("username",  payConfigStorage.getSeller());
+         data.put("password", payConfigStorage.getKeyPrivate());
+         String apbNonce = "6863fc0308af4550993ad4a57693ed9d";//SignUtils.randomStr();
 //         1、确定请求主体为用户登录，即需要传登录的用户名username和密码password并且要生成唯一的随机数命名为apb_nonce，长度为32位
 //         2、将所有的参数集进行key排序
 //         3、将排序后的数组从起始位置拼接成字符串如：password=XXXXXXXusername=XXXXX
 //         4、将拼接出来的字符串连接上apb_nonce的值即AAAAAAAAAA。再连接  password=XXXXXXXusername=XXXXXAAAAAAAAAA
-        String sign = createSign(SignUtils.parameterText(data, "") + apbNonce, payConfigStorage.getInputCharset());
-        String queryParam =  SignUtils.parameterText(data) +  "&apb_nonce=" + apbNonce + "&sign=" + sign;
-        JSONObject json = execute(new SimpleGetRequestExecutor(), loginUrl, queryParam);
-        payConfigStorage.updateAccessToken(json.getString("access_token"), json.getLongValue("viptime"));
-        return json;
-    }
+         String sign = createSign(SignUtils.parameterText(data, "") + apbNonce, payConfigStorage.getInputCharset());
+         String queryParam =  SignUtils.parameterText(data) +  "&apb_nonce=" + apbNonce + "&sign=" + sign;
+         JSONObject json = execute(new SimpleGetRequestExecutor(), loginUrl, queryParam);
+         payConfigStorage.updateAccessToken(json.getString("access_token"), json.getLongValue("viptime"));
+         return json;
+     }
 
 
 
@@ -171,7 +179,7 @@ public class WxYouDianPayService extends BasePayService {
      * @return 生成的签名结果
      */
     public boolean getSignVerify(Map<String, String> params, String sign) {
-        return SignUtils.valueOf(payConfigStorage.getSignType()).verify(params, sign, "&key=" + payConfigStorage.getKeyPrivate(), payConfigStorage.getInputCharset());
+       return SignUtils.valueOf(payConfigStorage.getSignType()).verify(params, sign, "&key=" + payConfigStorage.getKeyPrivate(), payConfigStorage.getInputCharset());
     }
 
     /**
@@ -247,9 +255,10 @@ public class WxYouDianPayService extends BasePayService {
     public JSONObject orderInfo(PayOrder order) {
         TreeMap<String, String> data = new TreeMap<>();
         data.put("access_token",  getAccessToken());
-        data.put("PayMoney", order.getPrice().setScale(2, BigDecimal.ROUND_HALF_UP).toString());
+        data.put("paymoney", order.getPrice().setScale(2, BigDecimal.ROUND_HALF_UP).toString());
         String apbNonce = SignUtils.randomStr();
         String sign = createSign(SignUtils.parameterText(data, "") + apbNonce, payConfigStorage.getInputCharset());
+        data.put("PayMoney", data.remove("paymoney"));
         String params =  SignUtils.parameterText(data) +  "&apb_nonce=" + apbNonce + "&sign=" + sign;
         try {
             JSONObject json = execute(new SimpleGetRequestExecutor(), unifiedOrderUrl, params);
@@ -326,6 +335,23 @@ public class WxYouDianPayService extends BasePayService {
                 .content("return_msg", message)
                 .content("nonce_str", SignUtils.randomStr());
         return builder.content("sign", SignUtils.valueOf(payConfigStorage.getSignType()).sign(builder.getJson(), "&key=" + payConfigStorage.getKeyPrivate(), payConfigStorage.getInputCharset())).build();
+    }
+
+    /**
+     * 针对web端的即时付款
+     *  暂未实现或无此功能
+     * @param orderInfo 发起支付的订单信息
+     * @param method 请求方式  "post" "get",
+     * @return
+     */
+    @Override
+    public String buildRequest(Map<String, Object> orderInfo, MethodType method) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public BufferedImage genQrPay(Map<String, Object> orderInfo) {
+        return  MatrixToImageWriter.writeInfoToJpgBuff((String) orderInfo.get("code_url"));
     }
 
     public WxYouDianPayService(PayConfigStorage payConfigStorage) {

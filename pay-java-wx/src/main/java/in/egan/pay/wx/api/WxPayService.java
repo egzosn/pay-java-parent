@@ -3,12 +3,15 @@ package in.egan.pay.wx.api;
 import in.egan.pay.common.api.PayConfigStorage;
 import in.egan.pay.common.api.PayService;
 import in.egan.pay.common.api.RequestExecutor;
+import in.egan.pay.common.bean.MethodType;
 import in.egan.pay.common.bean.PayOrder;
 import in.egan.pay.common.bean.PayOutMessage;
 import in.egan.pay.common.bean.result.PayError;
 import in.egan.pay.common.exception.PayErrorException;
+import in.egan.pay.common.util.MatrixToImageWriter;
 import in.egan.pay.common.util.sign.SignUtils;
 import in.egan.pay.common.util.str.StringUtils;
+import in.egan.pay.wx.bean.WxTransactionType;
 import in.egan.pay.wx.utils.SimplePostRequestExecutor;
 import in.egan.pay.common.util.XML;
 import org.apache.commons.logging.Log;
@@ -20,6 +23,8 @@ import org.apache.http.client.CredentialsProvider;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -88,7 +93,7 @@ public class WxPayService implements PayService {
      * @return 生成的签名结果
      */
     public boolean getSignVerify(Map<String, String> params, String sign) {
-        return SignUtils.valueOf(payConfigStorage.getSignType()).verify(params,  sign, "&key=" +  payConfigStorage.getKeyPrivate(), payConfigStorage.getInputCharset());
+       return SignUtils.valueOf(payConfigStorage.getSignType()).verify(params,  sign, "&key=" +  payConfigStorage.getKeyPrivate(), payConfigStorage.getInputCharset());
     }
 
     /**
@@ -148,7 +153,7 @@ public class WxPayService implements PayService {
      * @see in.egan.pay.common.bean.PayOrder
      */
     @Override
-    public Object orderInfo(PayOrder order) {
+    public Map<String, Object> orderInfo(PayOrder order) {
 
 
 //        Map<String, Object> results = new HashMap<String, Object>();
@@ -164,36 +169,51 @@ public class WxPayService implements PayService {
         parameters.put("total_fee", order.getPrice().multiply(new BigDecimal(100)).intValue());// 总金额单位为分
         parameters.put("trade_type", order.getTransactionType().getType());
         parameters.put("attach", order.getBody());
+        if (WxTransactionType.NATIVE == order.getTransactionType()){
+            parameters.put("product_id",  order.getTradeNo());
+        }
         String sign = createSign(SignUtils.parameterText(parameters), payConfigStorage.getInputCharset());
         parameters.put("sign", sign);
 
-        String requestXML = XML.getMap2Xml(parameters);
+       String requestXML = XML.getMap2Xml(parameters);
         log.debug("requestXML：" + requestXML);
         String result = null;
         try {
-            result = execute(new SimplePostRequestExecutor(), unifiedOrderUrl, requestXML);
+             result = execute(new SimplePostRequestExecutor(), unifiedOrderUrl, requestXML);
             log.debug("获取预支付订单返回结果33:" + result);
 
             /////////APP端调起支付的参数列表
             Map map  = XML.toJSONObject(result);
+            if (!"SUCCESS".equals(map.get("return_code"))){
+                throw new PayErrorException(new PayError(-1, (String) map.get("return_msg"), result));
+            }
+            //如果是扫码支付无需处理，直接返回
+            if (WxTransactionType.NATIVE == order.getTransactionType()){
+                return map;
+            }
+
             SortedMap<String, Object> params = new TreeMap<String, Object>();
             params.put("appid", payConfigStorage.getAppid());
-            params.put("timestamp", System.currentTimeMillis() / 1000);
-            params.put("noncestr", map.get("nonce_str")/*WxpayCore.genNonceStr()*/);
-            params.put("package", "Sign=WXPay");
             params.put("partnerid", payConfigStorage.getPartner());
             params.put("prepayid", map.get("prepay_id"));
-//            params.put("signType", "MD5");
-            String paySign = createSign(SignUtils.parameterText(parameters), payConfigStorage.getInputCharset());
-            params.put("sign", paySign);
+            params.put("timestamp", System.currentTimeMillis() / 1000);
+            params.put("noncestr", map.get("nonce_str")/*WxpayCore.genNonceStr()*/);
 
+            if (WxTransactionType.JSAPI == order.getTransactionType()){
+                params.put("package", "prepay_id=" + map.get("prepay_id"));
+                params.put("signType", payConfigStorage.getSignType());
+            }else  if (WxTransactionType.APP == order.getTransactionType()){
+                params.put("package", "Sign=WXPay");
+            }
+            String paySign = createSign(SignUtils.parameterText(params), payConfigStorage.getInputCharset());
+            params.put("sign", paySign);
             return params;
         } catch (PayErrorException e) {
             e.printStackTrace();
         }
 
 //        result = WxpayCore.httpsRequest2(httpsVerifyUrl, "POST", requestXML);
-        //////////////////////////
+    //////////////////////////
         return null;
     }
 
@@ -207,7 +227,7 @@ public class WxPayService implements PayService {
      */
     @Override
     public String createSign(String content, String characterEncoding) {
-        return SignUtils.valueOf(payConfigStorage.getSignType().toUpperCase()).createSign(content, "&key=" + payConfigStorage.getKeyPublic(), characterEncoding);
+       return SignUtils.valueOf(payConfigStorage.getSignType().toUpperCase()).createSign(content, "&key=" + payConfigStorage.getKeyPrivate(), characterEncoding).toUpperCase();
     }
 
     @Override
@@ -225,6 +245,29 @@ public class WxPayService implements PayService {
     @Override
     public PayOutMessage getPayOutMessage(String code, String message) {
         return PayOutMessage.XML().code(code.toUpperCase()).content(message).build();
+    }
+
+    /**
+     * 针对web端的即时付款
+     *  暂未实现或无此功能
+     * @param orderInfo 发起支付的订单信息
+     * @param method 请求方式  "post" "get",
+     * @return
+     */
+    @Override
+    public String buildRequest(Map<String, Object> orderInfo, MethodType method) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public BufferedImage genQrPay(Map<String, Object> orderInfo) {
+        //获取对应的支付账户操作工具（可根据账户id）
+        if (!"SUCCESS".equals(orderInfo.get("result_code"))){
+            throw new RuntimeException(new PayError(-1, (String) orderInfo.get("err_code")).toString());
+    }
+
+
+        return  MatrixToImageWriter.writeInfoToJpgBuff((String) orderInfo.get("code_url"));
     }
 
 

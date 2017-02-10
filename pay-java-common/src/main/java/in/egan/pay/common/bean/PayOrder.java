@@ -24,7 +24,17 @@ public class PayOrder {
     private String deviceInfo;
     //交易类型
     private TransactionType transactionType;
+    //支付币种
+    private CurType curType;
 
+
+    public CurType getCurType() {
+        return curType;
+    }
+
+    public void setCurType(CurType curType) {
+        this.curType = curType;
+    }
 
     public String getSubject() {
         return subject;
@@ -94,4 +104,7 @@ public class PayOrder {
         this.tradeNo = tradeNo;
         this.transactionType = transactionType;
     }
+
+
+
 }

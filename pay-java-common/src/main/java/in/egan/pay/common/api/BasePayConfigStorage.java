@@ -19,8 +19,10 @@ public abstract class BasePayConfigStorage implements PayConfigStorage{
     protected volatile  String keyPrivate ;
     // 支付公钥
     protected volatile  String keyPublic;
-    //回调地址
+    //异步回调地址
     protected volatile  String notifyUrl;
+    //同步回调地址
+    protected volatile  String returnUrl;;
     //签名加密类型
     protected volatile  String signType;
     //字符类型
@@ -70,6 +72,19 @@ public abstract class BasePayConfigStorage implements PayConfigStorage{
         return notifyUrl;
     }
 
+    public void setNotifyUrl(String notifyUrl) {
+        this.notifyUrl = notifyUrl;
+    }
+
+    @Override
+    public String getReturnUrl() {
+        return returnUrl;
+    }
+
+    public void setReturnUrl(String returnUrl) {
+        this.returnUrl = returnUrl;
+    }
+
     public void setSignType(String signType) {
         this.signType = signType;
     }
@@ -79,9 +94,7 @@ public abstract class BasePayConfigStorage implements PayConfigStorage{
         return signType;
     }
 
-    public void setNotifyUrl(String notifyUrl) {
-        this.notifyUrl = notifyUrl;
-    }
+
 
     @Override
     public String getHttpProxyHost() {

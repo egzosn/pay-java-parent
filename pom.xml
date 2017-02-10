@@ -6,7 +6,7 @@
     <groupId>in.egan</groupId>
     <artifactId>pay-java-parent</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.RELEASE</version>
+    <version>2.0.SNAPSHOT</version>
 
     <name>Pay Java Tools - Parent</name>
     <description>支付宝支付、微信支付上级POM</description>
@@ -34,15 +34,21 @@
 
 
     <properties>
-        <org.apache.commons.version>3.1</org.apache.commons.version>
-        <httpclient.version>4.5.2</httpclient.version>
         <httpmime.version>4.5.2</httpmime.version>
         <log4j.version>1.2.17</log4j.version>
+        <pay.version>2.0.SNAPSHOT</pay.version>
     </properties>
 
 
     <dependencyManagement>
         <dependencies>
+
+            <dependency>
+                <groupId>in.egan</groupId>
+                <artifactId>pay-java-common</artifactId>
+                <version>${pay.version}</version>
+            </dependency>
+
             <!--httpcomponents-->
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
@@ -74,6 +80,7 @@
         </dependencies>
 
     </dependencyManagement>
+
     <build>
         <plugins>
             <plugin>

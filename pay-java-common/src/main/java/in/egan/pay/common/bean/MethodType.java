@@ -15,26 +15,13 @@
  */
 
 
-package in.egan.pay.demo.dao;
-
-import in.egan.pay.demo.entity.ApyAccount;
+package in.egan.pay.common.bean;
 
 /**
- * 账户
  * @author: egan
  * @email egzosn@gmail.com
- * @date 2016/11/18 1:21
+ * @date 2017/2/7 9:52
  */
-//@Repository
-public class ApyAccountDao {
-
-    /**
-     * 根据id获取对应的账户信息
-     * @param payId
-     * @return
-     */
-    public ApyAccount get(Integer payId){
-        // TODO 2016/11/18 1:23 author: egan  这里具体实现 略。。
-        return new ApyAccount();
-    }
+public enum MethodType {
+    GET, POST
 }

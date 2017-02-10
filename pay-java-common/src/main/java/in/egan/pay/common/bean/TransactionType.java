@@ -11,6 +11,6 @@ public interface TransactionType {
      * 获取交易类型
      * @return
      */
-    public String getType();
+     String getType();
 }
 

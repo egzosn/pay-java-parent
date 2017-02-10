@@ -5,22 +5,21 @@
     <parent>
         <artifactId>pay-java-parent</artifactId>
         <groupId>in.egan</groupId>
-        <version>1.0.RELEASE</version>
+        <version>2.0.SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>pay-java-wx-youdian</artifactId>
 
-    <dependencies>
 
+
+    <dependencies>
 
         <!-- pay-java  -->
         <dependency>
             <groupId>in.egan</groupId>
             <artifactId>pay-java-common</artifactId>
-            <version>1.0.RELEASE</version>
         </dependency>
         <!-- /pay-java  -->
-
     </dependencies>
 
 

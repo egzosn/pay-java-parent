@@ -13,11 +13,11 @@ import java.util.concurrent.locks.Lock;
  public interface PayConfigStorage {
 
     /*
-     *   应用id
+     *  应用id
      */
      String getAppid();
     /**
-     * 合作者id
+     * 合作商唯一标识
      */
      String getPartner();
     /**
@@ -32,9 +32,13 @@ import java.util.concurrent.locks.Lock;
 
 
     /**
-     * 服务端回调Url
+     * 服务端异步回调Url
      */
      String getNotifyUrl();
+    /**
+     * 服务端同步回调Url
+     */
+     String getReturnUrl();
     /**
     * 签名方式
      */
