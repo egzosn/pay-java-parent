@@ -19,6 +19,8 @@ package in.egan.pay.demo.entity;
 
 import in.egan.pay.common.bean.MsgType;
 
+//import javax.persistence.*;
+
 /**
  * 支付账户
  * @author: egan
@@ -44,9 +46,12 @@ public class ApyAccount {
     // 支付私钥
 //    @Column(name = "private_key")
     private String privateKey;
-    // 回调地址
+    // 异步回调地址
 //    @Column(name = "notify_url")
     private String notifyUrl;
+    // 同步回调地址
+//    @Column(name = "return_url")
+    private String returnUrl;
     // 收款账号
 //    @Column(name = "seller")
     private String seller;
@@ -111,6 +116,14 @@ public class ApyAccount {
 
     public void setNotifyUrl(String notifyUrl) {
         this.notifyUrl = notifyUrl;
+    }
+
+    public String getReturnUrl() {
+        return returnUrl;
+    }
+
+    public void setReturnUrl(String returnUrl) {
+        this.returnUrl = returnUrl;
     }
 
     public String getSeller() {

@@ -20,7 +20,7 @@ import in.egan.pay.wx.youdian.bean.YoudianTransactionType;
  * @email egzosn@gmail.com
  * @date 2016/11/20 0:30
  */
-public enum PayType implements BasePayType{
+public enum PayType implements BasePayType {
 
     aliPay{
         @Override
@@ -30,6 +30,7 @@ public enum PayType implements BasePayType{
             aliPayConfigStorage.setAliPublicKey(apyAccount.getPublicKey());
             aliPayConfigStorage.setKeyPrivate(apyAccount.getPrivateKey());
             aliPayConfigStorage.setNotifyUrl(apyAccount.getNotifyUrl());
+            aliPayConfigStorage.setReturnUrl(apyAccount.getReturnUrl());
             aliPayConfigStorage.setSignType(apyAccount.getSignType());
             aliPayConfigStorage.setSeller(apyAccount.getSeller());
             aliPayConfigStorage.setPayType(apyAccount.getPayType().toString());
@@ -76,7 +77,9 @@ public enum PayType implements BasePayType{
         public PayService getPayService(ApyAccount apyAccount) {
             WxYouDianPayConfigStorage wxPayConfigStorage = new WxYouDianPayConfigStorage();
             wxPayConfigStorage.setKeyPrivate(apyAccount.getPrivateKey());
-            wxPayConfigStorage.setNotifyUrl(apyAccount.getNotifyUrl());
+            wxPayConfigStorage.setKeyPublic(apyAccount.getPublicKey());
+//            wxPayConfigStorage.setNotifyUrl(apyAccount.getNotifyUrl());
+//            wxPayConfigStorage.setReturnUrl(apyAccount.getReturnUrl());
             wxPayConfigStorage.setSignType(apyAccount.getSignType());
             wxPayConfigStorage.setPayType(apyAccount.getPayType().toString());
             wxPayConfigStorage.setMsgType(apyAccount.getMsgType());

@@ -17,12 +17,11 @@
 
 package in.egan.pay.demo.service;
 
-import in.egan.pay.demo.dao.ApyAccountDao;
+import in.egan.pay.demo.dao.ApyAccountRepository;
 import in.egan.pay.demo.entity.ApyAccount;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.stereotype.Service;
-
+import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,14 +33,22 @@ import java.util.Map;
 @Service
 public class ApyAccountService {
 
-//    @Autowired
-    private ApyAccountDao dao;
+//    @Resource
+    private ApyAccountRepository dao;
 
-    @Autowired
+    @Resource
     private AutowireCapableBeanFactory spring;
 
     //缓存
     private final static Map<Integer, PayResponse> payResponses = new HashMap<Integer, PayResponse>();
+
+    /**
+     * 这里简单初始化，引入orm等框架之后可自行删除
+     */
+    {
+
+        dao = new ApyAccountRepository();
+    }
 
 
     /**
@@ -53,7 +60,7 @@ public class ApyAccountService {
 
         PayResponse payResponse = payResponses.get(id);
         if (payResponse  == null) {
-            ApyAccount apyAccount = dao.get(id);
+            ApyAccount apyAccount = dao.findByPayId(id);
             if (apyAccount == null) {
                 throw new IllegalArgumentException ("无法查询");
             }

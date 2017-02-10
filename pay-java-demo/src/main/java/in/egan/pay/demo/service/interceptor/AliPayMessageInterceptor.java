@@ -32,6 +32,14 @@ import java.util.Map;
  * @date 2017/1/18 19:28
  */
 public class AliPayMessageInterceptor implements PayMessageInterceptor {
+
+    //支付账户id
+    private Integer payId;
+    public AliPayMessageInterceptor(Integer payId) {
+
+        this.payId = payId;
+    }
+
     /**
      * 拦截支付消息
      *

@@ -1,9 +1,3 @@
-/*
-SQLyog 企业版 - MySQL GUI v8.14 
-MySQL - 5.5.50-MariaDB-wsrep : Database - pay
-*********************************************************************
-*/
-
 
 /*Table structure for table `apy_account` */
 
@@ -13,9 +7,10 @@ CREATE TABLE `apy_account` (
   `pay_id` int(11) NOT NULL AUTO_INCREMENT COMMENT '支付账号id',
   `partner` varchar(32) DEFAULT NULL COMMENT '支付合作id',
   `appid` varchar(32) DEFAULT NULL COMMENT '应用id',
-  `public_key` varchar(1204) DEFAULT NULL COMMENT '支付公钥',
+  `public_key` varchar(1204) DEFAULT NULL COMMENT '支付公钥，sign_type只有单一key时public_key与private_key相等，比如sign_type=MD5的情况',
   `private_key` varchar(2048) DEFAULT NULL COMMENT '支付私钥',
-  `notify_url` varchar(1024) DEFAULT NULL COMMENT '回调地址',
+  `notify_url` varchar(1024) DEFAULT NULL COMMENT '异步回调地址',
+  `return_url` varchar(1024) DEFAULT NULL COMMENT '同步回调地址',
   `seller` varchar(256) DEFAULT NULL COMMENT '收款账号',
   `sign_type` varchar(16) DEFAULT NULL COMMENT '签名类型',
   `input_charset` varchar(16) DEFAULT NULL COMMENT '枚举值，字符编码 utf-8,gbk等等',
@@ -26,7 +21,11 @@ CREATE TABLE `apy_account` (
   PRIMARY KEY (`pay_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=0 DEFAULT CHARSET=utf8;
 
-/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
-/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
-/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
-/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+/*Data for the table `apy_account` */
+
+insert  into `apy_account`(`pay_id`,`partner`,`appid`,`public_key`,`private_key`,`notify_url`,`return_url`,`seller`,`sign_type`,`input_charset`,`pay_type`,`msg_type`,`create_by`,`create_time`) values
+(1,'12******01','wxa**********ba9e9','48gf0iwuhr***********r9weh9eiut9','48gf0iwuhr***********r9weh9eiut9','http://pay.egan.in/payBack2.json','同步回调地址','','MD5','utf-8','wxPay','xml','egan','2017-01-20 17:07:48'),
+(2,'20889119449*****','','MIGfMA0GCSqGSIb3DQEB*********gmLCUYuLkxpLQIDAQAB','IqZg51Vx8BvyypnIfKgw=*********MIICdwIBADANBgkqhkiG9w0BAQE','http://pay.egan.in/payBack3.json','同步回调地址','egzosn@gmail.com','RSA','utf-8','aliPay','text','egan','2017-01-20 17:11:46'),
+
+
+

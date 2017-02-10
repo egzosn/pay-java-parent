@@ -4,32 +4,31 @@ import in.egan.pay.common.api.PayService;
 import in.egan.pay.common.bean.PayMessage;
 import in.egan.pay.common.bean.PayOutMessage;
 import in.egan.pay.common.exception.PayErrorException;
-import in.egan.pay.demo.service.handler.BasePayMessageHandler;
 
 import java.util.Map;
 
 /**
- * 微信支付回调处理器
- * Created by ZaoSheng on 2016/6/1.
+ * @author Fuzx
+ * @create 2017 2017/1/24 0024
  */
-public class WxPayMessageHandler extends BasePayMessageHandler {
+public class FuiouPayMessageHandler extends BasePayMessageHandler {
 
 
 
 
-    public WxPayMessageHandler(Integer payId) {
+    public FuiouPayMessageHandler(Integer payId) {
         super(payId);
     }
 
     @Override
     public PayOutMessage handle(PayMessage payMessage, Map<String, Object> context, PayService payService) throws PayErrorException {
         //交易状态
-        if ("SUCCESS".equals(payMessage.getPayMessage().get("result_code"))){
+        if ("0000".equals(payMessage.getPayMessage().get("order_pay_code"))){
             /////这里进行成功的处理
 
-            return  payService.getPayOutMessage("SUCCESS", "OK");
+            return PayOutMessage.JSON().content("order_pay_error","成功").build();
         }
 
-        return  payService.getPayOutMessage("FAIL", "失败");
+        return PayOutMessage.JSON().content("order_pay_error",payMessage.getPayMessage().get("order_pay_error")).build();
     }
 }
