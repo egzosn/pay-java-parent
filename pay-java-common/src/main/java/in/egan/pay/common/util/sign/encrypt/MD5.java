@@ -37,7 +37,7 @@ public class MD5 {
      */
     public static boolean verify(String text, String sign, String key, String input_charset) {
         //判断是否一样
-        return StringUtils.equals(sign(text, key, input_charset), sign);
+        return StringUtils.equals(sign(text, key, input_charset).toUpperCase(), sign.toUpperCase());
     }
 
 

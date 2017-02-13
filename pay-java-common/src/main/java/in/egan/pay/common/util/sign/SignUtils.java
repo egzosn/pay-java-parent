@@ -219,7 +219,8 @@ public enum SignUtils {
      */
     public  boolean verify(Map params, String sign, String key, String characterEncoding){
         //判断是否一样
-        return StringUtils.equals(sign(params, key, characterEncoding), sign);
+//        return StringUtils.equals(sign(params, key, characterEncoding), sign);
+        return this.verify(parameterText(params), sign, key, characterEncoding);
     }
 
 

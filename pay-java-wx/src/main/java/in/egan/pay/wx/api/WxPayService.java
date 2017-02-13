@@ -93,7 +93,7 @@ public class WxPayService implements PayService {
      * @return 生成的签名结果
      */
     public boolean getSignVerify(Map<String, String> params, String sign) {
-       return SignUtils.valueOf(payConfigStorage.getSignType()).verify(params,  sign, "&key=" +  payConfigStorage.getKeyPrivate(), payConfigStorage.getInputCharset());
+       return SignUtils.valueOf(payConfigStorage.getSignType()).verify(params,  sign, "&key=" +  payConfigStorage.getKeyPublic(), payConfigStorage.getInputCharset());
     }
 
     /**
