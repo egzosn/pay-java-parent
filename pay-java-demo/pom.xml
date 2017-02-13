@@ -53,11 +53,7 @@
             <version>2.0</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${jackson-databind.version}</version>
-        </dependency>
+
         <!-- spring -->
         <dependency>
             <groupId>org.springframework</groupId>
@@ -87,9 +83,9 @@
         </profile>
 
         <profile>
-            <id>port8081</id>
+            <id>port9096</id>
             <properties>
-                <port>8081</port>
+                <port>9096</port>
             </properties>
         </profile>
         <profile>

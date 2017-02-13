@@ -3,7 +3,6 @@ package in.egan.pay.demo.controller;
 
 
 import in.egan.pay.common.util.str.StringUtils;
-import in.egan.pay.demo.dao.ApyAccountRepository;
 import in.egan.pay.demo.entity.ApyAccount;
 import in.egan.pay.demo.entity.PayType;
 import in.egan.pay.demo.service.ApyAccountService;
@@ -13,9 +12,10 @@ import in.egan.pay.common.bean.MethodType;
 import in.egan.pay.common.bean.PayMessage;
 import in.egan.pay.common.bean.PayOrder;
 import in.egan.pay.common.bean.PayOutMessage;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
 import javax.imageio.ImageIO;
@@ -27,13 +27,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import static in.egan.pay.demo.dao.ApyAccountRepository.apyAccounts;
+
 /**
  * 发起支付入口
  * @author: egan
  * @email egzosn@gmail.com
  * @date 2016/11/18 0:25
  */
-@RestController
+@Controller
 @RequestMapping
 public class PayController{
 
@@ -47,8 +49,9 @@ public class PayController{
      * @return
      */
     @RequestMapping("add")
+    @ResponseBody
     public Map<String, Object> add(ApyAccount account){
-        ApyAccountRepository.apyAccounts.put(account.getPayId(), account);
+        apyAccounts.put(account.getPayId(), account);
         Map<String, Object> data = new HashMap<>();
         data.put("code", 0);
         data.put("account", account);
@@ -108,10 +111,14 @@ public class PayController{
      * @return
      */
     @RequestMapping("getOrderInfo")
-    public Map<String, Object> getOrderInfo( Integer payId, String transactionType){
+    @ResponseBody
+    public Map<String, Object> getOrderInfo(Integer payId, String transactionType){
         //获取对应的支付账户操作工具（可根据账户id）
         PayResponse payResponse =  service.getPayResponse(payId);
-        return  payResponse.getService().orderInfo(new PayOrder("订单title", "摘要", new BigDecimal(0.01), UUID.randomUUID().toString().replace("-", ""), PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType)));
+        Map<String, Object> data = new HashMap<>();
+        data.put("code", 0);
+          data.put("orderInfo",  payResponse.getService().orderInfo(new PayOrder("订单title", "摘要", new BigDecimal(0.01), UUID.randomUUID().toString().replace("-", ""), PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType))));
+        return data;
     }
 
 
@@ -123,6 +130,7 @@ public class PayController{
      * @return
      */
     @RequestMapping(value = "payBack{payId}.json")
+    @ResponseBody
     public String payBack(HttpServletRequest request, @PathVariable Integer payId) throws IOException {
         //根据账户id，获取对应的支付账户操作工具
         PayResponse payResponse = service.getPayResponse(payId);
