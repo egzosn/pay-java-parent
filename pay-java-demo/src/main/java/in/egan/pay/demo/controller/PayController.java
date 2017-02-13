@@ -12,10 +12,9 @@ import in.egan.pay.common.bean.MethodType;
 import in.egan.pay.common.bean.PayMessage;
 import in.egan.pay.common.bean.PayOrder;
 import in.egan.pay.common.bean.PayOutMessage;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import javax.imageio.ImageIO;
@@ -35,7 +34,7 @@ import static in.egan.pay.demo.dao.ApyAccountRepository.apyAccounts;
  * @email egzosn@gmail.com
  * @date 2016/11/18 0:25
  */
-@Controller
+@RestController
 @RequestMapping
 public class PayController{
 
@@ -49,7 +48,6 @@ public class PayController{
      * @return
      */
     @RequestMapping("add")
-    @ResponseBody
     public Map<String, Object> add(ApyAccount account){
         apyAccounts.put(account.getPayId(), account);
         Map<String, Object> data = new HashMap<>();
@@ -70,11 +68,11 @@ public class PayController{
      * @return
      */
     @RequestMapping(value = "toPay.html", produces = "text/html;charset=UTF-8")
-    public String toPay( Integer payId, String transactionType, String bankType) {
+    public String toPay( Integer payId, String transactionType, String bankType, BigDecimal price) {
         //获取对应的支付账户操作工具（可根据账户id）
         PayResponse payResponse =  service.getPayResponse(payId);
 
-        PayOrder order = new PayOrder("订单title", "摘要", new BigDecimal(0.01), UUID.randomUUID().toString().replace("-", ""), PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType));
+        PayOrder order = new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType));
 
         //此处只有刷卡支付(银行卡支付)时需要
         if (StringUtils.isNotEmpty(bankType)){
@@ -91,11 +89,11 @@ public class PayController{
      * @return
      */
     @RequestMapping(value = "toQrPay.jpg", produces = "image/jpeg;charset=UTF-8")
-    public byte[] toWxQrPay(Integer payId, String transactionType) throws IOException {
+    public byte[] toWxQrPay(Integer payId, String transactionType, BigDecimal price) throws IOException {
         //获取对应的支付账户操作工具（可根据账户id）
         PayResponse payResponse =  service.getPayResponse(payId);
         //获取订单信息
-        Map<String, Object> orderInfo = payResponse.getService().orderInfo(new PayOrder("订单title", "摘要", new BigDecimal(0.01), UUID.randomUUID().toString().replace("-", ""), PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType)));
+        Map<String, Object> orderInfo = payResponse.getService().orderInfo(new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType)));
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ImageIO.write(payResponse.getService().genQrPay(orderInfo), "JPEG", baos);
@@ -111,13 +109,13 @@ public class PayController{
      * @return
      */
     @RequestMapping("getOrderInfo")
-    @ResponseBody
-    public Map<String, Object> getOrderInfo(Integer payId, String transactionType){
+    public Map<String, Object> getOrderInfo(Integer payId, String transactionType, BigDecimal price){
         //获取对应的支付账户操作工具（可根据账户id）
         PayResponse payResponse =  service.getPayResponse(payId);
         Map<String, Object> data = new HashMap<>();
         data.put("code", 0);
-          data.put("orderInfo",  payResponse.getService().orderInfo(new PayOrder("订单title", "摘要", new BigDecimal(0.01), UUID.randomUUID().toString().replace("-", ""), PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType))));
+        PayOrder order = new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType));
+        data.put("orderInfo",  payResponse.getService().orderInfo(order));
         return data;
     }
 
@@ -130,7 +128,6 @@ public class PayController{
      * @return
      */
     @RequestMapping(value = "payBack{payId}.json")
-    @ResponseBody
     public String payBack(HttpServletRequest request, @PathVariable Integer payId) throws IOException {
         //根据账户id，获取对应的支付账户操作工具
         PayResponse payResponse = service.getPayResponse(payId);
