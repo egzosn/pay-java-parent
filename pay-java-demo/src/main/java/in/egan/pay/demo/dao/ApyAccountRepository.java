@@ -20,7 +20,7 @@ import java.util.Map;
 public class ApyAccountRepository {
 
     // 这里简单模拟，引入orm等框架之后可自行删除
-    Map<Integer, ApyAccount > apyAccounts = new HashMap<>();
+    public static final  Map<Integer, ApyAccount > apyAccounts = new HashMap<>();
 
     /**
      * 这里简单初始化，引入orm等框架之后可自行删除

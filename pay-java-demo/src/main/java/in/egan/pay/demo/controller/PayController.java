@@ -3,6 +3,8 @@ package in.egan.pay.demo.controller;
 
 
 import in.egan.pay.common.util.str.StringUtils;
+import in.egan.pay.demo.dao.ApyAccountRepository;
+import in.egan.pay.demo.entity.ApyAccount;
 import in.egan.pay.demo.entity.PayType;
 import in.egan.pay.demo.service.ApyAccountService;
 import in.egan.pay.demo.service.PayResponse;
@@ -21,6 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -37,6 +40,21 @@ public class PayController{
     @Resource
     private ApyAccountService service;
 
+
+    /**
+     * 这里模拟账户信息增加
+     * @param account
+     * @return
+     */
+    @RequestMapping("add")
+    public Map<String, Object> add(ApyAccount account){
+        ApyAccountRepository.apyAccounts.put(account.getPayId(), account);
+        Map<String, Object> data = new HashMap<>();
+        data.put("code", 0);
+        data.put("account", account);
+
+        return data;
+    }
 
 
     /**
