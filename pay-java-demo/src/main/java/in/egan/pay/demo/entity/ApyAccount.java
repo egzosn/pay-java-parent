@@ -20,13 +20,13 @@ public class ApyAccount {
 //    @GeneratedValue
 //    @Column(name = "pay_id")
     private Integer payId;
-    // 支付合作id
+    // 支付合作id,商户id，差不多是支付平台的账号或id
 //    @Column(name = "partner")
     private String partner;
     // 应用id
 //    @Column(name = "appid")
     private String appid;
-    // 支付公钥
+    //  支付公钥，sign_type只有单一key时public_key与private_key相等，比如sign_type=MD5的情况
     private String publicKey;
     // 支付私钥
 //    @Column(name = "private_key")
@@ -43,14 +43,14 @@ public class ApyAccount {
     // 签名类型
 //    @Column(name = "sign_type")
     private String signType;
-    // 编码类型
+    // 编码类型 枚举值，字符编码 utf-8,gbk等等
 //    @Column(name = "input_charset")
     private String inputCharset;
-    //支付类型 aliPay 支付宝， wxPay微信
+    //支付类型,aliPay：支付宝，wxPay：微信, youdianPay: 友店微信,此处开发者自定义对应in.egan.pay.demo.entity.PayType枚举值
 //    @Enumerated(EnumType.STRING)
 //    @Column(name = "pay_type")
     private PayType payType;
-    // 消息类型，text,xml
+    // 消息类型，text,xml,json
 //    @Enumerated(EnumType.STRING)
 //    @Column(name = "msg_type")
     private MsgType msgType;

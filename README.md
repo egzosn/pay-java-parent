@@ -30,8 +30,7 @@
  * @date 2016/11/20 0:30
  */
 public enum PayType implements BasePayType{
-
-    aliPay{
+  aliPay{
         @Override
         public PayService getPayService(ApyAccount apyAccount) {
             AliPayConfigStorage aliPayConfigStorage = new AliPayConfigStorage();
@@ -39,6 +38,7 @@ public enum PayType implements BasePayType{
             aliPayConfigStorage.setAliPublicKey(apyAccount.getPublicKey());
             aliPayConfigStorage.setKeyPrivate(apyAccount.getPrivateKey());
             aliPayConfigStorage.setNotifyUrl(apyAccount.getNotifyUrl());
+            aliPayConfigStorage.setReturnUrl(apyAccount.getReturnUrl());
             aliPayConfigStorage.setSignType(apyAccount.getSignType());
             aliPayConfigStorage.setSeller(apyAccount.getSeller());
             aliPayConfigStorage.setPayType(apyAccount.getPayType().toString());
@@ -59,6 +59,7 @@ public enum PayType implements BasePayType{
             WxPayConfigStorage wxPayConfigStorage = new WxPayConfigStorage();
             wxPayConfigStorage.setMchId(apyAccount.getPartner());
             wxPayConfigStorage.setAppSecret(apyAccount.getPublicKey());
+            wxPayConfigStorage.setKeyPublic(apyAccount.getPublicKey());
             wxPayConfigStorage.setAppid(apyAccount.getAppid());
             wxPayConfigStorage.setKeyPrivate(apyAccount.getPrivateKey());
             wxPayConfigStorage.setNotifyUrl(apyAccount.getNotifyUrl());
@@ -83,10 +84,12 @@ public enum PayType implements BasePayType{
     },youdianPay {
         @Override
         public PayService getPayService(ApyAccount apyAccount) {
-           // TODO 2017/1/23 14:12 author: egan  集群的话,友店可能会有bug。暂未测试集群环境
+            // TODO 2017/1/23 14:12 author: egan  集群的话,友店可能会有bug。暂未测试集群环境
             WxYouDianPayConfigStorage wxPayConfigStorage = new WxYouDianPayConfigStorage();
             wxPayConfigStorage.setKeyPrivate(apyAccount.getPrivateKey());
-            wxPayConfigStorage.setNotifyUrl(apyAccount.getNotifyUrl());
+            wxPayConfigStorage.setKeyPublic(apyAccount.getPublicKey());
+//            wxPayConfigStorage.setNotifyUrl(apyAccount.getNotifyUrl());
+//            wxPayConfigStorage.setReturnUrl(apyAccount.getReturnUrl());
             wxPayConfigStorage.setSignType(apyAccount.getSignType());
             wxPayConfigStorage.setPayType(apyAccount.getPayType().toString());
             wxPayConfigStorage.setMsgType(apyAccount.getMsgType());
@@ -296,22 +299,70 @@ public class ApyAccountService {
 #####4.根据账户id与业务id，组拼订单信息（支付宝、微信支付订单）获取支付信息所需的数据
 
 ```java
+
     /**
+     * 跳到支付页面
+     * 针对实时支付,即时付款
+     *
+     * @param payId 账户id
+     * @param transactionType 交易类型， 这个针对于每一个 支付类型的对应的几种交易方式
+     * @param bankType 针对刷卡支付，卡的类型，类型值
+     * @return
+     */
+    @RequestMapping(value = "toPay.html", produces = "text/html;charset=UTF-8")
+    public String toPay( Integer payId, String transactionType, String bankType, BigDecimal price) {
+        //获取对应的支付账户操作工具（可根据账户id）
+        PayResponse payResponse =  service.getPayResponse(payId);
+
+        PayOrder order = new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType));
+
+        //此处只有刷卡支付(银行卡支付)时需要
+        if (StringUtils.isNotEmpty(bankType)){
+            order.setBankType(bankType);
+        }
+        Map orderInfo = payResponse.getService().orderInfo(order);
+        return  payResponse.getService().buildRequest(orderInfo, MethodType.POST);
+    }
+
+
+    /**
+     * 获取二维码图像
+     * 二维码支付
+     * @return
+     */
+    @RequestMapping(value = "toQrPay.jpg", produces = "image/jpeg;charset=UTF-8")
+    public byte[] toWxQrPay(Integer payId, String transactionType, BigDecimal price) throws IOException {
+        //获取对应的支付账户操作工具（可根据账户id）
+        PayResponse payResponse =  service.getPayResponse(payId);
+        //获取订单信息
+        Map<String, Object> orderInfo = payResponse.getService().orderInfo(new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType)));
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ImageIO.write(payResponse.getService().genQrPay(orderInfo), "JPEG", baos);
+        return baos.toByteArray();
+    }
+
+
+    /**
+     *
      *  获取支付预订单信息
      * @param payId 支付账户id
      * @param transactionType 交易类型
      * @return
      */
     @RequestMapping("getOrderInfo")
-    public Object getOrderInfo( Integer payId, String transactionType){
+    public Map<String, Object> getOrderInfo(Integer payId, String transactionType, BigDecimal price){
         //获取对应的支付账户操作工具（可根据账户id）
-        PayResponse payResponse =  service.getPayResponse(payId);;
-
-        //这里之所以用Object，因为微信需返回Map， 支付吧String。
-        Object orderInfo = payResponse.getService().orderInfo(new PayOrder("订单title", "摘要", new BigDecimal(0.01), "tradeNo", PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType)));
-
-        return orderInfo;
+        PayResponse payResponse =  service.getPayResponse(payId);
+        Map<String, Object> data = new HashMap<>();
+        data.put("code", 0);
+        PayOrder order = new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType));
+        data.put("orderInfo",  payResponse.getService().orderInfo(order));
+        return data;
     }
+
+
+
   
 ```
 
@@ -319,18 +370,17 @@ public class ApyAccountService {
 ```java
      
 
-    /**
-     * 微信或者支付宝回调地址
-     * @param request
-     * @return
-     */
-    @ResponseBody
+   /**
+       * 支付回调地址
+       * @param request
+       * @return
+       */
       @RequestMapping(value = "payBack{payId}.json")
       public String payBack(HttpServletRequest request, @PathVariable Integer payId) throws IOException {
           //根据账户id，获取对应的支付账户操作工具
           PayResponse payResponse = service.getPayResponse(payId);
           PayConfigStorage storage = payResponse.getStorage();
-            //
+          //获取支付方返回的对应参数
           Map<String, String> params = payResponse.getService().getParameter2Map(request.getParameterMap(), request.getInputStream());
           if (null == params){
               return payResponse.getService().getPayOutMessage("fail","失败").toMessage();
@@ -345,7 +395,6 @@ public class ApyAccountService {
 
           return payResponse.getService().getPayOutMessage("fail","失败").toMessage();
       }
-
 
         
 ```
