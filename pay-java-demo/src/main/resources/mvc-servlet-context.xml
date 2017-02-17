@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/mvc  
+      	   http://www.springframework.org/schema/mvc/spring-mvc.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context.xsd
+           ">
+
+    <!-- 使用annotation注解的方式时，需要添加上此行配置 -->
+    <context:annotation-config/>
+
+    <!-- 只扫描控制器Action -->
+    <context:component-scan base-package="in.egan.pay.demo.controller" />
+
+    <!-- MVC 注解 -->
+    <mvc:annotation-driven>
+  <!--  <mvc:message-converters >
+        &lt;!&ndash; 配置Fastjson支持 &ndash;&gt;
+        <bean class="com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter4">
+
+        </bean>
+    </mvc:message-converters>-->
+</mvc:annotation-driven>
+
+    <!-- 静态资源，当找不到对应的处理时，调用这个 -->
+    <mvc:default-servlet-handler/>
+
+
+</beans>

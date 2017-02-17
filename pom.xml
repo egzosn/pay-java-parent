@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>in.egan</groupId>
+    <artifactId>pay-java-parent</artifactId>
+    <packaging>pom</packaging>
+    <version>2.0.SNAPSHOT</version>
+
+    <name>Pay Java Tools - Parent</name>
+    <description>支付宝支付、微信支付上级POM</description>
+    <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <name>Egan</name>
+            <email>egzosn@gmail.com</email>
+            <url>https://github.com/egzosn/pay-java-parent</url>
+        </developer>
+    </developers>
+
+    <modules>
+        <module>pay-java-common</module>
+        <module>pay-java-ali</module>
+        <module>pay-java-wx</module>
+        <module>pay-java-demo</module>
+        <module>pay-java-wx-youdian</module>
+    </modules>
+
+
+    <properties>
+        <httpmime.version>4.5.2</httpmime.version>
+        <log4j.version>1.2.17</log4j.version>
+        <pay.version>2.0.SNAPSHOT</pay.version>
+    </properties>
+
+
+    <dependencyManagement>
+        <dependencies>
+
+            <dependency>
+                <groupId>in.egan</groupId>
+                <artifactId>pay-java-common</artifactId>
+                <version>${pay.version}</version>
+            </dependency>
+
+            <!--httpcomponents-->
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpmime</artifactId>
+                <version>${httpmime.version}</version>
+            </dependency>
+            <!--/httpcomponents-->
+
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>fastjson</artifactId>
+                <version>1.2.17</version>
+            </dependency>
+
+
+            <!-- log4j  -->
+            <dependency>
+                <groupId>log4j</groupId>
+                <artifactId>log4j</artifactId>
+                <version>${log4j.version}</version>
+            </dependency>
+            <!-- / log4j -->
+            <dependency>
+                <groupId>org.jdom</groupId>
+                <artifactId>jdom</artifactId>
+                <version>2.0.2</version>
+            </dependency>
+
+        </dependencies>
+
+    </dependencyManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.7</source>
+                    <target>1.7</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TEST</title>
+</head>
+<body>
+
+
+账户信息添加用于下面测试
+<div>
+    <form id="form">
+    账户id<input type="text" name="payId">
+    <br>
+    支付合作id<input type="text" name="partner">
+    <br>
+    应用id<input type="text" name="appid">
+    <br>
+    支付公钥<input type="text" name="publicKey"><b>如签名类型为MD5时，当前的值与支付私钥想等</b>
+    <br>
+    支付私钥<input type="text" name="privateKey">
+    <br>
+    异步回调地址<input type="text" name="notifyUrl"><b>友店支付用不到此参数，在友店管理端进行配置</b>
+    <br>
+    同步回调地址<input type="text" name="returnUrl"><b>同上</b>
+    <br>
+    收款账号(即时付款填写支付合作id)<input type="text" name="seller"><b>针对支付宝</b>
+        <br/>
+    签名类型<select name="signType">
+    <option>MD5</option>
+    <option>RSA</option>
+</select>
+    <br>
+    编码类型(建议UTF-8)<input type="text" name="inputCharset">
+    <br>
+    支付账户类型 <select name="payType">
+    <option value="aliPay">aliPay</option>
+    <option value="wxPay">wxPay</option>
+    <option value="youdianPay">youdianPay</option>
+</select><b>此处为开发者自定义，详情请查看 in.egan.pay.demo.entity.PayType</b>
+    <br>
+    消息类型 <select name="msgType">
+    <option>text</option>
+    <option>xml</option>
+    <option>json</option>
+</select>
+    <br>
+    </form>
+    <button id="submit">提交</button>
+</div>
+
+<br/>
+<div>各个支付对应的<b>交易类型</b>可自行查看对应的官方文档，本项目已实现几种交易类型,对应各个支付类型的<code>in.egan.pay.common.bean.TransactionType</code>具体实现</div>
+<div>支付宝(<code>in.egan.pay.ali.bean.AliTransactionType</code>)： 即时付款=DIRECT ， 移动支付=APP ， 手机网站支付=WAP</div>
+<div>微信(<code>in.egan.pay.wx.bean.WxTransactionType</code>)： 公众号支付=JSAPI ， 移动支付=APP ， 扫码付=NATIVE</div>
+<div>友店微信(<code>in.egan.pay.wx.youdian.bean.YoudianTransactionType</code>)： 扫码付=NATIVE</div>
+
+<br>
+<br>
+<br>
+APP提交(返回对应的json，具体实现，app端demo暂时未实现)
+<form action="getOrderInfo" target="_blank">
+    账户id<input type="text" name="payId">
+    <br>
+    金额<input type="text" name="price">
+    <br>
+    交易类型<input type="text" name="transactionType" value="APP" readonly>
+    <br>
+    <input type="submit" value="提交">
+</form>
+
+<br>
+普通web提交
+<form action="toPay.html" target="_blank">
+    账户id<input type="text" name="payId">
+    <br>
+    金额<input type="text" name="price">
+    <br>
+    交易类型<input type="text" name="transactionType">
+    <br>
+    <input type="submit" value="提交">
+</form>
+
+<br>
+二维码
+<form action="toQrPay.jpg" target="_blank">
+    账户id<input type="text" name="payId">
+    <br>
+    金额<input type="text" name="price">
+    <br>
+    交易类型<input type="text" name="transactionType">
+    <br>
+    <input type="submit" value="提交">
+</form>
+<script src="jquery-3.1.1.min.js"></script>
+<script>
+   $(function ($) {
+        $("#submit").click(function () {
+            $.ajax({
+                url : "add",
+                type : "post",
+                data : $("#form").serialize(),
+                dataType : 'json',
+                success : function(data) {
+                    if (data.code == 0){
+                        alert("保存成功");
+                        return;
+                    }
+                    alert("保存失败");
+                },
+                error : function(edata) {
+                    alert("服务器异常")
+                }
+            })
+        })
+   });
+
+</script>
+</body>
+</html>
