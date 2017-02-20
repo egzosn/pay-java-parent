@@ -22,6 +22,7 @@ public enum FuiouCurType  implements CurType {
         AUD("澳大利亚元");
 
     private String name;
+    private int index;
 
     private FuiouCurType(String name) {
         this.name = name;

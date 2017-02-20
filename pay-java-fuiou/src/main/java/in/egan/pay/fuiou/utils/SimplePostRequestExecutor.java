@@ -59,7 +59,7 @@ public class SimplePostRequestExecutor implements RequestExecutor<String, Object
 
         try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
             String responseContent = Utf8ResponseHandler.INSTANCE.handleResponse(response);
-            System.out.println("直接返回的查询结果-->"+responseContent);
+//            System.out.println("直接返回的查询结果-->"+responseContent);
 //            responseContent = responseContent.replace("<ap>","").replace("</ap>","").replace("<plain>","").replace("</plain>","");
             JSONObject jsonObject = XML.toJSONObject(responseContent);//包含md5
             JSONObject plain = XML.toJSONObject("<a>"+jsonObject.getString("plain")+"</a>");//"plain" -> "<order_pay_code>5002</order_pay_code><order_pay_error>验证签名失败</order_pay_error><order_id></order_id><order_st></order_st><fy_ssn></fy_ssn><resv1></resv1>"

@@ -2,7 +2,6 @@ package in.egan.pay.fuiou.api;/**
  * Created by Fuzx on 2017/1/16 0016.
  */
 
-import com.alibaba.fastjson.JSONObject;
 import in.egan.pay.common.api.BasePayService;
 import in.egan.pay.common.api.PayConfigStorage;
 import in.egan.pay.common.api.RequestExecutor;
@@ -11,7 +10,6 @@ import in.egan.pay.common.bean.PayOrder;
 import in.egan.pay.common.bean.PayOutMessage;
 import in.egan.pay.common.bean.result.PayError;
 import in.egan.pay.common.exception.PayErrorException;
-import in.egan.pay.common.util.XML;
 import in.egan.pay.common.util.sign.SignUtils;
 import in.egan.pay.common.util.str.StringUtils;
 import in.egan.pay.fuiou.utils.SimplePostRequestExecutor;
@@ -52,22 +50,31 @@ public class FuiouPayService extends BasePayService {
         return null;
     }
 
-
+    /**
+     * 回调校验
+     * @param params 回调回来的参数集
+     * @return
+     */
     @Override
     public boolean verify(Map<String, String> params) {
-        // TODO 2017/2/9 17:24 author: egan  需要校验签名，签名通过后，再校验订单的真实(根据单号查询对应的订单)
         if (!"0000".equals(params.get("order_pay_code"))) {
             log.debug(String.format("富友支付异常：order_pay_code=%s,错误原因=%s,参数集=%s", params.get("order_pay_code"), params.get("order_pay_error"), params));
             return false;
         }
         try {
-            return getSignVerify(params, params.get("md5")) && "0000".equals(verifyUrl(params.get("order_id")));//返回参数校验  和 重新请求订单检查是否真实支付成功
+            return getSignVerify(params, params.get("md5")) && "0000".equals(verifyUrl(params.get("order_id")));//返回参数校验  和 重新请求订单检查数据是否合法
         } catch (PayErrorException e) {
             e.printStackTrace();
         }
         return false;
     }
 
+    /**
+     * 校验回调参数是否合法
+     * @param params 参数集
+     * @param returnSign
+     * @return
+     */
     @Override
     public boolean getSignVerify(Map<String, String> params, String returnSign) {
         LinkedHashSet<String> keySet = new LinkedHashSet<>();
@@ -96,6 +103,12 @@ public class FuiouPayService extends BasePayService {
         return false;
     }
 
+    /**
+     * 发起请求校验订单是否支付成功
+     * @param order_id
+     * @return
+     * @throws PayErrorException
+     */
     @Override
     public String verifyUrl(String order_id) throws PayErrorException {
 //        LinkedHashMap param = new LinkedHashMap();
@@ -137,6 +150,11 @@ public class FuiouPayService extends BasePayService {
         throw new RuntimeException("富友支付服务端异常，超出重试次数");
     }
 
+    /**
+     * 对支付请求参数进行加密,排序
+     * @param order 支付订单
+     * @return
+     */
     @Override
     public Map<String, Object> orderInfo(PayOrder order) {
         LinkedHashMap<String, Object> parameters = getOrderInfo(order);
@@ -163,11 +181,23 @@ public class FuiouPayService extends BasePayService {
         return parameters;
     }
 
+    /**
+     * 对内容进行加密
+     * @param content           需要签名的内容
+     * @param characterEncoding 字符编码
+     * @return
+     */
     @Override
     public String createSign(String content, String characterEncoding) {
         return SignUtils.valueOf(payConfigStorage.getSignType().toUpperCase()).createSign(content, "|" + payConfigStorage.getSecretKey(), characterEncoding);
     }
 
+    /**
+     * 将参数拼凑成String
+     * @param parameterMap 请求参数
+     * @param is           请求流
+     * @return
+     */
     @Override
     public Map<String, String> getParameter2Map(Map<String, String[]> parameterMap, InputStream is) {
         Map<String, String> params = new TreeMap<String, String>();
@@ -240,37 +270,6 @@ public class FuiouPayService extends BasePayService {
     @Override
     public BufferedImage genQrPay(Map<String, Object> orderInfo) {
         throw new UnsupportedOperationException();
-    }
-
-
-    /**
-     * 支付结果查询(直接返回)
-     * <p>
-     * 返回结果例子
-     * <?xml version="1.0" encoding="UTF-8"?>
-     * <ap><plain><order_pay_code>错误代码(0000表示成功 其他失败)</order_pay_code><order_pay_error>错误中文描述</order_pay_error><order_id>商户订单号</order_id><order_st>订单状态(‘00’ – 订单已生成(初始状态) ‘01’ – 订单已撤消 ‘02’ – 订单已合并 ‘03’ – 订单已过期 ‘04’ – 订单已确认(等待支付) ‘05’ – 订单支付失败 ‘11’ – 订单已支付 ‘18’ – 已发货 ‘19’ – 已确认收货)</order_st><fy_ssn>富友流水号</fy_ssn><resv1>保留字段</resv1></plain><md5>md5</md5></ap>
-     * <p>
-     * md5为plain域的内容+商户密钥做md5，不包括plain标签
-     * 以下是MD5的内容
-     * <order_pay_code>错误代码(0000表示成功 其他失败)</order_pay_code><order_pay_error>错误中文描述</order_pay_error><order_id>商户订单号</order_id><order_st>订单状态(‘00’ – 订单已生成(初始状态) ‘01’ – 订单已撤消 ‘02’ – 订单已合并 ‘03’ – 订单已过期 ‘04’ – 订单已确认(等待支付) ‘05’ – 订单支付失败 ‘11’ – 订单已支付 ‘18’ – 已发货 ‘19’ – 已确认收货)</order_st><fy_ssn>富友流水号</fy_ssn><resv1>保留字段</resv1>商户密钥
-     *
-     * @param order_id
-     * @return
-     */
-    public JSONObject vaildatePayResult(String order_id) {
-        LinkedHashMap param = new LinkedHashMap();
-        param.put("mchnt_cd", payConfigStorage.getPartner());
-        param.put("order_id", order_id);
-        param.put("md5", createSign(SignUtils.parameters2MD5Str(param, "|"), payConfigStorage.getInputCharset()));
-        try {
-            String result = execute(new SimplePostRequestExecutor(), fuiouSmpAQueryGate, param);
-            JSONObject object = XML.toJSONObject(result);
-            return object;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return null;
     }
 
 
