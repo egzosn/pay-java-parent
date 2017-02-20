@@ -1,24 +1,8 @@
-/*
- * Copyright 2002-2017 the original huodull or egan.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
 package in.egan.pay.common.util.sign;
 
 
 import in.egan.pay.common.util.str.StringUtils;
+import org.apache.http.message.BasicNameValuePair;
 
 import java.util.*;
 
@@ -132,7 +116,7 @@ public enum SignUtils {
             if (null == valueStr || "".equals(valueStr.toString().trim()) || "sign".equals(k) || "key".equals(k) || "appId".equals(k) || "sign_type".equalsIgnoreCase(k)) {
                 continue;
             }
-                sb.append(k ).append("=").append( valueStr).append(separator);
+            sb.append(k ).append("=").append( valueStr).append(separator);
         }
         if (sb.length() > 0) {
             sb.deleteCharAt(sb.length() - 1);
@@ -147,17 +131,23 @@ public enum SignUtils {
      * @param separator
      * @return
      */
-    public static String  parameters2MD5Str(Map parameters, String separator){
+    public static String  parameters2MD5Str(Object parameters, String separator){
         StringBuffer sb = new StringBuffer();
-        Set<String >  keys = (Set<String>) parameters.keySet();
 
         if (parameters instanceof LinkedHashMap) {
-                for(String key : keys){
-                    String val = parameters.get(key).toString();
-                    if(StringUtils.isNotBlank(val)){
-                        sb.append(val).append(separator);
-                    }
+            Set<String >  keys = (Set<String>) ((LinkedHashMap)parameters).keySet();
+            for(String key : keys){
+                String val = ((LinkedHashMap)parameters).get(key).toString();
+                if(StringUtils.isNotBlank(val)){
+                    sb.append(val).append(separator);
                 }
+            }
+        }else if(parameters instanceof List){
+            for(BasicNameValuePair bnv :((List<BasicNameValuePair>)parameters) ){
+                if(StringUtils.isNotBlank(bnv.getValue())){
+                    sb.append(bnv.getValue()).append(separator);
+                }
+            }
         }
 
         return StringUtils.isBlank(sb.toString())?"":sb.deleteCharAt(sb.length() - 1).toString();

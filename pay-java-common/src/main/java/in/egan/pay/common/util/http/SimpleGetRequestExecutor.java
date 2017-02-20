@@ -4,6 +4,7 @@ package in.egan.pay.common.util.http;
  * @author  egan
  * @email egzosn@gmail.com
  * @date 2016-5-24
+ * @source chanjarster/weixin-java-tools
  */
 
 import in.egan.pay.common.api.RequestExecutor;

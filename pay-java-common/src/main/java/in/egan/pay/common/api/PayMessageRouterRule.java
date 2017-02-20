@@ -17,6 +17,7 @@ import java.util.regex.Pattern;
  * @author  egan
  * @email egzosn@gmail.com
  * @date 2016-6-1 11:28:01
+ * @source chanjarster/weixin-java-tools
  */
 public class PayMessageRouterRule {
 

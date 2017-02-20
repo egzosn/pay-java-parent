@@ -69,6 +69,7 @@ import java.util.Map;
      * @param <E> 请求数据类型
      * @return
      * @throws PayErrorException
+     * @source
      */
      <T, E> T execute(RequestExecutor<T, E> executor, String uri, E data) throws PayErrorException;
 

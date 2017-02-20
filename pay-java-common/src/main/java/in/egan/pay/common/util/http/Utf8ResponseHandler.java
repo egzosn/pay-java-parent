@@ -11,6 +11,8 @@ import org.apache.http.util.EntityUtils;
 import java.io.IOException;
 
  /**
+  * @source chanjarster/weixin-java-tools
+  * @author Daniel Qian
  * @author  egan
  * @email egzosn@gmail.com
  * @date 2016-5-24

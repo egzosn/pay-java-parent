@@ -13,6 +13,7 @@ import java.io.IOException;
  *
  * @param <T> 返回值类型
  * @param <E> 请求参数类型
+ * @source chanjarster/weixin-java-tools
  */
 public interface RequestExecutor<T, E> {
 

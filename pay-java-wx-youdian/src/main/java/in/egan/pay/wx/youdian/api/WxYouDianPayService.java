@@ -133,7 +133,7 @@ public class WxYouDianPayService extends BasePayService {
          TreeMap<String, String> data = new TreeMap<>();
          data.put("username",  payConfigStorage.getSeller());
          data.put("password", payConfigStorage.getKeyPrivate());
-         String apbNonce = "6863fc0308af4550993ad4a57693ed9d";//SignUtils.randomStr();
+         String apbNonce = SignUtils.randomStr();
 //         1、确定请求主体为用户登录，即需要传登录的用户名username和密码password并且要生成唯一的随机数命名为apb_nonce，长度为32位
 //         2、将所有的参数集进行key排序
 //         3、将排序后的数组从起始位置拼接成字符串如：password=XXXXXXXusername=XXXXX

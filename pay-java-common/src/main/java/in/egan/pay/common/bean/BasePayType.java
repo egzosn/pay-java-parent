@@ -14,6 +14,6 @@ public interface BasePayType {
      * @param transactionType 类型值
      * @return
      */
-    public abstract TransactionType getTransactionType(String transactionType);
+    TransactionType getTransactionType(String transactionType);
 
 }

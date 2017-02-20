@@ -38,6 +38,7 @@ import java.util.concurrent.Future;
  * router.route(message);
  * 
  * </pre>
+ *  @source chanjarster/weixin-java-tools
  *  @source Daniel Qian
  *  @author  egan
  *
