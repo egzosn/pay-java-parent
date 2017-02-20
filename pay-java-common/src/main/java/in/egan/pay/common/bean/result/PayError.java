@@ -12,6 +12,7 @@ import java.util.Map;
  * @author Daniel Qian
  * @dete 2017/1/12 9:57
  * @author: egan
+ * @source chanjarster/weixin-java-tools
  */
 
 public class PayError implements Serializable {

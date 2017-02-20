@@ -18,7 +18,6 @@
         <dependency>
             <groupId>in.egan</groupId>
             <artifactId>pay-java-common</artifactId>
-            <version>1.0.RELEASE</version>
         </dependency>
         <!-- /pay-java  -->
     </dependencies>

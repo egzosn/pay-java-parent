@@ -12,6 +12,7 @@ import java.io.Serializable;
  * @author  egan
  * @email egzosn@gmail.com
  * @date 2016-6-1 11:40:30
+ * @source chanjarster/weixin-java-tools
  */
 public abstract class PayOutMessage implements Serializable {
     protected String content;

@@ -21,6 +21,7 @@ import java.io.IOException;
 /**
  * 简单的GET请求执行器，请求的参数是String, 返回的结果也是String
  * @author Daniel Qian
+ * @source chanjarster/weixin-java-tools
  *
  */
 public class SimpleGetRequestExecutor implements RequestExecutor<String, String> {

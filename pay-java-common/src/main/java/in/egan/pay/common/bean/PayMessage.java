@@ -14,6 +14,7 @@ import java.util.Map;
  * @author egan
  * @email egzosn@gmail.com
  * @date 2016-6-1 14:2:3
+ * @source chanjarster/weixin-java-tools
  */
 public class PayMessage implements Serializable {
     private Map<String, String> payMessage = null;

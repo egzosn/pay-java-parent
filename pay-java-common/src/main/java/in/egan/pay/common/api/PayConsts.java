@@ -2,6 +2,7 @@ package in.egan.pay.common.api;
 
 /**
  *  支付宝支付通知
+ *  @source chanjarster/weixin-java-tools
  * @author  egan
  * @email egzosn@gmail.com
  * @date 2016-6-1 11:45:31

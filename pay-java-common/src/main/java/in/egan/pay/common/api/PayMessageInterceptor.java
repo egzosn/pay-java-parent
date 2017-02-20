@@ -8,7 +8,7 @@ import java.util.Map;
 
 /**
  * 支付消息拦截器，可以用来做验证
- *
+ * @author Daniel Qian
  */
 public interface PayMessageInterceptor {
 
