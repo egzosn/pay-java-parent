@@ -5,9 +5,11 @@
 
 声明： 本项目最初想法自 https://github.com/chanjarster/weixin-java-tools, 15年1月左右关注chanjarster/weixin-java-tools，并将其htpp请求基础与回调处理修改并进行使用。
 
+开发版 https://git.oschina.net/egzosn/pay-java-parent/tree/develop
+
 ###特性
-   
-   
+
+
 
     1. 不依赖任何 mvc 框架
     2. 也不依赖 servlet，仅仅作为工具使用，可轻松嵌入到任何系统里（项目例子利用spring mvc的 @PathVariable进行，推荐使用类似的框架）
@@ -24,7 +26,7 @@
      3. pay-java-*  具体的支付实现库
 
 
-###使用  
+###使用
 这里不多说直接上代码  集群的话,友店可能会有bug。
 
 测试链接 ： http://pay.egan.in/index.html
