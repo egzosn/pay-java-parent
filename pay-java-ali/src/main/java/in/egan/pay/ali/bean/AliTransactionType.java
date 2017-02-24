@@ -9,8 +9,11 @@ import in.egan.pay.common.bean.TransactionType;
  * @date 2016/10/19 22:58
  */
 public enum  AliTransactionType implements TransactionType {
-    //即时到帐                          //移动支付                      //手机网站支付
-    DIRECT("create_direct_pay_by_user"),APP("mobile.securitypay.pay"),WAP("alipay.wap.create.direct.pay.by.user");
+     //即时到帐                                   //移动支付                      //手机网站支付
+     DIRECT("create_direct_pay_by_user"),APP("alipay.trade.app.pay"),WAP("alipay.trade.wap.pay")
+    // TODO 2017/2/23 20:26 author: egan 以下三个为主动交易类型 暂未测试，
+    //扫码付                                   //条码付                        // 声波付
+    ,SWEEPPAY("alipay.trade.precreate"),BAR_CODE("alipay.trade.pay"),WAVE_CODE("alipay.trade.pay"),;
 
     private String type;
 

@@ -19,6 +19,7 @@ import org.apache.commons.logging.LogFactory;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
@@ -352,6 +353,31 @@ public class WxYouDianPayService extends BasePayService {
     @Override
     public BufferedImage genQrPay(Map<String, Object> orderInfo) {
         return  MatrixToImageWriter.writeInfoToJpgBuff((String) orderInfo.get("code_url"));
+    }
+
+    @Override
+    public Map<String, Object> query(String tradeNo, String outTradeNo) {
+        return null;
+    }
+
+    @Override
+    public Map<String, Object> close(String tradeNo, String outTradeNo) {
+        return null;
+    }
+
+    @Override
+    public Map<String, Object> refund(String tradeNo, String outTradeNo) {
+        return null;
+    }
+
+    @Override
+    public Map<String, Object> refundquery(String tradeNo, String outTradeNo) {
+        return null;
+    }
+
+    @Override
+    public Object downloadbill(Date billDate, String billType) {
+        return null;
     }
 
     public WxYouDianPayService(PayConfigStorage payConfigStorage) {

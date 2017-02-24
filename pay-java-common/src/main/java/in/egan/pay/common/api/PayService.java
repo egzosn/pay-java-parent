@@ -8,6 +8,7 @@ import in.egan.pay.common.exception.PayErrorException;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +20,7 @@ import java.util.Map;
  * @date 2016-5-18 14:09:01
  */
  public interface PayService {
+
     /**
      * 回调校验URL
      * @return
@@ -93,7 +95,6 @@ import java.util.Map;
 
     /**
      * 将请求参数或者请求流转化为 Map
-     *
      * @param parameterMap 请求参数
      * @param is           请求流
      * @return
@@ -123,4 +124,46 @@ import java.util.Map;
      * @return
      */
     BufferedImage genQrPay(Map<String, Object> orderInfo);
+
+    /**
+     *  交易查询接口
+     * @param tradeNo 支付平台订单号
+     * @param outTradeNo 商户单号
+     * @return
+     */
+    Map<String, Object> query(String tradeNo, String outTradeNo);
+
+    /**
+     *  交易关闭接口
+     * @param tradeNo 支付平台订单号
+     * @param outTradeNo 商户单号
+     * @return
+     */
+    Map<String, Object> close(String tradeNo, String outTradeNo);
+
+    /**
+     *  交易关闭接口
+     * @param tradeNo 支付平台订单号
+     * @param outTradeNo 商户单号
+     * @return
+     */
+    Map<String, Object> refund(String tradeNo, String outTradeNo);
+
+    /**
+     *  查询退款
+     * @param tradeNo 支付平台订单号
+     * @param outTradeNo 商户单号
+     * @return
+     */
+    Map<String, Object> refundquery(String tradeNo, String outTradeNo);
+
+    /**
+     *  下载对账单
+     * @param billDate 支付平台订单号
+     * @param billType 商户单号
+     * @return
+     */
+   Object downloadbill(Date billDate, String billType);
+
+
 }

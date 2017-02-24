@@ -54,7 +54,13 @@ public abstract class BasePayConfigStorage implements PayConfigStorage{
     protected volatile  String httpProxyPassword;
 
 
-
+    /**
+     * 合作商唯一标识
+     * @see #getPartner 代替者
+     */
+    public String getPid(){
+        throw null;
+    }
 
     @Override
     public String getInputCharset() {

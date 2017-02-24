@@ -164,13 +164,13 @@ public class WxPayService implements PayService {
         parameters.put("nonce_str", SignUtils.randomStr());
         parameters.put("body", order.getSubject());// 购买支付信息
         parameters.put("notify_url", payConfigStorage.getNotifyUrl());
-        parameters.put("out_trade_no", order.getTradeNo());// 订单号
+        parameters.put("out_trade_no", order.getOutTradeNo());// 订单号
         parameters.put("spbill_create_ip", "192.168.1.150");
         parameters.put("total_fee", order.getPrice().multiply(new BigDecimal(100)).intValue());// 总金额单位为分
         parameters.put("trade_type", order.getTransactionType().getType());
         parameters.put("attach", order.getBody());
         if (WxTransactionType.NATIVE == order.getTransactionType()){
-            parameters.put("product_id",  order.getTradeNo());
+            parameters.put("product_id",  order.getOutTradeNo());
         }
         String sign = createSign(SignUtils.parameterText(parameters), payConfigStorage.getInputCharset());
         parameters.put("sign", sign);
@@ -268,6 +268,31 @@ public class WxPayService implements PayService {
 
 
         return  MatrixToImageWriter.writeInfoToJpgBuff((String) orderInfo.get("code_url"));
+    }
+
+    @Override
+    public Map<String, Object> query(String tradeNo, String outTradeNo) {
+        return null;
+    }
+
+    @Override
+    public Map<String, Object> close(String tradeNo, String outTradeNo) {
+        return null;
+    }
+
+    @Override
+    public Map<String, Object> refund(String tradeNo, String outTradeNo) {
+        return null;
+    }
+
+    @Override
+    public Map<String, Object> refundquery(String tradeNo, String outTradeNo) {
+        return null;
+    }
+
+    @Override
+    public Object downloadbill(Date billDate, String billType) {
+        return null;
     }
 
 

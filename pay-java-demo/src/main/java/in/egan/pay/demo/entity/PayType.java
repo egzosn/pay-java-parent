@@ -26,7 +26,7 @@ public enum PayType implements BasePayType {
         @Override
         public PayService getPayService(ApyAccount apyAccount) {
             AliPayConfigStorage aliPayConfigStorage = new AliPayConfigStorage();
-            aliPayConfigStorage.setPartner(apyAccount.getPartner());
+            aliPayConfigStorage.setPid(apyAccount.getPartner());
             aliPayConfigStorage.setAliPublicKey(apyAccount.getPublicKey());
             aliPayConfigStorage.setKeyPrivate(apyAccount.getPrivateKey());
             aliPayConfigStorage.setNotifyUrl(apyAccount.getNotifyUrl());

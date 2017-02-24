@@ -1,7 +1,5 @@
-package in.egan.pay.ali.api;
+package in.egan.pay.ali.before.api;
 
-import com.alibaba.fastjson.JSONObject;
-import in.egan.pay.ali.bean.AliTransactionType;
 import in.egan.pay.ali.util.SimpleGetRequestExecutor;
 import in.egan.pay.common.api.BasePayService;
 import in.egan.pay.common.api.PayConfigStorage;
@@ -20,20 +18,21 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
-import java.text.DateFormat;
 import java.util.*;
 
 /**
  *  支付宝支付通知
  * @author  egan
  * @email egzosn@gmail.com
- * @date 2017-2-22 20:09
+ * @date 2016-5-18 14:09:01
+ * @see in.egan.pay.ali.api.AliPayService
  */
+@Deprecated
 public class AliPayService extends BasePayService {
     protected final Log log = LogFactory.getLog(AliPayService.class);
 
 
-    private String httpsReqUrl = "https://openapi.alipay.com/gateway.do";
+    private String httpsReqUrl = "https://mapi.alipay.com/gateway.do";
 
 
     public String getHttpsVerifyUrl() {
@@ -118,7 +117,7 @@ public class AliPayService extends BasePayService {
      *
      * @param order 支付订单
      * @return
-     * @see in.egan.pay.common.bean.PayOrder
+     * @see PayOrder
      */
     @Override
     public Map<String, Object> orderInfo(PayOrder order) {
@@ -137,52 +136,6 @@ public class AliPayService extends BasePayService {
         return orderInfo;
     }
 
-
-   /**
-     * 支付宝创建订单信息
-     * create the order info
-     *
-     * @param order 支付订单
-     * @return
-     * @see in.egan.pay.common.bean.PayOrder
-     */
-    private  Map<String, Object> getOrder(PayOrder order) {
-
-        //兼容上一版本的即时到账
-        if (AliTransactionType.DIRECT == order.getTransactionType()){
-            return getOrderDirect(order);
-        }
-
-        Map<String, Object> orderInfo = new TreeMap<>();
-        orderInfo.put("app_id", payConfigStorage.getAppid());
-        orderInfo.put("method", order.getTransactionType().getType());
-        orderInfo.put("charset", payConfigStorage.getInputCharset());
-        DateFormat formatter = DateFormat.getDateTimeInstance();
-        orderInfo.put("timestamp", formatter.format( new Date()));
-        orderInfo.put("version", "1.0");
-        orderInfo.put("notify_url", payConfigStorage.getNotifyUrl());
-
-        JSONObject bizContent = new JSONObject();
-        if ("alipay.trade.pay".equals(order.getTransactionType().getType())){
-            bizContent.put("scene", order.getTransactionType().toString().toLowerCase());
-            bizContent.put("product_code", "FACE_TO_FACE_PAYMENT");
-            bizContent.put("auth_code", order.getAuthCode());
-        }else {
-            bizContent.put("product_code", "QUICK_MSECURITY_PAY");
-        }
-        bizContent.put("body", order.getBody());
-        bizContent.put("seller_id", payConfigStorage.getPid());
-        bizContent.put("subject", order.getSubject());
-        bizContent.put("out_trade_no", order.getOutTradeNo());
-        bizContent.put("total_amount", order.getPrice().setScale(2, BigDecimal.ROUND_HALF_UP).toString());
-        orderInfo.put("biz_content", bizContent.toJSONString());
-
-
-
-        return orderInfo;
-    }
-
-
     /**
      * 支付宝创建订单信息
      * create the order info
@@ -191,7 +144,7 @@ public class AliPayService extends BasePayService {
      * @return
      * @see in.egan.pay.common.bean.PayOrder
      */
-    private  Map<String, Object> getOrderDirect(PayOrder order) {
+    private  Map<String, Object> getOrder(PayOrder order) {
         Map<String, Object> orderInfo = new TreeMap<>();
 //        StringBuilder orderInfo = new StringBuilder();
         // 签约合作者身份ID
@@ -256,7 +209,6 @@ public class AliPayService extends BasePayService {
 
         return orderInfo;
     }
-
 
 
     @Override

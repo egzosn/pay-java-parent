@@ -20,7 +20,14 @@ import java.util.concurrent.locks.Lock;
     /**
      * 合作商唯一标识
      */
+    @Deprecated
      String getPartner();
+    /**
+     * 合作商唯一标识
+     * @see #getPartner 代替者
+     */
+     String getPid();
+
     /**
      * 获取收款账号
      */

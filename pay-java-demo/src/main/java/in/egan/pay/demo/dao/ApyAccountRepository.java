@@ -28,8 +28,8 @@ public class ApyAccountRepository {
     {
         ApyAccount apyAccount1 = new ApyAccount();
         apyAccount1.setPayId(1);
-        apyAccount1.setPartner("12******01");
-        apyAccount1.setAppid("wxa**********ba9e9");
+        apyAccount1.setPartner("2088911944978307");
+        apyAccount1.setAppid("2016052301431829");
         // TODO 2017/2/9 16:20 author: egan  sign_type只有单一key时public_key与private_key相等，比如sign_type=MD5的情况
         apyAccount1.setPublicKey("48gf0iwuhr***********r9weh9eiut9");
         apyAccount1.setPrivateKey("48gf0iwuhr***********r9weh9eiut9");

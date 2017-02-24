@@ -272,5 +272,30 @@ public class FuiouPayService extends BasePayService {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public Map<String, Object> query(String tradeNo, String outTradeNo) {
+        return null;
+    }
+
+    @Override
+    public Map<String, Object> close(String tradeNo, String outTradeNo) {
+        return null;
+    }
+
+    @Override
+    public Map<String, Object> refund(String tradeNo, String outTradeNo) {
+        return null;
+    }
+
+    @Override
+    public Map<String, Object> refundquery(String tradeNo, String outTradeNo) {
+        return null;
+    }
+
+    @Override
+    public Object downloadbill(Date billDate, String billType) {
+        return null;
+    }
+
 
 }
