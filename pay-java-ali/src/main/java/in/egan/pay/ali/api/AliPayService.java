@@ -34,6 +34,7 @@ public class AliPayService extends BasePayService {
 
 
     private String httpsReqUrl = "https://openapi.alipay.com/gateway.do";
+    private String httpsReqUrlBefore = "https://mapi.alipay.com/gateway.do";
 
 
     public String getHttpsVerifyUrl() {
@@ -196,43 +197,33 @@ public class AliPayService extends BasePayService {
 //        StringBuilder orderInfo = new StringBuilder();
         // 签约合作者身份ID
         orderInfo.put("partner", payConfigStorage.getPartner());
-//        orderInfo.append( "partner=").append( "\"").append( payConfigStorage.getPartner() ).append("\"");
 
         // 签约卖家支付宝账号
         orderInfo.put("seller_id", payConfigStorage.getSeller());
-//         orderInfo.append("&seller_id=" ) .append("\"" ) .append(payConfigStorage.getSeller() ) .append("\"");
 
         // 商户网站唯一订单号
         orderInfo.put("out_trade_no", order.getTradeNo());
-//         orderInfo.append("&out_trade_no=" ) .append("\"" ).append(order.getTradeNo() ) .append("\"");
 
         // 商品名称
         orderInfo.put("subject", order.getSubject());
-//         orderInfo.append("&subject=" ) .append("\"" ) .append(order.getSubject() ) .append("\"");
 
         // 商品详情
         orderInfo.put("body", order.getBody());
-//         orderInfo.append("&body=" ) .append("\"" ) .append(order.getBody() ) .append("\"");
 
         // 商品金额
         orderInfo.put("total_fee", order.getPrice().setScale(2, BigDecimal.ROUND_HALF_UP).toString() );
-//         orderInfo.append("&total_fee=" ) .append("\"" ) .append(order.getPrice().setScale(2, BigDecimal.ROUND_HALF_UP) ) .append("\"");
 
         // 服务器异步通知页面路径
         orderInfo.put("notify_url", payConfigStorage.getNotifyUrl() );
-//         orderInfo.append("&notify_url=" ) .append("\"" ).append( payConfigStorage.getNotifyUrl() ) .append("\"");
 
         // 服务接口名称， 固定值
         orderInfo.put("service",  order.getTransactionType().getType()  );
-//         orderInfo.append("&service=\"" ).append( order.getTransactionType().getType() ).append("\"");
 
         // 支付类型， 固定值
         orderInfo.put("payment_type",  "1" );
-//         orderInfo.append("&payment_type=\"1\"");
 
         // 参数编码， 固定值
         orderInfo.put("_input_charset",  payConfigStorage.getInputCharset());
-//         orderInfo.append("&_input_charset=\"utf-8\"");
 
         // 设置未付款交易的超时时间
         // 默认30分钟，一旦超时，该笔交易就会自动被关闭。
@@ -241,18 +232,16 @@ public class AliPayService extends BasePayService {
         // 该参数数值不接受小数点，如1.5h，可转换为90m。
         // TODO 2017/2/6 11:05 author: egan  目前写死，这一块建议配置
         orderInfo.put("it_b_pay",  "30m");
-//         orderInfo.append("&it_b_pay=\"30m\"");
 
         // extern_token为经过快登授权获取到的alipay_open_id,带上此参数用户将使用授权的账户进行支付
-        //  orderInfo.append("&extern_token=" ) .append("\"" ) extern_token ) .append("\"");
+        //  orderInfo.put("extern_token", extern_token );
 
         // 支付宝处理完请求后，当前页面跳转到商户指定页面的路径，可空
         orderInfo.put("return_url", payConfigStorage.getReturnUrl());
-//         orderInfo.append("&return_url=\"m.alipay.com\"");
 
         // 调用银行卡支付，需配置此参数，参与签名， 固定值 （需要签约《无线银行卡快捷支付》才能使用）
 //        if (order.getTransactionType().getType())
-//          orderInfo.append("&paymethod=\"expressGateway\"");
+//          orderInfo.put("paymethod","expressGateway");
 
         return orderInfo;
     }
@@ -297,7 +286,7 @@ public class AliPayService extends BasePayService {
         StringBuffer formHtml = new StringBuffer();
 
         formHtml.append("<form id=\"_alipaysubmit_\" name=\"alipaysubmit\" action=\"" )
-                .append( httpsReqUrl)
+                .append( null == orderInfo.get("method") ? httpsReqUrlBefore : httpsReqUrl)
                 .append(  "?_input_charset=" )
                 .append( payConfigStorage.getInputCharset())
                 .append( "\" method=\"")
