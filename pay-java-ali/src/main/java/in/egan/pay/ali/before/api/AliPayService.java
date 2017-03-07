@@ -1,23 +1,29 @@
 package in.egan.pay.ali.before.api;
 
-import in.egan.pay.ali.util.SimpleGetRequestExecutor;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import in.egan.pay.ali.before.bean.AliTransactionType;
 import in.egan.pay.common.api.BasePayService;
+import in.egan.pay.common.api.Callback;
 import in.egan.pay.common.api.PayConfigStorage;
-import in.egan.pay.common.api.RequestExecutor;
 import in.egan.pay.common.bean.MethodType;
 import in.egan.pay.common.bean.PayOrder;
 import in.egan.pay.common.bean.PayOutMessage;
-import in.egan.pay.common.bean.result.PayError;
+import in.egan.pay.common.bean.TransactionType;
+import in.egan.pay.common.bean.result.PayException;
 import in.egan.pay.common.exception.PayErrorException;
+import in.egan.pay.common.http.ClientHttpRequest;
+import in.egan.pay.common.http.HttpConfigStorage;
 import in.egan.pay.common.util.sign.SignUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -27,12 +33,20 @@ import java.util.*;
  * @date 2016-5-18 14:09:01
  * @see in.egan.pay.ali.api.AliPayService
  */
-@Deprecated
 public class AliPayService extends BasePayService {
     protected final Log log = LogFactory.getLog(AliPayService.class);
 
 
     private String httpsReqUrl = "https://mapi.alipay.com/gateway.do";
+    private String queryReqUrl = "https://openapi.alipay.com/gateway.do";
+
+    public AliPayService(PayConfigStorage payConfigStorage) {
+        super(payConfigStorage);
+    }
+
+    public AliPayService(PayConfigStorage payConfigStorage, HttpConfigStorage configStorage) {
+        super(payConfigStorage, configStorage);
+    }
 
 
     public String getHttpsVerifyUrl() {
@@ -42,14 +56,13 @@ public class AliPayService extends BasePayService {
     @Override
     public boolean verify(Map<String, String> params) {
 
-
         if (params.get("sign") == null || params.get("notify_id") == null) {
             log.debug("支付宝支付异常：params：" + params);
             return false;
         }
 
         try {
-            return getSignVerify(params, params.get("sign")) && "true".equals(verifyUrl(params.get("notify_id")));
+            return signVerify(params, params.get("sign")) && verifySource(params.get("notify_id"));
         } catch (PayErrorException e) {
             e.printStackTrace();
         }
@@ -57,6 +70,10 @@ public class AliPayService extends BasePayService {
         return false;
     }
 
+    @Override
+    public boolean verifySource(String id) {
+        return "true".equals(requestTemplate.getForObject( getHttpsVerifyUrl() + "partner=" + payConfigStorage.getPid() + "&notify_id=" + id, String.class));
+    }
 
     /**
      * 根据反馈回来的信息，生成签名结果
@@ -64,51 +81,49 @@ public class AliPayService extends BasePayService {
      * @param sign 比对的签名结果
      * @return 生成的签名结果
      */
-    public   boolean getSignVerify(Map<String, String> params, String sign) {
+    @Override
+    public boolean signVerify(Map<String, String> params, String sign) {
 
         return SignUtils.valueOf(payConfigStorage.getSignType()).verify(params,  sign,  payConfigStorage.getKeyPublic(), payConfigStorage.getInputCharset());
     }
 
 
-    @Override
-    public String verifyUrl(String notify_id) throws PayErrorException {
-        return execute(new SimpleGetRequestExecutor(), getHttpsVerifyUrl(), "partner=" + payConfigStorage.getPartner() + "&notify_id=" + notify_id);
+    /**
+     *  生成并设置签名
+     * @param parameters 请求参数
+     * @return
+     */
+    private Map<String, Object> setSign(Map<String, Object> parameters){
+        parameters.put("sign_type", payConfigStorage.getSignType());
+        String sign = createSign(SignUtils.parameterText(parameters, "&",  "sign", "appId"), payConfigStorage.getInputCharset());
+      /*  try {
+            sign = URLEncoder.encode(sign, payConfigStorage.getInputCharset());
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }*/
+        parameters.put("sign", sign);
+
+        return parameters;
     }
 
-
     /**
-     * 向支付宝端发送请求，在这里执行的策略是当发生access_token过期时才去刷新，然后重新执行请求，而不是全局定时请求
-     *
-     * @param executor
-     * @param uri
-     * @param data
+     * 获取公共请求参数
+     * @param transactionType 交易类型
      * @return
-     * @throws PayErrorException
-     * @source chanjarster/weixin-java-tools
      */
-    @Override
-    public <T, E> T execute(RequestExecutor<T, E> executor, String uri, E data) throws PayErrorException {
-        int retryTimes = 0;
-        do {
-            try {
-                return executeInternal(executor, uri, data);
-            } catch (PayErrorException e) {
-                PayError error = e.getError();
-                if (error.getErrorCode() == 404) {
-                    int sleepMillis = retrySleepMillis * (1 << retryTimes);
-                    try {
-                        log.debug(String.format("支付宝系统繁忙，(%s)ms 后重试(第%s次)", sleepMillis, retryTimes + 1));
-                        Thread.sleep(sleepMillis);
-                    } catch (InterruptedException e1) {
-                        throw new RuntimeException(e1);
-                    }
-                } else {
-                    throw e;
-                }
-            }
-        } while (++retryTimes < maxRetryTimes);
+    private Map<String, Object> getPublicParameters(TransactionType transactionType ){
+        Map<String, Object> orderInfo = new TreeMap<>();
+        orderInfo.put("app_id", payConfigStorage.getAppid());
+        orderInfo.put("method", transactionType.getType());
+        orderInfo.put("format", "json");
+        orderInfo.put("charset", payConfigStorage.getInputCharset());
 
-        throw new RuntimeException("支付宝服务端异常，超出重试次数");
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        df.setTimeZone(TimeZone.getTimeZone("GMT+8"));
+//      DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        orderInfo.put("timestamp", df.format(new Date()));
+        orderInfo.put("version", "1.0");
+        return  orderInfo;
     }
 
 
@@ -124,7 +139,7 @@ public class AliPayService extends BasePayService {
 
         Map<String, Object> orderInfo = getOrder(order);
 
-        String sign = createSign( SignUtils.parameterText(orderInfo, "&"), "UTF-8");
+        String sign = createSign(orderInfo, "UTF-8");
 
         try {
             sign = URLEncoder.encode(sign, "UTF-8");
@@ -142,51 +157,30 @@ public class AliPayService extends BasePayService {
      *
      * @param order 支付订单
      * @return
-     * @see in.egan.pay.common.bean.PayOrder
+     * @see PayOrder
      */
     private  Map<String, Object> getOrder(PayOrder order) {
         Map<String, Object> orderInfo = new TreeMap<>();
-//        StringBuilder orderInfo = new StringBuilder();
         // 签约合作者身份ID
         orderInfo.put("partner", payConfigStorage.getPartner());
-//        orderInfo.append( "partner=").append( "\"").append( payConfigStorage.getPartner() ).append("\"");
-
         // 签约卖家支付宝账号
         orderInfo.put("seller_id", payConfigStorage.getSeller());
-//         orderInfo.append("&seller_id=" ) .append("\"" ) .append(payConfigStorage.getSeller() ) .append("\"");
-
         // 商户网站唯一订单号
         orderInfo.put("out_trade_no", order.getTradeNo());
-//         orderInfo.append("&out_trade_no=" ) .append("\"" ).append(order.getTradeNo() ) .append("\"");
-
         // 商品名称
         orderInfo.put("subject", order.getSubject());
-//         orderInfo.append("&subject=" ) .append("\"" ) .append(order.getSubject() ) .append("\"");
-
         // 商品详情
         orderInfo.put("body", order.getBody());
-//         orderInfo.append("&body=" ) .append("\"" ) .append(order.getBody() ) .append("\"");
-
         // 商品金额
         orderInfo.put("total_fee", order.getPrice().setScale(2, BigDecimal.ROUND_HALF_UP).toString() );
-//         orderInfo.append("&total_fee=" ) .append("\"" ) .append(order.getPrice().setScale(2, BigDecimal.ROUND_HALF_UP) ) .append("\"");
-
         // 服务器异步通知页面路径
         orderInfo.put("notify_url", payConfigStorage.getNotifyUrl() );
-//         orderInfo.append("&notify_url=" ) .append("\"" ).append( payConfigStorage.getNotifyUrl() ) .append("\"");
-
         // 服务接口名称， 固定值
         orderInfo.put("service",  order.getTransactionType().getType()  );
-//         orderInfo.append("&service=\"" ).append( order.getTransactionType().getType() ).append("\"");
-
         // 支付类型， 固定值
         orderInfo.put("payment_type",  "1" );
-//         orderInfo.append("&payment_type=\"1\"");
-
         // 参数编码， 固定值
         orderInfo.put("_input_charset",  payConfigStorage.getInputCharset());
-//         orderInfo.append("&_input_charset=\"utf-8\"");
-
         // 设置未付款交易的超时时间
         // 默认30分钟，一旦超时，该笔交易就会自动被关闭。
         // 取值范围：1m～15d。
@@ -194,28 +188,15 @@ public class AliPayService extends BasePayService {
         // 该参数数值不接受小数点，如1.5h，可转换为90m。
         // TODO 2017/2/6 11:05 author: egan  目前写死，这一块建议配置
         orderInfo.put("it_b_pay",  "30m");
-//         orderInfo.append("&it_b_pay=\"30m\"");
-
-        // extern_token为经过快登授权获取到的alipay_open_id,带上此参数用户将使用授权的账户进行支付
-        //  orderInfo.append("&extern_token=" ) .append("\"" ) extern_token ) .append("\"");
-
         // 支付宝处理完请求后，当前页面跳转到商户指定页面的路径，可空
         orderInfo.put("return_url", payConfigStorage.getReturnUrl());
-//         orderInfo.append("&return_url=\"m.alipay.com\"");
-
         // 调用银行卡支付，需配置此参数，参与签名， 固定值 （需要签约《无线银行卡快捷支付》才能使用）
 //        if (order.getTransactionType().getType())
-//          orderInfo.append("&paymethod=\"expressGateway\"");
+//          orderInfo.put("paymethod","expressGateway");
 
         return orderInfo;
     }
 
-
-    @Override
-    public String createSign(String content, String characterEncoding) {
-
-        return  SignUtils.valueOf(payConfigStorage.getSignType()).createSign(content, payConfigStorage.getKeyPrivate(),characterEncoding);
-    }
 
 
     @Override
@@ -265,12 +246,13 @@ public class AliPayService extends BasePayService {
 
 
         //submit按钮控件请不要含有name属性
-//        formHtml.append("<input type=\"submit\" value=\"\" style=\"display:none;\">");
         formHtml.append("</form>");
         formHtml.append("<script>document.forms['_alipaysubmit_'].submit();</script>");
 
         return formHtml.toString();
     }
+
+
 
     /**
      * 生成二维码支付
@@ -283,61 +265,177 @@ public class AliPayService extends BasePayService {
         throw new UnsupportedOperationException();
     }
 
+
+    /**
+     *  交易查询接口
+     * @param tradeNo 支付平台订单号
+     * @param outTradeNo 商户单号
+     * @return
+     */
     @Override
     public Map<String, Object> query(String tradeNo, String outTradeNo) {
-        return null;
-    }
 
-    @Override
-    public Map<String, Object> close(String tradeNo, String outTradeNo) {
-        return null;
-    }
-
-    @Override
-    public Map<String, Object> refund(String tradeNo, String outTradeNo) {
-        return null;
-    }
-
-    @Override
-    public Map<String, Object> refundquery(String tradeNo, String outTradeNo) {
-        return null;
-    }
-
-    @Override
-    public Object downloadbill(Date billDate, String billType) {
-        return null;
+        return  query(tradeNo, outTradeNo, new Callback<Map<String, Object>>() {
+            @Override
+            public Map<String, Object> perform(Map<String, Object> map) {
+                return map;
+            }
+        });
     }
 
     /**
      *
-     * @param executor
-     * @param uri
-     * @param data
+     * @param tradeNo    支付平台订单号
+     * @param outTradeNo 商户单号
+     * @param callback 处理器
      * @param <T>
-     * @param <E>
      * @return
-     * @throws PayErrorException
      */
-    protected <T, E> T executeInternal(RequestExecutor<T, E> executor, String uri, E data) throws PayErrorException {
+    @Override
+    public <T> T query(String tradeNo, String outTradeNo, Callback<T> callback) {
 
-        try {
-            return executor.execute(getHttpClient(), httpProxy, uri, data);
-        } catch (IOException  e) {
-            throw new RuntimeException(e);
-        }
+        return secondaryInterface(tradeNo, outTradeNo, AliTransactionType.QUERY, callback);
     }
-
 
 
     @Override
-    public PayConfigStorage getPayConfigStorage() {
-        return payConfigStorage;
+    public Map<String, Object> close(String tradeNo, String outTradeNo) {
+
+        return  close(tradeNo, outTradeNo, new Callback<Map<String, Object>>() {
+            @Override
+            public Map<String, Object> perform(Map<String, Object> map) {
+                return map;
+            }
+        });
     }
 
-    public AliPayService() {
+    @Override
+    public <T> T close(String tradeNo, String outTradeNo, Callback<T> callback) {
+        return  secondaryInterface(tradeNo, outTradeNo, AliTransactionType.CLOSE, callback);
     }
 
-    public AliPayService(PayConfigStorage payConfigStorage) {
-        setPayConfigStorage(payConfigStorage);
+    @Override
+    public Map<String, Object> refund(String tradeNo, String outTradeNo) {
+
+        return  refund(tradeNo, outTradeNo, new Callback<Map<String, Object>>() {
+            @Override
+            public Map<String, Object> perform(Map<String, Object> map) {
+                return map;
+            }
+        });
     }
+
+    @Override
+    public <T> T refund(String tradeNo, String outTradeNo, Callback<T> callback) {
+        return secondaryInterface(tradeNo, outTradeNo, AliTransactionType.REFUND, callback);
+    }
+
+    @Override
+    public Map<String, Object> refundquery(String tradeNo, String outTradeNo) {
+        return  refundquery(tradeNo, outTradeNo, new Callback<Map<String, Object>>() {
+            @Override
+            public Map<String, Object> perform(Map<String, Object> map) {
+                return map;
+            }
+        });
+    }
+
+    @Override
+    public <T> T refundquery(String tradeNo, String outTradeNo, Callback<T> callback) {
+        return secondaryInterface(tradeNo, outTradeNo, AliTransactionType.REFUNDQUERY, callback);
+    }
+
+    /**
+     * 目前只支持日账单
+     * @param billDate 账单类型，商户通过接口或商户经开放平台授权后其所属服务商通过接口可以获取以下账单类型：trade、signcustomer；trade指商户基于支付宝交易收单的业务账单；signcustomer是指基于商户支付宝余额收入及支出等资金变动的帐务账单；
+     * @param billType 账单时间：日账单格式为yyyy-MM-dd，月账单格式为yyyy-MM。
+     * @return
+     */
+    @Override
+    public Map<String, Object> downloadbill(Date billDate, String billType) {
+        return  downloadbill(billDate, billType, new Callback<Map<String, Object>>() {
+            @Override
+            public Map<String, Object> perform(Map<String, Object> map) {
+                return map;
+            }
+        });
+    }
+
+    /**
+     *  目前只支持日账单
+     * @param billDate 账单时间：具体请查看对应支付平台
+     * @param billType 账单类型，具体请查看对应支付平台
+     * @param callback 处理器
+     * @param <T>
+     * @return
+     */
+    @Override
+    public <T> T downloadbill(Date billDate, String billType, Callback<T> callback) {
+
+        //获取公共参数
+        Map<String, Object> parameters = getPublicParameters(AliTransactionType.DOWNLOADBILL);
+
+        Map<String, Object> bizContent = new TreeMap<>();
+        bizContent.put("bill_type", billType);
+        //目前只支持日账单
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        df.setTimeZone(TimeZone.getTimeZone("GMT+8"));
+        bizContent.put("bill_date", df.format(billDate));
+        //设置请求参数的集合
+        parameters.put("biz_content", JSON.toJSONString(bizContent));
+        //设置签名
+        setSign(parameters);
+        return callback.perform(requestTemplate.getForObject(queryReqUrl + "?" + ClientHttpRequest.getMapToParameters(parameters), JSONObject.class));
+    }
+
+    /**
+     *
+     * @param tradeNoOrBillDate 支付平台订单号或者账单类型， 具体请
+     *                          类型为{@link String }或者 {@link Date }，类型须强制限制，类型不对应则抛出异常{@link in.egan.pay.common.exception.PayErrorException}
+     * @param outTradeNoBillType  商户单号或者 账单类型
+     * @param transactionType 交易类型
+     * @param callback 处理器
+     * @param <T>
+     * @return
+     */
+    @Override
+    public <T> T secondaryInterface(Object tradeNoOrBillDate, String outTradeNoBillType, TransactionType transactionType, Callback<T> callback) {
+        if (transactionType == AliTransactionType.DOWNLOADBILL){
+            if (tradeNoOrBillDate instanceof  Date){
+                return downloadbill((Date) tradeNoOrBillDate, outTradeNoBillType, callback);
+            }
+            throw new PayErrorException(new PayException("failure", "非法类型异常:" + tradeNoOrBillDate.getClass()));
+        }
+
+        if (!(tradeNoOrBillDate instanceof  String)){
+            throw new PayErrorException(new PayException("failure", "非法类型异常:" + tradeNoOrBillDate.getClass()));
+        }
+
+        //获取公共参数
+        Map<String, Object> parameters = getPublicParameters(transactionType);
+        //设置请求参数的集合
+        parameters.put("biz_content", getContentToJson(tradeNoOrBillDate.toString(), outTradeNoBillType));
+        //设置签名
+        setSign(parameters);
+        return  callback.perform(requestTemplate.getForObject(queryReqUrl + "?" + ClientHttpRequest.getMapToParameters(parameters), JSONObject.class));
+
+    }
+
+    /**
+     *  获取biz_content。不包含下载账单
+     * @param tradeNo 支付平台订单号
+     * @param outTradeNo 商户单号
+     * @return
+     */
+    private String getContentToJson(String tradeNo, String outTradeNo){
+        Map<String, Object> bizContent = new TreeMap<>();
+        if (null != outTradeNo){
+            bizContent.put("out_trade_no", outTradeNo);
+        }
+        if (null != tradeNo){
+            bizContent.put("trade_no", tradeNo);
+        }
+        return JSON.toJSONString(bizContent);
+    }
+
 }

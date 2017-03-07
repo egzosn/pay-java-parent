@@ -1,4 +1,4 @@
-package in.egan.pay.ali.util;
+package in.egan.pay.ali.before.util;
 
 /**
  * @author  egan
@@ -6,10 +6,10 @@ package in.egan.pay.ali.util;
  * @date 2016-5-24
  */
 
-import in.egan.pay.common.api.RequestExecutor;
-import in.egan.pay.common.bean.result.PayError;
+import in.egan.pay.common.before.api.RequestExecutor;
+import in.egan.pay.common.before.bean.result.PayError;
 import in.egan.pay.common.exception.PayErrorException;
-import in.egan.pay.common.util.http.Utf8ResponseHandler;
+import in.egan.pay.common.before.util.http.Utf8ResponseHandler;
 import org.apache.http.HttpHost;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -24,6 +24,7 @@ import java.io.IOException;
  * @source chanjarster/weixin-java-tools
  *
  */
+@Deprecated
 public class SimpleGetRequestExecutor implements RequestExecutor<String, String> {
 
     @Override

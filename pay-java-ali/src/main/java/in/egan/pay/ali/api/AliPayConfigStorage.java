@@ -58,7 +58,7 @@ public class AliPayConfigStorage extends BasePayConfigStorage {
     }
 
     /**
-     * @see #setPid()
+     * @see #setPid(String)
      * @return 合作者id
      */
     @Deprecated

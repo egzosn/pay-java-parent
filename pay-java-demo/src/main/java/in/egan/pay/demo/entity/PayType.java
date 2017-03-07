@@ -1,8 +1,8 @@
 package in.egan.pay.demo.entity;
 
 import in.egan.pay.ali.api.AliPayConfigStorage;
-import in.egan.pay.ali.api.AliPayService;
-import in.egan.pay.ali.bean.AliTransactionType;
+import in.egan.pay.ali.before.api.AliPayService;
+import in.egan.pay.ali.before.bean.AliTransactionType;
 import in.egan.pay.common.api.PayService;
 import in.egan.pay.common.bean.BasePayType;
 import in.egan.pay.common.bean.TransactionType;
@@ -22,11 +22,13 @@ import in.egan.pay.wx.youdian.bean.YoudianTransactionType;
  */
 public enum PayType implements BasePayType {
 
+
     aliPay{
         @Override
         public PayService getPayService(ApyAccount apyAccount) {
             AliPayConfigStorage aliPayConfigStorage = new AliPayConfigStorage();
             aliPayConfigStorage.setPid(apyAccount.getPartner());
+            aliPayConfigStorage.setAppId(apyAccount.getAppid());
             aliPayConfigStorage.setAliPublicKey(apyAccount.getPublicKey());
             aliPayConfigStorage.setKeyPrivate(apyAccount.getPrivateKey());
             aliPayConfigStorage.setNotifyUrl(apyAccount.getNotifyUrl());
