@@ -1,5 +1,6 @@
-package in.egan.pay.common.api;
+package in.egan.pay.common.before.api;
 
+import in.egan.pay.common.api.PayErrorExceptionHandler;
 import in.egan.pay.common.bean.PayMessage;
 import in.egan.pay.common.bean.PayOutMessage;
 import in.egan.pay.common.util.LogExceptionHandler;
@@ -21,7 +22,7 @@ import java.util.concurrent.Future;
  * 1. 配置路由规则时要按照从细到粗的原则，否则可能消息可能会被提前处理
  * 2. 默认情况下消息只会被处理一次，除非使用 {@link PayMessageRouterRule#next()}
  * 3. 规则的结束必须用{@link PayMessageRouterRule#end()}或者{@link PayMessageRouterRule#next()}，否则不会生效
- *
+ * 
  * 使用方法：
  * PayMessageRouter router = new PayMessageRouter();
  * router
@@ -33,16 +34,17 @@ import java.util.concurrent.Future;
  *       // 另外一个匹配规则
  *   .end()
  * ;
- *
+ * 
  * // 将PayMessage交给消息路由器
  * router.route(message);
- *
+ * 
  * </pre>
  *  @source chanjarster/weixin-java-tools
  *  @source Daniel Qian
  *  @author  egan
  *
  */
+@Deprecated
 public class PayMessageRouter {
 
     protected final Log log = LogFactory.getLog(PayMessageRouter.class);
@@ -51,13 +53,13 @@ public class PayMessageRouter {
 
   private final List<PayMessageRouterRule> rules = new ArrayList<PayMessageRouterRule>();
 
-  private final PayService payService;
+  private final in.egan.pay.common.before.api.PayService payService;
 
   private ExecutorService executorService;
 
   private PayErrorExceptionHandler exceptionHandler;
 
-  public PayMessageRouter(PayService payService) {
+  public PayMessageRouter(in.egan.pay.common.before.api.PayService payService) {
     this.payService = payService;
     this.executorService = Executors.newFixedThreadPool(DEFAULT_THREAD_POOL_SIZE);
     this.exceptionHandler = new LogExceptionHandler();

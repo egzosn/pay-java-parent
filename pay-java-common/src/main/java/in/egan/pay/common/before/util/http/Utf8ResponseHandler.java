@@ -1,4 +1,4 @@
-package in.egan.pay.common.util.http;
+package in.egan.pay.common.before.util.http;
 
 import org.apache.http.Consts;
 import org.apache.http.HttpEntity;
@@ -24,7 +24,7 @@ public class Utf8ResponseHandler implements ResponseHandler<String> {
     public String handleResponse(final HttpResponse response) throws IOException {
         final StatusLine statusLine = response.getStatusLine();
         final HttpEntity entity = response.getEntity();
-        if (statusLine.getStatusCode() >= 300) {
+        if (statusLine.getStatusCode() >= 300 && statusLine.getStatusCode() != 304) {
             EntityUtils.consume(entity);
             throw new HttpResponseException(statusLine.getStatusCode(), statusLine.getReasonPhrase());
         }

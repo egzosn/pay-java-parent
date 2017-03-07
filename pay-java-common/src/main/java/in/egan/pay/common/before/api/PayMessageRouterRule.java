@@ -1,6 +1,7 @@
-package in.egan.pay.common.api;
+package in.egan.pay.common.before.api;
 
 
+import in.egan.pay.common.api.PayErrorExceptionHandler;
 import in.egan.pay.common.bean.PayMessage;
 import in.egan.pay.common.bean.PayOutMessage;
 import in.egan.pay.common.exception.PayErrorException;
@@ -19,8 +20,8 @@ import java.util.regex.Pattern;
  * @date 2016-6-1 11:28:01
  * @source chanjarster/weixin-java-tools
  */
+@Deprecated
 public class PayMessageRouterRule {
-
 
     private final PayMessageRouter routerBuilder;
 
@@ -92,7 +93,7 @@ public class PayMessageRouterRule {
      * @param transactionType
      * @return
      */
-    public PayMessageRouterRule transactionType(String ... transactionType) {
+    public PayMessageRouterRule transactionType(String... transactionType) {
         this.transactionType = transactionType;
         return this;
     }
@@ -241,10 +242,9 @@ public class PayMessageRouterRule {
                         &&
                         (this.payType == null || this.payType.equals((payMessage.getPayType() == null ? null : payMessage.getPayType())))
                         &&
-                        (this.transactionType == null || equalsTransactionType(payMessage.getTransactionType()))
+                        (this.transactionType == null || equalsTransactionType(payMessage.getTransactionType()) )
                         &&
-                        (this.discount == null || this.discount
-                                .equals(payMessage.getDiscount() == null ? null : payMessage.getDiscount().trim()))
+                        (this.discount == null || this.discount.equals(payMessage.getDiscount() == null ? null : payMessage.getDiscount().trim()))
                         &&
                         (this.rDiscount == null || Pattern
                                 .matches(this.rDiscount, payMessage.getDiscount() == null ? "" : payMessage.getDiscount().trim()))
@@ -257,6 +257,7 @@ public class PayMessageRouterRule {
                 )
                 ;
     }
+
 
     /**
      * 匹配交易类型
@@ -277,8 +278,6 @@ public class PayMessageRouterRule {
 
     }
 
-
-
     /**
      * 处理支付回调过来的消息
      *
@@ -286,7 +285,7 @@ public class PayMessageRouterRule {
      * @return true 代表继续执行别的router，false 代表停止执行别的router
      */
     protected PayOutMessage service(PayMessage payMessage,
-                                        PayService payService,
+                                        in.egan.pay.common.before.api.PayService payService,
                                         PayErrorExceptionHandler exceptionHandler) {
 
         try {

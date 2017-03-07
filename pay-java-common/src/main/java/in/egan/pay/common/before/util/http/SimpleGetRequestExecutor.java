@@ -1,4 +1,4 @@
-package in.egan.pay.common.util.http;
+package in.egan.pay.common.before.util.http;
 
 /**
  * @author  egan
@@ -7,8 +7,7 @@ package in.egan.pay.common.util.http;
  * @source chanjarster/weixin-java-tools
  */
 
-import in.egan.pay.common.api.RequestExecutor;
-import in.egan.pay.common.bean.result.PayError;
+import in.egan.pay.common.before.api.RequestExecutor;
 import in.egan.pay.common.exception.PayErrorException;
 import org.apache.http.HttpHost;
 import org.apache.http.client.config.RequestConfig;
@@ -17,10 +16,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 
 import java.io.IOException;
-
-
-
-import org.apache.http.impl.client.CloseableHttpClient;
 
 /**
  * 简单的GET请求执行器，请求的参数是String, 返回的结果也是String

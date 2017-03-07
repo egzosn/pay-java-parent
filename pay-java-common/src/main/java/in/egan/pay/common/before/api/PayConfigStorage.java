@@ -1,4 +1,4 @@
-package in.egan.pay.common.api;
+package in.egan.pay.common.before.api;
 
 import in.egan.pay.common.bean.MsgType;
 
@@ -10,7 +10,9 @@ import java.util.concurrent.locks.Lock;
  * @email egzosn@gmail.com
  * @date 2016-5-18 14:09:01
  * @source chanjarster/weixin-java-tools
+ * @see  in.egan.pay.common.api.PayConfigStorage
  */
+@Deprecated
  public interface PayConfigStorage {
 
     /*
@@ -81,7 +83,10 @@ import java.util.concurrent.locks.Lock;
      * 消息类型
      *  @see #getMsgType
      *  @see MsgType
-     * @return "text" 或者 "xml"，json
+     * @return "text" 或者 "xml"
+     * @see MsgType#text
+     * @see MsgType#xml
+     * @see MsgType#json
      */
      MsgType getMsgType();
 
@@ -125,5 +130,38 @@ import java.util.concurrent.locks.Lock;
      * @param expiresTime 过期时间，时间戳
      */
     void updateAccessToken(String accessToken, long expiresTime);
+
+
+    /**
+     * http代理地址
+     * @return
+     * @see in.egan.pay.common.http.HttpConfigStorage#getHttpProxyHost()
+     */
+    @Deprecated
+     String getHttpProxyHost();
+
+    /**
+     *   代理端口
+     * @return
+     * @see in.egan.pay.common.http.HttpConfigStorage#getHttpProxyPort()
+     */
+    @Deprecated
+    int getHttpProxyPort();
+
+    /**
+     * 代理用户名
+     * @return
+     * @see in.egan.pay.common.http.HttpConfigStorage#getHttpProxyUsername()
+     */
+    @Deprecated
+     String getHttpProxyUsername();
+
+    /**
+     *  代理密码
+     * @return
+     * @see in.egan.pay.common.http.HttpConfigStorage#getHttpProxyPassword()
+     */
+    @Deprecated
+     String getHttpProxyPassword();
 
 }

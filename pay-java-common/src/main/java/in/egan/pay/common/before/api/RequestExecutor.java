@@ -1,9 +1,8 @@
-package in.egan.pay.common.api;
+package in.egan.pay.common.before.api;
 
 
 import in.egan.pay.common.exception.PayErrorException;
 import org.apache.http.HttpHost;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.impl.client.CloseableHttpClient;
 
 import java.io.IOException;
@@ -15,6 +14,7 @@ import java.io.IOException;
  * @param <E> 请求参数类型
  * @source chanjarster/weixin-java-tools
  */
+@Deprecated
 public interface RequestExecutor<T, E> {
 
     /**

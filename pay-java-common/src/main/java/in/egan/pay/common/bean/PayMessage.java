@@ -1,10 +1,10 @@
 package in.egan.pay.common.bean;
 
-import in.egan.pay.common.api.PayConsts;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
 
@@ -13,14 +13,13 @@ import java.util.Map;
  * 基础实现，具体可根据具体支付回调的消息去实现
  * @author egan
  * @email egzosn@gmail.com
- * @date 2016-6-1 14:2:3
- * @source chanjarster/weixin-java-tools
+ * @date 2017/3/7 16:37
  */
 public class PayMessage implements Serializable {
     private Map<String, String> payMessage = null;
     private String msgType;
-    private String event;
-    private String eventKey;
+    private String payType;
+    private String transactionType;
     private String fromPay;
     private String describe;
 
@@ -28,10 +27,18 @@ public class PayMessage implements Serializable {
         this.payMessage = payMessage;
     }
 
-    public PayMessage(Map<String, String> payMessage, String event, String msgType) {
+    public PayMessage(Map<String, String> payMessage, String payType, String msgType) {
         this(payMessage);
-        this.event = event;
+        this.payType = payType;
         this.msgType = msgType;
+    }
+
+
+    public PayMessage(Map<String, String> payMessage, String msgType, String payType, String transactionType) {
+        this.payMessage = payMessage;
+        this.msgType = msgType;
+        this.payType = payType;
+        this.transactionType = transactionType;
     }
 
     public String getMsgType() {
@@ -42,20 +49,21 @@ public class PayMessage implements Serializable {
         this.msgType = msgType;
     }
 
-    public String getEvent() {
-        return event;
+
+    public String getPayType() {
+        return payType;
     }
 
-    public void setEvent(String event) {
-        this.event = event;
+    public void setPayType(String payType) {
+        this.payType = payType;
     }
 
-    public String getEventKey() {
-        return eventKey;
+    public String getTransactionType() {
+        return transactionType;
     }
 
-    public void setEventKey(String eventKey) {
-        this.eventKey = eventKey;
+    public void setTransactionType(String transactionType) {
+            this.transactionType = transactionType;
     }
 
     public String getFromPay() {
@@ -286,6 +294,7 @@ public class PayMessage implements Serializable {
     public Map<String, String> getPayMessage() {
         return payMessage;
     }
+
 
 
 }

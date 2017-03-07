@@ -71,7 +71,7 @@ public enum SignUtils {
      * @param separator 分隔符
      * @return 去掉空值与签名参数后的新签名，拼接后字符串
      */
-    public static String parameterText(Map parameters, String separator) {
+  /*  public static String parameterText(Map parameters, String separator) {
         if(parameters == null){
             return "";
         }
@@ -107,13 +107,85 @@ public enum SignUtils {
                 for (int i = 0; i < values.length; i++) {
                     String value = values[i].trim();
                     if ("".equals(value)){ continue;}
-                    valueStr = (i == values.length - 1) ? valueStr + value
-                            : valueStr + value + ",";
+                    valueStr += (i == values.length - 1) ?  value :  value + ",";
                 }
             } else if (o != null) {
                 valueStr = o.toString();
             }
             if (null == valueStr || "".equals(valueStr.toString().trim()) || "sign".equals(k) || "key".equals(k) || "appId".equals(k) || "sign_type".equalsIgnoreCase(k)) {
+                continue;
+            }
+            sb.append(k ).append("=").append( valueStr).append(separator);
+        }
+        if (sb.length() > 0) {
+            sb.deleteCharAt(sb.length() - 1);
+        }
+        return sb.toString();
+    }*/
+
+    /**
+     *
+     * 把数组所有元素排序，并按照“参数=参数值”的模式用“@param separator”字符拼接成字符串
+     * @param parameters 参数
+     * @param separator 分隔符
+     * @return 去掉空值与签名参数后的新签名，拼接后字符串
+     */
+    public static String parameterText(Map parameters, String separator) {
+        return parameterText(parameters, separator, "sign", "key", "appId", "sign_type");
+    }
+
+    /**
+     *
+     * 把数组所有元素排序，并按照“参数=参数值”的模式用“@param separator”字符拼接成字符串
+     * @param parameters 参数
+     * @param separator 分隔符
+     * @param ignoreKey 需要忽略添加的key
+     * @return 去掉空值与签名参数后的新签名，拼接后字符串
+     */
+    public static String parameterText(Map parameters, String separator, String... ignoreKey ) {
+        if(parameters == null){
+            return "";
+        }
+        StringBuffer sb = new StringBuffer();
+        if (null != ignoreKey){
+            Arrays.sort(ignoreKey);
+        }
+        // TODO 2016/11/11 10:14 author: egan 已经排序好处理
+        if (parameters instanceof SortedMap) {
+            for (String k : ((Set<String>) parameters.keySet())) {
+                Object v = parameters.get(k);
+                if (null == v || "".equals(v.toString().trim()) || (null != ignoreKey && Arrays.binarySearch(ignoreKey, k ) >= 0)) {
+                    continue;
+                }
+                sb.append(k ).append("=").append( v.toString().trim()).append(separator);
+            }
+            if (sb.length() > 0 && !"".equals(separator)) {
+                sb.deleteCharAt(sb.length() - 1);
+            }
+            return sb.toString();
+
+        }
+
+
+        // TODO 2016/11/11 10:14 author: egan 未排序须处理
+        List<String> keys = new ArrayList<String>(parameters.keySet());
+        //排序
+        Collections.sort(keys);
+        for (String k : keys) {
+            String valueStr = "";
+            Object o = parameters.get(k);
+            if (o instanceof String[]) {
+                String[] values = (String[]) o;
+                if (null == values){continue;}
+                for (int i = 0; i < values.length; i++) {
+                    String value = values[i].trim();
+                    if ("".equals(value)){ continue;}
+                    valueStr += (i == values.length - 1) ?  value :  value + ",";
+                }
+            } else if (o != null) {
+                valueStr = o.toString();
+            }
+            if (null == valueStr || "".equals(valueStr.toString().trim()) || (null != ignoreKey && Arrays.binarySearch(ignoreKey, k ) >= 0)) {
                 continue;
             }
             sb.append(k ).append("=").append( valueStr).append(separator);
