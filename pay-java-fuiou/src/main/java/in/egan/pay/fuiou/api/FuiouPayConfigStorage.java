@@ -2,7 +2,7 @@ package in.egan.pay.fuiou.api;/**
  * Created by Fuzx on 2017/1/16 0016.
  */
 
-import in.egan.pay.common.api.BasePayConfigStorage;
+import in.egan.pay.common.before.api.BasePayConfigStorage;
 
 /**
  * @author Fuzx

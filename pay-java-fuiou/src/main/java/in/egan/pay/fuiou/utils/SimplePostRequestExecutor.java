@@ -1,11 +1,11 @@
 package in.egan.pay.fuiou.utils;
 
 import com.alibaba.fastjson.JSONObject;
-import in.egan.pay.common.api.RequestExecutor;
-import in.egan.pay.common.bean.result.PayError;
+import in.egan.pay.common.before.api.RequestExecutor;
+import in.egan.pay.common.before.bean.result.PayError;
 import in.egan.pay.common.exception.PayErrorException;
 import in.egan.pay.common.util.XML;
-import in.egan.pay.common.util.http.Utf8ResponseHandler;
+import in.egan.pay.common.before.util.http.Utf8ResponseHandler;
 import org.apache.http.Consts;
 import org.apache.http.HttpHost;
 import org.apache.http.client.ClientProtocolException;

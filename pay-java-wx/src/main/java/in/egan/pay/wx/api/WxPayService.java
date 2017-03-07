@@ -1,29 +1,23 @@
 package in.egan.pay.wx.api;
 
+import com.alibaba.fastjson.JSONObject;
+import in.egan.pay.common.api.BasePayService;
+import in.egan.pay.common.api.Callback;
 import in.egan.pay.common.api.PayConfigStorage;
 import in.egan.pay.common.api.PayService;
-import in.egan.pay.common.api.RequestExecutor;
 import in.egan.pay.common.bean.MethodType;
 import in.egan.pay.common.bean.PayOrder;
 import in.egan.pay.common.bean.PayOutMessage;
-import in.egan.pay.common.bean.result.PayError;
+import in.egan.pay.common.bean.TransactionType;
 import in.egan.pay.common.exception.PayErrorException;
+import in.egan.pay.common.http.HttpConfigStorage;
 import in.egan.pay.common.util.MatrixToImageWriter;
 import in.egan.pay.common.util.sign.SignUtils;
-import in.egan.pay.common.util.str.StringUtils;
+import in.egan.pay.wx.bean.WxPayError;
 import in.egan.pay.wx.bean.WxTransactionType;
-import in.egan.pay.wx.utils.SimplePostRequestExecutor;
 import in.egan.pay.common.util.XML;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpHost;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,30 +30,31 @@ import java.util.*;
  * @email egzosn@gmail.com
  * @date 2016-5-18 14:09:01
  */
-public class WxPayService implements PayService {
+public class WxPayService extends BasePayService {
     protected final Log log = LogFactory.getLog(WxPayService.class);
 
-    protected PayConfigStorage payConfigStorage;
 
-    protected CloseableHttpClient httpClient;
 
-    protected HttpHost httpProxy;
-
-    private int retrySleepMillis = 1000;
-
-    private int maxRetryTimes = 5;
 
     public final static String httpsVerifyUrl = "https://gw.tenpay.com/gateway";
     public final static String unifiedOrderUrl = "https://api.mch.weixin.qq.com/pay/unifiedorder";
-//    public final static String orderqueryUrl = "https://api.mch.weixin.qq.com/pay/orderquery";
+    //    public final static String orderqueryUrl = "https://api.mch.weixin.qq.com/pay/orderquery";
+
+
+
+    public WxPayService(PayConfigStorage payConfigStorage) {
+        super(payConfigStorage);
+    }
+
+    public WxPayService(PayConfigStorage payConfigStorage, HttpConfigStorage configStorage) {
+        super(payConfigStorage, configStorage);
+    }
 
     /**
      *  微信支付V2版本所需
-     *  当前版本不需要
+     *  当前版本不需要  ?
      * @return
      */
-    @Deprecated
-    @Override
     public String getHttpsVerifyUrl() {
         return httpsVerifyUrl + "/verifynotifyid.xml";
     }
@@ -71,19 +66,29 @@ public class WxPayService implements PayService {
             return false;
         }
 
-        if(params.get("sign") == null) {
+        if(null == params.get("sign")) {
 
             log.debug("微信支付异常：签名为空！out_trade_no=" + params.get("out_trade_no"));
         }
 
         try {
-            return getSignVerify(params, params.get("sign")) && "true".equals(verifyUrl(params.get("out_trade_no")));
+            return signVerify(params, params.get("sign")) && verifySource(params.get("out_trade_no"));
         } catch (PayErrorException e) {
             e.printStackTrace();
         }
         return false;
     }
 
+
+    /**
+     * 支付宝需要,微信是否也需要再次校验来源，进行订单查询
+     * @param id 商户单号
+     * @return
+     */
+    @Override
+    public boolean verifySource(String id) {
+        return true;
+    }
 
 
     /**
@@ -92,57 +97,11 @@ public class WxPayService implements PayService {
      * @param sign 比对的签名结果
      * @return 生成的签名结果
      */
-    public boolean getSignVerify(Map<String, String> params, String sign) {
+    public boolean signVerify(Map<String, String> params, String sign) {
        return SignUtils.valueOf(payConfigStorage.getSignType()).verify(params,  sign, "&key=" +  payConfigStorage.getKeyPublic(), payConfigStorage.getInputCharset());
     }
 
-    /**
-     * 支付宝需要，暂时预留
-     * @param out_trade_no 商户单号
-     * @return
-     * @throws PayErrorException
-     */
-    @Override
-    public String verifyUrl(String out_trade_no) throws PayErrorException {
-//        return execute(new SimplePostRequestExecutor(), getHttpsVerifyUrl(), "partner=" + payConfigStorage.getPartner() + "&notify_id=" + notify_id);
 
-        return "true";
-    }
-
-
-    /**
-     * 向支付端发送请求，在这里执行的策略是当发生access_token过期时才去刷新，然后重新执行请求，而不是全局定时请求
-     *
-     * @param executor
-     * @param uri
-     * @param data
-     * @return
-     * @throws PayErrorException
-     */
-    @Override
-    public <T, E> T execute(RequestExecutor<T, E> executor, String uri, E data) throws PayErrorException {
-        int retryTimes = 0;
-        do {
-            try {
-                return executeInternal(executor, uri, data);
-            } catch (PayErrorException e) {
-                PayError error = e.getError();
-                if (error.getErrorCode() == 403) {
-                    int sleepMillis = retrySleepMillis * (1 << retryTimes);
-                    try {
-                        log.debug(String.format("微信支付系统繁忙，(%s)ms 后重试(第%s次)", sleepMillis, retryTimes + 1));
-                        Thread.sleep(sleepMillis);
-                    } catch (InterruptedException e1) {
-                        throw new RuntimeException(e1);
-                    }
-                } else {
-                    throw e;
-                }
-            }
-        } while (++retryTimes < maxRetryTimes);
-
-        throw new PayErrorException(new PayError(-1, "微信支付服务端异常，超出重试次数"));
-    }
 
 
     /**
@@ -150,7 +109,7 @@ public class WxPayService implements PayService {
      *
      * @param order 支付订单
      * @return
-     * @see in.egan.pay.common.bean.PayOrder
+     * @see PayOrder
      */
     @Override
     public Map<String, Object> orderInfo(PayOrder order) {
@@ -177,44 +136,35 @@ public class WxPayService implements PayService {
 
        String requestXML = XML.getMap2Xml(parameters);
         log.debug("requestXML：" + requestXML);
-        String result = null;
-        try {
-             result = execute(new SimplePostRequestExecutor(), unifiedOrderUrl, requestXML);
-            log.debug("获取预支付订单返回结果33:" + result);
+        /////////APP端调起支付的参数列表
+        JSONObject result = getHttpRequestTemplate().postForObject(unifiedOrderUrl, requestXML, JSONObject.class);
 
-            /////////APP端调起支付的参数列表
-            Map map  = XML.toJSONObject(result);
-            if (!"SUCCESS".equals(map.get("return_code"))){
-                throw new PayErrorException(new PayError(-1, (String) map.get("return_msg"), result));
-            }
-            //如果是扫码支付无需处理，直接返回
-            if (WxTransactionType.NATIVE == order.getTransactionType()){
-                return map;
-            }
-
-            SortedMap<String, Object> params = new TreeMap<String, Object>();
-            params.put("appid", payConfigStorage.getAppid());
-            params.put("partnerid", payConfigStorage.getPartner());
-            params.put("prepayid", map.get("prepay_id"));
-            params.put("timestamp", System.currentTimeMillis() / 1000);
-            params.put("noncestr", map.get("nonce_str")/*WxpayCore.genNonceStr()*/);
-
-            if (WxTransactionType.JSAPI == order.getTransactionType()){
-                params.put("package", "prepay_id=" + map.get("prepay_id"));
-                params.put("signType", payConfigStorage.getSignType());
-            }else  if (WxTransactionType.APP == order.getTransactionType()){
-                params.put("package", "Sign=WXPay");
-            }
-            String paySign = createSign(SignUtils.parameterText(params), payConfigStorage.getInputCharset());
-            params.put("sign", paySign);
-            return params;
-        } catch (PayErrorException e) {
-            e.printStackTrace();
+        if (!"SUCCESS".equals(result.get("return_code"))){
+            throw new PayErrorException(new WxPayError(result.getString("return_code"),  result.getString("return_msg"), result.toJSONString()));
+        }
+        //如果是扫码支付无需处理，直接返回
+        if (WxTransactionType.NATIVE == order.getTransactionType()){
+            return result;
         }
 
-//        result = WxpayCore.httpsRequest2(httpsVerifyUrl, "POST", requestXML);
-    //////////////////////////
-        return null;
+        SortedMap<String, Object> params = new TreeMap<String, Object>();
+        params.put("appid", payConfigStorage.getAppid());
+        params.put("partnerid", payConfigStorage.getPartner());
+        params.put("prepayid", result.get("prepay_id"));
+        params.put("timestamp", System.currentTimeMillis() / 1000);
+        params.put("noncestr", result.get("nonce_str")/*WxpayCore.genNonceStr()*/);
+
+        if (WxTransactionType.JSAPI == order.getTransactionType()){
+            params.put("package", "prepay_id=" + result.get("prepay_id"));
+            params.put("signType", payConfigStorage.getSignType());
+        }else  if (WxTransactionType.APP == order.getTransactionType()){
+            params.put("package", "Sign=WXPay");
+        }
+        String paySign = createSign(SignUtils.parameterText(params), payConfigStorage.getInputCharset());
+        params.put("sign", paySign);
+        return params;
+
+
     }
 
 
@@ -262,9 +212,9 @@ public class WxPayService implements PayService {
     @Override
     public BufferedImage genQrPay(Map<String, Object> orderInfo) {
         //获取对应的支付账户操作工具（可根据账户id）
-        if (!"SUCCESS".equals(orderInfo.get("result_code"))){
-            throw new RuntimeException(new PayError(-1, (String) orderInfo.get("err_code")).toString());
-    }
+        if (!"SUCCESS".equals(orderInfo.get("result_code"))) {
+            throw new PayErrorException(new WxPayError("-1", (String) orderInfo.get("err_code")));
+        }
 
 
         return  MatrixToImageWriter.writeInfoToJpgBuff((String) orderInfo.get("code_url"));
@@ -276,7 +226,17 @@ public class WxPayService implements PayService {
     }
 
     @Override
+    public <T> T query(String tradeNo, String outTradeNo, Callback<T> callback) {
+        return null;
+    }
+
+    @Override
     public Map<String, Object> close(String tradeNo, String outTradeNo) {
+        return null;
+    }
+
+    @Override
+    public <T> T close(String tradeNo, String outTradeNo, Callback<T> callback) {
         return null;
     }
 
@@ -286,7 +246,17 @@ public class WxPayService implements PayService {
     }
 
     @Override
+    public <T> T refund(String tradeNo, String outTradeNo, Callback<T> callback) {
+        return null;
+    }
+
+    @Override
     public Map<String, Object> refundquery(String tradeNo, String outTradeNo) {
+        return null;
+    }
+
+    @Override
+    public <T> T refundquery(String tradeNo, String outTradeNo, Callback<T> callback) {
         return null;
     }
 
@@ -295,67 +265,20 @@ public class WxPayService implements PayService {
         return null;
     }
 
-
-    protected <T, E> T executeInternal(RequestExecutor<T, E> executor, String uri, E data) throws PayErrorException {
-
-        try {
-            return executor.execute(getHttpClient(), httpProxy, uri, data);
-        } catch (IOException  e) {
-            throw new RuntimeException(e);
-        }
+    @Override
+    public <T> T downloadbill(Date billDate, String billType, Callback<T> callback) {
+        return null;
     }
 
-    public HttpHost getHttpProxy() {
-        return httpProxy;
+    @Override
+    public <T> T secondaryInterface(Object tradeNoOrBillDate, String outTradeNoBillType, TransactionType transactionType, Callback<T> callback) {
+        return null;
     }
 
-    public CloseableHttpClient getHttpClient() {
-        return httpClient;
-    }
-
-    /**
-     * 设置支付配置
-     * @param payConfigStorage 支付配置
-     */
-    public void setPayConfigStorage(PayConfigStorage payConfigStorage) {
-        this.payConfigStorage = payConfigStorage;
-
-        String http_proxy_host = payConfigStorage.getHttpProxyHost();
-        int http_proxy_port = payConfigStorage.getHttpProxyPort();
-        String http_proxy_username = payConfigStorage.getHttpProxyUsername();
-        String http_proxy_password = payConfigStorage.getHttpProxyPassword();
-
-        if (StringUtils.isNotBlank(http_proxy_host)) {
-            // 使用代理服务器
-            if (StringUtils.isNotBlank(http_proxy_username)) {
-                // 需要用户认证的代理服务器
-                CredentialsProvider credsProvider = new BasicCredentialsProvider();
-                credsProvider.setCredentials(
-                        new AuthScope(http_proxy_host, http_proxy_port),
-                        new UsernamePasswordCredentials(http_proxy_username, http_proxy_password));
-                httpClient = HttpClients
-                        .custom()
-                        .setDefaultCredentialsProvider(credsProvider)
-                        .build();
-            } else {
-                // 无需用户认证的代理服务器
-                httpClient = HttpClients.createDefault();
-            }
-            httpProxy = new HttpHost(http_proxy_host, http_proxy_port);
-        } else {
-            httpClient = HttpClients.createDefault();
-        }
-    }
 
     @Override
     public PayConfigStorage getPayConfigStorage() {
         return payConfigStorage;
     }
 
-    public WxPayService() {
-    }
-
-    public WxPayService(PayConfigStorage payConfigStorage) {
-        setPayConfigStorage(payConfigStorage);
-    }
 }

@@ -2,13 +2,13 @@ package in.egan.pay.fuiou.api;/**
  * Created by Fuzx on 2017/1/16 0016.
  */
 
-import in.egan.pay.common.api.BasePayService;
-import in.egan.pay.common.api.PayConfigStorage;
-import in.egan.pay.common.api.RequestExecutor;
+import in.egan.pay.common.before.api.BasePayService;
+import in.egan.pay.common.before.api.PayConfigStorage;
+import in.egan.pay.common.before.api.RequestExecutor;
 import in.egan.pay.common.bean.MethodType;
 import in.egan.pay.common.bean.PayOrder;
 import in.egan.pay.common.bean.PayOutMessage;
-import in.egan.pay.common.bean.result.PayError;
+import in.egan.pay.common.before.bean.result.PayError;
 import in.egan.pay.common.exception.PayErrorException;
 import in.egan.pay.common.util.sign.SignUtils;
 import in.egan.pay.common.util.str.StringUtils;
@@ -29,8 +29,8 @@ public class FuiouPayService extends BasePayService {
 
     protected final Log log = LogFactory.getLog(FuiouPayService.class);
 
-    //    public final static String fuiouBaseDomain = "https://pay.fuiou.com/";//正式域名
-    public final static String fuiouBaseDomain = "http://www-1.fuiou.com:8888/wg1_run/";//测试域名
+        public final static String fuiouBaseDomain = "https://pay.fuiou.com/";//正式域名
+//    public final static String fuiouBaseDomain = "http://www-1.fuiou.com:8888/wg1_run/";//测试域名
 
     public final static String fuiouSmpGate = fuiouBaseDomain + "smpGate.do";//B2C/B2B支付
 
@@ -132,8 +132,8 @@ public class FuiouPayService extends BasePayService {
             try {
                 return executeInternal(executor, uri, data);
             } catch (PayErrorException e) {
-                PayError error = e.getError();
-                if (error.getErrorCode() == 404) {
+                PayError error = (PayError) e.getPayError();
+                if ("404".equals(error.getErrorCode()) ) {
                     int sleepMillis = retrySleepMillis * (1 << retryTimes);
                     try {
                         log.debug(String.format("富友支付系统错误，错误信息:<%s>,(%s)ms 后重试(第%s次)",e.getMessage(),sleepMillis, retryTimes + 1));
