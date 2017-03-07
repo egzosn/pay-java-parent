@@ -10,12 +10,19 @@
  * @email egzosn@gmail.com
  * @date 2016/11/20 0:30
  */
-public enum PayType implements BasePayType{
-  aliPay{
+public enum PayType implements BasePayType {
+
+    aliPay{
+        /**
+         *  @see in.egan.pay.ali.before.api.AliPayService  支付宝暂时请用这个2016年版本的，17年更新的版本暂时未进行测试，开发者可自行测试，可以的话反馈到我这边
+         * @param apyAccount
+         * @return
+         */
         @Override
         public PayService getPayService(ApyAccount apyAccount) {
             AliPayConfigStorage aliPayConfigStorage = new AliPayConfigStorage();
-            aliPayConfigStorage.setPartner(apyAccount.getPartner());
+            aliPayConfigStorage.setPid(apyAccount.getPartner());
+            aliPayConfigStorage.setAppId(apyAccount.getAppid());
             aliPayConfigStorage.setAliPublicKey(apyAccount.getPublicKey());
             aliPayConfigStorage.setKeyPrivate(apyAccount.getPrivateKey());
             aliPayConfigStorage.setNotifyUrl(apyAccount.getNotifyUrl());
@@ -30,6 +37,7 @@ public enum PayType implements BasePayType{
 
         @Override
         public TransactionType getTransactionType(String transactionType) {
+            // in.egan.pay.ali.before.bean.AliTransactionType 支付宝暂时用2016年版本的，17年更新的版本暂时未进行测试，开发者可自行测试，可以的话反馈到我这边
             return AliTransactionType.valueOf(transactionType);
         }
 
@@ -94,7 +102,6 @@ public enum PayType implements BasePayType{
 
     public abstract PayService getPayService(ApyAccount apyAccount);
 
-
 }
 
 /**
@@ -139,26 +146,34 @@ public class PayResponse {
      * 配置路由
      * @param payId 指定账户id，用户多微信支付多支付宝支付
      */
-      private void buildRouter(Integer payId) {
-            router = new PayMessageRouter(this.service);
-            router
-                    .rule()
-                    .async(false)
-                    .msgType(MsgType.text.name()) //消息类型
-                    .event(PayType.aliPay.name()) //支付账户事件类型
-                    .interceptor(new AliPayMessageInterceptor()) //拦截器
-                    .handler(autowire(new AliPayMessageHandler(payId))) //处理器
-                    .end()
-                    .rule()
-                    .async(false)
-                    .msgType(MsgType.xml.name())
-                    .event(PayType.wxPay.name())
-                    .handler(autowire(new WxPayMessageHandler(payId)))
-                    .end()
-            ;
-      }
+    private void buildRouter(Integer payId) {
+        router = new PayMessageRouter(this.service);
+        router
+                .rule()
+                .async(false)
+                .msgType(MsgType.text.name()) //消息类型
+                .payType(PayType.aliPay.name()) //支付账户事件类型
+                .transactionType(AliTransactionType.UNAWARE.name())//交易类型，有关回调的可在这处理
+                .interceptor(new AliPayMessageInterceptor(payId)) //拦截器
+                .handler(autowire(new AliPayMessageHandler(payId))) //处理器
+                .end()
+                .rule()
+                .async(false)
+                .msgType(MsgType.xml.name())
+                .payType(PayType.wxPay.name())
+                .handler(autowire(new WxPayMessageHandler(payId)))
+                .end()
+                .rule()
+                .async(false)
+                .msgType(MsgType.json.name())
+                .payType(PayType.youdianPay.name())
+                .handler(autowire(new YouDianPayMessageHandler(payId)))
+                .end()
 
-    
+        ;
+    }
+
+
     private PayMessageHandler autowire(PayMessageHandler handler) {
         spring.autowireBean(handler);
         return handler;
@@ -167,7 +182,7 @@ public class PayResponse {
     public PayConfigStorage getStorage() {
         return storage;
     }
-    
+
     public PayService getService() {
         return service;
     }
@@ -344,12 +359,12 @@ public class ApyAccountService {
 
 
 
-  
+
 ```
 
 #####5.支付回调
 ```java
-     
+
 
    /**
        * 支付回调地址
@@ -377,5 +392,5 @@ public class ApyAccountService {
           return payResponse.getService().getPayOutMessage("fail","失败").toMessage();
       }
 
-        
+
 ```
