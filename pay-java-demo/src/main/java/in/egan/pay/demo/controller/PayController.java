@@ -9,16 +9,13 @@ import com.alipay.api.request.AlipayTradeQueryRequest;
 import com.alipay.api.response.AlipayTradeQueryResponse;
 import in.egan.pay.ali.before.bean.AliTransactionType;
 import in.egan.pay.common.api.Callback;
+import in.egan.pay.common.bean.*;
 import in.egan.pay.common.util.str.StringUtils;
 import in.egan.pay.demo.entity.ApyAccount;
 import in.egan.pay.demo.entity.PayType;
 import in.egan.pay.demo.service.ApyAccountService;
 import in.egan.pay.demo.service.PayResponse;
 import in.egan.pay.common.api.PayConfigStorage;
-import in.egan.pay.common.bean.MethodType;
-import in.egan.pay.common.bean.PayMessage;
-import in.egan.pay.common.bean.PayOrder;
-import in.egan.pay.common.bean.PayOutMessage;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -169,15 +166,15 @@ public class PayController{
     }
 
     /**
-     * 查询
+     * 通用接口，根据 TransactionType 类型进行实现
      * @param payId
      * @return
      */
     @RequestMapping("query1")
-    public Map<String, Object> query1(Integer payId) {
+    public Map<String, Object> query1(Integer payId,  String transactionType) {
         PayResponse payResponse = service.getPayResponse(payId);
-
-        return payResponse.getService().secondaryInterface("2017012921001004530273937216", "8a2950f959cf08740159ea0666fc04bd", AliTransactionType.QUERY, new Callback<Map<String, Object>>() {
+        TransactionType type = PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType);
+        return payResponse.getService().secondaryInterface("2017012921001004530273937216", "8a2950f959cf08740159ea0666fc04bd", type, new Callback<Map<String, Object>>() {
             @Override
             public Map<String, Object> perform(Map<String, Object> map) {
                 return map;
