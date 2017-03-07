@@ -2,11 +2,6 @@
 package in.egan.pay.demo.controller;
 
 
-import com.alipay.api.AlipayApiException;
-import com.alipay.api.AlipayClient;
-import com.alipay.api.DefaultAlipayClient;
-import com.alipay.api.request.AlipayTradeQueryRequest;
-import com.alipay.api.response.AlipayTradeQueryResponse;
 import in.egan.pay.ali.before.bean.AliTransactionType;
 import in.egan.pay.common.api.Callback;
 import in.egan.pay.common.util.str.StringUtils;
