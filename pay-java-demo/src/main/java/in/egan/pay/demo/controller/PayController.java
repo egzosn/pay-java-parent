@@ -157,7 +157,7 @@ public class PayController{
         PayResponse payResponse = service.getPayResponse(payId);
 
 
-        return payResponse.getService().query("2017012921001004530273937216", "8a2950f959cf08740159ea0666fc04bd");
+        return payResponse.getService().query("4009922001201703072549284850", "8a2950f95a8e17e1015aa7a6eb872ccb");
     }
 
     /**
@@ -165,8 +165,8 @@ public class PayController{
      * @param payId
      * @return
      */
-    @RequestMapping("query1")
-    public Map<String, Object> query1(Integer payId,  String transactionType) {
+    @RequestMapping("secondaryInterface")
+    public Map<String, Object> secondaryInterface(Integer payId,  String transactionType) {
         PayResponse payResponse = service.getPayResponse(payId);
         TransactionType type = PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType);
         return payResponse.getService().secondaryInterface("2017012921001004530273937216", "8a2950f959cf08740159ea0666fc04bd", type, new Callback<Map<String, Object>>() {

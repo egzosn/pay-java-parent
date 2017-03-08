@@ -9,7 +9,9 @@ import in.egan.pay.common.bean.MethodType;
 import in.egan.pay.common.bean.PayOrder;
 import in.egan.pay.common.bean.PayOutMessage;
 import in.egan.pay.common.bean.TransactionType;
+import in.egan.pay.common.bean.result.PayException;
 import in.egan.pay.common.exception.PayErrorException;
+import in.egan.pay.common.http.ClientHttpRequest;
 import in.egan.pay.common.http.HttpConfigStorage;
 import in.egan.pay.common.util.MatrixToImageWriter;
 import in.egan.pay.common.util.sign.SignUtils;
@@ -22,6 +24,8 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -37,6 +41,8 @@ public class WxPayService extends BasePayService {
 
 
     public final static String httpsVerifyUrl = "https://gw.tenpay.com/gateway";
+
+    public final static String uri = "https://api.mch.weixin.qq.com/";
     public final static String unifiedOrderUrl = "https://api.mch.weixin.qq.com/pay/unifiedorder";
     //    public final static String orderqueryUrl = "https://api.mch.weixin.qq.com/pay/orderquery";
 
@@ -57,6 +63,11 @@ public class WxPayService extends BasePayService {
      */
     public String getHttpsVerifyUrl() {
         return httpsVerifyUrl + "/verifynotifyid.xml";
+    }
+
+    private String getUrl(TransactionType transactionType){
+
+        return uri + transactionType.getMethod();
     }
 
     @Override
@@ -101,6 +112,20 @@ public class WxPayService extends BasePayService {
        return SignUtils.valueOf(payConfigStorage.getSignType()).verify(params,  sign, "&key=" +  payConfigStorage.getKeyPublic(), payConfigStorage.getInputCharset());
     }
 
+    /**
+     * 获取公共参数
+     * @return
+     */
+    private Map<String,Object> getPublicParameters() {
+
+        Map<String, Object> parameters = new TreeMap<String, Object>();
+        parameters.put("appid", payConfigStorage.getAppid());
+        parameters.put("mch_id", payConfigStorage.getPartner());
+        parameters.put("nonce_str", SignUtils.randomStr());
+        return parameters;
+
+
+    }
 
 
 
@@ -117,10 +142,10 @@ public class WxPayService extends BasePayService {
 
 //        Map<String, Object> results = new HashMap<String, Object>();
         ////统一下单
-        SortedMap<String, Object> parameters = new TreeMap<String, Object>();
-        parameters.put("appid", payConfigStorage.getAppid());
+        Map<String, Object> parameters = getPublicParameters();
+     /*   parameters.put("appid", payConfigStorage.getAppid());
         parameters.put("mch_id", payConfigStorage.getPartner());
-        parameters.put("nonce_str", SignUtils.randomStr());
+        parameters.put("nonce_str", SignUtils.randomStr());*/
         parameters.put("body", order.getSubject());// 购买支付信息
         parameters.put("notify_url", payConfigStorage.getNotifyUrl());
         parameters.put("out_trade_no", order.getOutTradeNo());// 订单号
@@ -137,7 +162,7 @@ public class WxPayService extends BasePayService {
        String requestXML = XML.getMap2Xml(parameters);
         log.debug("requestXML：" + requestXML);
         /////////APP端调起支付的参数列表
-        JSONObject result = getHttpRequestTemplate().postForObject(unifiedOrderUrl, requestXML, JSONObject.class);
+        JSONObject result = requestTemplate.postForObject(getUrl(order.getTransactionType()), requestXML, JSONObject.class);
 
         if (!"SUCCESS".equals(result.get("return_code"))){
             throw new PayErrorException(new WxPayError(result.getString("return_code"),  result.getString("return_msg"), result.toJSONString()));
@@ -149,7 +174,7 @@ public class WxPayService extends BasePayService {
 
         SortedMap<String, Object> params = new TreeMap<String, Object>();
         params.put("appid", payConfigStorage.getAppid());
-        params.put("partnerid", payConfigStorage.getPartner());
+        params.put("partnerid", payConfigStorage.getPid());
         params.put("prepayid", result.get("prepay_id"));
         params.put("timestamp", System.currentTimeMillis() / 1000);
         params.put("noncestr", result.get("nonce_str")/*WxpayCore.genNonceStr()*/);
@@ -167,7 +192,17 @@ public class WxPayService extends BasePayService {
 
     }
 
-
+    /**
+     *  生成并设置签名
+     * @param parameters 请求参数
+     * @return
+     */
+    private Map<String, Object> setSign(Map<String, Object> parameters){
+        parameters.put("sign_type", payConfigStorage.getSignType());
+        String sign = createSign( SignUtils.parameterText(parameters, "&", "sign", "appId"), payConfigStorage.getInputCharset());
+        parameters.put("sign", sign);
+        return parameters;
+    }
 
     /**
      * 签名
@@ -220,65 +255,152 @@ public class WxPayService extends BasePayService {
         return  MatrixToImageWriter.writeInfoToJpgBuff((String) orderInfo.get("code_url"));
     }
 
+    /**
+     *  交易查询接口
+     * @param tradeNo 支付平台订单号
+     * @param outTradeNo 商户单号
+     * @return
+     */
     @Override
     public Map<String, Object> query(String tradeNo, String outTradeNo) {
-        return null;
+
+        return  query(tradeNo, outTradeNo, new Callback<Map<String, Object>>() {
+            @Override
+            public Map<String, Object> perform(Map<String, Object> map) {
+                return map;
+            }
+        });
     }
 
+    /**
+     *
+     * @param tradeNo    支付平台订单号
+     * @param outTradeNo 商户单号
+     * @param callback 处理器
+     * @param <T>
+     * @return
+     */
     @Override
     public <T> T query(String tradeNo, String outTradeNo, Callback<T> callback) {
-        return null;
+
+        return secondaryInterface(tradeNo, outTradeNo, WxTransactionType.QUERY, callback);
     }
+
 
     @Override
     public Map<String, Object> close(String tradeNo, String outTradeNo) {
-        return null;
+
+        return  close(tradeNo, outTradeNo, new Callback<Map<String, Object>>() {
+            @Override
+            public Map<String, Object> perform(Map<String, Object> map) {
+                return map;
+            }
+        });
     }
 
     @Override
     public <T> T close(String tradeNo, String outTradeNo, Callback<T> callback) {
-        return null;
+        return  secondaryInterface(tradeNo, outTradeNo, WxTransactionType.CLOSE, callback);
     }
 
     @Override
     public Map<String, Object> refund(String tradeNo, String outTradeNo) {
-        return null;
+
+        return  refund(tradeNo, outTradeNo, new Callback<Map<String, Object>>() {
+            @Override
+            public Map<String, Object> perform(Map<String, Object> map) {
+                return map;
+            }
+        });
     }
 
     @Override
     public <T> T refund(String tradeNo, String outTradeNo, Callback<T> callback) {
-        return null;
+        return secondaryInterface(tradeNo, outTradeNo, WxTransactionType.REFUND, callback);
     }
 
     @Override
     public Map<String, Object> refundquery(String tradeNo, String outTradeNo) {
-        return null;
+        return  refundquery(tradeNo, outTradeNo, new Callback<Map<String, Object>>() {
+            @Override
+            public Map<String, Object> perform(Map<String, Object> map) {
+                return map;
+            }
+        });
     }
 
     @Override
     public <T> T refundquery(String tradeNo, String outTradeNo, Callback<T> callback) {
-        return null;
+        return secondaryInterface(tradeNo, outTradeNo, WxTransactionType.REFUNDQUERY, callback);
     }
 
+    /**
+     * 目前只支持日账单
+     * @param billDate 账单类型，商户通过接口或商户经开放平台授权后其所属服务商通过接口可以获取以下账单类型：trade、signcustomer；trade指商户基于支付宝交易收单的业务账单；signcustomer是指基于商户支付宝余额收入及支出等资金变动的帐务账单；
+     * @param billType 账单时间：日账单格式为yyyy-MM-dd，月账单格式为yyyy-MM。
+     * @return
+     */
     @Override
-    public Object downloadbill(Date billDate, String billType) {
-        return null;
+    public Map<String, Object> downloadbill(Date billDate, String billType) {
+        return  downloadbill(billDate, billType, new Callback<Map<String, Object>>() {
+            @Override
+            public Map<String, Object> perform(Map<String, Object> map) {
+                return map;
+            }
+        });
     }
 
+    /**
+     *  目前只支持日账单
+     * @param billDate 账单时间：具体请查看对应支付平台
+     * @param billType 账单类型，具体请查看对应支付平台
+     * @param callback 处理器
+     * @param <T>
+     * @return
+     */
     @Override
     public <T> T downloadbill(Date billDate, String billType, Callback<T> callback) {
-        return null;
-    }
 
+        //获取公共参数
+        Map<String, Object> parameters = getPublicParameters();
+
+        Map<String, Object> bizContent = new TreeMap<>();
+        bizContent.put("bill_type", billType);
+        //目前只支持日账单
+        DateFormat df = new SimpleDateFormat("yyyyMMdd");
+        df.setTimeZone(TimeZone.getTimeZone("GMT+8"));
+        bizContent.put("bill_date", df.format(billDate));
+
+        //设置签名
+        setSign(parameters);
+        return callback.perform(requestTemplate.postForObject(getUrl(WxTransactionType.DOWNLOADBILL),  XML.getMap2Xml(parameters), JSONObject.class));
+    }
     @Override
-    public <T> T secondaryInterface(Object tradeNoOrBillDate, String outTradeNoBillType, TransactionType transactionType, Callback<T> callback) {
-        return null;
+    public <T> T secondaryInterface(Object transactionIdOrBillDate, String outTradeNoBillType, TransactionType transactionType, Callback<T> callback) {
+
+        if (transactionType == WxTransactionType.DOWNLOADBILL){
+            if (transactionIdOrBillDate instanceof  Date){
+                return downloadbill((Date) transactionIdOrBillDate, outTradeNoBillType, callback);
+            }
+            throw new PayErrorException(new PayException("failure", "非法类型异常:" + transactionIdOrBillDate.getClass()));
+        }
+
+        if (!(transactionIdOrBillDate instanceof  String)){
+            throw new PayErrorException(new PayException("failure", "非法类型异常:" + transactionIdOrBillDate.getClass()));
+        }
+
+        //获取公共参数
+        Map<String, Object> parameters = getPublicParameters();
+        if (null != transactionIdOrBillDate){
+            parameters.put("transaction_id", transactionIdOrBillDate);
+        }else {
+            parameters.put("out_trade_no", outTradeNoBillType);
+        }
+        //设置签名
+        setSign(parameters);
+        return  callback.perform(requestTemplate.postForObject(getUrl(transactionType), XML.getMap2Xml(parameters) , JSONObject.class));
     }
 
 
-    @Override
-    public PayConfigStorage getPayConfigStorage() {
-        return payConfigStorage;
-    }
 
 }
