@@ -52,6 +52,18 @@ public enum SignUtils {
         public boolean verify(String text, String sign, String publicKey, String characterEncoding) {
             return in.egan.pay.common.util.sign.encrypt.RSA.verify(text, sign, publicKey, characterEncoding);
         }
+    },
+
+    RSA2 {
+        @Override
+        public String createSign(String content, String key, String characterEncoding) {
+            return in.egan.pay.common.util.sign.encrypt.RSA2.sign(content, key, characterEncoding);
+        }
+
+        @Override
+        public boolean verify(String text, String sign, String publicKey, String characterEncoding) {
+            return in.egan.pay.common.util.sign.encrypt.RSA2.verify(text, sign, publicKey, characterEncoding);
+        }
     };
 
     /**
