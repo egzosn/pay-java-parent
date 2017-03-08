@@ -32,14 +32,24 @@ public enum  AliTransactionType implements TransactionType {
 
 
 
-    private String type;
+    private String method;
 
-    private AliTransactionType(String type) {
-        this.type = type;
+    private AliTransactionType(String method) {
+        this.method = method;
     }
 
     @Override
     public String getType() {
-        return type;
+        return this.name();
     }
+
+    /**
+     * 获取接口名称
+     * @return
+     */
+    @Override
+    public String getMethod() {
+        return this.method;
+    }
+
 }

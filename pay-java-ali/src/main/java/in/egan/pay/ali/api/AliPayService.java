@@ -165,7 +165,7 @@ public class AliPayService extends BasePayService {
         orderInfo.put("notify_url", payConfigStorage.getNotifyUrl());
 
         Map<String, Object> bizContent = new TreeMap<>();
-        if ("alipay.trade.pay".equals(order.getTransactionType().getType())){
+        if ("alipay.trade.pay".equals(order.getTransactionType().getMethod())){
             bizContent.put("scene", order.getTransactionType().toString().toLowerCase());
             bizContent.put("product_code", "FACE_TO_FACE_PAYMENT");
             bizContent.put("auth_code", order.getAuthCode());
@@ -189,7 +189,7 @@ public class AliPayService extends BasePayService {
     private Map<String, Object> getPublicParameters(TransactionType transactionType ){
         Map<String, Object> orderInfo = new TreeMap<>();
         orderInfo.put("app_id", payConfigStorage.getAppid());
-        orderInfo.put("method", transactionType.getType());
+        orderInfo.put("method", transactionType.getMethod());
         orderInfo.put("charset", payConfigStorage.getInputCharset());
         DateFormat formatter = DateFormat.getDateTimeInstance();
         orderInfo.put("timestamp", formatter.format( new Date()));

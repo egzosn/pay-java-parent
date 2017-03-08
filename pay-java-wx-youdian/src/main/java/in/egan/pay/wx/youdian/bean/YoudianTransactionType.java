@@ -11,12 +11,27 @@ import in.egan.pay.common.bean.TransactionType;
 public enum  YoudianTransactionType implements TransactionType {
 
     //扫码付
-    NATIVE,
+    NATIVE("unifiedorder"),
     //刷卡付
-    MICROPAY;//暂未接触
+    MICROPAY("micropay");//暂未接触
+
+    private String method;
+
+    private YoudianTransactionType(String method) {
+        this.method = method;
+    }
 
     @Override
     public String getType() {
         return this.name();
+    }
+
+    /**
+     * 获取接口名称
+     * @return
+     */
+    @Override
+    public String getMethod() {
+        return this.method;
     }
 }

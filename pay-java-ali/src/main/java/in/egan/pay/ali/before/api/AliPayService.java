@@ -114,7 +114,7 @@ public class AliPayService extends BasePayService {
     private Map<String, Object> getPublicParameters(TransactionType transactionType ){
         Map<String, Object> orderInfo = new TreeMap<>();
         orderInfo.put("app_id", payConfigStorage.getAppid());
-        orderInfo.put("method", transactionType.getType());
+        orderInfo.put("method", transactionType.getMethod());
         orderInfo.put("format", "json");
         orderInfo.put("charset", payConfigStorage.getInputCharset());
 
@@ -166,7 +166,7 @@ public class AliPayService extends BasePayService {
         // 签约卖家支付宝账号
         orderInfo.put("seller_id", payConfigStorage.getSeller());
         // 商户网站唯一订单号
-        orderInfo.put("out_trade_no", order.getTradeNo());
+        orderInfo.put("out_trade_no", order.getOutTradeNo());
         // 商品名称
         orderInfo.put("subject", order.getSubject());
         // 商品详情
@@ -176,7 +176,7 @@ public class AliPayService extends BasePayService {
         // 服务器异步通知页面路径
         orderInfo.put("notify_url", payConfigStorage.getNotifyUrl() );
         // 服务接口名称， 固定值
-        orderInfo.put("service",  order.getTransactionType().getType()  );
+        orderInfo.put("service",  order.getTransactionType().getMethod()  );
         // 支付类型， 固定值
         orderInfo.put("payment_type",  "1" );
         // 参数编码， 固定值
