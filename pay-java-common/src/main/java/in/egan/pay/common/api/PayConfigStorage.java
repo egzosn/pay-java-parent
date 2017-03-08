@@ -19,12 +19,13 @@ import java.util.concurrent.locks.Lock;
      String getAppid();
     /**
      * 合作商唯一标识
+     *  @see #getPid()  代替者
      */
     @Deprecated
      String getPartner();
     /**
      * 合作商唯一标识
-     * @see #getPartner 代替者
+     * @see #getPartner()  代替者
      */
      String getPid();
 

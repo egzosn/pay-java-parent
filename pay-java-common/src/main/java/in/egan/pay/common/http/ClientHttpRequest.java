@@ -196,10 +196,18 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
                 throw  new HttpResponseException(statusLine.getStatusCode(), responseType + " 无法进行类型转换");
             }
         }
+        String charset = "UTF-8";
+        if (null != value && 2 == charset.length()) {
+            charset = value[1].substring(value[1].indexOf("=") + 1);
+        }
+        String result = EntityUtils.toString(entity, charset);
 
-        String result = EntityUtils.toString(entity, value[1].substring( value[1].indexOf("=") + 1));
+        if (responseType.isAssignableFrom(String.class)){
+            return (T)result;
+        }
+
         String frist = result.substring(0, 1);
-        if (ContentType.APPLICATION_JSON.getMimeType().equals( value[0]) || "{[".indexOf(frist) >= 0){
+        if ( ContentType.APPLICATION_JSON.getMimeType().equals( value[0]) || "{[".indexOf(frist) >= 0 ){
             try {
                 return JSON.parseObject(result, responseType);
             }catch (JSONException e){
@@ -207,14 +215,11 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
             }
         }
 
-        if (ContentType.APPLICATION_XML.getMimeType().equals( value[0])){
+        if (ContentType.APPLICATION_XML.getMimeType().equals( value[0]) || "<".indexOf(frist) >= 0){
             return XML.toJSONObject(result).toJavaObject(responseType);
         }
-        if (!responseType.isAssignableFrom(String.class)){
-            throw new PayErrorException(new PayException("failure", "类型转化异常,contentType:" + entity.getContentType().getValue(), result));
-        }
 
-        return (T)result;
+        throw new PayErrorException(new PayException("failure", "类型转化异常,contentType:" + entity.getContentType().getValue(), result));
 
     }
 }
