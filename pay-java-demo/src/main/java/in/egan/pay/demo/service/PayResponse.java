@@ -2,10 +2,10 @@
 
 package in.egan.pay.demo.service;
 
+import in.egan.pay.ali.bean.AliTransactionType;
 import in.egan.pay.demo.entity.ApyAccount;
 import in.egan.pay.demo.entity.PayType;
 import in.egan.pay.demo.service.handler.AliPayMessageHandler;
-import in.egan.pay.demo.service.handler.FuiouPayMessageHandler;
 import in.egan.pay.demo.service.handler.WxPayMessageHandler;
 import in.egan.pay.demo.service.handler.YouDianPayMessageHandler;
 import in.egan.pay.demo.service.interceptor.AliPayMessageInterceptor;
@@ -64,20 +64,21 @@ public class PayResponse {
                 .rule()
                 .async(false)
                 .msgType(MsgType.text.name()) //消息类型
-                .event(PayType.aliPay.name()) //支付账户事件类型
+                .payType(PayType.aliPay.name()) //支付账户事件类型
+                .transactionType(AliTransactionType.UNAWARE.name())//交易类型，有关回调的可在这处理
                 .interceptor(new AliPayMessageInterceptor(payId)) //拦截器
                 .handler(autowire(new AliPayMessageHandler(payId))) //处理器
                 .end()
                 .rule()
                 .async(false)
                 .msgType(MsgType.xml.name())
-                .event(PayType.wxPay.name())
+                .payType(PayType.wxPay.name())
                 .handler(autowire(new WxPayMessageHandler(payId)))
                 .end()
                 .rule()
                 .async(false)
                 .msgType(MsgType.json.name())
-                .event(PayType.youdianPay.name())
+                .payType(PayType.youdianPay.name())
                 .handler(autowire(new YouDianPayMessageHandler(payId)))
                 .end()
 

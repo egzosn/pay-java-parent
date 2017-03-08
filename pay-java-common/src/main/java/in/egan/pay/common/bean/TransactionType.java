@@ -12,5 +12,11 @@ public interface TransactionType {
      * @return
      */
      String getType();
+
+    /**
+     * 获取接口
+     * @return
+     */
+     String getMethod();
 }
 

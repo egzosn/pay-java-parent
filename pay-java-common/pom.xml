@@ -41,7 +41,11 @@
             <artifactId>core</artifactId>
             <version>3.3.0</version>
         </dependency>
-
+        <dependency>
+            <groupId>com.alipay</groupId>
+            <artifactId>app</artifactId>
+            <version>1.0</version>
+        </dependency>
     </dependencies>
 
 </project>

@@ -3,8 +3,6 @@ package in.egan.pay.common.api;
 
 import in.egan.pay.common.exception.PayErrorException;
 
-
-
 /**
  *   PayErrorExceptionHandler处理器
  *
@@ -14,6 +12,10 @@ import in.egan.pay.common.exception.PayErrorException;
  */
 public interface PayErrorExceptionHandler {
 
-    public void handle(PayErrorException e);
+    /**
+     * 异常统一处理器
+     * @param e
+     */
+     void handle(PayErrorException e);
 
 }

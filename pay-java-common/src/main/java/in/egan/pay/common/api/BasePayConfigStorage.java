@@ -7,9 +7,9 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * 支付基础配置存储
- * @author  egan
+ * @author: egan
  * @email egzosn@gmail.com
- * @date 2016-5-18 14:09:01
+ * @date 2017/3/5 20:33
  */
 public abstract class BasePayConfigStorage implements PayConfigStorage{
 
@@ -31,13 +31,11 @@ public abstract class BasePayConfigStorage implements PayConfigStorage{
 
     //支付类型 aliPay 支付宝， wxPay微信..等等，开发者自定义，唯一
     protected volatile  String payType;
+
     /**
      * 消息来源类型
-     * @see PayConsts#MSG_XML
-     * @see PayConsts#MSG_TEXT
-     * @see PayConsts#MSG_JSON
      */
-    protected volatile  MsgType msgType;
+    protected volatile MsgType msgType;
 
 
     // 访问令牌 每次请求其他方法都要传入的值
@@ -46,92 +44,6 @@ public abstract class BasePayConfigStorage implements PayConfigStorage{
     protected volatile long expiresTime;
     //授权码锁
     protected Lock accessTokenLock = new ReentrantLock();
-
-
-    protected volatile  String httpProxyHost;
-    protected volatile  int httpProxyPort;
-    protected volatile  String httpProxyUsername;
-    protected volatile  String httpProxyPassword;
-
-
-
-
-    @Override
-    public String getInputCharset() {
-        return inputCharset;
-    }
-
-    public void setInputCharset(String inputCharset) {
-        this.inputCharset = inputCharset;
-    }
-
-
-
-    @Override
-    public String getNotifyUrl() {
-        return notifyUrl;
-    }
-
-    public void setNotifyUrl(String notifyUrl) {
-        this.notifyUrl = notifyUrl;
-    }
-
-    @Override
-    public String getReturnUrl() {
-        return returnUrl;
-    }
-
-    public void setReturnUrl(String returnUrl) {
-        this.returnUrl = returnUrl;
-    }
-
-    public void setSignType(String signType) {
-        this.signType = signType;
-    }
-
-    @Override
-    public String getSignType() {
-        return signType;
-    }
-
-
-
-    @Override
-    public String getHttpProxyHost() {
-        return httpProxyHost;
-    }
-
-    public void setHttpProxyHost(String httpProxyHost) {
-        this.httpProxyHost = httpProxyHost;
-    }
-
-    @Override
-    public int getHttpProxyPort() {
-        return httpProxyPort;
-    }
-
-    public void setHttpProxyPort(int httpProxyPort) {
-        this.httpProxyPort = httpProxyPort;
-    }
-
-    @Override
-    public String getHttpProxyUsername() {
-        return httpProxyUsername;
-    }
-
-    public void setHttpProxyUsername(String httpProxyUsername) {
-        this.httpProxyUsername = httpProxyUsername;
-    }
-
-    @Override
-    public String getHttpProxyPassword() {
-        return httpProxyPassword;
-    }
-
-
-    public void setHttpProxyPassword(String httpProxyPassword) {
-        this.httpProxyPassword = httpProxyPassword;
-    }
 
     @Override
     public String getKeyPrivate() {
@@ -151,19 +63,43 @@ public abstract class BasePayConfigStorage implements PayConfigStorage{
         this.keyPublic = keyPublic;
     }
 
-
-
     @Override
-    public String getToken() {
-        return null;
+    public String getNotifyUrl() {
+        return notifyUrl;
     }
 
+    public void setNotifyUrl(String notifyUrl) {
+        this.notifyUrl = notifyUrl;
+    }
 
-    /**
-     * 支付类型 自定义
-     * 这里暂定 aliPay 支付宝， wxPay微信支付
-     * @return
-     */
+    @Override
+    public String getReturnUrl() {
+        return returnUrl;
+    }
+
+    public void setReturnUrl(String returnUrl) {
+        this.returnUrl = returnUrl;
+    }
+
+    @Override
+    public String getSignType() {
+        return signType;
+    }
+
+    public void setSignType(String signType) {
+        this.signType = signType;
+    }
+
+    @Override
+    public String getInputCharset() {
+        return inputCharset;
+    }
+
+    public void setInputCharset(String inputCharset) {
+        this.inputCharset = inputCharset;
+    }
+
+    @Override
     public String getPayType() {
         return payType;
     }
@@ -180,7 +116,6 @@ public abstract class BasePayConfigStorage implements PayConfigStorage{
     public void setMsgType(MsgType msgType) {
         this.msgType = msgType;
     }
-
 
     @Override
     public String getAccessToken() {
@@ -218,6 +153,11 @@ public abstract class BasePayConfigStorage implements PayConfigStorage{
     @Override
     public void expireAccessToken() {
         this.expiresTime = 0;
+    }
+
+    @Override
+    public String getToken() {
+        return null;
     }
 
 }

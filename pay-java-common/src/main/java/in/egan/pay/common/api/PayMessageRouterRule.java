@@ -21,6 +21,7 @@ import java.util.regex.Pattern;
  */
 public class PayMessageRouterRule {
 
+
     private final PayMessageRouter routerBuilder;
 
     private boolean async = true;
@@ -29,9 +30,9 @@ public class PayMessageRouterRule {
 
     private String msgType;
 
-    private String event;
+    private String payType;
 
-    private String eventKey;
+    private String[] transactionType;
 
     private String discount;
 
@@ -75,24 +76,24 @@ public class PayMessageRouterRule {
     }
 
     /**
-     * 如果event等于某值
+     * 如果payType等于某值
      *
-     * @param event
+     * @param payType
      * @return
      */
-    public PayMessageRouterRule event(String event) {
-        this.event = event;
+    public PayMessageRouterRule payType(String payType) {
+        this.payType = payType;
         return this;
     }
 
     /**
-     * 如果eventKey等于某值
+     * 如果transactionType等于某值
      *
-     * @param eventKey
+     * @param transactionType
      * @return
      */
-    public PayMessageRouterRule eventKey(String eventKey) {
-        this.eventKey = eventKey;
+    public PayMessageRouterRule transactionType(String ... transactionType) {
+        this.transactionType = transactionType;
         return this;
     }
 
@@ -238,9 +239,9 @@ public class PayMessageRouterRule {
                         &&
                         (this.msgType == null || this.msgType.toLowerCase().equals((payMessage.getMsgType() ==null?null:payMessage.getMsgType().toLowerCase())))
                         &&
-                        (this.event == null || this.event.equals((payMessage.getEvent() == null ? null : payMessage.getEvent())))
+                        (this.payType == null || this.payType.equals((payMessage.getPayType() == null ? null : payMessage.getPayType())))
                         &&
-                        (this.eventKey == null || this.eventKey.toLowerCase().equals((payMessage.getEventKey()==null?null:payMessage.getEventKey().toLowerCase())))
+                        (this.transactionType == null || equalsTransactionType(payMessage.getTransactionType()))
                         &&
                         (this.discount == null || this.discount
                                 .equals(payMessage.getDiscount() == null ? null : payMessage.getDiscount().trim()))
@@ -256,6 +257,27 @@ public class PayMessageRouterRule {
                 )
                 ;
     }
+
+    /**
+     * 匹配交易类型
+     * @param transactionType 交易类型
+     * @return
+     */
+    public boolean equalsTransactionType(String transactionType) {
+        if (null == transactionType){
+            return false;
+        }
+
+        for (String type :this.getTransactionType()){
+            if (type.toLowerCase().equals((transactionType.toLowerCase()))){
+                return true;
+            }
+        }
+        return false;
+
+    }
+
+
 
     /**
      * 处理支付回调过来的消息
@@ -319,20 +341,20 @@ public class PayMessageRouterRule {
         this.msgType = msgType;
     }
 
-    public String getEvent() {
-        return event;
+    public String getPayType() {
+        return payType;
     }
 
-    public void setEvent(String event) {
-        this.event = event;
+    public void setPayType(String payType) {
+        this.payType = payType;
     }
 
-    public String getEventKey() {
-        return eventKey;
+    public String[] getTransactionType() {
+        return transactionType;
     }
 
-    public void setEventKey(String eventKey) {
-        this.eventKey = eventKey;
+    public void setTransactionType(String[] transactionType) {
+        this.transactionType = transactionType;
     }
 
     public String getDiscount() {

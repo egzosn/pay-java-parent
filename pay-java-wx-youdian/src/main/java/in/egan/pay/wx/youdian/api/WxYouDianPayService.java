@@ -2,23 +2,25 @@ package in.egan.pay.wx.youdian.api;
 
 import com.alibaba.fastjson.JSONObject;
 import in.egan.pay.common.api.BasePayService;
+import in.egan.pay.common.api.Callback;
 import in.egan.pay.common.api.PayConfigStorage;
-import in.egan.pay.common.api.RequestExecutor;
 import in.egan.pay.common.bean.MethodType;
 import in.egan.pay.common.bean.PayOrder;
 import in.egan.pay.common.bean.PayOutMessage;
+import in.egan.pay.common.bean.TransactionType;
 import in.egan.pay.common.bean.outbuilder.JsonBuilder;
 import in.egan.pay.common.bean.result.PayError;
 import in.egan.pay.common.exception.PayErrorException;
+import in.egan.pay.common.http.HttpConfigStorage;
 import in.egan.pay.common.util.MatrixToImageWriter;
 import in.egan.pay.common.util.sign.SignUtils;
-import in.egan.pay.wx.youdian.utils.SimpleGetRequestExecutor;
+import in.egan.pay.wx.youdian.bean.YdPayError;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
@@ -40,6 +42,7 @@ public class WxYouDianPayService extends BasePayService {
     public final static String unifiedorderStatusUrl = "http://life.51youdian.com/Api/CheckoutCounter/unifiedorderStatus";
     //预下单链接
     public final static String unifiedOrderUrl = "http://life.51youdian.com/Api/CheckoutCounter/unifiedorder";
+
 
 
     public String getAccessToken()  {
@@ -75,12 +78,12 @@ public class WxYouDianPayService extends BasePayService {
                 StringBuilder param = new StringBuilder().append("access_token=").append(payConfigStorage.getAccessToken());
                 String sign = createSign(param.toString() + apbNonce, payConfigStorage.getInputCharset());
                 param.append("&apb_nonce=").append(apbNonce).append("&sign=").append(sign);
-                JSONObject json =  execute(new SimpleGetRequestExecutor(), resetLoginUrl, param.toString());
+                JSONObject json =  execute(resetLoginUrl + "?" +  param.toString(), MethodType.GET, null );
                 int errorcode = json.getIntValue("errorcode");
                 if (0 == errorcode){
                     payConfigStorage.updateAccessToken(payConfigStorage.getAccessToken(), 7200);
                 }else {
-                    throw  new PayErrorException(new PayError(errorcode, json.getString("msg"), json.toJSONString()));
+                    throw  new PayErrorException(new YdPayError(errorcode, json.getString("msg"), json.toJSONString()));
                 }
 
               /*  try {
@@ -140,7 +143,8 @@ public class WxYouDianPayService extends BasePayService {
 //         4、将拼接出来的字符串连接上apb_nonce的值即AAAAAAAAAA。再连接  password=XXXXXXXusername=XXXXXAAAAAAAAAA
          String sign = createSign(SignUtils.parameterText(data, "") + apbNonce, payConfigStorage.getInputCharset());
          String queryParam =  SignUtils.parameterText(data) +  "&apb_nonce=" + apbNonce + "&sign=" + sign;
-         JSONObject json = execute(new SimpleGetRequestExecutor(), loginUrl, queryParam);
+
+         JSONObject json = execute(loginUrl + "?" + queryParam, MethodType.GET, null);
          payConfigStorage.updateAccessToken(json.getString("access_token"), json.getLongValue("viptime"));
          return json;
      }
@@ -151,7 +155,6 @@ public class WxYouDianPayService extends BasePayService {
      *  微信友店2支付状态校验
      * @return
      */
-    @Override
     public String getHttpsVerifyUrl() {
         return unifiedorderStatusUrl;
     }
@@ -165,12 +168,13 @@ public class WxYouDianPayService extends BasePayService {
         if(params.get("sign") == null) {log.debug("友店微信支付异常：签名为空！out_trade_no=" + params.get("out_trade_no"));}
 
         try {
-            return getSignVerify(params, params.get("sign")) && "0".equals(verifyUrl(params.get("out_trade_no")));
+            return signVerify(params, params.get("sign")) && verifySource(params.get("out_trade_no"));
         } catch (PayErrorException e) {
             e.printStackTrace();
         }
         return false;
     }
+
 
     /**
      * 根据反馈回来的信息，生成签名结果
@@ -178,69 +182,77 @@ public class WxYouDianPayService extends BasePayService {
      * @param sign 比对的签名结果
      * @return 生成的签名结果
      */
-    public boolean getSignVerify(Map<String, String> params, String sign) {
-       return SignUtils.valueOf(payConfigStorage.getSignType()).verify(params, sign, "&key=" + payConfigStorage.getKeyPrivate(), payConfigStorage.getInputCharset());
+    @Override
+    public boolean signVerify(Map<String, String> params, String sign) {
+        return SignUtils.valueOf(payConfigStorage.getSignType()).verify(params, sign, "&key=" + payConfigStorage.getKeyPrivate(), payConfigStorage.getInputCharset());
     }
+
 
     /**
      * 验证链接来源是否有效
-     * @param outTradeNo 商户订单号（扫码收款返回的order_sn）
+     * @param id 商户订单号（扫码收款返回的order_sn）
      * @return
      * @throws PayErrorException
      */
     @Override
-    public String verifyUrl(String outTradeNo) throws PayErrorException {
+    public boolean verifySource(String id) {
         String apbNonce = SignUtils.randomStr();
         TreeMap<String, String> data = new TreeMap<>();
         data.put("access_token",  payConfigStorage.getAccessToken());
-        data.put("order_sn", outTradeNo);
+        data.put("order_sn", id);
         String sign = createSign(SignUtils.parameterText(data, "") + apbNonce, payConfigStorage.getInputCharset());
         String queryParam =  SignUtils.parameterText(data) +  "&apb_nonce=" + apbNonce + "&sign=" + sign;
 
-        JSONObject jsonObject = execute(new SimpleGetRequestExecutor(), getHttpsVerifyUrl(), queryParam);
+        JSONObject jsonObject = execute(getHttpsVerifyUrl() + "?"  +  queryParam, MethodType.GET, null);
 
-        return jsonObject.getIntValue("errorcode") + "";
-
+        return 0 == jsonObject.getIntValue("errorcode");
     }
+
 
 
 
     /**
      * 向友店端发送请求，在这里执行的策略是当发生access_token过期时才去刷新，然后重新执行请求，而不是全局定时请求
      *
-     * @param executor
-     * @param uri
-     * @param data
+     * @param uri 请求地址
+     * @param method 请求方式
+     *               @see MethodType#GET
+     *               @see MethodType#POST
+     * @param request 请求内容，GET无需
      * @return
      * @throws PayErrorException
      */
-    @Override
-    public <T, E> T execute(RequestExecutor<T, E> executor, String uri, E data) throws PayErrorException {
+    public JSONObject execute(String uri,  MethodType method, Object request) throws PayErrorException {
         int retryTimes = 0;
         do {
-            try {
-                return executeInternal(executor, uri, data);
-            } catch (PayErrorException e) {
-                PayError error = e.getError();
-                if (error.getErrorCode() == 401) {
-                    // 强制设置wxMpConfigStorage它的access token过期了，这样在下一次请求里就会刷新access token
-                    payConfigStorage.expireAccessToken();
-                    //进行重新登陆授权
-                    login();
-                    int sleepMillis = retrySleepMillis * (1 << retryTimes);
-                    try {
-                        log.debug(String.format("友店微信系统繁忙，(%s)ms 后重试(第%s次)", sleepMillis, retryTimes + 1));
-                        Thread.sleep(sleepMillis);
-                    } catch (InterruptedException e1) {
-                        throw new RuntimeException(e1);
-                    }
-                } else {
-                    throw e;
-                }
+        try {
+            JSONObject result = requestTemplate.doExecute(uri, request, JSONObject.class, method);
+            if ( 0 != result.getIntValue("errorcode")){
+              throw new PayErrorException(new YdPayError(result.getIntValue("errorcode"), result.getString("msg"), result.toJSONString()));
             }
+
+        }catch (PayErrorException e){
+            PayError error = e.getPayError();
+            if ("401".equals(error.getErrorCode()) ) {
+                // 强制设置wxMpConfigStorage它的access token过期了，这样在下一次请求里就会刷新access token
+                payConfigStorage.expireAccessToken();
+                //进行重新登陆授权
+                login();
+                int sleepMillis = retrySleepMillis * (1 << retryTimes);
+                try {
+                    log.debug(String.format("友店微信系统繁忙，(%s)ms 后重试(第%s次)", sleepMillis, retryTimes + 1));
+                    Thread.sleep(sleepMillis);
+                } catch (InterruptedException e1) {
+                    throw new PayErrorException(new YdPayError(-1, "友店支付服务端重试失败", e1.getMessage()));
+                }
+            }else {
+                throw e;
+            }
+        }
+
         } while (++retryTimes < maxRetryTimes);
 
-        throw new PayErrorException(new PayError(-1, "友店微信服务端异常，超出重试次数"));
+        throw new PayErrorException(new YdPayError(-1, "友店微信服务端异常，超出重试次数"));
     }
 
 
@@ -249,7 +261,7 @@ public class WxYouDianPayService extends BasePayService {
      *
      * @param order 支付订单
      * @return
-     * @see in.egan.pay.common.bean.PayOrder
+     * @see PayOrder
      */
     @Override
     public JSONObject orderInfo(PayOrder order) {
@@ -261,7 +273,7 @@ public class WxYouDianPayService extends BasePayService {
         data.put("PayMoney", data.remove("paymoney"));
         String params =  SignUtils.parameterText(data) +  "&apb_nonce=" + apbNonce + "&sign=" + sign;
         try {
-            JSONObject json = execute(new SimpleGetRequestExecutor(), unifiedOrderUrl, params);
+            JSONObject json = execute(unifiedOrderUrl+ "?" +  params, MethodType.GET, null);
             //友店比较特殊，需要在下完预订单后，自己存储 order_sn 对应 微信官方文档 out_trade_no
             order.setTradeNo(json.getString("order_sn"));
             return json;
@@ -354,8 +366,66 @@ public class WxYouDianPayService extends BasePayService {
         return  MatrixToImageWriter.writeInfoToJpgBuff((String) orderInfo.get("code_url"));
     }
 
-    public WxYouDianPayService(PayConfigStorage payConfigStorage) {
-        setPayConfigStorage(payConfigStorage);
+    @Override
+    public Map<String, Object> query(String tradeNo, String outTradeNo) {
+        return null;
     }
 
+    @Override
+    public <T> T query(String tradeNo, String outTradeNo, Callback<T> callback) {
+        return null;
+    }
+
+    @Override
+    public Map<String, Object> close(String tradeNo, String outTradeNo) {
+        return null;
+    }
+
+    @Override
+    public <T> T close(String tradeNo, String outTradeNo, Callback<T> callback) {
+        return null;
+    }
+
+    @Override
+    public Map<String, Object> refund(String tradeNo, String outTradeNo) {
+        return null;
+    }
+
+    @Override
+    public <T> T refund(String tradeNo, String outTradeNo, Callback<T> callback) {
+        return null;
+    }
+
+    @Override
+    public Map<String, Object> refundquery(String tradeNo, String outTradeNo) {
+        return null;
+    }
+
+    @Override
+    public <T> T refundquery(String tradeNo, String outTradeNo, Callback<T> callback) {
+        return null;
+    }
+
+    @Override
+    public Object downloadbill(Date billDate, String billType) {
+        return null;
+    }
+
+    @Override
+    public <T> T downloadbill(Date billDate, String billType, Callback<T> callback) {
+        return null;
+    }
+
+    @Override
+    public <T> T secondaryInterface(Object tradeNoOrBillDate, String outTradeNoBillType, TransactionType transactionType, Callback<T> callback) {
+        return null;
+    }
+
+    public WxYouDianPayService(PayConfigStorage payConfigStorage) {
+        super(payConfigStorage);
+    }
+
+    public WxYouDianPayService(PayConfigStorage payConfigStorage, HttpConfigStorage configStorage) {
+        super(payConfigStorage, configStorage);
+    }
 }

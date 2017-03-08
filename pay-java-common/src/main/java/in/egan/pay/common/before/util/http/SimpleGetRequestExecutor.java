@@ -1,15 +1,14 @@
-package in.egan.pay.ali.util;
+package in.egan.pay.common.before.util.http;
 
 /**
  * @author  egan
  * @email egzosn@gmail.com
  * @date 2016-5-24
+ * @source chanjarster/weixin-java-tools
  */
 
-import in.egan.pay.common.api.RequestExecutor;
-import in.egan.pay.common.bean.result.PayError;
+import in.egan.pay.common.before.api.RequestExecutor;
 import in.egan.pay.common.exception.PayErrorException;
-import in.egan.pay.common.util.http.Utf8ResponseHandler;
 import org.apache.http.HttpHost;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -21,7 +20,6 @@ import java.io.IOException;
 /**
  * 简单的GET请求执行器，请求的参数是String, 返回的结果也是String
  * @author Daniel Qian
- * @source chanjarster/weixin-java-tools
  *
  */
 public class SimpleGetRequestExecutor implements RequestExecutor<String, String> {
@@ -42,11 +40,10 @@ public class SimpleGetRequestExecutor implements RequestExecutor<String, String>
 
         try (CloseableHttpResponse response = httpclient.execute(httpGet)) {
             String responseContent = Utf8ResponseHandler.INSTANCE.handleResponse(response);
-            if ("true".equals(responseContent)){ return responseContent; }
-
-            throw new PayErrorException(new PayError(100101, responseContent));
+            return responseContent;
+        }finally {
+            httpGet.releaseConnection();
         }
-
 
     }
 

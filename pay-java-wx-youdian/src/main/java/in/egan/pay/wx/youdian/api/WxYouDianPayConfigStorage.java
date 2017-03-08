@@ -2,9 +2,6 @@ package in.egan.pay.wx.youdian.api;
 
 import in.egan.pay.common.api.BasePayConfigStorage;
 
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
 /**
  * 支付客户端配置存储
  * @author  egan
@@ -37,6 +34,11 @@ public class WxYouDianPayConfigStorage extends BasePayConfigStorage {
 
     @Override
     public String getPartner() {
+        return null;
+    }
+
+    @Override
+    public String getPid() {
         return null;
     }
 

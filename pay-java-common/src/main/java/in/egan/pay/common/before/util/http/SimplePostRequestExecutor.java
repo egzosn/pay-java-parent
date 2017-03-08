@@ -1,7 +1,6 @@
-package in.egan.pay.common.util.http;
+package in.egan.pay.common.before.util.http;
 
-import in.egan.pay.common.api.RequestExecutor;
-import in.egan.pay.common.bean.result.PayError;
+import in.egan.pay.common.before.api.RequestExecutor;
 import in.egan.pay.common.exception.PayErrorException;
 import org.apache.http.Consts;
 import org.apache.http.HttpHost;

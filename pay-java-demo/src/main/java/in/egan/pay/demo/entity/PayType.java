@@ -1,8 +1,8 @@
 package in.egan.pay.demo.entity;
 
 import in.egan.pay.ali.api.AliPayConfigStorage;
-import in.egan.pay.ali.api.AliPayService;
-import in.egan.pay.ali.bean.AliTransactionType;
+import in.egan.pay.ali.before.api.AliPayService;
+import in.egan.pay.ali.before.bean.AliTransactionType;
 import in.egan.pay.common.api.PayService;
 import in.egan.pay.common.bean.BasePayType;
 import in.egan.pay.common.bean.TransactionType;
@@ -22,11 +22,18 @@ import in.egan.pay.wx.youdian.bean.YoudianTransactionType;
  */
 public enum PayType implements BasePayType {
 
+
     aliPay{
+        /**
+         *  @see in.egan.pay.ali.before.api.AliPayService  支付宝暂时请用这个2016年版本的，17年更新的版本暂时未进行测试，开发者可自行测试，可以的话反馈到我这边
+         * @param apyAccount
+         * @return
+         */
         @Override
         public PayService getPayService(ApyAccount apyAccount) {
             AliPayConfigStorage aliPayConfigStorage = new AliPayConfigStorage();
-            aliPayConfigStorage.setPartner(apyAccount.getPartner());
+            aliPayConfigStorage.setPid(apyAccount.getPartner());
+            aliPayConfigStorage.setAppId(apyAccount.getAppid());
             aliPayConfigStorage.setAliPublicKey(apyAccount.getPublicKey());
             aliPayConfigStorage.setKeyPrivate(apyAccount.getPrivateKey());
             aliPayConfigStorage.setNotifyUrl(apyAccount.getNotifyUrl());
@@ -41,6 +48,7 @@ public enum PayType implements BasePayType {
 
         @Override
         public TransactionType getTransactionType(String transactionType) {
+            // in.egan.pay.ali.before.bean.AliTransactionType 支付宝暂时用2016年版本的，17年更新的版本暂时未进行测试，开发者可自行测试，可以的话反馈到我这边
             return AliTransactionType.valueOf(transactionType);
         }
 

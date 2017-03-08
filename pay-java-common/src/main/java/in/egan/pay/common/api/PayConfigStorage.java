@@ -19,8 +19,16 @@ import java.util.concurrent.locks.Lock;
      String getAppid();
     /**
      * 合作商唯一标识
+     *  @see #getPid()  代替者
      */
+    @Deprecated
      String getPartner();
+    /**
+     * 合作商唯一标识
+     * @see #getPartner()  代替者
+     */
+     String getPid();
+
     /**
      * 获取收款账号
      */
@@ -74,10 +82,7 @@ import java.util.concurrent.locks.Lock;
      * 消息类型
      *  @see #getMsgType
      *  @see MsgType
-     * @return "text" 或者 "xml"
-     * @see MsgType#text
-     * @see MsgType#xml
-     * @see MsgType#json
+     * @return "text" 或者 "xml"，json
      */
      MsgType getMsgType();
 
@@ -121,30 +126,5 @@ import java.util.concurrent.locks.Lock;
      * @param expiresTime 过期时间，时间戳
      */
     void updateAccessToken(String accessToken, long expiresTime);
-
-
-    /**
-     * http代理地址
-     * @return
-     */
-     String getHttpProxyHost();
-
-    /**
-     *   代理端口
-     * @return
-     */
-    int getHttpProxyPort();
-
-    /**
-     * 代理用户名
-     * @return
-     */
-     String getHttpProxyUsername();
-
-    /**
-     *  代理密码
-     * @return
-     */
-     String getHttpProxyPassword();
 
 }
