@@ -37,6 +37,7 @@ public class AliPayService extends BasePayService {
 
 
     private String httpsReqUrl = "https://openapi.alipay.com/gateway.do";
+//    private String httpsReqUrl = "https://openapi.alipaydev.com/gateway.do";
     private String httpsReqUrlBefore = "https://mapi.alipay.com/gateway.do";
 
     public AliPayService(PayConfigStorage payConfigStorage, HttpConfigStorage configStorage) {
@@ -90,7 +91,7 @@ public class AliPayService extends BasePayService {
     @Override
     public boolean verifySource(String id) {
 
-        return "true".equals(requestTemplate.getForObject( getHttpsVerifyUrl() + "partner=" + payConfigStorage.getPid() + "&notify_id=" + id, String.class));
+        return "true".equals(requestTemplate.getForObject( getHttpsVerifyUrl() + "pid=" + payConfigStorage.getPid() + "&notify_id=" + id, String.class));
     }
 
 
@@ -101,7 +102,7 @@ public class AliPayService extends BasePayService {
      */
     private Map<String, Object> setSign(Map<String, Object> parameters){
         parameters.put("sign_type", payConfigStorage.getSignType());
-        String sign = createSign( SignUtils.parameterText(parameters, "&", "sign", "appId"), payConfigStorage.getInputCharset());
+        String sign = createSign( SignUtils.parameterText(parameters, "&", "sign"), payConfigStorage.getInputCharset());
 
     /*    try {
             sign = URLEncoder.encode(sign, payConfigStorage.getInputCharset());
@@ -163,9 +164,14 @@ public class AliPayService extends BasePayService {
         Map<String, Object> orderInfo = getPublicParameters(order.getTransactionType());
 
         orderInfo.put("notify_url", payConfigStorage.getNotifyUrl());
+        orderInfo.put("format", "json");
+
 
         Map<String, Object> bizContent = new TreeMap<>();
-        if ("alipay.trade.pay".equals(order.getTransactionType().getMethod())){
+        if (order.getTransactionType() == AliTransactionType.WAP){
+            bizContent.put("product_code", "QUICK_WAP_PAY");
+            orderInfo.put("return_url", payConfigStorage.getReturnUrl());
+        }else if ("alipay.trade.pay".equals(order.getTransactionType().getMethod())){
             bizContent.put("scene", order.getTransactionType().toString().toLowerCase());
             bizContent.put("product_code", "FACE_TO_FACE_PAYMENT");
             bizContent.put("auth_code", order.getAuthCode());
@@ -173,7 +179,7 @@ public class AliPayService extends BasePayService {
             bizContent.put("product_code", "QUICK_MSECURITY_PAY");
         }
         bizContent.put("body", order.getBody());
-        bizContent.put("seller_id", payConfigStorage.getPid());
+        bizContent.put("seller_id", payConfigStorage.getSeller());
         bizContent.put("subject", order.getSubject());
         bizContent.put("out_trade_no", order.getOutTradeNo());
         bizContent.put("total_amount", order.getPrice().setScale(2, BigDecimal.ROUND_HALF_UP).toString());
@@ -191,8 +197,10 @@ public class AliPayService extends BasePayService {
         orderInfo.put("app_id", payConfigStorage.getAppid());
         orderInfo.put("method", transactionType.getMethod());
         orderInfo.put("charset", payConfigStorage.getInputCharset());
-        DateFormat formatter = DateFormat.getDateTimeInstance();
-        orderInfo.put("timestamp", formatter.format( new Date()));
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        df.setTimeZone(TimeZone.getTimeZone("GMT+8"));
+//      DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        orderInfo.put("timestamp", df.format(new Date()));
         orderInfo.put("version", "1.0");
         return  orderInfo;
     }
@@ -285,21 +293,32 @@ public class AliPayService extends BasePayService {
     public String buildRequest(Map<String, Object> orderInfo, MethodType method) {
 
         StringBuffer formHtml = new StringBuffer();
+        formHtml.append("<form id=\"_alipaysubmit_\" name=\"alipaysubmit\" action=\"");
+        if (null == orderInfo.get("method")) {
+            formHtml.append(httpsReqUrlBefore)
+                    .append("?_input_charset=")
+                    .append(payConfigStorage.getInputCharset())
+                    .append("\" method=\"")
+                    .append(method.name().toLowerCase()).append("\">");
+            for (String key : orderInfo.keySet()) {
+                Object o = orderInfo.get(key);
+                if (null == o || "null".equals(o) || "".equals(o)) {
+                    continue;
+                }
 
-        formHtml.append("<form id=\"_alipaysubmit_\" name=\"alipaysubmit\" action=\"" )
-                .append( null == orderInfo.get("method") ? httpsReqUrlBefore : httpsReqUrl)
-                .append(  "?_input_charset=" )
-                .append( payConfigStorage.getInputCharset())
-                .append( "\" method=\"")
-                .append( method.name().toLowerCase()) .append( "\">");
+                formHtml.append("<input type=\"hidden\" name=\"" + key + "\" value=\"" + orderInfo.get(key) + "\"/>");
 
-        for (String key: orderInfo.keySet()) {
-            Object o = orderInfo.get(key);
-            if (null == o ||"null".equals(o) || "".equals(o) ){
-                continue;
             }
-            formHtml.append("<input type=\"hidden\" name=\"" + key + "\" value=\"" + orderInfo.get(key) + "\"/>");
+
+        } else {
+            String biz_content = (String)orderInfo.remove("biz_content");
+            formHtml.append(httpsReqUrl).append("?").append(ClientHttpRequest.getMapToParameters(orderInfo))
+            .append("\" method=\"")
+                    .append(method.name().toLowerCase()).append("\">");
+
+            formHtml.append("<input type=\"hidden\" name=\"biz_content\" value=\"" + biz_content.replace("\"", "&quot;") + "\"/>");
         }
+
 
 
         //submit按钮控件请不要含有name属性

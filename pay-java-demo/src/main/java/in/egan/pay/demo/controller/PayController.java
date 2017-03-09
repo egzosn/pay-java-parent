@@ -2,7 +2,7 @@
 package in.egan.pay.demo.controller;
 
 
-import in.egan.pay.ali.before.bean.AliTransactionType;
+
 import in.egan.pay.common.api.Callback;
 import in.egan.pay.common.bean.*;
 import in.egan.pay.common.util.str.StringUtils;
