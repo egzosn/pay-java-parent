@@ -9,6 +9,7 @@ import in.egan.pay.common.http.HttpRequestTemplate;
 
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Map;
 
@@ -179,23 +180,27 @@ public interface PayService {
     <T>T close(String tradeNo, String outTradeNo, Callback<T> callback);
 
     /**
-     * 交易关闭接口
+     * 申请退款接口
      *
      * @param tradeNo    支付平台订单号
      * @param outTradeNo 商户单号
+     * @param refundAmount 退款金额
+     * @param totalAmount 总金额
      * @return
      */
-    Map<String, Object> refund(String tradeNo, String outTradeNo);
+    Map<String, Object> refund(String tradeNo, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount);
     /**
-     * 交易关闭接口
+     * 申请退款接口
      *
      * @param tradeNo    支付平台订单号
      * @param outTradeNo 商户单号
+     * @param refundAmount 退款金额
+     * @param totalAmount 总金额
      * @param callback 处理器
      * @param <T> 返回类型
      * @return
      */
-    <T>T refund(String tradeNo, String outTradeNo, Callback<T> callback);
+    <T>T refund(String tradeNo, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount, Callback<T> callback);
 
     /**
      * 查询退款

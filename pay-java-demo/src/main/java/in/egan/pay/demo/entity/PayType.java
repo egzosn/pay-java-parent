@@ -1,8 +1,8 @@
 package in.egan.pay.demo.entity;
 
 import in.egan.pay.ali.api.AliPayConfigStorage;
-import in.egan.pay.ali.before.api.AliPayService;
-import in.egan.pay.ali.before.bean.AliTransactionType;
+import in.egan.pay.ali.api.AliPayService;
+import in.egan.pay.ali.bean.AliTransactionType;
 import in.egan.pay.common.api.PayService;
 import in.egan.pay.common.bean.BasePayType;
 import in.egan.pay.common.bean.TransactionType;
