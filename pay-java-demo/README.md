@@ -14,7 +14,7 @@ public enum PayType implements BasePayType {
 
     aliPay{
         /**
-         *  @see in.egan.pay.ali.before.api.AliPayService  支付宝暂时请用这个2016年版本的，17年更新的版本暂时未进行测试，开发者可自行测试，可以的话反馈到我这边
+         *  @see in.egan.pay.ali.api.AliPayService  17年更新的版本,旧版本请自行切换{@link in.egan.pay.ali.before.api.AliPayService }
          * @param apyAccount
          * @return
          */
@@ -37,7 +37,7 @@ public enum PayType implements BasePayType {
 
         @Override
         public TransactionType getTransactionType(String transactionType) {
-            // in.egan.pay.ali.before.bean.AliTransactionType 支付宝暂时用2016年版本的，17年更新的版本暂时未进行测试，开发者可自行测试，可以的话反馈到我这边
+              // in.egan.pay.ali.bean.AliTransactionType 17年更新的版本,旧版本请自行切换{@link in.egan.pay.ali.before.bean.AliTransactionType}
             return AliTransactionType.valueOf(transactionType);
         }
 
