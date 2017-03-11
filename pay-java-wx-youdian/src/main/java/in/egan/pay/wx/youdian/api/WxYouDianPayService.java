@@ -387,12 +387,12 @@ public class WxYouDianPayService extends BasePayService {
     }
 
     @Override
-    public Map<String, Object> refund(String tradeNo, String outTradeNo) {
+    public Map<String, Object> refund(String tradeNo, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount) {
         return null;
     }
 
     @Override
-    public <T> T refund(String tradeNo, String outTradeNo, Callback<T> callback) {
+    public <T> T refund(String tradeNo, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount, Callback<T> callback) {
         return null;
     }
 

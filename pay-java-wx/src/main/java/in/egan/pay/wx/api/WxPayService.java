@@ -41,9 +41,8 @@ public class WxPayService extends BasePayService {
 
 
     public final static String httpsVerifyUrl = "https://gw.tenpay.com/gateway";
-
     public final static String uri = "https://api.mch.weixin.qq.com/";
-    public final static String unifiedOrderUrl = "https://api.mch.weixin.qq.com/pay/unifiedorder";
+//    public final static String unifiedOrderUrl = "https://api.mch.weixin.qq.com/pay/unifiedorder";
     //    public final static String orderqueryUrl = "https://api.mch.weixin.qq.com/pay/orderquery";
 
 
@@ -255,14 +254,14 @@ public class WxPayService extends BasePayService {
 
     /**
      *  交易查询接口
-     * @param tradeNo 支付平台订单号
+     * @param transactionId 支付平台订单号
      * @param outTradeNo 商户单号
      * @return
      */
     @Override
-    public Map<String, Object> query(String tradeNo, String outTradeNo) {
+    public Map<String, Object> query(String transactionId, String outTradeNo) {
 
-        return  query(tradeNo, outTradeNo, new Callback<Map<String, Object>>() {
+        return  query(transactionId, outTradeNo, new Callback<Map<String, Object>>() {
             @Override
             public Map<String, Object> perform(Map<String, Object> map) {
                 return map;
@@ -272,23 +271,23 @@ public class WxPayService extends BasePayService {
 
     /**
      *
-     * @param tradeNo    支付平台订单号
+     * @param transactionId    支付平台订单号
      * @param outTradeNo 商户单号
      * @param callback 处理器
      * @param <T>
      * @return
      */
     @Override
-    public <T> T query(String tradeNo, String outTradeNo, Callback<T> callback) {
+    public <T> T query(String transactionId, String outTradeNo, Callback<T> callback) {
 
-        return secondaryInterface(tradeNo, outTradeNo, WxTransactionType.QUERY, callback);
+        return secondaryInterface(transactionId, outTradeNo, WxTransactionType.QUERY, callback);
     }
 
 
     @Override
-    public Map<String, Object> close(String tradeNo, String outTradeNo) {
+    public Map<String, Object> close(String transactionId, String outTradeNo) {
 
-        return  close(tradeNo, outTradeNo, new Callback<Map<String, Object>>() {
+        return  close(transactionId, outTradeNo, new Callback<Map<String, Object>>() {
             @Override
             public Map<String, Object> perform(Map<String, Object> map) {
                 return map;
@@ -297,14 +296,64 @@ public class WxPayService extends BasePayService {
     }
 
     @Override
-    public <T> T close(String tradeNo, String outTradeNo, Callback<T> callback) {
-        return  secondaryInterface(tradeNo, outTradeNo, WxTransactionType.CLOSE, callback);
+    public <T> T close(String transactionId, String outTradeNo, Callback<T> callback) {
+        return  secondaryInterface(transactionId, outTradeNo, WxTransactionType.CLOSE, callback);
+    }
+
+    /**
+     * 退款
+     * @param transactionId 微信订单号
+     * @param outTradeNo 商户单号
+     * @param refundAmount 退款金额
+     * @param totalAmount 总金额
+     * @return
+     */
+    @Override
+    public Map<String, Object> refund(String transactionId, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount) {
+
+        return  refund(transactionId, outTradeNo, refundAmount, totalAmount, new Callback<Map<String, Object>>() {
+            @Override
+            public Map<String, Object> perform(Map<String, Object> map) {
+                return map;
+            }
+        });
+    }
+
+    /**
+     * 退款
+     *
+     * @param transactionId 微信订单号
+     * @param outTradeNo    商户单号
+     * @param refundAmount  退款金额
+     * @param totalAmount   总金额
+     * @param callback      处理器
+     * @param <T>
+     * @return
+     */
+    @Override
+    public <T> T refund(String transactionId, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount, Callback<T> callback) {
+
+        //获取公共参数
+        Map<String, Object> parameters = getPublicParameters();
+        if (null != transactionId) {
+            parameters.put("transaction_id", transactionId);
+            parameters.put("out_refund_no", transactionId);
+        } else {
+            parameters.put("out_trade_no", outTradeNo);
+            parameters.put("out_refund_no", outTradeNo);
+        }
+        parameters.put("total_fee", totalAmount);
+        parameters.put("refund_fee", refundAmount);
+        parameters.put("op_user_id", payConfigStorage.getPid());
+
+        //设置签名
+        setSign(parameters);
+        return callback.perform(requestTemplate.postForObject(getUrl(WxTransactionType.REFUND), XML.getMap2Xml(parameters), JSONObject.class));
     }
 
     @Override
-    public Map<String, Object> refund(String tradeNo, String outTradeNo) {
-
-        return  refund(tradeNo, outTradeNo, new Callback<Map<String, Object>>() {
+    public Map<String, Object> refundquery(String transactionId, String outTradeNo) {
+        return  refundquery(transactionId, outTradeNo, new Callback<Map<String, Object>>() {
             @Override
             public Map<String, Object> perform(Map<String, Object> map) {
                 return map;
@@ -313,23 +362,8 @@ public class WxPayService extends BasePayService {
     }
 
     @Override
-    public <T> T refund(String tradeNo, String outTradeNo, Callback<T> callback) {
-        return secondaryInterface(tradeNo, outTradeNo, WxTransactionType.REFUND, callback);
-    }
-
-    @Override
-    public Map<String, Object> refundquery(String tradeNo, String outTradeNo) {
-        return  refundquery(tradeNo, outTradeNo, new Callback<Map<String, Object>>() {
-            @Override
-            public Map<String, Object> perform(Map<String, Object> map) {
-                return map;
-            }
-        });
-    }
-
-    @Override
-    public <T> T refundquery(String tradeNo, String outTradeNo, Callback<T> callback) {
-        return secondaryInterface(tradeNo, outTradeNo, WxTransactionType.REFUNDQUERY, callback);
+    public <T> T refundquery(String transactionId, String outTradeNo, Callback<T> callback) {
+        return secondaryInterface(transactionId, outTradeNo, WxTransactionType.REFUNDQUERY, callback);
     }
 
     /**
@@ -386,6 +420,11 @@ public class WxPayService extends BasePayService {
     @Override
     public <T> T secondaryInterface(Object transactionIdOrBillDate, String outTradeNoBillType, TransactionType transactionType, Callback<T> callback) {
 
+        if (transactionType == WxTransactionType.REFUND){
+            throw new PayErrorException(new PayException("failure", "通用接口不支持:" + transactionType));
+        }
+        
+        
         if (transactionType == WxTransactionType.DOWNLOADBILL){
             if (transactionIdOrBillDate instanceof  Date){
                 return downloadbill((Date) transactionIdOrBillDate, outTradeNoBillType, callback);
