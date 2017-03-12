@@ -77,8 +77,8 @@ public class WxPayService extends BasePayService {
         }
 
         if(null == params.get("sign")) {
-
             log.debug("微信支付异常：签名为空！out_trade_no=" + params.get("out_trade_no"));
+            return false;
         }
 
         try {
@@ -138,8 +138,6 @@ public class WxPayService extends BasePayService {
     @Override
     public Map<String, Object> orderInfo(PayOrder order) {
 
-
-//        Map<String, Object> results = new HashMap<String, Object>();
         ////统一下单
         Map<String, Object> parameters = getPublicParameters();
      /*   parameters.put("appid", payConfigStorage.getAppid());
@@ -176,7 +174,7 @@ public class WxPayService extends BasePayService {
         params.put("partnerid", payConfigStorage.getPid());
         params.put("prepayid", result.get("prepay_id"));
         params.put("timestamp", System.currentTimeMillis() / 1000);
-        params.put("noncestr", result.get("nonce_str")/*WxpayCore.genNonceStr()*/);
+        params.put("noncestr", result.get("nonce_str"));
 
         if (WxTransactionType.JSAPI == order.getTransactionType()){
             params.put("package", "prepay_id=" + result.get("prepay_id"));
@@ -409,6 +407,16 @@ public class WxPayService extends BasePayService {
         setSign(parameters);
         return callback.perform(requestTemplate.postForObject(getUrl(WxTransactionType.DOWNLOADBILL),  XML.getMap2Xml(parameters), JSONObject.class));
     }
+
+    /**
+     *
+     * @param transactionIdOrBillDate 支付平台订单号或者账单类型， 具体请 类型为{@link String }或者 {@link Date }，类型须强制限制，类型不对应则抛出异常{@link in.egan.pay.common.exception.PayErrorException}
+     * @param outTradeNoBillType  商户单号或者 账单类型
+     * @param transactionType 交易类型
+     * @param callback 处理器
+     * @param <T>
+     * @return
+     */
     @Override
     public <T> T secondaryInterface(Object transactionIdOrBillDate, String outTradeNoBillType, TransactionType transactionType, Callback<T> callback) {
 

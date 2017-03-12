@@ -244,8 +244,8 @@ public interface PayService {
     /**
      * 交易辅助接口
      *
-     * @param tradeNoOrBillDate 支付平台订单号或者账单类型， 具体请
-     *                          类型为{@link String }或者 {@link Date }，类型须强制限制，类型不对应则抛出异常{@link in.egan.pay.common.exception.PayErrorException}
+     * @param tradeNoOrBillDate 支付平台订单号或者账单类型， 具体请 类型为{@link String }或者 {@link Date }，类型须强制限制，类型不对应则抛出异常{@link in.egan.pay.common.exception.PayErrorException}
+     *
      * @param outTradeNoBillType  商户单号或者 账单类型
      * @param transactionType 交易类型
      * @param callback 处理器
