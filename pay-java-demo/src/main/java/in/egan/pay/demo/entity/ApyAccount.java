@@ -54,7 +54,8 @@ public class ApyAccount {
 //    @Enumerated(EnumType.STRING)
 //    @Column(name = "msg_type")
     private MsgType msgType;
-
+    //是否为测试环境
+    private boolean isTest = false;
     public Integer getPayId() {
         return payId;
     }
@@ -149,6 +150,14 @@ public class ApyAccount {
 
     public void setInputCharset(String inputCharset) {
         this.inputCharset = inputCharset;
+    }
+
+    public boolean isTest() {
+        return isTest;
+    }
+
+    public void setTest(boolean test) {
+        isTest = test;
     }
 
     @Override

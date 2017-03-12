@@ -127,7 +127,7 @@ public class PayResponse {
     /**
      * 初始化支付配置
      * @param apyAccount 账户信息
-     * @see ApyAccount 对应表结构详情--》 pay-java-demo/resources/apy_account.sql
+     * @see in.egan.pay.demo.entity.ApyAccount 对应表结构详情--》 pay-java-demo/resources/apy_account.sql
      */
     public void init(ApyAccount apyAccount) {
 
@@ -305,6 +305,7 @@ public class ApyAccountService {
      * @param bankType 针对刷卡支付，卡的类型，类型值
      * @return
      */
+    
     @RequestMapping(value = "toPay.html", produces = "text/html;charset=UTF-8")
     public String toPay( Integer payId, String transactionType, String bankType, BigDecimal price) {
         //获取对应的支付账户操作工具（可根据账户id）
@@ -355,6 +356,83 @@ public class ApyAccountService {
         PayOrder order = new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType));
         data.put("orderInfo",  payResponse.getService().orderInfo(order));
         return data;
+    }
+
+
+ /**
+     * 查询
+     * @param order 订单的请求体
+     * @return
+     */
+    @RequestMapping("query")
+    public Map<String, Object> query(QueryOrder order) {
+        PayResponse payResponse = service.getPayResponse(order.getPayId());
+        return payResponse.getService().query(order.getTradeNo(), order.getOutTradeNo());
+    }
+    /**
+     * 交易关闭接口
+     * @param order 订单的请求体
+     * @return
+     */
+    @RequestMapping("close")
+    public Map<String, Object> close(QueryOrder order) {
+        PayResponse payResponse = service.getPayResponse(order.getPayId());
+        return payResponse.getService().close(order.getTradeNo(), order.getOutTradeNo());
+    }
+
+    /**
+     * 申请退款接口
+     * @param order 订单的请求体
+     * @return
+     */
+    @RequestMapping("refund")
+    public Map<String, Object> refund(QueryOrder order) {
+        PayResponse payResponse = service.getPayResponse(order.getPayId());
+
+
+        return payResponse.getService().refund(order.getTradeNo(), order.getOutTradeNo(), order.getRefundAmount(), order.getTotalAmount());
+    }
+
+    /**
+     * 查询退款
+     * @param order 订单的请求体
+     * @return
+     */
+    @RequestMapping("refundquery")
+    public Map<String, Object> refundquery(QueryOrder order) {
+        PayResponse payResponse = service.getPayResponse(order.getPayId());
+        return payResponse.getService().refundquery(order.getTradeNo(), order.getOutTradeNo());
+    }
+
+    /**
+     * 下载对账单
+     * @param order 订单的请求体
+     * @return
+     */
+    @RequestMapping("downloadbill")
+    public Object downloadbill(QueryOrder order) {
+        PayResponse payResponse = service.getPayResponse(order.getPayId());
+
+        return payResponse.getService().downloadbill(order.getBillDate(), order.getBillType());
+    }
+
+
+    /**
+     * 通用查询接口，根据 TransactionType 类型进行实现,此接口不包括退款
+     * @param order 订单的请求体
+     *
+     * @return
+     */
+    @RequestMapping("secondaryInterface")
+    public Map<String, Object> secondaryInterface(QueryOrder order) {
+        PayResponse payResponse = service.getPayResponse(order.getPayId());
+        TransactionType type = PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(order.getTransactionType());
+        return payResponse.getService().secondaryInterface(order.getTradeNoOrBillDate(), order.getOutTradeNoBillType(), type, new Callback<Map<String, Object>>() {
+            @Override
+            public Map<String, Object> perform(Map<String, Object> map) {
+                return map;
+            }
+        });
     }
 
 

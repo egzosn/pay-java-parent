@@ -54,6 +54,7 @@ public abstract class BasePayConfigStorage implements PayConfigStorage{
     protected volatile  String httpProxyUsername;
     protected volatile  String httpProxyPassword;
 
+    private boolean isTest = false;
 
     /**
      * 合作商唯一标识
@@ -226,5 +227,12 @@ public abstract class BasePayConfigStorage implements PayConfigStorage{
     public void expireAccessToken() {
         this.expiresTime = 0;
     }
+    @Override
+    public boolean isTest() {
+        return isTest;
+    }
 
+    public void setTest(boolean test) {
+        isTest = test;
+    }
 }

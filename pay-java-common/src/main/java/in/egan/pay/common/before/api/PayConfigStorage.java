@@ -164,4 +164,10 @@ import java.util.concurrent.locks.Lock;
     @Deprecated
      String getHttpProxyPassword();
 
+
+    /**
+     * 是否为测试环境， true测试环境
+     * @return
+     */
+    boolean isTest();
 }

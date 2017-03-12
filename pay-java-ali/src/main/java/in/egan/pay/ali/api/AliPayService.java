@@ -35,10 +35,22 @@ import java.util.*;
 public class AliPayService extends BasePayService {
     protected final Log log = LogFactory.getLog(AliPayService.class);
 
-
-//    private String httpsReqUrl = "https://openapi.alipay.com/gateway.do";
-    private String httpsReqUrl = "https://openapi.alipaydev.com/gateway.do";
+      //正式测试环境
+    private String httpsReqUrl = "https://openapi.alipay.com/gateway.do";
+    //沙箱测试环境账号
+    private String devReqUrl = "https://openapi.alipaydev.com/gateway.do";
+    //兼容上一版本即时收款
     private String httpsReqUrlBefore = "https://mapi.alipay.com/gateway.do";
+
+
+    /**
+     * 获取对应的请求地址
+     * @return
+     */
+    public String getReqUrl(){
+        return payConfigStorage.isTest() ? devReqUrl : httpsReqUrl;
+    }
+
 
     public AliPayService(PayConfigStorage payConfigStorage, HttpConfigStorage configStorage) {
         super(payConfigStorage, configStorage);
@@ -50,7 +62,7 @@ public class AliPayService extends BasePayService {
 
 
     public String getHttpsVerifyUrl() {
-        return httpsReqUrl + "?service=notify_verify";
+        return getReqUrl() + "?service=notify_verify";
     }
 
     @Override
@@ -105,11 +117,6 @@ public class AliPayService extends BasePayService {
         parameters.put("sign_type", payConfigStorage.getSignType());
         String sign = createSign( SignUtils.parameterText(parameters, "&", "sign"), payConfigStorage.getInputCharset());
 
-    /*    try {
-            sign = URLEncoder.encode(sign, payConfigStorage.getInputCharset());
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }*/
         parameters.put("sign", sign);
         return parameters;
     }
@@ -124,17 +131,6 @@ public class AliPayService extends BasePayService {
     @Override
     public Map<String, Object> orderInfo(PayOrder order) {
 
-/*        Map<String, Object> orderInfo = getOrder(order);
-
-        String sign = createSign( SignUtils.parameterText(orderInfo, "&"), "UTF-8");
-
-        try {
-            sign = URLEncoder.encode(sign, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        orderInfo.put("sign", sign);
-        orderInfo.put("sign_type", payConfigStorage.getSignType());*/
         return setSign(getOrder(order));
     }
 
@@ -149,19 +145,12 @@ public class AliPayService extends BasePayService {
      */
     private  Map<String, Object> getOrder(PayOrder order) {
 
-        //兼容上一版本
+        //兼容上一版本 即时收款
   /*      if (AliTransactionType.DIRECT == order.getTransactionType() || AliTransactionType.MOBILE == order.getTransactionType() || AliTransactionType.WAPPAY == order.getTransactionType()){
             return getOrderBefore(order);
         }
 */
 
-    /*    Map<String, Object> orderInfo = new TreeMap<>();
-        orderInfo.put("app_id", payConfigStorage.getAppid());
-        orderInfo.put("method", order.getTransactionType().getType());
-        orderInfo.put("charset", payConfigStorage.getInputCharset());
-        DateFormat formatter = DateFormat.getDateTimeInstance();
-        orderInfo.put("timestamp", formatter.format( new Date()));
-        orderInfo.put("version", "1.0");*/
         Map<String, Object> orderInfo = getPublicParameters(order.getTransactionType());
 
         orderInfo.put("notify_url", payConfigStorage.getNotifyUrl());
@@ -313,7 +302,7 @@ public class AliPayService extends BasePayService {
 
         } else {
             String biz_content = (String)orderInfo.remove("biz_content");
-            formHtml.append(httpsReqUrl).append("?").append(ClientHttpRequest.getMapToParameters(orderInfo))
+            formHtml.append(getReqUrl()).append("?").append(ClientHttpRequest.getMapToParameters(orderInfo))
             .append("\" method=\"")
                     .append(method.name().toLowerCase()).append("\">");
 
@@ -405,12 +394,12 @@ public class AliPayService extends BasePayService {
         Map<String, Object> parameters = getPublicParameters(AliTransactionType.REFUND);
 
         Map<String, Object> bizContent = getBizContent(tradeNo, outTradeNo, null);
-        bizContent.put("refund_amount", refundAmount);
+        bizContent.put("refund_amount", refundAmount.setScale(2, BigDecimal.ROUND_HALF_UP).toString());
         //设置请求参数的集合
         parameters.put("biz_content", JSON.toJSONString(bizContent));
         //设置签名
         setSign(parameters);
-        return  callback.perform(requestTemplate.getForObject(httpsReqUrl + "?" + ClientHttpRequest.getMapToParameters(parameters), JSONObject.class));
+        return  callback.perform(requestTemplate.getForObject(getReqUrl() + "?" + ClientHttpRequest.getMapToParameters(parameters), JSONObject.class));
     }
 
     @Override
@@ -468,7 +457,7 @@ public class AliPayService extends BasePayService {
         parameters.put("biz_content", JSON.toJSONString(bizContent));
         //设置签名
         setSign(parameters);
-        return callback.perform(requestTemplate.getForObject(httpsReqUrl + "?" + ClientHttpRequest.getMapToParameters(parameters), JSONObject.class));
+        return callback.perform(requestTemplate.getForObject(getReqUrl() + "?" + ClientHttpRequest.getMapToParameters(parameters), JSONObject.class));
     }
 
     /**
@@ -505,7 +494,7 @@ public class AliPayService extends BasePayService {
         parameters.put("biz_content", getContentToJson(tradeNoOrBillDate.toString(), outTradeNoBillType));
         //设置签名
         setSign(parameters);
-        return  callback.perform(requestTemplate.getForObject(httpsReqUrl + "?" + ClientHttpRequest.getMapToParameters(parameters), JSONObject.class));
+        return  callback.perform(requestTemplate.getForObject(getReqUrl() + "?" + ClientHttpRequest.getMapToParameters(parameters), JSONObject.class));
 
     }
 

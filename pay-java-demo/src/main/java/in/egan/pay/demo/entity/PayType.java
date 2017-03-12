@@ -43,6 +43,7 @@ public enum PayType implements BasePayType {
             aliPayConfigStorage.setPayType(apyAccount.getPayType().toString());
             aliPayConfigStorage.setMsgType(apyAccount.getMsgType());
             aliPayConfigStorage.setInputCharset(apyAccount.getInputCharset());
+            aliPayConfigStorage.setTest(apyAccount.isTest());
             return new AliPayService(aliPayConfigStorage);
         }
 
@@ -67,6 +68,7 @@ public enum PayType implements BasePayType {
             wxPayConfigStorage.setPayType(apyAccount.getPayType().toString());
             wxPayConfigStorage.setMsgType(apyAccount.getMsgType());
             wxPayConfigStorage.setInputCharset(apyAccount.getInputCharset());
+            wxPayConfigStorage.setTest(apyAccount.isTest());
             return  new WxPayService(wxPayConfigStorage);
         }
 
@@ -95,6 +97,7 @@ public enum PayType implements BasePayType {
             wxPayConfigStorage.setMsgType(apyAccount.getMsgType());
             wxPayConfigStorage.setSeller(apyAccount.getSeller());
             wxPayConfigStorage.setInputCharset(apyAccount.getInputCharset());
+            wxPayConfigStorage.setTest(apyAccount.isTest());
             return  new WxYouDianPayService(wxPayConfigStorage);
         }
 

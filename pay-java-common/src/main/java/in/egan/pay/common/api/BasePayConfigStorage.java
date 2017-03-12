@@ -45,6 +45,9 @@ public abstract class BasePayConfigStorage implements PayConfigStorage{
     //授权码锁
     private Lock accessTokenLock = new ReentrantLock();
 
+    private boolean isTest = false;
+
+
     @Override
     public String getKeyPrivate() {
         return keyPrivate;
@@ -160,4 +163,24 @@ public abstract class BasePayConfigStorage implements PayConfigStorage{
         return null;
     }
 
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
+    }
+
+    public void setExpiresTime(long expiresTime) {
+        this.expiresTime = expiresTime;
+    }
+
+    public void setAccessTokenLock(Lock accessTokenLock) {
+        this.accessTokenLock = accessTokenLock;
+    }
+
+    @Override
+    public boolean isTest() {
+        return isTest;
+    }
+
+    public void setTest(boolean test) {
+        isTest = test;
+    }
 }

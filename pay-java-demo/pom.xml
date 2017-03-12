@@ -38,6 +38,11 @@
             <artifactId>pay-java-wx-youdian</artifactId>
             <version>${pay.version}</version>
         </dependency>
+        <dependency>
+            <groupId>in.egan</groupId>
+            <artifactId>pay-java-fuiou</artifactId>
+            <version>${pay.version}</version>
+        </dependency>
         <!--/支付-->
 
         <dependency>

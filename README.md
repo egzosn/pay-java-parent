@@ -31,7 +31,9 @@
 
 测试链接 ： http://pay.egan.in/index.html
 
-详细使用与简单教程请看 [pay-java-demo](pay-java-demo?dir=1&filepath=pay-java-demo)
+服务端+网页端详细使用与简单教程请看 [pay-java-demo](pay-java-demo?dir=1&filepath=pay-java-demo)
+android 案例 [pay-java-demo](http://git.oschina.net/egzosn/pay-java-android)
+
 
 ##交流
 很希望更多志同道合友友一起扩展新的的支付接口。

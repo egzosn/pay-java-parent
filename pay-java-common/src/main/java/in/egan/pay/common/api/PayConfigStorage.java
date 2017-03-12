@@ -127,4 +127,9 @@ import java.util.concurrent.locks.Lock;
      */
     void updateAccessToken(String accessToken, long expiresTime);
 
+    /**
+     * 是否为测试环境， true测试环境
+     * @return
+     */
+    boolean isTest();
 }
