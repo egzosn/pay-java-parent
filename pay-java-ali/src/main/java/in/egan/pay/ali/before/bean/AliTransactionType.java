@@ -1,4 +1,4 @@
-package in.egan.pay.ali.bean;
+package in.egan.pay.ali.before.bean;
 
 import in.egan.pay.common.bean.TransactionType;
 
@@ -16,21 +16,18 @@ import in.egan.pay.common.bean.TransactionType;
  * @author egan
  * @email egzosn@gmail.com
  * @date 2016/10/19 22:58
+ * @see in.egan.pay.ali.bean.AliTransactionType
  */
+@Deprecated
 public enum  AliTransactionType implements TransactionType {
-    //app支付                      //手机网站支付
-    APP("alipay.trade.app.pay"),WAP("alipay.trade.wap.pay")
-    // TODO 2017/2/23 20:26 author: egan 以下三个为主动交易类型 暂未测试，
-    //扫码付                                   //条码付                        // 声波付
-    ,SWEEPPAY("alipay.trade.precreate"),BAR_CODE("alipay.trade.pay"),WAVE_CODE("alipay.trade.pay")
+    //即时到帐                                //移动支付                      //手机网站支付
+    DIRECT("create_direct_pay_by_user"),APP("mobile.securitypay.pay"),WAP("alipay.wap.create.direct.pay.by.user"),
     //交易辅助接口
-    ,QUERY("alipay.trade.query"),CLOSE("alipay.trade.close"),REFUND("alipay.trade.refund"),REFUNDQUERY("alipay.trade.fastpay.refund.query"),DOWNLOADBILL("alipay.data.dataservice.bill.downloadurl.query")
+    QUERY("alipay.trade.query"),CLOSE("alipay.trade.close"),REFUND("alipay.trade.refund"),REFUNDQUERY("alipay.trade.fastpay.refund.query"),DOWNLOADBILL("alipay.data.dataservice.bill.downloadurl.query")
 
-    //回调通知，回调后不清楚交易类型，以此定义
+    //不知道交易类型，主要用于回调通知，回调后不清楚交易类型，以此定义
     ,UNAWARE("UNAWARE")
     ;
-
-
 
     private String method;
 
@@ -51,5 +48,4 @@ public enum  AliTransactionType implements TransactionType {
     public String getMethod() {
         return this.method;
     }
-
 }

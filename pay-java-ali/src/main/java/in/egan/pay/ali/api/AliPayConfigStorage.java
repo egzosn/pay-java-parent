@@ -11,7 +11,12 @@ import in.egan.pay.common.api.BasePayConfigStorage;
 public class AliPayConfigStorage extends BasePayConfigStorage {
 
     // 商户PID
-    public volatile  String partner ;
+    public volatile  String appId ;
+    // 商户签约拿到的pid,partner_id的简称，合作伙伴身份等同于 partner
+    public volatile  String pid ;
+    //partner_id的简称，合作伙伴身份
+//    public volatile  String partner ;
+
     // 商户收款账号
     public volatile  String seller;
     //公钥
@@ -33,20 +38,41 @@ public class AliPayConfigStorage extends BasePayConfigStorage {
     }
 
 
+    public void setAppId(String appId) {
+        this.appId = appId;
+    }
 
     @Override
     public String getAppid() {
-        return null;
+        return appId;
+    }
+
+    /**
+     * @see #getPid()
+     * @return 合作者id
+     */
+    @Deprecated
+    @Override
+    public String getPartner() {
+        return pid;
+    }
+
+    /**
+     * @see #setPid(String)
+     * @return 合作者id
+     */
+    @Deprecated
+    public void setPartner(String partner) {
+        this.pid = partner;
     }
 
     @Override
-    public String getPartner() {
-        return partner;
+    public String getPid() {
+        return pid;
     }
 
-
-    public void setPartner(String partner) {
-        this.partner = partner;
+    public void setPid(String pid) {
+        this.pid = pid;
     }
 
     public String getSeller() {
