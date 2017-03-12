@@ -32,11 +32,13 @@
 测试链接 ： http://pay.egan.in/index.html
 
 服务端+网页端详细使用与简单教程请看 [pay-java-demo](pay-java-demo?dir=1&filepath=pay-java-demo)
-android 例子 [pay-java-android](http://git.oschina.net/egzosn/pay-java-android)
+android 例子 [pay-java-android](https://github.com/egzosn/pay-java-android)
 
 
 ##交流
 很希望更多志同道合友友一起扩展新的的支付接口。
+
+这里感谢[ouyangxiangshao](https://github.com/ouyangxiangshao) 与[Actinian](https://github.com/Actinian) 所提交的安卓例子或者分支
 
 非常欢迎和感谢对本项目发起Pull Request的同学，不过本项目基于git flow开发流程，因此在发起Pull Request的时候请选择develop分支。
 
