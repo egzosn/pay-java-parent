@@ -1,9 +1,9 @@
-package in.egan.pay.common.api;
+package in.egan.pay.common.before.api;
 
 import in.egan.pay.common.bean.PayMessage;
 import in.egan.pay.common.bean.PayOutMessage;
+import in.egan.pay.common.before.api.*;
 import in.egan.pay.common.exception.PayErrorException;
-
 import java.util.Map;
 
 
@@ -14,6 +14,7 @@ import java.util.Map;
  * @email egzosn@gmail.com
  * @date 2016-6-1 11:40:30
  */
+@Deprecated
 public interface PayMessageHandler {
 
     /**
@@ -23,8 +24,8 @@ public interface PayMessageHandler {
      * @return xml,text格式的消息，如果在异步规则里处理的话，可以返回null
      */
     public PayOutMessage handle(PayMessage payMessage,
-                                Map<String, Object> context,
-                                PayService payService
-    ) throws PayErrorException;
+                                    Map<String, Object> context,
+                                    in.egan.pay.common.before.api.PayService payService
+                                   ) throws PayErrorException;
 
 }

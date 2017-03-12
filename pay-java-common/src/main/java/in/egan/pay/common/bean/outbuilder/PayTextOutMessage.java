@@ -1,6 +1,7 @@
 package in.egan.pay.common.bean.outbuilder;
 
-import in.egan.pay.common.api.PayConsts;
+import in.egan.pay.common.bean.MsgType;
+import in.egan.pay.common.before.api.PayConsts;
 import in.egan.pay.common.bean.PayOutMessage;
 
 /**
@@ -11,7 +12,7 @@ import in.egan.pay.common.bean.PayOutMessage;
 public class PayTextOutMessage extends PayOutMessage{
 
     public PayTextOutMessage() {
-        this.msgType = PayConsts.OUT_MSG_TEXT;
+        this.msgType = MsgType.text.name();
     }
 
     @Override

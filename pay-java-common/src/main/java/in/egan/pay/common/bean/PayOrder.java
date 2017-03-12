@@ -16,12 +16,14 @@ public class PayOrder {
     private String body;
     //价格
     private BigDecimal price;
-    //商户单号
-    private String tradeNo;
+    //商户订单号
+    private String outTradeNo;
     //银行卡类型
     private String bankType;
     //设备号
     private String deviceInfo;
+    //付款条码串  与设备号类似？？？
+    private String authCode;
     //交易类型
     private TransactionType transactionType;
     //支付币种
@@ -60,12 +62,38 @@ public class PayOrder {
         this.price = price;
     }
 
+    /**
+     * 获取商户订单号
+     * @return
+     * @see  #getOutTradeNo()
+     */
+    @Deprecated
     public String getTradeNo() {
-        return tradeNo;
+        return outTradeNo;
     }
 
+    /**
+     * 设置商户订单号
+     * @see  #setOutTradeNo(String)
+     */
+    @Deprecated
     public void setTradeNo(String tradeNo) {
-        this.tradeNo = tradeNo;
+        this.outTradeNo = tradeNo;
+    }
+
+    /**
+     *  获取商户订单号
+     * @return
+     */
+    public String getOutTradeNo() {
+        return outTradeNo;
+    }
+    /**
+     *  设置商户订单号
+     * @return
+     */
+    public void setOutTradeNo(String outTradeNo) {
+        this.outTradeNo = outTradeNo;
     }
 
     public TransactionType getTransactionType() {
@@ -84,6 +112,14 @@ public class PayOrder {
         this.bankType = bankType;
     }
 
+    public String getAuthCode() {
+        return authCode;
+    }
+
+    public void setAuthCode(String authCode) {
+        this.authCode = authCode;
+    }
+
     public String getDeviceInfo() {
         return deviceInfo;
     }
@@ -96,14 +132,15 @@ public class PayOrder {
     }
 
 
-    public PayOrder(String subject, String body, BigDecimal price, String tradeNo, TransactionType transactionType) {
-
+    public PayOrder(String subject, String body, BigDecimal price, String outTradeNo, TransactionType transactionType) {
         this.subject = subject;
         this.body = body;
         this.price = price;
-        this.tradeNo = tradeNo;
+        this.outTradeNo = outTradeNo;
         this.transactionType = transactionType;
     }
+
+
 
 
 
