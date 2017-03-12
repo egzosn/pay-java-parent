@@ -54,12 +54,12 @@ public class WxYouDianPayConfigStorage extends BasePayConfigStorage {
 
 
     public void setToken(String accessToken) {
-        this.accessToken = accessToken;
+       setAccessToken(accessToken);
     }
 
     @Override
     public String getToken() {
-        return accessToken;
+        return getAccessToken();
     }
 
 
