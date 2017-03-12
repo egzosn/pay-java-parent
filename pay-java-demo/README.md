@@ -62,7 +62,7 @@ public enum PayType implements BasePayType {
         /**
          * 根据支付类型获取交易类型
          * @param transactionType 类型值
-         * @see WxTransactionType
+         * @see in.egan.pay.wx.bean.WxTransactionType
          * @return
          */
         @Override
@@ -90,7 +90,7 @@ public enum PayType implements BasePayType {
         /**
          * 根据支付类型获取交易类型
          * @param transactionType 类型值
-         * @see YoudianTransactionType
+         * @see in.egan.pay.wx.youdian.bean.YoudianTransactionType
          * @return
          */
         @Override
