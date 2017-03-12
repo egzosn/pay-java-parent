@@ -16,34 +16,34 @@ public abstract class BasePayConfigStorage implements PayConfigStorage{
 
     // ali rsa_private 商户私钥，pkcs8格式
     //wx api_key 商户密钥
-    protected volatile  String keyPrivate ;
+    private volatile  String keyPrivate ;
     // 支付公钥
-    protected volatile  String keyPublic;
+    private volatile  String keyPublic;
     //异步回调地址
-    protected volatile  String notifyUrl;
+    private volatile  String notifyUrl;
     //同步回调地址
-    protected volatile  String returnUrl;;
+    private volatile  String returnUrl;;
     //签名加密类型
-    protected volatile  String signType;
+    private volatile  String signType;
     //字符类型
-    protected volatile  String inputCharset;
+    private volatile  String inputCharset;
 
 
     //支付类型 aliPay 支付宝， wxPay微信..等等，开发者自定义，唯一
-    protected volatile  String payType;
+    private volatile  String payType;
 
     /**
      * 消息来源类型
      */
-    protected volatile MsgType msgType;
+    private volatile MsgType msgType;
 
 
     // 访问令牌 每次请求其他方法都要传入的值
-    protected volatile String accessToken;
+    private volatile String accessToken;
     // access token 到期时间时间戳
-    protected volatile long expiresTime;
+    private volatile long expiresTime;
     //授权码锁
-    protected Lock accessTokenLock = new ReentrantLock();
+    private Lock accessTokenLock = new ReentrantLock();
 
     @Override
     public String getKeyPrivate() {
