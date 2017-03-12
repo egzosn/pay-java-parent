@@ -7,6 +7,7 @@
 <body>
 
 
+
 账户信息添加用于下面测试
 <div>
     <form id="form">
@@ -31,7 +32,7 @@
     <option>RSA</option>
 </select>
     <br>
-    编码类型(建议UTF-8)<input type="text" name="inputCharset">
+    编码类型(建议UTF-8)<input type="text" name="inputCharset" value="UTF-8">
     <br>
     支付账户类型 <select name="payType">
     <option value="aliPay">aliPay</option>
@@ -45,13 +46,19 @@
     <option>json</option>
 </select>
     <br>
+        是否为沙箱环境<select type="text" name="isTest">
+        <option value="true">是</option>
+        <option value="false">否</option>
+    </select>
+    <br>
     </form>
     <button id="submit">提交</button>
 </div>
 
 <br/>
 <div>各个支付对应的<b>交易类型</b>可自行查看对应的官方文档，本项目已实现几种交易类型,对应各个支付类型的<code>in.egan.pay.common.bean.TransactionType</code>具体实现</div>
-<div>支付宝(<code>in.egan.pay.ali.bean.AliTransactionType</code>)： 即时付款=DIRECT ， 移动支付=APP ， 手机网站支付=WAP</div>
+<div>旧版支付宝(<code>in.egan.pay.ali.before.bean.AliTransactionType</code>)： 即时付款=DIRECT ， 移动支付=APP ， 手机网站支付=WAP</div>
+<div>新版支付宝(<code>in.egan.pay.ali.bean.AliTransactionType</code>)：  app支付=APP ， 手机网站支付=WAP , 扫码付=SWEEPPAY, 条码付=BAR_CODE, 声波付=WAVE_CODE </div>
 <div>微信(<code>in.egan.pay.wx.bean.WxTransactionType</code>)： 公众号支付=JSAPI ， 移动支付=APP ， 扫码付=NATIVE</div>
 <div>友店微信(<code>in.egan.pay.wx.youdian.bean.YoudianTransactionType</code>)： 扫码付=NATIVE</div>
 
@@ -87,6 +94,80 @@ APP提交(返回对应的json，具体实现，app端demo暂时未实现)
     账户id<input type="text" name="payId">
     <br>
     金额<input type="text" name="price">
+    <br>
+    交易类型<input type="text" name="transactionType">
+    <br>
+    <input type="submit" value="提交">
+</form>
+<br>
+查询账单
+<form action="query" target="_blank">
+    账户id<input type="text" name="payId">
+    <br>
+    支付平台订单号<input type="text" name="tradeNo">
+    <br>
+    商户单号<input type="text" name="outTradeNo">
+    <br>
+    <input type="submit" value="提交">
+</form>
+<br/>
+交易关闭接口
+<form action="close" target="_blank">
+    账户id<input type="text" name="payId">
+    <br>
+    支付平台订单号<input type="text" name="tradeNo">
+    <br>
+    商户单号<input type="text" name="outTradeNo">
+    <br>
+    <input type="submit" value="提交">
+</form>
+<br/>
+申请退款接口
+<form action="refund" target="_blank">
+    账户id<input type="text" name="payId">
+    <br>
+    支付平台订单号<input type="text" name="tradeNo">
+    <br>
+    商户单号<input type="text" name="outTradeNo">
+    <br>
+    退款金额<input type="text" name="refundAmount">
+    <br>
+    总金额(微信必填)<input type="text" name="totalAmount">
+    <br>
+    <input type="submit" value="提交">
+</form>
+<br/>
+查询退款
+<form action="refundquery" target="_blank">
+    账户id<input type="text" name="payId">
+    <br>
+    支付平台订单号<input type="text" name="tradeNo">
+    <br>
+    商户单号<input type="text" name="outTradeNo">
+    <br>
+    <input type="submit" value="提交">
+</form>
+
+<br>
+下载对账单(日期，不支持月份)
+<form action="downloadbill" target="_blank">
+    账户id<input type="text" name="payId">
+    <br>
+    账单时间：具体请查看对应支付平台<input type="text" name="billDate">
+    <br>
+    账单类型 <input type="text" name="billType">
+    <br>
+    <input type="submit" value="提交">
+</form>
+
+<br>
+通用查询接口，根据 交易类型（TransactionType） 进行实现,此接口不包括退款
+<form action="secondaryInterface" target="_blank">
+    账户id<input type="text" name="payId">
+    <br>
+    支付平台订单号或者账单日期<input type="text" name="tradeNoOrBillDate">
+    <br>
+    商户单号或者 账单类型<input type="text" name="outTradeNoBillType">
     <br>
     交易类型<input type="text" name="transactionType">
     <br>

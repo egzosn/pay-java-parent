@@ -24,12 +24,8 @@ public class AliPayMessageHandler extends BasePayMessageHandler {
     @Override
     public PayOutMessage handle(PayMessage payMessage, Map<String, Object> context, PayService payService) throws PayErrorException {
         //交易状态
-       String trade_status = null;
-        try {
-            trade_status = new String(payMessage.getPayMessage().get("trade_status").getBytes("ISO-8859-1"),"UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+       String  trade_status =payMessage.getPayMessage().get("trade_status");
+
         if(trade_status.equals("TRADE_FINISHED")){
 
             //判断该笔订单是否在商户网站中已经做过处理

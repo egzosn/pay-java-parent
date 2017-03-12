@@ -10,12 +10,19 @@
  * @email egzosn@gmail.com
  * @date 2016/11/20 0:30
  */
-public enum PayType implements BasePayType{
-  aliPay{
+public enum PayType implements BasePayType {
+
+    aliPay{
+        /**
+         *  @see in.egan.pay.ali.api.AliPayService  17年更新的版本,旧版本请自行切换{@link in.egan.pay.ali.before.api.AliPayService }
+         * @param apyAccount
+         * @return
+         */
         @Override
         public PayService getPayService(ApyAccount apyAccount) {
             AliPayConfigStorage aliPayConfigStorage = new AliPayConfigStorage();
-            aliPayConfigStorage.setPartner(apyAccount.getPartner());
+            aliPayConfigStorage.setPid(apyAccount.getPartner());
+            aliPayConfigStorage.setAppId(apyAccount.getAppid());
             aliPayConfigStorage.setAliPublicKey(apyAccount.getPublicKey());
             aliPayConfigStorage.setKeyPrivate(apyAccount.getPrivateKey());
             aliPayConfigStorage.setNotifyUrl(apyAccount.getNotifyUrl());
@@ -30,6 +37,7 @@ public enum PayType implements BasePayType{
 
         @Override
         public TransactionType getTransactionType(String transactionType) {
+              // in.egan.pay.ali.bean.AliTransactionType 17年更新的版本,旧版本请自行切换{@link in.egan.pay.ali.before.bean.AliTransactionType}
             return AliTransactionType.valueOf(transactionType);
         }
 
@@ -54,7 +62,7 @@ public enum PayType implements BasePayType{
         /**
          * 根据支付类型获取交易类型
          * @param transactionType 类型值
-         * @see WxTransactionType
+         * @see in.egan.pay.wx.bean.WxTransactionType
          * @return
          */
         @Override
@@ -82,7 +90,7 @@ public enum PayType implements BasePayType{
         /**
          * 根据支付类型获取交易类型
          * @param transactionType 类型值
-         * @see YoudianTransactionType
+         * @see in.egan.pay.wx.youdian.bean.YoudianTransactionType
          * @return
          */
         @Override
@@ -93,7 +101,6 @@ public enum PayType implements BasePayType{
     };
 
     public abstract PayService getPayService(ApyAccount apyAccount);
-
 
 }
 
@@ -120,7 +127,7 @@ public class PayResponse {
     /**
      * 初始化支付配置
      * @param apyAccount 账户信息
-     * @see ApyAccount 对应表结构详情--》 pay-java-demo/resources/apy_account.sql
+     * @see in.egan.pay.demo.entity.ApyAccount 对应表结构详情--》 pay-java-demo/resources/apy_account.sql
      */
     public void init(ApyAccount apyAccount) {
 
@@ -139,26 +146,34 @@ public class PayResponse {
      * 配置路由
      * @param payId 指定账户id，用户多微信支付多支付宝支付
      */
-      private void buildRouter(Integer payId) {
-            router = new PayMessageRouter(this.service);
-            router
-                    .rule()
-                    .async(false)
-                    .msgType(MsgType.text.name()) //消息类型
-                    .event(PayType.aliPay.name()) //支付账户事件类型
-                    .interceptor(new AliPayMessageInterceptor()) //拦截器
-                    .handler(autowire(new AliPayMessageHandler(payId))) //处理器
-                    .end()
-                    .rule()
-                    .async(false)
-                    .msgType(MsgType.xml.name())
-                    .event(PayType.wxPay.name())
-                    .handler(autowire(new WxPayMessageHandler(payId)))
-                    .end()
-            ;
-      }
+    private void buildRouter(Integer payId) {
+        router = new PayMessageRouter(this.service);
+        router
+                .rule()
+                .async(false)
+                .msgType(MsgType.text.name()) //消息类型
+                .payType(PayType.aliPay.name()) //支付账户事件类型
+                .transactionType(AliTransactionType.UNAWARE.name())//交易类型，有关回调的可在这处理
+                .interceptor(new AliPayMessageInterceptor(payId)) //拦截器
+                .handler(autowire(new AliPayMessageHandler(payId))) //处理器
+                .end()
+                .rule()
+                .async(false)
+                .msgType(MsgType.xml.name())
+                .payType(PayType.wxPay.name())
+                .handler(autowire(new WxPayMessageHandler(payId)))
+                .end()
+                .rule()
+                .async(false)
+                .msgType(MsgType.json.name())
+                .payType(PayType.youdianPay.name())
+                .handler(autowire(new YouDianPayMessageHandler(payId)))
+                .end()
 
-    
+        ;
+    }
+
+
     private PayMessageHandler autowire(PayMessageHandler handler) {
         spring.autowireBean(handler);
         return handler;
@@ -167,7 +182,7 @@ public class PayResponse {
     public PayConfigStorage getStorage() {
         return storage;
     }
-    
+
     public PayService getService() {
         return service;
     }
@@ -290,6 +305,7 @@ public class ApyAccountService {
      * @param bankType 针对刷卡支付，卡的类型，类型值
      * @return
      */
+    
     @RequestMapping(value = "toPay.html", produces = "text/html;charset=UTF-8")
     public String toPay( Integer payId, String transactionType, String bankType, BigDecimal price) {
         //获取对应的支付账户操作工具（可根据账户id）
@@ -343,13 +359,90 @@ public class ApyAccountService {
     }
 
 
+ /**
+     * 查询
+     * @param order 订单的请求体
+     * @return
+     */
+    @RequestMapping("query")
+    public Map<String, Object> query(QueryOrder order) {
+        PayResponse payResponse = service.getPayResponse(order.getPayId());
+        return payResponse.getService().query(order.getTradeNo(), order.getOutTradeNo());
+    }
+    /**
+     * 交易关闭接口
+     * @param order 订单的请求体
+     * @return
+     */
+    @RequestMapping("close")
+    public Map<String, Object> close(QueryOrder order) {
+        PayResponse payResponse = service.getPayResponse(order.getPayId());
+        return payResponse.getService().close(order.getTradeNo(), order.getOutTradeNo());
+    }
 
-  
+    /**
+     * 申请退款接口
+     * @param order 订单的请求体
+     * @return
+     */
+    @RequestMapping("refund")
+    public Map<String, Object> refund(QueryOrder order) {
+        PayResponse payResponse = service.getPayResponse(order.getPayId());
+
+
+        return payResponse.getService().refund(order.getTradeNo(), order.getOutTradeNo(), order.getRefundAmount(), order.getTotalAmount());
+    }
+
+    /**
+     * 查询退款
+     * @param order 订单的请求体
+     * @return
+     */
+    @RequestMapping("refundquery")
+    public Map<String, Object> refundquery(QueryOrder order) {
+        PayResponse payResponse = service.getPayResponse(order.getPayId());
+        return payResponse.getService().refundquery(order.getTradeNo(), order.getOutTradeNo());
+    }
+
+    /**
+     * 下载对账单
+     * @param order 订单的请求体
+     * @return
+     */
+    @RequestMapping("downloadbill")
+    public Object downloadbill(QueryOrder order) {
+        PayResponse payResponse = service.getPayResponse(order.getPayId());
+
+        return payResponse.getService().downloadbill(order.getBillDate(), order.getBillType());
+    }
+
+
+    /**
+     * 通用查询接口，根据 TransactionType 类型进行实现,此接口不包括退款
+     * @param order 订单的请求体
+     *
+     * @return
+     */
+    @RequestMapping("secondaryInterface")
+    public Map<String, Object> secondaryInterface(QueryOrder order) {
+        PayResponse payResponse = service.getPayResponse(order.getPayId());
+        TransactionType type = PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(order.getTransactionType());
+        return payResponse.getService().secondaryInterface(order.getTradeNoOrBillDate(), order.getOutTradeNoBillType(), type, new Callback<Map<String, Object>>() {
+            @Override
+            public Map<String, Object> perform(Map<String, Object> map) {
+                return map;
+            }
+        });
+    }
+
+
+
+
 ```
 
 #####5.支付回调
 ```java
-     
+
 
    /**
        * 支付回调地址
@@ -377,5 +470,5 @@ public class ApyAccountService {
           return payResponse.getService().getPayOutMessage("fail","失败").toMessage();
       }
 
-        
+
 ```

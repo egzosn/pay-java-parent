@@ -22,11 +22,18 @@ import in.egan.pay.wx.youdian.bean.YoudianTransactionType;
  */
 public enum PayType implements BasePayType {
 
+
     aliPay{
+        /**
+         *  @see in.egan.pay.ali.before.api.AliPayService 17年更新的版本,旧版本请自行切换
+         * @param apyAccount
+         * @return
+         */
         @Override
         public PayService getPayService(ApyAccount apyAccount) {
             AliPayConfigStorage aliPayConfigStorage = new AliPayConfigStorage();
-            aliPayConfigStorage.setPartner(apyAccount.getPartner());
+            aliPayConfigStorage.setPid(apyAccount.getPartner());
+            aliPayConfigStorage.setAppId(apyAccount.getAppid());
             aliPayConfigStorage.setAliPublicKey(apyAccount.getPublicKey());
             aliPayConfigStorage.setKeyPrivate(apyAccount.getPrivateKey());
             aliPayConfigStorage.setNotifyUrl(apyAccount.getNotifyUrl());
@@ -36,11 +43,13 @@ public enum PayType implements BasePayType {
             aliPayConfigStorage.setPayType(apyAccount.getPayType().toString());
             aliPayConfigStorage.setMsgType(apyAccount.getMsgType());
             aliPayConfigStorage.setInputCharset(apyAccount.getInputCharset());
+            aliPayConfigStorage.setTest(apyAccount.isTest());
             return new AliPayService(aliPayConfigStorage);
         }
 
         @Override
         public TransactionType getTransactionType(String transactionType) {
+            // in.egan.pay.ali.before.bean.AliTransactionType 17年更新的版本,旧版本请自行切换
             return AliTransactionType.valueOf(transactionType);
         }
 
@@ -59,6 +68,7 @@ public enum PayType implements BasePayType {
             wxPayConfigStorage.setPayType(apyAccount.getPayType().toString());
             wxPayConfigStorage.setMsgType(apyAccount.getMsgType());
             wxPayConfigStorage.setInputCharset(apyAccount.getInputCharset());
+            wxPayConfigStorage.setTest(apyAccount.isTest());
             return  new WxPayService(wxPayConfigStorage);
         }
 
@@ -87,6 +97,7 @@ public enum PayType implements BasePayType {
             wxPayConfigStorage.setMsgType(apyAccount.getMsgType());
             wxPayConfigStorage.setSeller(apyAccount.getSeller());
             wxPayConfigStorage.setInputCharset(apyAccount.getInputCharset());
+            wxPayConfigStorage.setTest(apyAccount.isTest());
             return  new WxYouDianPayService(wxPayConfigStorage);
         }
 

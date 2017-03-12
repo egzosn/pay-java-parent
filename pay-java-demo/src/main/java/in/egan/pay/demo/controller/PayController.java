@@ -2,16 +2,16 @@
 package in.egan.pay.demo.controller;
 
 
+
+import in.egan.pay.common.api.Callback;
+import in.egan.pay.common.bean.*;
 import in.egan.pay.common.util.str.StringUtils;
 import in.egan.pay.demo.entity.ApyAccount;
 import in.egan.pay.demo.entity.PayType;
+import in.egan.pay.demo.request.QueryOrder;
 import in.egan.pay.demo.service.ApyAccountService;
 import in.egan.pay.demo.service.PayResponse;
 import in.egan.pay.common.api.PayConfigStorage;
-import in.egan.pay.common.bean.MethodType;
-import in.egan.pay.common.bean.PayMessage;
-import in.egan.pay.common.bean.PayOrder;
-import in.egan.pay.common.bean.PayOutMessage;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -68,11 +68,11 @@ public class PayController{
      * @return
      */
     @RequestMapping(value = "toPay.html", produces = "text/html;charset=UTF-8")
-    public String toPay( Integer payId, String transactionType, String bankType, BigDecimal price) {
+    public String toPay( Integer payId, String transactionType, String bankType,  BigDecimal price) {
         //获取对应的支付账户操作工具（可根据账户id）
         PayResponse payResponse =  service.getPayResponse(payId);
 
-        PayOrder order = new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType));
+        PayOrder order = new PayOrder("订单title", "摘要",  null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType));
 
         //此处只有刷卡支付(银行卡支付)时需要
         if (StringUtils.isNotEmpty(bankType)){
@@ -89,11 +89,11 @@ public class PayController{
      * @return
      */
     @RequestMapping(value = "toQrPay.jpg", produces = "image/jpeg;charset=UTF-8")
-    public byte[] toWxQrPay(Integer payId, String transactionType, BigDecimal price) throws IOException {
+    public byte[] toWxQrPay(Integer payId, String transactionType,  BigDecimal price) throws IOException {
         //获取对应的支付账户操作工具（可根据账户id）
         PayResponse payResponse =  service.getPayResponse(payId);
         //获取订单信息
-        Map<String, Object> orderInfo = payResponse.getService().orderInfo(new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType)));
+        Map<String, Object> orderInfo = payResponse.getService().orderInfo(new PayOrder("订单title", "摘要",  null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType)));
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ImageIO.write(payResponse.getService().genQrPay(orderInfo), "JPEG", baos);
@@ -114,7 +114,7 @@ public class PayController{
         PayResponse payResponse =  service.getPayResponse(payId);
         Map<String, Object> data = new HashMap<>();
         data.put("code", 0);
-        PayOrder order = new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType));
+        PayOrder order = new PayOrder("订单title", "摘要",   null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType));
         data.put("orderInfo",  payResponse.getService().orderInfo(order));
         return data;
     }
@@ -147,6 +147,83 @@ public class PayController{
 
         return payResponse.getService().getPayOutMessage("fail","失败").toMessage();
     }
+
+    /**
+     * 查询
+     * @param order 订单的请求体
+     * @return
+     */
+    @RequestMapping("query")
+    public Map<String, Object> query(QueryOrder order) {
+        PayResponse payResponse = service.getPayResponse(order.getPayId());
+        return payResponse.getService().query(order.getTradeNo(), order.getOutTradeNo());
+    }
+    /**
+     * 交易关闭接口
+     * @param order 订单的请求体
+     * @return
+     */
+    @RequestMapping("close")
+    public Map<String, Object> close(QueryOrder order) {
+        PayResponse payResponse = service.getPayResponse(order.getPayId());
+        return payResponse.getService().close(order.getTradeNo(), order.getOutTradeNo());
+    }
+
+    /**
+     * 申请退款接口
+     * @param order 订单的请求体
+     * @return
+     */
+    @RequestMapping("refund")
+    public Map<String, Object> refund(QueryOrder order) {
+        PayResponse payResponse = service.getPayResponse(order.getPayId());
+
+
+        return payResponse.getService().refund(order.getTradeNo(), order.getOutTradeNo(), order.getRefundAmount(), order.getTotalAmount());
+    }
+
+    /**
+     * 查询退款
+     * @param order 订单的请求体
+     * @return
+     */
+    @RequestMapping("refundquery")
+    public Map<String, Object> refundquery(QueryOrder order) {
+        PayResponse payResponse = service.getPayResponse(order.getPayId());
+        return payResponse.getService().refundquery(order.getTradeNo(), order.getOutTradeNo());
+    }
+
+    /**
+     * 下载对账单
+     * @param order 订单的请求体
+     * @return
+     */
+    @RequestMapping("downloadbill")
+    public Object downloadbill(QueryOrder order) {
+        PayResponse payResponse = service.getPayResponse(order.getPayId());
+
+        return payResponse.getService().downloadbill(order.getBillDate(), order.getBillType());
+    }
+
+
+    /**
+     * 通用查询接口，根据 TransactionType 类型进行实现,此接口不包括退款
+     * @param order 订单的请求体
+     *
+     * @return
+     */
+    @RequestMapping("secondaryInterface")
+    public Map<String, Object> secondaryInterface(QueryOrder order) {
+        PayResponse payResponse = service.getPayResponse(order.getPayId());
+        TransactionType type = PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(order.getTransactionType());
+        return payResponse.getService().secondaryInterface(order.getTradeNoOrBillDate(), order.getOutTradeNoBillType(), type, new Callback<Map<String, Object>>() {
+            @Override
+            public Map<String, Object> perform(Map<String, Object> map) {
+                return map;
+            }
+        });
+    }
+
 
 
 
