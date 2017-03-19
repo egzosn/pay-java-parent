@@ -9,7 +9,7 @@ import in.egan.pay.common.bean.PayOutMessage;
  * @email egzosn@gmail.com
  * @date 2017/1/13 14:30
  */
-public class JsonBuilder  extends BaseBuilder<TextBuilder, PayOutMessage>{
+public class JsonBuilder  extends BaseBuilder<JsonBuilder, PayOutMessage>{
     JSONObject json = null;
 
     public JsonBuilder(JSONObject json) {

@@ -362,7 +362,8 @@ public class WxYouDianPayService extends BasePayService {
     }
 
     @Override
-    public BufferedImage genQrPay(Map<String, Object> orderInfo) {
+    public BufferedImage genQrPay(PayOrder order) {
+        JSONObject orderInfo = orderInfo(order);
         return  MatrixToImageWriter.writeInfoToJpgBuff((String) orderInfo.get("code_url"));
     }
 
