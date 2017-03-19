@@ -42,6 +42,7 @@ public class ApyAccountRepository {
         apyAccount1.setSignType(SignUtils.RSA.name());
         apyAccount1.setPayType(PayType.aliPay);
         apyAccount1.setMsgType(MsgType.text);
+        apyAccount1.setTest(true);
         apyAccounts.put(apyAccount1.getPayId(), apyAccount1);
 
         ApyAccount apyAccount2 = new ApyAccount();

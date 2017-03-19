@@ -2,7 +2,6 @@
 package in.egan.pay.demo.controller;
 
 
-
 import in.egan.pay.common.api.Callback;
 import in.egan.pay.common.bean.*;
 import in.egan.pay.common.util.str.StringUtils;
@@ -30,13 +29,14 @@ import static in.egan.pay.demo.dao.ApyAccountRepository.apyAccounts;
 
 /**
  * 发起支付入口
+ *
  * @author: egan
  * @email egzosn@gmail.com
  * @date 2016/11/18 0:25
  */
 @RestController
 @RequestMapping
-public class PayController{
+public class PayController {
 
     @Resource
     private ApyAccountService service;
@@ -44,11 +44,12 @@ public class PayController{
 
     /**
      * 这里模拟账户信息增加
+     *
      * @param account
      * @return
      */
     @RequestMapping("add")
-    public Map<String, Object> add(ApyAccount account){
+    public Map<String, Object> add(ApyAccount account) {
         apyAccounts.put(account.getPayId(), account);
         Map<String, Object> data = new HashMap<>();
         data.put("code", 0);
@@ -62,68 +63,66 @@ public class PayController{
      * 跳到支付页面
      * 针对实时支付,即时付款
      *
-     * @param payId 账户id
+     * @param payId           账户id
      * @param transactionType 交易类型， 这个针对于每一个 支付类型的对应的几种交易方式
-     * @param bankType 针对刷卡支付，卡的类型，类型值
+     * @param bankType        针对刷卡支付，卡的类型，类型值
      * @return
      */
     @RequestMapping(value = "toPay.html", produces = "text/html;charset=UTF-8")
-    public String toPay( Integer payId, String transactionType, String bankType,  BigDecimal price) {
+    public String toPay(Integer payId, String transactionType, String bankType, BigDecimal price) {
         //获取对应的支付账户操作工具（可根据账户id）
-        PayResponse payResponse =  service.getPayResponse(payId);
+        PayResponse payResponse = service.getPayResponse(payId);
 
-        PayOrder order = new PayOrder("订单title", "摘要",  null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType));
+        PayOrder order = new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType));
 
         //此处只有刷卡支付(银行卡支付)时需要
-        if (StringUtils.isNotEmpty(bankType)){
+        if (StringUtils.isNotEmpty(bankType)) {
             order.setBankType(bankType);
         }
         Map orderInfo = payResponse.getService().orderInfo(order);
-        return  payResponse.getService().buildRequest(orderInfo, MethodType.POST);
+        return payResponse.getService().buildRequest(orderInfo, MethodType.POST);
     }
 
 
     /**
      * 获取二维码图像
      * 二维码支付
+     *
      * @return
      */
     @RequestMapping(value = "toQrPay.jpg", produces = "image/jpeg;charset=UTF-8")
-    public byte[] toWxQrPay(Integer payId, String transactionType,  BigDecimal price) throws IOException {
+    public byte[] toWxQrPay(Integer payId, String transactionType, BigDecimal price) throws IOException {
         //获取对应的支付账户操作工具（可根据账户id）
-        PayResponse payResponse =  service.getPayResponse(payId);
-        //获取订单信息
-        Map<String, Object> orderInfo = payResponse.getService().orderInfo(new PayOrder("订单title", "摘要",  null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType)));
-
+        PayResponse payResponse = service.getPayResponse(payId);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ImageIO.write(payResponse.getService().genQrPay(orderInfo), "JPEG", baos);
+
+        ImageIO.write(payResponse.getService().genQrPay(new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, "9d1c43152c304ed2b9d2db320ef0a742", PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType))), "JPEG", baos);
         return baos.toByteArray();
     }
 
 
     /**
+     * 获取支付预订单信息
      *
-     *  获取支付预订单信息
-     * @param payId 支付账户id
+     * @param payId           支付账户id
      * @param transactionType 交易类型
      * @return
      */
     @RequestMapping("getOrderInfo")
-    public Map<String, Object> getOrderInfo(Integer payId, String transactionType, BigDecimal price){
+    public Map<String, Object> getOrderInfo(Integer payId, String transactionType, BigDecimal price) {
         //获取对应的支付账户操作工具（可根据账户id）
-        PayResponse payResponse =  service.getPayResponse(payId);
+        PayResponse payResponse = service.getPayResponse(payId);
         Map<String, Object> data = new HashMap<>();
         data.put("code", 0);
-        PayOrder order = new PayOrder("订单title", "摘要",   null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType));
-        data.put("orderInfo",  payResponse.getService().orderInfo(order));
+        PayOrder order = new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType));
+        data.put("orderInfo", payResponse.getService().orderInfo(order));
         return data;
     }
 
 
-
-
     /**
      * 微信或者支付宝回调地址
+     *
      * @param request
      * @return
      */
@@ -134,22 +133,23 @@ public class PayController{
         PayConfigStorage storage = payResponse.getStorage();
         //获取支付方返回的对应参数
         Map<String, String> params = payResponse.getService().getParameter2Map(request.getParameterMap(), request.getInputStream());
-        if (null == params){
-            return payResponse.getService().getPayOutMessage("fail","失败").toMessage();
+        if (null == params) {
+            return payResponse.getService().getPayOutMessage("fail", "失败").toMessage();
         }
 
         //校验
-        if (payResponse.getService().verify(params)){
+        if (payResponse.getService().verify(params)) {
             PayMessage message = new PayMessage(params, storage.getPayType(), storage.getMsgType().name());
             PayOutMessage outMessage = payResponse.getRouter().route(message);
             return outMessage.toMessage();
         }
 
-        return payResponse.getService().getPayOutMessage("fail","失败").toMessage();
+        return payResponse.getService().getPayOutMessage("fail", "失败").toMessage();
     }
 
     /**
      * 查询
+     *
      * @param order 订单的请求体
      * @return
      */
@@ -158,8 +158,10 @@ public class PayController{
         PayResponse payResponse = service.getPayResponse(order.getPayId());
         return payResponse.getService().query(order.getTradeNo(), order.getOutTradeNo());
     }
+
     /**
      * 交易关闭接口
+     *
      * @param order 订单的请求体
      * @return
      */
@@ -171,6 +173,7 @@ public class PayController{
 
     /**
      * 申请退款接口
+     *
      * @param order 订单的请求体
      * @return
      */
@@ -184,6 +187,7 @@ public class PayController{
 
     /**
      * 查询退款
+     *
      * @param order 订单的请求体
      * @return
      */
@@ -195,6 +199,7 @@ public class PayController{
 
     /**
      * 下载对账单
+     *
      * @param order 订单的请求体
      * @return
      */
@@ -208,8 +213,8 @@ public class PayController{
 
     /**
      * 通用查询接口，根据 TransactionType 类型进行实现,此接口不包括退款
-     * @param order 订单的请求体
      *
+     * @param order 订单的请求体
      * @return
      */
     @RequestMapping("secondaryInterface")
@@ -223,9 +228,6 @@ public class PayController{
             }
         });
     }
-
-
-
 
 
 }
