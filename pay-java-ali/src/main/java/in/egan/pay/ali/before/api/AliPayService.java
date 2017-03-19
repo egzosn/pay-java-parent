@@ -14,6 +14,7 @@ import in.egan.pay.common.bean.result.PayException;
 import in.egan.pay.common.exception.PayErrorException;
 import in.egan.pay.common.http.ClientHttpRequest;
 import in.egan.pay.common.http.HttpConfigStorage;
+import in.egan.pay.common.http.UriVariables;
 import in.egan.pay.common.util.sign.SignUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -261,7 +262,7 @@ public class AliPayService extends BasePayService {
      * @return
      */
     @Override
-    public BufferedImage genQrPay(Map<String, Object> orderInfo) {
+    public BufferedImage genQrPay(PayOrder orderInfo) {
         throw new UnsupportedOperationException();
     }
 
@@ -336,7 +337,7 @@ public class AliPayService extends BasePayService {
         parameters.put("biz_content", JSON.toJSONString(bizContent));
         //设置签名
         setSign(parameters);
-        return  callback.perform(requestTemplate.getForObject(queryReqUrl + "?" + ClientHttpRequest.getMapToParameters(parameters), JSONObject.class));
+        return  callback.perform(requestTemplate.getForObject(queryReqUrl + "?" + UriVariables.getMapToParameters(parameters), JSONObject.class));
     }
     @Override
     public Map<String, Object> refundquery(String tradeNo, String outTradeNo) {
@@ -393,7 +394,7 @@ public class AliPayService extends BasePayService {
         parameters.put("biz_content", JSON.toJSONString(bizContent));
         //设置签名
         setSign(parameters);
-        return callback.perform(requestTemplate.getForObject(queryReqUrl + "?" + ClientHttpRequest.getMapToParameters(parameters), JSONObject.class));
+        return callback.perform(requestTemplate.getForObject(queryReqUrl + "?" + UriVariables.getMapToParameters(parameters), JSONObject.class));
     }
 
     /**
@@ -425,7 +426,7 @@ public class AliPayService extends BasePayService {
         parameters.put("biz_content", getContentToJson(tradeNoOrBillDate.toString(), outTradeNoBillType));
         //设置签名
         setSign(parameters);
-        return  callback.perform(requestTemplate.getForObject(queryReqUrl + "?" + ClientHttpRequest.getMapToParameters(parameters), JSONObject.class));
+        return  callback.perform(requestTemplate.getForObject(queryReqUrl + "?" + UriVariables.getMapToParameters(parameters), JSONObject.class));
 
     }
 
