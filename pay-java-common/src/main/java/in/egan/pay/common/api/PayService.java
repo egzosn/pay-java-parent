@@ -135,10 +135,10 @@ public interface PayService {
     /**
      * 获取输出二维码，用户返回给支付端,
      *
-     * @param orderInfo 发起支付的订单信息
+     * @param order 发起支付的订单信息
      * @return
      */
-    BufferedImage genQrPay(Map<String, Object> orderInfo);
+    BufferedImage genQrPay(PayOrder order);
 
     /**
      * 交易查询接口

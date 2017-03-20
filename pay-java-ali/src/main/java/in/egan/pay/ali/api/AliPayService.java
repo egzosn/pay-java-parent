@@ -12,16 +12,15 @@ import in.egan.pay.common.bean.PayOutMessage;
 import in.egan.pay.common.bean.TransactionType;
 import in.egan.pay.common.bean.result.PayException;
 import in.egan.pay.common.exception.PayErrorException;
-import in.egan.pay.common.http.ClientHttpRequest;
 import in.egan.pay.common.http.HttpConfigStorage;
+import in.egan.pay.common.http.UriVariables;
+import in.egan.pay.common.util.MatrixToImageWriter;
 import in.egan.pay.common.util.sign.SignUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
-import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -165,7 +164,7 @@ public class AliPayService extends BasePayService {
             bizContent.put("scene", order.getTransactionType().toString().toLowerCase());
             bizContent.put("product_code", "FACE_TO_FACE_PAYMENT");
             bizContent.put("auth_code", order.getAuthCode());
-        }else {
+        }else  if (order.getTransactionType() != AliTransactionType.SWEEPPAY){
             bizContent.put("product_code", "QUICK_MSECURITY_PAY");
         }
         bizContent.put("body", order.getBody());
@@ -302,7 +301,7 @@ public class AliPayService extends BasePayService {
 
         } else {
             String biz_content = (String)orderInfo.remove("biz_content");
-            formHtml.append(getReqUrl()).append("?").append(ClientHttpRequest.getMapToParameters(orderInfo))
+            formHtml.append(getReqUrl()).append("?").append(UriVariables.getMapToParameters(orderInfo))
             .append("\" method=\"")
                     .append(method.name().toLowerCase()).append("\">");
 
@@ -322,12 +321,24 @@ public class AliPayService extends BasePayService {
     /**
      * 生成二维码支付
      * 暂未实现或无此功能
-     * @param orderInfo 发起支付的订单信息
+     * @param order 发起支付的订单信息
      * @return
      */
     @Override
-    public BufferedImage genQrPay(Map<String, Object> orderInfo) {
-        throw new UnsupportedOperationException();
+    public BufferedImage genQrPay(PayOrder order) {
+
+        Map<String, Object> orderInfo = orderInfo(order);
+
+//        Map<String, Object> content = new HashMap<>(1);
+//        content.put("biz_content", orderInfo.remove("biz_content"));
+        //预订单
+        JSONObject result = getHttpRequestTemplate().postForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(orderInfo), null, JSONObject.class);
+        JSONObject response = result.getJSONObject("alipay_trade_precreate_response");
+        if ("10000".equals(response.getString("code"))){
+            return MatrixToImageWriter.writeInfoToJpgBuff( response.getString("qr_code"));
+        }
+        throw new PayErrorException(new PayException(response.getString("code"), response.getString("msg"), result.toJSONString()));
+
     }
     /**
      *  交易查询接口
@@ -399,7 +410,7 @@ public class AliPayService extends BasePayService {
         parameters.put("biz_content", JSON.toJSONString(bizContent));
         //设置签名
         setSign(parameters);
-        return  callback.perform(requestTemplate.getForObject(getReqUrl() + "?" + ClientHttpRequest.getMapToParameters(parameters), JSONObject.class));
+        return  callback.perform(requestTemplate.getForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(parameters), JSONObject.class));
     }
 
     @Override
@@ -457,7 +468,7 @@ public class AliPayService extends BasePayService {
         parameters.put("biz_content", JSON.toJSONString(bizContent));
         //设置签名
         setSign(parameters);
-        return callback.perform(requestTemplate.getForObject(getReqUrl() + "?" + ClientHttpRequest.getMapToParameters(parameters), JSONObject.class));
+        return callback.perform(requestTemplate.getForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(parameters), JSONObject.class));
     }
 
     /**
@@ -494,7 +505,7 @@ public class AliPayService extends BasePayService {
         parameters.put("biz_content", getContentToJson(tradeNoOrBillDate.toString(), outTradeNoBillType));
         //设置签名
         setSign(parameters);
-        return  callback.perform(requestTemplate.getForObject(getReqUrl() + "?" + ClientHttpRequest.getMapToParameters(parameters), JSONObject.class));
+        return  callback.perform(requestTemplate.getForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(parameters), JSONObject.class));
 
     }
 

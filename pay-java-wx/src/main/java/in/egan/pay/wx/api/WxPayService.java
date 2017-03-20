@@ -242,7 +242,8 @@ public class WxPayService extends BasePayService {
     }
 
     @Override
-    public BufferedImage genQrPay(Map<String, Object> orderInfo) {
+    public BufferedImage genQrPay(PayOrder order) {
+        Map<String, Object> orderInfo = orderInfo(order);
         //获取对应的支付账户操作工具（可根据账户id）
         if (!"SUCCESS".equals(orderInfo.get("result_code"))) {
             throw new PayErrorException(new WxPayError("-1", (String) orderInfo.get("err_code")));
