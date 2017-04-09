@@ -29,7 +29,7 @@
 ###使用
 这里不多说直接上代码  集群的话,友店可能会有bug。
 
-测试链接 ： http://pay.egan.in/index.html
+测试链接 ： http://pay.egzosn.com/index.html
 
 服务端+网页端详细使用与简单教程请看 [pay-java-demo](pay-java-demo?dir=1&filepath=pay-java-demo)
 
