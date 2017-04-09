@@ -3,6 +3,7 @@
 package in.egan.pay.demo.service;
 
 import in.egan.pay.ali.bean.AliTransactionType;
+import in.egan.pay.common.http.HttpConfigStorage;
 import in.egan.pay.demo.entity.ApyAccount;
 import in.egan.pay.demo.entity.PayType;
 import in.egan.pay.demo.service.handler.AliPayMessageHandler;
@@ -48,10 +49,28 @@ public class PayResponse {
         //根据不同的账户类型 初始化支付配置
         this.service = apyAccount.getPayType().getPayService(apyAccount);
         this.storage = service.getPayConfigStorage();
-
+        //这里设置代理配置
+//        service.setRequestTemplateConfigStorage(getHttpConfigStorage());
         buildRouter(apyAccount.getPayId());
     }
 
+    /**
+     * 获取http配置，如果配置为null则为默认配置，无代理。
+     * 此处非必需
+     * @return
+     */
+    public HttpConfigStorage getHttpConfigStorage(){
+        HttpConfigStorage httpConfigStorage = new HttpConfigStorage();
+        //http代理地址
+        httpConfigStorage.setHttpProxyHost("192.168.1.69");
+        //代理端口
+        httpConfigStorage.setHttpProxyPort(3308);
+        //代理用户名
+        httpConfigStorage.setHttpProxyUsername("user");
+        //代理密码
+        httpConfigStorage.setHttpProxyPassword("password");
+        return httpConfigStorage;
+    }
 
 
     /**
