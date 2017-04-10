@@ -14,7 +14,7 @@ public enum PayType implements BasePayType {
 
     aliPay{
         /**
-         *  @see in.egan.pay.ali.api.AliPayService  17年更新的版本,旧版本请自行切换{@link in.egan.pay.ali.before.api.AliPayService }
+         *  @see com.egzosn.pay.ali.api.AliPayService  17年更新的版本,旧版本请自行切换{@link com.egzosn.pay.ali.before.api.AliPayService }
          * @param apyAccount
          * @return
          */
@@ -37,7 +37,7 @@ public enum PayType implements BasePayType {
 
         @Override
         public TransactionType getTransactionType(String transactionType) {
-              // in.egan.pay.ali.bean.AliTransactionType 17年更新的版本,旧版本请自行切换{@link in.egan.pay.ali.before.bean.AliTransactionType}
+              // com.egzosn.pay.ali.bean.AliTransactionType 17年更新的版本,旧版本请自行切换{@link com.egzosn.pay.ali.before.bean.AliTransactionType}
             return AliTransactionType.valueOf(transactionType);
         }
 
@@ -62,7 +62,7 @@ public enum PayType implements BasePayType {
         /**
          * 根据支付类型获取交易类型
          * @param transactionType 类型值
-         * @see in.egan.pay.wx.bean.WxTransactionType
+         * @see com.egzosn.pay.wx.bean.WxTransactionType
          * @return
          */
         @Override
@@ -90,7 +90,7 @@ public enum PayType implements BasePayType {
         /**
          * 根据支付类型获取交易类型
          * @param transactionType 类型值
-         * @see in.egan.pay.wx.youdian.bean.YoudianTransactionType
+         * @see com.egzosn.pay.wx.youdian.bean.YoudianTransactionType
          * @return
          */
         @Override
@@ -127,7 +127,7 @@ public class PayResponse {
     /**
      * 初始化支付配置
      * @param apyAccount 账户信息
-     * @see in.egan.pay.demo.entity.ApyAccount 对应表结构详情--》 pay-java-demo/resources/apy_account.sql
+     * @see com.egzosn.pay.demo.entity.ApyAccount 对应表结构详情--》 pay-java-demo/resources/apy_account.sql
      */
     public void init(ApyAccount apyAccount) {
 
