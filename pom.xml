@@ -3,13 +3,13 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>in.egan</groupId>
+    <groupId>com.egzosn</groupId>
     <artifactId>pay-java-parent</artifactId>
     <packaging>pom</packaging>
     <version>2.0.SNAPSHOT</version>
 
-    <name>Pay Java Tools - Parent</name>
-    <description>支付宝支付、微信支付上级POM</description>
+    <name>Pay Java - Parent</name>
+    <description>支付整合父级</description>
     <licenses>
         <license>
             <name>The Apache License, Version 2.0</name>
@@ -20,9 +20,31 @@
         <developer>
             <name>Egan</name>
             <email>egzosn@gmail.com</email>
-            <url>https://github.com/egzosn/pay-java-parent</url>
+            <url>https://github.com/egzosn</url>
+        </developer>
+        <developer>
+            <name>Actinia</name>
+            <email>412605202@qq.com</email>
+            <url>https://github.com/Actinian</url>
         </developer>
     </developers>
+    <scm>
+        <connection>scm:git:https://github.com/egzosn/pay-java-parent.git</connection>
+        <developerConnection>scm:git:git@github.com:egzosn/pay-java-parent.git</developerConnection>
+        <url>https://github.com/egzosn/pay-java-parent</url>
+    </scm>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <name>Maven Central Staging Repository</name>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
 
     <modules>
         <module>pay-java-common</module>
@@ -45,7 +67,7 @@
         <dependencies>
 
             <dependency>
-                <groupId>in.egan</groupId>
+                <groupId>com.egzosn</groupId>
                 <artifactId>pay-java-common</artifactId>
                 <version>${pay.version}</version>
             </dependency>
@@ -83,13 +105,57 @@
     </dependencyManagement>
 
     <build>
+
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>2.17</version>
+                    <configuration>
+                        <skip>true</skip>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
         <plugins>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <configuration>
+                <source>1.7</source>
+                <target>1.7</target>
+            </configuration>
+        </plugin>
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.3</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>ossrh</serverId>
+                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>false</autoReleaseAfterClose>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.5.1</version>
+                <configuration>
+                    <autoVersionSubmodules>true</autoVersionSubmodules>
+                    <useReleaseProfile>false</useReleaseProfile>
+                    <releaseProfiles>release</releaseProfiles>
+                    <goals>deploy</goals>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.6.0</version>
                 <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
+                    <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
         </plugins>
