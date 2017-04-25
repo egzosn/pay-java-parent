@@ -4,8 +4,10 @@ package com.egzosn.pay.common.http;
 /**
  * HTTP 配置
  * @author: egan
- * @email egzosn@gmail.com
- * @date 2017/3/3 20:48
+ *  <pre>
+ * email egzosn@gmail.com
+ * date 2017/3/3 20:48
+ *  </pre>
  */
 public class HttpConfigStorage {
     //http代理地址
@@ -20,7 +22,7 @@ public class HttpConfigStorage {
 
     /**
      * http代理地址
-     * @return
+     * @return http代理地址
      */
     public String getHttpProxyHost() {
         return httpProxyHost;
@@ -33,7 +35,7 @@ public class HttpConfigStorage {
 
     /**
      *   代理端口
-     * @return
+     * @return 代理端口
      */
     public int getHttpProxyPort() {
         return httpProxyPort;
@@ -44,7 +46,7 @@ public class HttpConfigStorage {
     }
     /**
      * 代理用户名
-     * @return
+     * @return 代理用户名
      */
     public String getHttpProxyUsername() {
         return httpProxyUsername;
@@ -56,7 +58,7 @@ public class HttpConfigStorage {
 
     /**
      *  代理密码
-     * @return
+     * @return 代理密码
      */
     public String getHttpProxyPassword() {
         return httpProxyPassword;

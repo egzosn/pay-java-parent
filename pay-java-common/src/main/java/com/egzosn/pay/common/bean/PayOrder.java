@@ -6,8 +6,10 @@ import java.math.BigDecimal;
  * 支付订单信息
  *
  * @author egan
- * @email egzosn@gmail.com
- * @date 2016/10/19 22:34
+ *  <pre>
+ *      email egzosn@gmail.com
+ *      date 2016/10/19 22:34
+ *  </pre>
  */
 public class PayOrder {
     //商品名称
@@ -64,7 +66,7 @@ public class PayOrder {
 
     /**
      * 获取商户订单号
-     * @return
+     * @return 商户订单号
      * @see  #getOutTradeNo()
      */
     @Deprecated
@@ -72,8 +74,10 @@ public class PayOrder {
         return outTradeNo;
     }
 
+
     /**
-     * 设置商户订单号
+     *
+     * @param tradeNo 商户订单号
      * @see  #setOutTradeNo(String)
      */
     @Deprecated
@@ -83,14 +87,15 @@ public class PayOrder {
 
     /**
      *  获取商户订单号
-     * @return
+     * @return 商户订单号
      */
     public String getOutTradeNo() {
         return outTradeNo;
     }
+
     /**
-     *  设置商户订单号
-     * @return
+     * 设置商户订单号
+     * @param outTradeNo  商户订单号
      */
     public void setOutTradeNo(String outTradeNo) {
         this.outTradeNo = outTradeNo;

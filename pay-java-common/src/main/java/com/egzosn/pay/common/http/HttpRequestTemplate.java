@@ -18,8 +18,10 @@ import java.util.Map;
 /**
  * http请求工具
  * @author: egan
- * @email egzosn@gmail.com
- * @date 2017/3/3 21:33
+ *  <pre>
+ * email egzosn@gmail.com
+ * date 2017/3/3 21:33
+ *  </pre>
  */
 public class HttpRequestTemplate {
 
@@ -43,6 +45,11 @@ public class HttpRequestTemplate {
         setHttpConfigStorage(null);
     }
 
+    /**
+     * 设置HTTP请求的配置
+     * @param configStorage 请求配置
+     * @return 当前HTTP请求的客户端模板
+     */
     public HttpRequestTemplate setHttpConfigStorage(HttpConfigStorage configStorage){
 
         if (null == configStorage){
@@ -79,11 +86,11 @@ public class HttpRequestTemplate {
      *
      * post
      * @param uri 请求地址
-     * @param request
+     * @param request 请求参数
      * @param responseType 为响应类(需要自己依据响应格式来确定)
-     * @param <T>
-     * @return
-     * @throws IOException
+     * @param uriVariables 地址通配符对应的值
+     * @param <T> 响应类型
+     * @return 类型对象
      */
     public <T> T postForObject(String uri, Object request, Class<T> responseType, Object... uriVariables){
         return doExecute(URI.create(UriVariables.getUri(uri, uriVariables)), request, responseType, MethodType.POST);
@@ -105,10 +112,10 @@ public class HttpRequestTemplate {
      * @param responseType 响应类型
      * @param uriVariables 用于匹配表达式
      * @param <T> 响应类型
-     * @return
+     * @return 类型对象
      *
      * <code>
-     *    getForObject("http://egan.in/pay/{id}/f/{type}", String.class, "1", "APP")
+     *    getForObject(&quot;http://egan.in/pay/{id}/f/{type}&quot;, String.class, &quot;1&quot;, &quot;APP&quot;)
      * </code>
      */
     public <T> T getForObject(String uri, Class<T> responseType, Object... uriVariables){
@@ -123,12 +130,12 @@ public class HttpRequestTemplate {
      * @param responseType 响应类型
      * @param uriVariables 用于匹配表达式
      * @param <T>          响应类型
-     * @return
+     * @return 类型对象
      * <code>
-     * Map<String, String> uriVariables = new HashMap<String, String>();
-     * uriVariables.put("id", "1");
-     * uriVariables.put("type", "APP");
-     * getForObject("http://egan.in/pay/{id}/f/{type}", String.class, uriVariables)
+     * Map&lt;String, String&gt; uriVariables = new HashMap&lt;String, String&gt;();
+     * uriVariables.put(&quot;id&quot;, &quot;1&quot;);
+     * uriVariables.put(&quot;type&quot;, &quot;APP&quot;);
+     * getForObject(&quot;http://egan.in/pay/{id}/f/{type}&quot;, String.class, uriVariables)
      * </code>
      */
     public <T> T getForObject(String uri, Class<T> responseType, Map<String, ?> uriVariables){
@@ -142,9 +149,8 @@ public class HttpRequestTemplate {
      * @param request 请求数据
      * @param responseType 响应类型
      * @param method 请求方法
-     * @param <T>
-     * @return
-     * @throws IOException
+     * @param <T> 响应类型
+     * @return 类型对象
      */
     public <T>T doExecute(URI uri, Object request, Class<T> responseType, MethodType method){
         ClientHttpRequest<T> httpRequest = new ClientHttpRequest(uri ,method, request);
@@ -165,9 +171,8 @@ public class HttpRequestTemplate {
      * @param request 请求数据
      * @param responseType 响应类型
      * @param method 请求方法
-     * @param <T>
-     * @return
-     * @throws IOException
+     * @param <T> 响应类型
+     * @return 类型对象
      */
     public <T>T doExecute(String uri, Object request, Class<T> responseType, MethodType method){
        return doExecute(URI.create(uri), request, responseType, method);

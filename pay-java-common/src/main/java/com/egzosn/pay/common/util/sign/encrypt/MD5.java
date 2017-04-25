@@ -45,9 +45,7 @@ public class MD5 {
     /**
      * @param content 需要加密串
      * @param charset 字符集
-     * @return
-     * @throws SignatureException
-     * @throws UnsupportedEncodingException
+     * @return 加密后的字节数组
      */
     public static byte[] getContentBytes(String content, String charset) {
         if (StringUtils.isEmpty(charset)) {

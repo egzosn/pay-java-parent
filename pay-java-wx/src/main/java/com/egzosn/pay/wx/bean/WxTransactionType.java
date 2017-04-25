@@ -5,8 +5,9 @@ import com.egzosn.pay.common.bean.TransactionType;
 /**
  * 微信交易类型
  * @author egan
- * @email egzosn@gmail.com
- * @date 2016/10/19 22:58
+ *
+ * email egzosn@gmail.com
+ * date 2016/10/19 22:58
  */
 public enum  WxTransactionType implements TransactionType {
     //公众号支付

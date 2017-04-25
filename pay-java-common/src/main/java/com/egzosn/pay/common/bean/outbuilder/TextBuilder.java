@@ -3,10 +3,12 @@ package com.egzosn.pay.common.bean.outbuilder;
 import com.egzosn.pay.common.bean.PayOutMessage;
 
 /**
- * @source chanjarster/weixin-java-tools
+ * <p> source chanjarster/weixin-java-tools</p>
  * @author egan
- * @email egzosn@gmail.com
- * @date 2016-6-1 11:40:30
+ * <pre>
+ *     email egzosn@gmail.com
+ *     date 2016-6-1 11:40:30
+ *  </pre>
  */
 public class TextBuilder extends BaseBuilder<TextBuilder, PayOutMessage> {
     private String content;

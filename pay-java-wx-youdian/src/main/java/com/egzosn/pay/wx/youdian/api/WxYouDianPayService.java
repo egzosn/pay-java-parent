@@ -29,8 +29,9 @@ import java.util.concurrent.locks.Lock;
 /**
  *  友店支付服务
  * @author  egan
- * @email egzosn@gmail.com
- * @date 2017/01/12 22:58
+ *
+ * email egzosn@gmail.com
+ * date 2017/01/12 22:58
  */
 public class WxYouDianPayService extends BasePayService {
     protected final Log log = LogFactory.getLog(WxYouDianPayService.class);
@@ -44,7 +45,10 @@ public class WxYouDianPayService extends BasePayService {
     public final static String unifiedOrderUrl = "http://life.51youdian.com/Api/CheckoutCounter/unifiedorder";
 
 
-
+    /**
+     * 获取请求token
+     * @return 授权令牌
+     */
     public String getAccessToken()  {
         try {
             return getAccessToken(false);
@@ -56,9 +60,9 @@ public class WxYouDianPayService extends BasePayService {
 
     /**
      *  获取授权令牌
-     * @param forceRefresh
-     * @return
-     * @throws PayErrorException
+     * @param forceRefresh 是否重新获取， true重新获取
+     * @return 新的授权令牌
+     * @throws PayErrorException 支付异常
      */
     public String getAccessToken(boolean forceRefresh) throws PayErrorException {
         Lock lock = payConfigStorage.getAccessTokenLock();
@@ -85,40 +89,6 @@ public class WxYouDianPayService extends BasePayService {
                 }else {
                     throw  new PayErrorException(new YdPayError(errorcode, json.getString("msg"), json.toJSONString()));
                 }
-
-              /*  try {
-                    HttpGet httpGet = new HttpGet(resetLoginUrl+ "?" + param.toString());
-                    if (this.httpProxy != null) {
-                        RequestConfig config = RequestConfig.custom().setProxy(this.httpProxy).build();
-                        httpGet.setConfig(config);
-                    }
-                    try (CloseableHttpResponse response = getHttpClient().execute(httpGet)) {
-                        String responseObj = new BasicResponseHandler().handleResponse(response);
-                        JSONObject json = JSON.parseObject(responseObj);
-                        int errorcode = json.getIntValue("errorcode");
-
-                        switch (errorcode){
-                            //成功
-                            case 0:
-                                //刷新
-                                payConfigStorage.updateAccessToken(payConfigStorage.getAccessToken(), 7200);
-                                break;
-                            //登录已过期
-                            case 401:
-                                //进行重新登陆
-                                JSONObject login = login();
-                                payConfigStorage.updateAccessToken(login.getString("access_token"), login.getLongValue("viptime"));
-                                break;
-                            default:
-                                throw  new PayErrorException(new PayError(errorcode, json.getString("msg"), responseObj));
-
-                        }
-                    }finally {
-                        httpGet.releaseConnection();
-                    }
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }*/
             }
         } finally {
             lock.unlock();
@@ -128,9 +98,9 @@ public class WxYouDianPayService extends BasePayService {
 
 
     /**
-     * 登录 获取授权码
-     * @return
-     * @throws PayErrorException
+     * 登录 并获取登陆信息(授权码)
+     * @return  登陆信息
+     * @throws PayErrorException 支付异常
      */
      public JSONObject login() throws PayErrorException {
          TreeMap<String, String> data = new TreeMap<>();
@@ -153,12 +123,17 @@ public class WxYouDianPayService extends BasePayService {
 
     /**
      *  微信友店2支付状态校验
-     * @return
+     * @return 请求地址
      */
     public String getHttpsVerifyUrl() {
         return unifiedorderStatusUrl;
     }
-
+    /**
+     * 回调校验
+     *
+     * @param params 回调回来的参数集
+     * @return 签名校验 true通过
+     */
     @Override
     public boolean verify(Map<String, String> params) {
         if (!"SUCCESS".equals(params.get("return_code"))){
@@ -188,11 +163,12 @@ public class WxYouDianPayService extends BasePayService {
     }
 
 
+
     /**
      * 验证链接来源是否有效
-     * @param id 商户订单号（扫码收款返回的order_sn）
-     * @return
-     * @throws PayErrorException
+     * 校验数据来源
+     * @param id  id 商户订单号（扫码收款返回的order_sn）
+     * @return true通过
      */
     @Override
     public boolean verifySource(String id) {
@@ -219,8 +195,8 @@ public class WxYouDianPayService extends BasePayService {
      *               @see MethodType#GET
      *               @see MethodType#POST
      * @param request 请求内容，GET无需
-     * @return
-     * @throws PayErrorException
+     * @return 请求成功后的结果
+     * @throws PayErrorException 支付异常
      */
     public JSONObject execute(String uri,  MethodType method, Object request) throws PayErrorException {
         int retryTimes = 0;
@@ -230,7 +206,7 @@ public class WxYouDianPayService extends BasePayService {
             if ( 0 != result.getIntValue("errorcode")){
               throw new PayErrorException(new YdPayError(result.getIntValue("errorcode"), result.getString("msg"), result.toJSONString()));
             }
-
+            return  result;
         }catch (PayErrorException e){
             PayError error = e.getPayError();
             if ("401".equals(error.getErrorCode()) ) {
@@ -256,12 +232,13 @@ public class WxYouDianPayService extends BasePayService {
     }
 
 
+
     /**
      * 获取支付平台所需的订单信息
      *
      * @param order 支付订单
-     * @return
-     * @see PayOrder
+     * @return 订单信息
+     * @see PayOrder 支付订单信息
      */
     @Override
     public JSONObject orderInfo(PayOrder order) {
@@ -275,7 +252,7 @@ public class WxYouDianPayService extends BasePayService {
         try {
             JSONObject json = execute(unifiedOrderUrl+ "?" +  params, MethodType.GET, null);
             //友店比较特殊，需要在下完预订单后，自己存储 order_sn 对应 微信官方文档 out_trade_no
-            order.setTradeNo(json.getString("order_sn"));
+            order.setOutTradeNo(json.getString("order_sn"));
             return json;
         } catch (PayErrorException e) {
             e.printStackTrace();
@@ -294,7 +271,7 @@ public class WxYouDianPayService extends BasePayService {
      *     2、将所有的参数集进行key排序
      *     3、将排序后的数组从起始位置拼接成字符串如：password=XXXXXXXusername=XXXXX
      *     4、将拼接出来的字符串连接上apb_nonce的值即AAAAAAAAAA。再连接  password=XXXXXXXusername=XXXXXAAAAAAAAAA
-     * @return
+     * @return 签名结果
      */
     @Override
     public String createSign(String content, String characterEncoding) {
@@ -302,10 +279,11 @@ public class WxYouDianPayService extends BasePayService {
     }
 
     /**
+     * 将请求参数或者请求流转化为 Map
      *
      * @param parameterMap 请求参数
      * @param is           请求流
-     * @return
+     * @return 获得回调的请求参数
      */
     @Override
     public Map<String, String> getParameter2Map(Map<String, String[]> parameterMap, InputStream is) {
@@ -332,12 +310,12 @@ public class WxYouDianPayService extends BasePayService {
      *return_code 返回码只有SUCCESS和FAIL
      *return_msg 返回具体信息
      *nonce_str 您的服务器新生成随机生成32位字符串
-     *sign 为签名，签名规则是您需要发送的所有数据(除了sign)按照字典升序排列后加上&key=xxxxxxxx您的密钥后md5加密，最后转成小写
+     *sign 为签名，签名规则是您需要发送的所有数据(除了sign)按照字典升序排列后加上&amp;key=xxxxxxxx您的密钥后md5加密，最后转成小写
      *最后把得到的所有需要返回的数据用json格式化成json对象格式如下
-     *{‘return_code’:’SUCCESS’,’return_msg’:’ok’,’nonce_str’:’dddddddddddddddddddd’,’sign’:’sdddddddddddddddddd’}
+     *{&quot;return_code&quot;:&quot;SUCCESS&quot;,&quot;return_msg&quot;:&quot;ok&quot;,&quot;nonce_str&quot;:&quot;dddddddddddddddddddd’,’sign’:’sdddddddddddddddddd&quot;}
      * @param code return_code
      * @param message return_msg
-     * @return
+     * @return 返回输出消息
      */
     @Override
     public PayOutMessage getPayOutMessage(String code, String message) {
@@ -353,8 +331,9 @@ public class WxYouDianPayService extends BasePayService {
      * 针对web端的即时付款
      *  暂未实现或无此功能
      * @param orderInfo 发起支付的订单信息
-     * @param method 请求方式  "post" "get",
-     * @return
+     * @param method 请求方式  &quot;post&quot; &quot;get&quot;,
+     * @return 获取输出消息，用户返回给支付端, 针对于web端
+     * @see MethodType 请求类型
      */
     @Override
     public String buildRequest(Map<String, Object> orderInfo, MethodType method) {
