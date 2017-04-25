@@ -13,11 +13,15 @@ import java.util.regex.Pattern;
 
 
 /**
- *
+ * Route规则 路由
  * @author  egan
- * @email egzosn@gmail.com
- * @date 2016-6-1 11:28:01
- * @source chanjarster/weixin-java-tools
+ * <pre>
+ *  email egzosn@gmail.com
+ *  date 2016-6-1 11:28:01
+ *
+ *
+ *  source chanjarster/weixin-java-tools
+ *  </pre>
  */
 public class PayMessageRouterRule {
 
@@ -56,8 +60,8 @@ public class PayMessageRouterRule {
     /**
      * 设置是否异步执行，默认是true
      *
-     * @param async
-     * @return
+     * @param async  是否异步执行，默认是true
+     * @return Route规则
      */
     public PayMessageRouterRule async(boolean async) {
         this.async = async;
@@ -67,8 +71,8 @@ public class PayMessageRouterRule {
     /**
      * 如果msgType等于某值
      *
-     * @param msgType
-     * @return
+     * @param msgType 消息类型
+     * @return Route规则
      */
     public PayMessageRouterRule msgType(String msgType) {
         this.msgType = msgType;
@@ -78,8 +82,8 @@ public class PayMessageRouterRule {
     /**
      * 如果payType等于某值
      *
-     * @param payType
-     * @return
+     * @param payType  支付类型
+     * @return Route规则
      */
     public PayMessageRouterRule payType(String payType) {
         this.payType = payType;
@@ -89,8 +93,8 @@ public class PayMessageRouterRule {
     /**
      * 如果transactionType等于某值
      *
-     * @param transactionType
-     * @return
+     * @param transactionType 交易类型
+     * @return Route规则
      */
     public PayMessageRouterRule transactionType(String ... transactionType) {
         this.transactionType = transactionType;
@@ -100,8 +104,8 @@ public class PayMessageRouterRule {
     /**
      * 如果discount等于某值
      *
-     * @param discount
-     * @return
+     * @param discount discount等于某值
+     * @return Route规则
      */
     public PayMessageRouterRule discount(String discount) {
         this.discount = discount;
@@ -111,8 +115,8 @@ public class PayMessageRouterRule {
     /**
      * 如果discount匹配该正则表达式
      *
-     * @param regex
-     * @return
+     * @param regex discount匹配该正则表达式
+     * @return Route规则
      */
     public PayMessageRouterRule rDiscount(String regex) {
         this.rDiscount = regex;
@@ -120,10 +124,10 @@ public class PayMessageRouterRule {
     }
 
     /**
-     * 如果discount等于某值
+     * 如果subject等于某值
      *
-     * @param subject
-     * @return
+     * @param subject 简介
+     * @return Route规则
      */
     public PayMessageRouterRule subject(String subject) {
         this.subject = subject;
@@ -131,10 +135,10 @@ public class PayMessageRouterRule {
     }
 
     /**
-     * 如果discount匹配该正则表达式
+     * 如果subject匹配该正则表达式
      *
-     * @param regex
-     * @return
+     * @param regex 简介正则
+     * @return Route规则
      */
     public PayMessageRouterRule rSubject(String regex) {
         this.rSubject = regex;
@@ -143,32 +147,21 @@ public class PayMessageRouterRule {
 
 
     /**
-     * 如果消息匹配某个matcher，用在用户需要自定义更复杂的匹配规则的时候
+     * 设置消息拦截器
      *
-     * @param matcher
-     * @return
-     */
-  /*  public PayMessageRouterRule matcher(WxMpMessageMatcher matcher) {
-        this.matcher = matcher;
-        return this;
-    }*/
-
-    /**
-     * 设置微信消息拦截器
-     *
-     * @param interceptor
-     * @return
+     * @param interceptor 消息拦截器
+     * @return Route规则
      */
     public PayMessageRouterRule interceptor(PayMessageInterceptor interceptor) {
         return interceptor(interceptor, (PayMessageInterceptor[]) null);
     }
 
     /**
-     * 设置微信消息拦截器
+     * 设置消息拦截器
      *
-     * @param interceptor
-     * @param otherInterceptors
-     * @return
+     * @param interceptor 消息拦截器
+     * @param otherInterceptors 其他消息拦截器
+     * @return Route规则
      */
     public PayMessageRouterRule interceptor(PayMessageInterceptor interceptor, PayMessageInterceptor... otherInterceptors) {
         this.interceptors.add(interceptor);
@@ -181,21 +174,21 @@ public class PayMessageRouterRule {
     }
 
     /**
-     * 设置微信消息处理器
+     * 设置消息处理器
      *
-     * @param handler
-     * @return
+     * @param handler 消息处理器
+     * @return Route规则
      */
     public PayMessageRouterRule handler(PayMessageHandler handler) {
         return handler(handler, (PayMessageHandler[]) null);
     }
 
     /**
-     * 设置微信消息处理器
+     * 设置消息处理器
      *
-     * @param handler
-     * @param otherHandlers
-     * @return
+     * @param handler 消息处理器
+     * @param otherHandlers 其他消息处理器
+     * @return Route规则
      */
     public PayMessageRouterRule handler(PayMessageHandler handler, PayMessageHandler... otherHandlers) {
         this.handlers.add(handler);
@@ -210,7 +203,7 @@ public class PayMessageRouterRule {
     /**
      * 规则结束，代表如果一个消息匹配该规则，那么它将不再会进入其他规则
      *
-     * @return
+     * @return Route规则
      */
     public PayMessageRouter end() {
         this.routerBuilder.getRules().add(this);
@@ -220,7 +213,7 @@ public class PayMessageRouterRule {
     /**
      * 规则结束，但是消息还会进入其他规则
      *
-     * @return
+     * @return Route规则
      */
     public PayMessageRouter next() {
         this.reEnter = true;
@@ -230,8 +223,8 @@ public class PayMessageRouterRule {
     /**
      * 将支付事件修正为不区分大小写,
      * 比如框架定义的事件常量为
-     * @param payMessage
-     * @return
+     * @param payMessage 支付消息
+     * @return 是否匹配通过
      */
     protected boolean test(PayMessage payMessage) {
         return (
@@ -261,7 +254,7 @@ public class PayMessageRouterRule {
     /**
      * 匹配交易类型
      * @param transactionType 交易类型
-     * @return
+     * @return 匹配交易类型
      */
     public boolean equalsTransactionType(String transactionType) {
         if (null == transactionType){
@@ -278,12 +271,12 @@ public class PayMessageRouterRule {
     }
 
 
-
     /**
-     * 处理支付回调过来的消息
-     *
-     * @param payService
-     * @return true 代表继续执行别的router，false 代表停止执行别的router
+     *  返回支付响应消息
+     * @param payMessage 支付消息
+     * @param payService 支付服务
+     * @param exceptionHandler 异常处理器
+     * @return 支付响应消息
      */
     protected PayOutMessage service(PayMessage payMessage,
                                         PayService payService,

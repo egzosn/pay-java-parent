@@ -46,7 +46,7 @@ public class PayController {
      * 这里模拟账户信息增加
      *
      * @param account
-     * @return
+     * @return 支付账户信息
      */
     @RequestMapping("add")
     public Map<String, Object> add(ApyAccount account) {
@@ -66,7 +66,7 @@ public class PayController {
      * @param payId           账户id
      * @param transactionType 交易类型， 这个针对于每一个 支付类型的对应的几种交易方式
      * @param bankType        针对刷卡支付，卡的类型，类型值
-     * @return
+     * @return 跳到支付页面
      */
     @RequestMapping(value = "toPay.html", produces = "text/html;charset=UTF-8")
     public String toPay(Integer payId, String transactionType, String bankType, BigDecimal price) {
@@ -88,7 +88,7 @@ public class PayController {
      * 获取二维码图像
      * 二维码支付
      *
-     * @return
+     * @return 二维码图像
      */
     @RequestMapping(value = "toQrPay.jpg", produces = "image/jpeg;charset=UTF-8")
     public byte[] toWxQrPay(Integer payId, String transactionType, BigDecimal price) throws IOException {
@@ -106,7 +106,7 @@ public class PayController {
      *
      * @param payId           支付账户id
      * @param transactionType 交易类型
-     * @return
+     * @return 支付预订单信息
      */
     @RequestMapping("getOrderInfo")
     public Map<String, Object> getOrderInfo(Integer payId, String transactionType, BigDecimal price) {
@@ -121,10 +121,10 @@ public class PayController {
 
 
     /**
-     * 微信或者支付宝回调地址
+     * 支付回调地址
      *
      * @param request
-     * @return
+     * @return 支付是否成功
      */
     @RequestMapping(value = "payBack{payId}.json")
     public String payBack(HttpServletRequest request, @PathVariable Integer payId) throws IOException {
@@ -151,7 +151,7 @@ public class PayController {
      * 查询
      *
      * @param order 订单的请求体
-     * @return
+     * @return 返回查询回来的结果集，支付方原值返回
      */
     @RequestMapping("query")
     public Map<String, Object> query(QueryOrder order) {
@@ -163,7 +163,7 @@ public class PayController {
      * 交易关闭接口
      *
      * @param order 订单的请求体
-     * @return
+     * @return 返回支付方交易关闭后的结果
      */
     @RequestMapping("close")
     public Map<String, Object> close(QueryOrder order) {
@@ -175,7 +175,7 @@ public class PayController {
      * 申请退款接口
      *
      * @param order 订单的请求体
-     * @return
+     * @return 返回支付方申请退款后的结果
      */
     @RequestMapping("refund")
     public Map<String, Object> refund(QueryOrder order) {
@@ -189,7 +189,7 @@ public class PayController {
      * 查询退款
      *
      * @param order 订单的请求体
-     * @return
+     * @return 返回支付方查询退款后的结果
      */
     @RequestMapping("refundquery")
     public Map<String, Object> refundquery(QueryOrder order) {
@@ -201,7 +201,7 @@ public class PayController {
      * 下载对账单
      *
      * @param order 订单的请求体
-     * @return
+     * @return 返回支付方下载对账单的结果
      */
     @RequestMapping("downloadbill")
     public Object downloadbill(QueryOrder order) {
@@ -215,7 +215,7 @@ public class PayController {
      * 通用查询接口，根据 TransactionType 类型进行实现,此接口不包括退款
      *
      * @param order 订单的请求体
-     * @return
+     * @return 返回支付方对应接口的结果
      */
     @RequestMapping("secondaryInterface")
     public Map<String, Object> secondaryInterface(QueryOrder order) {

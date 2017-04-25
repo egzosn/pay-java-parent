@@ -5,8 +5,9 @@ import com.egzosn.pay.common.bean.TransactionType;
 /**
  * 友店交易类型
  * @author egan
- * @email egzosn@gmail.com
- * @date 2017/01/12 22:58
+ *
+ * email egzosn@gmail.com
+ * date 2017/01/12 22:58
  */
 public enum  YoudianTransactionType implements TransactionType {
 
@@ -17,7 +18,7 @@ public enum  YoudianTransactionType implements TransactionType {
 
     private String method;
 
-    private YoudianTransactionType(String method) {
+    YoudianTransactionType(String method) {
         this.method = method;
     }
 
@@ -28,7 +29,7 @@ public enum  YoudianTransactionType implements TransactionType {
 
     /**
      * 获取接口名称
-     * @return
+     * @return 接口名称
      */
     @Override
     public String getMethod() {

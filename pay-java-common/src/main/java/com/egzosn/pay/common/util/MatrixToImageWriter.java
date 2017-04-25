@@ -17,8 +17,10 @@ import java.util.Map;
 /**
  * 二维码生成工具
  * @author  egan
- * @email egzosn@gmail.com
- * @date  2017/2/7 10:35
+ * <pre>
+ * email egzosn@gmail.com
+ * date  2017/2/7 10:35
+ * </pre>
  */
 public class MatrixToImageWriter {
 
@@ -32,7 +34,7 @@ public class MatrixToImageWriter {
 	 * 根据二维矩阵的碎片 生成对应的二维码图像缓冲
 	 * @param matrix  二维矩阵的碎片 包含 宽高 行，字节
 	 * @see com.google.zxing.common.BitMatrix
-	 * @return
+	 * @return 二维码图像缓冲
      */
 	   public static BufferedImage toBufferedImage(BitMatrix matrix) {
 	     int width = matrix.getWidth();
@@ -49,10 +51,10 @@ public class MatrixToImageWriter {
 
 	/**
 	 * 二维码生成文件
-	 * @param matrix
-	 * @param format
-	 * @param file
-	 * @throws IOException
+	 * @param matrix 二维矩阵的碎片 包含 宽高 行，字节
+	 * @param format 格式
+	 * @param file 保持的文件地址
+	 * @throws IOException 文件保存异常
 	 */
 	   public static void writeToFile(BitMatrix matrix, String format, File file)
 	       throws IOException {
@@ -65,10 +67,10 @@ public class MatrixToImageWriter {
 
 	/**
 	 * 二维码生成流
-	 * @param matrix
-	 * @param format
-	 * @param stream
-	 * @throws IOException
+	 * @param matrix 二维矩阵的碎片 包含 宽高 行，字节
+	 * @param format 格式
+	 * @param stream 保持的文件输出流
+	 * @throws IOException 文件保存异常
 	 */
 	   public static void writeToStream(BitMatrix matrix, String format, OutputStream stream)
 	       throws IOException {
@@ -81,8 +83,8 @@ public class MatrixToImageWriter {
 	   
 	   /**
 	    * 二维码信息写成JPG文件
-	    * @param content
-	    * @param fileUrl
+	    * @param content  二维码信息
+	    * @param fileUrl 文件地址
 	    */
 	  public static void writeInfoToJpgFile(String content, String fileUrl){
 		    MultiFormatWriter multiFormatWriter = new MultiFormatWriter();
@@ -101,8 +103,8 @@ public class MatrixToImageWriter {
 	  
 	  /**
 	   * 二维码信息写成JPG BufferedImage
-	   * @param content
-	   * @return
+	   * @param content 二维码信息
+	   * @return JPG BufferedImage
 	   */
 	  public static BufferedImage writeInfoToJpgBuff(String content){
 		    BufferedImage re=null;

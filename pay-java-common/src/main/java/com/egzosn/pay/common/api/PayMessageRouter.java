@@ -36,16 +36,14 @@ import java.util.concurrent.Future;
  *
  * // 将PayMessage交给消息路由器
  * router.route(message);
- *
+ *  source chanjarster/weixin-java-tools  Daniel Qian
  * </pre>
- *  @source chanjarster/weixin-java-tools
- *  @source Daniel Qian
  *  @author  egan
  *
  */
 public class PayMessageRouter {
 
-    protected final Log log = LogFactory.getLog(PayMessageRouter.class);
+  protected final Log log = LogFactory.getLog(PayMessageRouter.class);
 
   private static final int DEFAULT_THREAD_POOL_SIZE = 100;
 
@@ -66,9 +64,9 @@ public class PayMessageRouter {
   /**
    * <pre>
    * 设置自定义的 {@link ExecutorService}
-   * 如果不调用该方法，默认使用 Executors.newFixedThreadPool(100)
+   * 如果不调用用该方法，默认使 Executors.newFixedThreadPool(100)
    * </pre>
-   * @param executorService
+   * @param executorService 异步线程处理器
    */
   public void setExecutorService(ExecutorService executorService) {
     this.executorService = executorService;
@@ -81,19 +79,23 @@ public class PayMessageRouter {
    * 设置自定义的{@link PayErrorExceptionHandler}
    * 如果不调用该方法，默认使用 {@link LogExceptionHandler}
    * </pre>
-   * @param exceptionHandler
+   * @param exceptionHandler 异常处理器
    */
   public void setExceptionHandler(PayErrorExceptionHandler exceptionHandler) {
     this.exceptionHandler = exceptionHandler;
   }
 
+  /**
+   * 获取所有的规则
+   * @return 规则
+   */
   List<PayMessageRouterRule> getRules() {
     return this.rules;
   }
 
   /**
    * 开始一个新的Route规则
-   * @return
+   * @return 新的Route规则
    */
   public PayMessageRouterRule rule() {
     return new PayMessageRouterRule(this);
@@ -101,7 +103,8 @@ public class PayMessageRouter {
 
   /**
    * 处理支付消息
-   * @param payMessage
+   * @param payMessage 支付消息
+   *  @return 支付输出结果
    */
   public PayOutMessage route(final PayMessage payMessage) {
 

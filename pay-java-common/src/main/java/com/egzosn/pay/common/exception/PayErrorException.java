@@ -4,8 +4,10 @@ import com.egzosn.pay.common.bean.result.PayError;
 
 /**
  * @author  egan
- * @email egzosn@gmail.com
- * @date 2016-5-18 14:09:01
+ *  <pre>
+ * email egzosn@gmail.com
+ * date 2016-5-18 14:09:01
+ *  </pre>
  */
 public class PayErrorException extends RuntimeException  {
 

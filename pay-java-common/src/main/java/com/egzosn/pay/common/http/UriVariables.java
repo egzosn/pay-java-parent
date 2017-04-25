@@ -17,18 +17,20 @@ import java.util.regex.Pattern;
  * URL表达式处理器
  *
  * @author: egan
- * @email egzosn@gmail.com
- * @date 2017/3/5 10:07
+ * <pre>
+ * email egzosn@gmail.com
+ * date 2017/3/5 10:07
+ * </pre>
  */
 public class UriVariables {
 
     /**
      * 依次匹配
-     * @param uri
-     * @param uriVariables
-     * @return
+     * @param uri 匹配的uri，带代表式
+     * @param uriVariables 匹配表达式的值
+     * @return 匹配完的url
      * <code>
-     *     System.out.println(getUri("http://egan.in/{a}/ba/{a1}?{bb}={a1}", "no1", "no2", "no3", "no4"));
+     *     System.out.println(getUri(&quot;http://egan.in/{a}/ba/{a1}?{bb}={a1}&quot;, &quot;no1&quot;, &quot;no2&quot;, &quot;no3&quot;, &quot;no4&quot;));
      *    结果 http://egan.in/no1/ba/no2?no3=no4
      * </code>
      *
@@ -51,15 +53,15 @@ public class UriVariables {
 
     /**
      * 匹配Map.key
-     * @param uri
-     * @param uriVariables
-     * @return
+     * @param uri 匹配的uri，带代表式
+     * @param uriVariables 匹配表达式的值
+     * @return 匹配完的url
      * <code>
-     *      Map<String, Object> uriVariable = new HashMap<>();
-     *      uriVariable.put("a", "no1");
-     *      uriVariable.put("a1", "no2");
-     *      uriVariable.put("bb", "no3");
-     *      System.out.println(getUri("http://egan.in/{a}/ba/{a1}?{bb}={a1}", uriVariable));
+     *      Map&lt;String, Object&gt;  uriVariable = new HashMap&lt;String, Object&gt;();
+     *      uriVariable.put(&quot;a&quot;, &quot;no1&quot;);
+     *      uriVariable.put(&quot;a1&quot;, &quot;no2&quot;);
+     *      uriVariable.put(&quot;bb&quot;, &quot;no3&quot;);
+     *      System.out.println(getUri(&quot;http://egan.in/{a}/ba/{a1}?{bb}={a1}&quot;, uriVariable));
      *      结果 http://egan.in/no1/ba/no2?no3=no2
      * </code>
      */
@@ -83,8 +85,8 @@ public class UriVariables {
 
     /**
      * Map转化为对应得参数字符串
-     * @param pe
-     * @return
+     * @param pe 参数
+     * @return 参数字符串
      */
     public static String getMapToParameters(Map pe){
         StringBuilder builder = new StringBuilder();

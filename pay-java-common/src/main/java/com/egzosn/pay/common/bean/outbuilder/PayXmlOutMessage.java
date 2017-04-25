@@ -5,8 +5,10 @@ import com.egzosn.pay.common.bean.PayOutMessage;
 
 /**
  * @author egan
- * @email egzosn@gmail.com
- * @date 2016-6-1 13:53:3
+ * <pre>
+ *     email egzosn@gmail.com
+ *     date 2016-6-1 13:53:3
+ *  </pre>
  */
 public class PayXmlOutMessage extends PayOutMessage{
 

@@ -4,9 +4,10 @@ import com.egzosn.pay.common.api.BasePayConfigStorage;
 
 /**
  * 支付客户端配置存储
- * @author  egan
- * @email egzosn@gmail.com
- * @date 2016-5-18 14:09:01
+ * author  egan
+ *
+ * email egzosn@gmail.com
+ * date 2016-5-18 14:09:01
  */
 public class AliPayConfigStorage extends BasePayConfigStorage {
 
@@ -57,9 +58,11 @@ public class AliPayConfigStorage extends BasePayConfigStorage {
         return pid;
     }
 
+
     /**
+     * 设置合作者id
      * @see #setPid(String)
-     * @return 合作者id
+     * @param partner 合作者id
      */
     @Deprecated
     public void setPartner(String partner) {

@@ -36,6 +36,7 @@ public class RSA2 {
 	* @param privateKey 商户私钥
 	* @param characterEncoding 编码格式
 	* @return 解密后的字符串
+	 * @throws Exception 解密异常
 	*/
 	public static String decrypt(String content, String privateKey, String characterEncoding) throws Exception {
         return RSA.decrypt(content, privateKey, characterEncoding);
@@ -45,7 +46,8 @@ public class RSA2 {
 	/**
 	* 得到私钥
 	* @param key 密钥字符串（经过base64编码）
-	* @throws Exception
+	* @throws Exception 加密异常
+	 * @return 私钥
 	*/
 	public static PrivateKey getPrivateKey(String key) throws Exception {
 		return RSA.getPrivateKey(key);

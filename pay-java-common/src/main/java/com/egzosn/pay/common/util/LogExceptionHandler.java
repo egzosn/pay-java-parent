@@ -10,9 +10,13 @@ import org.apache.commons.logging.LogFactory;
 /**
  * LogExceptionHandler 日志处理器
  * @author  egan
- * @email egzosn@gmail.com
- * @date 2016-6-1 11:28:01
- * @source chanjarster/weixin-java-tools
+ * <pre>
+ * email egzosn@gmail.com
+ * date 2016-6-1 11:28:01
+ *
+ *
+ * source chanjarster/weixin-java-tools
+ * </pre>
  */
 public class LogExceptionHandler implements PayErrorExceptionHandler {
 

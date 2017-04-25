@@ -14,8 +14,9 @@ import com.egzosn.pay.common.bean.TransactionType;
  * </pre>
  *
  * @author egan
- * @email egzosn@gmail.com
- * @date 2016/10/19 22:58
+ *
+ * email egzosn@gmail.com
+ * date 2016/10/19 22:58
  */
 public enum  AliTransactionType implements TransactionType {
     //app支付                      //手机网站支付
@@ -45,7 +46,7 @@ public enum  AliTransactionType implements TransactionType {
 
     /**
      * 获取接口名称
-     * @return
+     * @return 接口名称
      */
     @Override
     public String getMethod() {

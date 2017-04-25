@@ -18,9 +18,12 @@
 package com.egzosn.pay.common.bean.result;
 
 /**
+ * 支付异常
  * @author: egan
- * @email egzosn@gmail.com
- * @date 2017/3/7 12:32
+ *  <pre>
+ *      email egzosn@gmail.com
+ *      date 2017/3/7 12:32
+ *  </pre>
  */
 public class PayException implements PayError {
     private String errorCode;

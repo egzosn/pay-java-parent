@@ -26,8 +26,10 @@ import static com.egzosn.pay.common.http.UriVariables.getMapToParameters;
 /**
  * 一个HTTP请求的客户端
  * @author: egan
- * @email egzosn@gmail.com
- * @date 2017/3/4 17:56
+ *  <pre>
+ * email egzosn@gmail.com
+ * date 2017/3/4 17:56
+ *  </pre>
  */
 public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase implements  org.apache.http.client.ResponseHandler<T>{
     //http请求
@@ -83,7 +85,7 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
     /**
      * 设置代理
      * @param httpProxy http代理配置信息
-     * @return
+     * @return 当前HTTP请求的客户端
      */
     public ClientHttpRequest setProxy(HttpHost httpProxy){
         if (httpProxy != null) {
@@ -98,7 +100,7 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
      * 设置请求参数
      *
      * @param request 请求参数
-     * @return
+     * @return 当前HTTP请求的客户端
      */
     public ClientHttpRequest setParameters(Object request) {
         if (null == request){
