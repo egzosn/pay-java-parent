@@ -2,23 +2,26 @@ package in.egan.pay.fuiou.api;/**
  * Created by Fuzx on 2017/1/16 0016.
  */
 
-import in.egan.pay.common.before.api.BasePayService;
-import in.egan.pay.common.before.api.PayConfigStorage;
-import in.egan.pay.common.before.api.RequestExecutor;
+import com.alibaba.fastjson.JSONObject;
+import in.egan.pay.common.api.BasePayService;
+import in.egan.pay.common.api.Callback;
+import in.egan.pay.common.api.PayConfigStorage;
 import in.egan.pay.common.bean.MethodType;
 import in.egan.pay.common.bean.PayOrder;
 import in.egan.pay.common.bean.PayOutMessage;
-import in.egan.pay.common.before.bean.result.PayError;
+import in.egan.pay.common.bean.TransactionType;
 import in.egan.pay.common.exception.PayErrorException;
+import in.egan.pay.common.http.HttpConfigStorage;
 import in.egan.pay.common.util.sign.SignUtils;
 import in.egan.pay.common.util.str.StringUtils;
-import in.egan.pay.fuiou.utils.SimplePostRequestExecutor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.message.BasicNameValuePair;
 
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
+import java.math.BigDecimal;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -26,34 +29,39 @@ import java.util.*;
  * @create 2017 2017/1/16 0016
  */
 public class FuiouPayService extends BasePayService {
-
+    //日志
     protected final Log log = LogFactory.getLog(FuiouPayService.class);
+    //正式域名
+    public final static String URL_FuiouBaseDomain = "https://pay.fuiou.com/";
+    //测试域名
+//    public final static String URL_FuiouBaseDomain = "http://www-1.fuiou.com:8888/wg1_run/";
+    //B2C/B2B支付
+    public final static String URL_FuiouSmpGate  = URL_FuiouBaseDomain + "smpGate.do";
+    //B2C/B2B支付(跨境支付)
+    public final static String URL_FuiouNewSmpGate = URL_FuiouBaseDomain + "newSmpGate.do";
+    //订单退款
+    public final static String URL_FuiouSmpRefundGate = URL_FuiouBaseDomain + "newSmpRefundGate.do";
+    //3.2	支付结果查询
+    public final static String URL_FuiouSmpQueryGate = URL_FuiouBaseDomain + "smpQueryGate.do";
+    //3.3	支付结果查询(直接返回)
+    public final static String URL_FuiouSmpAQueryGate = URL_FuiouBaseDomain + "smpAQueryGate.do";
+    //3.4订单退款
+    public final static String URL_NewSmpRefundGate = URL_FuiouBaseDomain +  "newSmpRefundGate.do";
 
-        public final static String fuiouBaseDomain = "https://pay.fuiou.com/";//正式域名
-//    public final static String fuiouBaseDomain = "http://www-1.fuiou.com:8888/wg1_run/";//测试域名
-
-    public final static String fuiouSmpGate = fuiouBaseDomain + "smpGate.do";//B2C/B2B支付
-
-    public final static String fuiouNewSmpGate = fuiouBaseDomain + "newSmpGate.do";//B2C/B2B支付(跨境支付)
-    public final static String fuiouSmpRefundGate = fuiouBaseDomain + "newSmpRefundGate.do";//订单退款
-
-    public final static String fuiouSmpQueryGate = fuiouBaseDomain + "smpQueryGate.do";//3.2	支付结果查询
-    public final static String fuiouSmpAQueryGate = fuiouBaseDomain + "smpAQueryGate.do";//3.3	支付结果查询(直接返回)
-
-    public FuiouPayService(PayConfigStorage payConfigStorage) {
-        setPayConfigStorage(payConfigStorage);
+    /**
+     * 构造函数，初始化时候使用
+     * @param payConfigStorage
+     * @param configStorage
+     */
+    public FuiouPayService (PayConfigStorage payConfigStorage, HttpConfigStorage configStorage) {
+        super(payConfigStorage, configStorage);
     }
 
-
-    @Override
-    public String getHttpsVerifyUrl() {
-        return null;
-    }
 
     /**
      * 回调校验
      * @param params 回调回来的参数集
-     * @return
+     * @return 返回检验结果 0000 成功 其他失败
      */
     @Override
     public boolean verify(Map<String, String> params) {
@@ -62,7 +70,8 @@ public class FuiouPayService extends BasePayService {
             return false;
         }
         try {
-            return getSignVerify(params, params.get("md5")) && "0000".equals(verifyUrl(params.get("order_id")));//返回参数校验  和 重新请求订单检查数据是否合法
+            //返回参数校验  和 重新请求订单检查数据是否合法
+            return (signVerify(params, params.get("md5")) && verifySource(params.get("order_id")));
         } catch (PayErrorException e) {
             e.printStackTrace();
         }
@@ -70,13 +79,14 @@ public class FuiouPayService extends BasePayService {
     }
 
     /**
-     * 校验回调参数是否合法
+     * 回调签名校验
+     *
      * @param params 参数集
-     * @param returnSign
-     * @return
+     * @param responseSign   响应的签名串
+     * @return 校验结果
      */
     @Override
-    public boolean getSignVerify(Map<String, String> params, String returnSign) {
+    public boolean signVerify (Map<String, String> params, String responseSign   ) {
         LinkedHashSet<String> keySet = new LinkedHashSet<>();
         keySet.add("mchnt_cd");//商户代码
         keySet.add("order_id");//商户订单号
@@ -97,63 +107,29 @@ public class FuiouPayService extends BasePayService {
         }
         String sign  = createSign(verifyMD5Str.deleteCharAt(verifyMD5Str.length() -1).toString(),payConfigStorage.getInputCharset());
 //        System.out.println("加密串"+verifyMD5Str+",,返回参数生成MD5="+sign+",,返回MD5摘要值"+returnSign);
-        if(returnSign.equals(sign)){
-            return true;
-        }
-        return false;
+        return responseSign.equals(sign);
     }
 
     /**
-     * 发起请求校验订单是否支付成功
-     * @param order_id
-     * @return
-     * @throws PayErrorException
+     * 校验回调数据来源是否合法
+     *
+     * @param order_id 业务id, 数据的真实性.
+     * @return 返回校验结果
      */
     @Override
-    public String verifyUrl(String order_id) throws PayErrorException {
-//        LinkedHashMap param = new LinkedHashMap();
-//        param.put("mchnt_cd",payConfigStorage.getPartner());
-//        param.put("order_id",order_id);
-//        param.put("md5",createSign(SignUtils.parameters2MD5Str(param,"|"),payConfigStorage.getInputCharset()));
-        List<BasicNameValuePair> pairList = new ArrayList<BasicNameValuePair>();
-        pairList.add(new BasicNameValuePair("mchnt_cd",payConfigStorage.getPartner()));
-        pairList.add(new BasicNameValuePair("order_id",order_id));
-        pairList.add(new BasicNameValuePair("md5",createSign(SignUtils.parameters2MD5Str(pairList,"|"),payConfigStorage.getInputCharset())));
-        return execute(new SimplePostRequestExecutor(), fuiouSmpAQueryGate,pairList);
-//        JSONObject jsonObject = XML.toJSONObject(responseContent);
-
-//        return getFormString(param,MethodType.POST,fuiouSmpAQueryGate);
-    }
-
-    @Override
-    public <T, E> T execute(RequestExecutor<T, E> executor, String uri, E data) throws PayErrorException {
-        int retryTimes = 0;
-        do {
-            try {
-                return executeInternal(executor, uri, data);
-            } catch (PayErrorException e) {
-                PayError error = (PayError) e.getPayError();
-                if ("404".equals(error.getErrorCode()) ) {
-                    int sleepMillis = retrySleepMillis * (1 << retryTimes);
-                    try {
-                        log.debug(String.format("富友支付系统错误，错误信息:<%s>,(%s)ms 后重试(第%s次)",e.getMessage(),sleepMillis, retryTimes + 1));
-                        Thread.sleep(sleepMillis);
-                    } catch (InterruptedException e1) {
-                        throw new RuntimeException(e1);
-                    }
-                } else {
-                    throw e;
-                }
-            }
-        } while (++retryTimes < maxRetryTimes);
-
-        throw new RuntimeException("富友支付服务端异常，超出重试次数");
+    public boolean verifySource (String order_id) {
+        LinkedHashMap<String ,Object> params = new LinkedHashMap<>();
+        params.put("mchnt_cd",payConfigStorage.getPid());
+        params.put("order_id",order_id);
+        params.put("md5",createSign(SignUtils.parameters2MD5Str(params,"|"),payConfigStorage.getInputCharset()));
+        JSONObject resultJson   = getHttpRequestTemplate().postForObject(URL_FuiouSmpAQueryGate,params,JSONObject.class);
+        return resultJson.getString("order_pay_code").equals("0000");
     }
 
     /**
-     * 对支付请求参数进行加密,排序
+     * 将支付请求参数加密成md5
      * @param order 支付订单
-     * @return
+     * @return 返回支付请求参数集合
      */
     @Override
     public Map<String, Object> orderInfo(PayOrder order) {
@@ -163,6 +139,11 @@ public class FuiouPayService extends BasePayService {
         return parameters;
     }
 
+    /**
+     * 按序添加请求参数
+     * @param order 支付订单
+     * @return 返回支付请求参数集合
+     */
     private LinkedHashMap<String, Object> getOrderInfo(PayOrder order) {
         LinkedHashMap<String, Object> parameters = new LinkedHashMap<String, Object>();
         parameters.put("mchnt_cd", payConfigStorage.getPartner());//商户代码
@@ -183,9 +164,9 @@ public class FuiouPayService extends BasePayService {
 
     /**
      * 对内容进行加密
-     * @param content           需要签名的内容
+     * @param content           需要加密的内容
      * @param characterEncoding 字符编码
-     * @return
+     * @return 加密后的字符串
      */
     @Override
     public String createSign(String content, String characterEncoding) {
@@ -193,45 +174,57 @@ public class FuiouPayService extends BasePayService {
     }
 
     /**
-     * 将参数拼凑成String
+     * 将请求参数或者请求流转化为 Map
      * @param parameterMap 请求参数
      * @param is           请求流
-     * @return
+     * @return 返回参数集合
      */
     @Override
     public Map<String, String> getParameter2Map(Map<String, String[]> parameterMap, InputStream is) {
-        Map<String, String> params = new TreeMap<String, String>();
-        for (Iterator iter = parameterMap.keySet().iterator(); iter.hasNext(); ) {
-            String name = (String) iter.next();
-            String[] values = parameterMap.get(name);
-            String valueStr = "";
-            for (int i = 0; i < values.length; i++) {
-                valueStr = (i == values.length - 1) ? valueStr + values[i]
-                        : valueStr + values[i] + ",";
-            }
-            //乱码解决，这段代码在出现乱码时使用。如果mysign和sign不相等也可以使用这段代码转化
-            //valueStr = new String(valueStr.getBytes("ISO-8859-1"), "gbk");
-            params.put(name, valueStr);
-        }
-        return params;
+        return null;
     }
+
+    /**
+     *  获取输出消息，用户返回给支付端
+     * @param code 返回代码
+     * @param message 返回信息
+     * @return 消息实体
+     */
 
     @Override
     public PayOutMessage getPayOutMessage(String code, String message) {
         return PayOutMessage.TEXT().content(code.toLowerCase()).build();
     }
 
+    /**
+     * 发送支付请求（form表单）
+     * @param orderInfo 发起支付的订单信息
+     * @param method    请求方式  "post" "get",
+     * @return form表单提交的html字符串
+     */
+
     @Override
     public String buildRequest(Map<String, Object> orderInfo, MethodType method) {
-        return getFormString(orderInfo, method,fuiouSmpGate);
+        return getFormString(orderInfo, method,URL_FuiouSmpGate );
     }
 
     /**
-     * 根据参数行程form表单
+     * 获取输出二维码，用户返回给支付端,
+     *
+     * @param order 发起支付的订单信息
+     * @return 空
+     */
+    @Override
+    public BufferedImage genQrPay (PayOrder order) {
+        return null;
+    }
+
+    /**
+     * 根据参数形成form表单
      * @param param 参数
      * @param method 请求方式 get_post
-     * @param url
-     * @return
+     * @param url 支付请求url地址
+     * @return form表单html代码
      */
     private String getFormString(Map<String, Object> param, MethodType method,String url) {
         StringBuffer formHtml = new StringBuffer();
@@ -261,39 +254,155 @@ public class FuiouPayService extends BasePayService {
     }
 
     /**
-     * 生成二维码支付
-     * 暂未实现或无此功能
-     *
-     * @param orderInfo 发起支付的订单信息
-     * @return
+     * 交易查询接口
+     * @param tradeNo    支付平台订单号
+     * @param outTradeNo 商户单号
+     * @return 空
      */
-    @Override
-    public BufferedImage genQrPay(Map<String, Object> orderInfo) {
-        throw new UnsupportedOperationException();
-    }
-
     @Override
     public Map<String, Object> query(String tradeNo, String outTradeNo) {
         return null;
     }
 
+    /**
+     * 交易查询接口
+     *
+     * @param tradeNo    支付平台订单号
+     * @param outTradeNo 商户单号
+     * @param callback   处理器
+     * @return 空
+     */
+    @Override
+    public <T> T query (String tradeNo, String outTradeNo, Callback<T> callback) {
+        return null;
+    }
+
+    /**
+     * 交易关闭接口
+     * @param tradeNo    支付平台订单号
+     * @param outTradeNo 商户单号
+     * @return 空
+     */
     @Override
     public Map<String, Object> close(String tradeNo, String outTradeNo) {
         return null;
     }
 
+    /**
+     * 交易关闭接口
+     *
+     * @param tradeNo    支付平台订单号
+     * @param outTradeNo 商户单号
+     * @param callback   处理器
+     * @return 空
+     */
     @Override
-    public Map<String, Object> refund(String tradeNo, String outTradeNo) {
+    public <T> T close (String tradeNo, String outTradeNo, Callback<T> callback) {
         return null;
     }
+
+    /**
+     * 申请退款接口
+     *
+     * @param tradeNo      支付平台订单号
+     * @param outTradeNo   商户单号
+     * @param refundAmount 退款金额
+     * @param totalAmount  总金额
+     * @return 退款返回结果集
+     */
+    @Override
+    public Map<String, Object> refund (String tradeNo, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount) {
+        Map<String ,Object> params = new HashMap<>();
+        params.put("mchnt_cd",payConfigStorage.getSecretKey());//商户代码
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        df.setTimeZone(TimeZone.getTimeZone("GMT+8"));
+        params.put("origin_order_date",df.format(new Date()));//原交易日期
+        params.put("origin_order_id",tradeNo);//原订单号
+        params.put("refund_amt",refundAmount);//退款金额
+        params.put("rem","");//备注
+        params.put("md5",createSign(SignUtils.parameters2MD5Str(params,"|"),payConfigStorage.getInputCharset()));
+        JSONObject resultJson   = getHttpRequestTemplate().postForObject(URL_FuiouSmpRefundGate,params,JSONObject.class);
+        //5341标识退款成功
+        return resultJson;
+
+    }
+
+    /**
+     * 申请退款接口
+     *
+     * @param tradeNo      支付平台订单号
+     * @param outTradeNo   商户单号
+     * @param refundAmount 退款金额
+     * @param totalAmount  总金额
+     * @param callback     处理器
+     * @return 空
+     */
+    @Override
+    public <T> T refund (String tradeNo, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount, Callback<T> callback) {
+        return null;
+    }
+
+    /**
+     *  查询退款
+     * @param tradeNo    支付平台订单号
+     * @param outTradeNo 商户单号
+     * @return  空
+     *
+     */
 
     @Override
     public Map<String, Object> refundquery(String tradeNo, String outTradeNo) {
         return null;
     }
 
+    /**
+     * 查询退款
+     *
+     * @param tradeNo    支付平台订单号
+     * @param outTradeNo 商户单号
+     * @param callback   处理器
+     * @return　空
+     */
+    @Override
+    public <T> T refundquery (String tradeNo, String outTradeNo, Callback<T> callback) {
+        return null;
+    }
+
+    /**
+     * 下载对账单
+     * @param billDate 账单时间：日账单格式为yyyy-MM-dd，月账单格式为yyyy-MM。
+     * @param billType 账单类型，商户通过接口或商户经开放平台授权后其所属服务商通过接口可以获取以下账单类型：trade、signcustomer；trade指商户基于支付宝交易收单的业务账单；signcustomer是指基于商户支付宝余额收入及支出等资金变动的帐务账单；
+     * @return 空
+     */
     @Override
     public Object downloadbill(Date billDate, String billType) {
+        return null;
+    }
+
+    /**
+     * 下载对账单
+     *
+     * @param billDate 账单时间：具体请查看对应支付平台
+     * @param billType 账单类型，具体请查看对应支付平台
+     * @param callback 处理器
+     * @return 空
+     */
+    @Override
+    public <T> T downloadbill (Date billDate, String billType, Callback<T> callback) {
+        return null;
+    }
+
+    /**
+     * 通用查询接口
+     *
+     * @param tradeNoOrBillDate  支付平台订单号或者账单日期， 具体请 类型为{@link String }或者 {@link Date }，类型须强制限制，类型不对应则抛出异常{@link PayErrorException}
+     * @param outTradeNoBillType 商户单号或者 账单类型
+     * @param transactionType    交易类型
+     * @param callback           处理器
+     * @return 空
+     */
+    @Override
+    public <T> T secondaryInterface (Object tradeNoOrBillDate, String outTradeNoBillType, TransactionType transactionType, Callback<T> callback) {
         return null;
     }
 

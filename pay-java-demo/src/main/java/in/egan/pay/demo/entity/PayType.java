@@ -112,6 +112,33 @@ public enum PayType implements BasePayType {
 
             return YoudianTransactionType.valueOf(transactionType);
         }
+    },fuiou{
+
+        @Override
+        public PayService getPayService(ApyAccount apyAccount) {
+            AliPayConfigStorage aliPayConfigStorage = new AliPayConfigStorage();
+            aliPayConfigStorage.setPid(apyAccount.getPartner());
+            aliPayConfigStorage.setAppId(apyAccount.getAppid());
+            aliPayConfigStorage.setAliPublicKey(apyAccount.getPublicKey());
+            aliPayConfigStorage.setKeyPrivate(apyAccount.getPrivateKey());
+            aliPayConfigStorage.setNotifyUrl(apyAccount.getNotifyUrl());
+            aliPayConfigStorage.setReturnUrl(apyAccount.getReturnUrl());
+            aliPayConfigStorage.setSignType(apyAccount.getSignType());
+            aliPayConfigStorage.setSeller(apyAccount.getSeller());
+            aliPayConfigStorage.setPayType(apyAccount.getPayType().toString());
+            aliPayConfigStorage.setMsgType(apyAccount.getMsgType());
+            aliPayConfigStorage.setInputCharset(apyAccount.getInputCharset());
+            aliPayConfigStorage.setTest(apyAccount.isTest());
+            return new AliPayService(aliPayConfigStorage);
+        }
+
+        @Override
+        public TransactionType getTransactionType(String transactionType) {
+            // in.egan.pay.ali.before.bean.AliTransactionType 17年更新的版本,旧版本请自行切换
+            return AliTransactionType.valueOf(transactionType);
+        }
+
+
     };
 
     public abstract PayService getPayService(ApyAccount apyAccount);

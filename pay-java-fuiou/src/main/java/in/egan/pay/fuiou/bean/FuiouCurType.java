@@ -5,6 +5,7 @@ package in.egan.pay.fuiou.bean;/**
 import in.egan.pay.common.bean.CurType;
 
 /**
+ * 货币类型
  * @author Fuzx
  * @create 2017 2017/1/24 0024
  */
@@ -20,13 +21,25 @@ public enum FuiouCurType  implements CurType {
         JPY("日元"),
     	SGD("新加坡元"),
         AUD("澳大利亚元");
-
+    /**
+     * 币种名称
+     */
     private String name;
+    //索引
     private int index;
 
-    private FuiouCurType(String name) {
+    /**
+     * 构造函数
+     * @param name
+     */
+    FuiouCurType(String name) {
         this.name = name;
     }
+
+    /**
+     * 获取币种名称
+     * @return 币种名称
+     */
     @Override
     public String getCurType(){
         return this.name();

@@ -2,7 +2,7 @@ package in.egan.pay.fuiou.api;/**
  * Created by Fuzx on 2017/1/16 0016.
  */
 
-import in.egan.pay.common.before.api.BasePayConfigStorage;
+import in.egan.pay.common.api.BasePayConfigStorage;
 
 /**
  * @author Fuzx
@@ -13,19 +13,41 @@ public class FuiouPayConfigStorage extends BasePayConfigStorage {
     public String mchntCd;//商户代码
     public String mchntKey;//商户密钥
 
-
+    /**
+     *  应用id
+     * @return 空
+     */
     @Override
     public String getAppid() {
         return null;
     }
 
+    /**
+     * 合作商唯一标识
+     *
+     * @see #getPid()  代替者
+     */
     @Override
-    public String getPartner() {
+    public String getPartner () {
         return mchntCd;
     }
 
-    public void setPartner(String partner) {
-        this.mchntCd = partner;
+    /**
+     * 合作商唯一标识
+     *
+     * @see #getPartner()  代替者
+     */
+    @Override
+    public String getPid () {
+        return mchntCd;
+    }
+
+    public String getMchntCd () {
+        return mchntCd;
+    }
+
+    public void setMchntCd (String mchntCd) {
+        this.mchntCd = mchntCd;
     }
 
     @Override
@@ -35,7 +57,7 @@ public class FuiouPayConfigStorage extends BasePayConfigStorage {
 
     @Override
     public String getSecretKey() {
-        return mchntKey;
+        return super.getKeyPrivate();
     }
 
     public void setSecretKey(String mchntKey){

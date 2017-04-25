@@ -6,6 +6,7 @@ import in.egan.pay.ali.bean.AliTransactionType;
 import in.egan.pay.demo.entity.ApyAccount;
 import in.egan.pay.demo.entity.PayType;
 import in.egan.pay.demo.service.handler.AliPayMessageHandler;
+import in.egan.pay.demo.service.handler.FuiouPayMessageHandler;
 import in.egan.pay.demo.service.handler.WxPayMessageHandler;
 import in.egan.pay.demo.service.handler.YouDianPayMessageHandler;
 import in.egan.pay.demo.service.interceptor.AliPayMessageInterceptor;
@@ -80,6 +81,12 @@ public class PayResponse {
                 .msgType(MsgType.json.name())
                 .payType(PayType.youdianPay.name())
                 .handler(autowire(new YouDianPayMessageHandler(payId)))
+                .end()
+                .rule()
+                .async(false)
+                .msgType(MsgType.xml.name())
+                .payType(PayType.fuiou.name())
+                .handler(autowire(new FuiouPayMessageHandler(payId)))
                 .end()
 
         ;
