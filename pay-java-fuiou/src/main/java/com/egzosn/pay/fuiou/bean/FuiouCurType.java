@@ -1,13 +1,11 @@
-package com.egzosn.pay.fuiou.bean;/**
- * Created by Fuzx on 2017/1/24 0024.
- */
+package com.egzosn.pay.fuiou.bean;
 
 import com.egzosn.pay.common.bean.CurType;
 
 /**
  * 货币类型
  * @author Fuzx
- * @create 2017 2017/1/24 0024
+ * create 2017 2017/1/24 0024
  */
 public enum FuiouCurType  implements CurType {
 

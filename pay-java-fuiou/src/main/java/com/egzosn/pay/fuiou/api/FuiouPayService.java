@@ -1,8 +1,4 @@
-package com.egzosn.pay.fuiou.api;/**
- * Created by Fuzx on 2017/1/16 0016.
- */
-
-
+package com.egzosn.pay.fuiou.api;
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.api.BasePayService;
 import com.egzosn.pay.common.api.Callback;
@@ -27,7 +23,9 @@ import java.util.*;
 
 /**
  * @author Fuzx
- * @create 2017 2017/1/16 0016
+ * <pre>
+ * create 2017 2017/1/16 0016
+ * </pre>
  */
 public class FuiouPayService extends BasePayService {
     //日志
@@ -51,19 +49,18 @@ public class FuiouPayService extends BasePayService {
 
     /**
      * 构造函数，初始化时候使用
-     * @param payConfigStorage
-     * @param configStorage
+     * @param payConfigStorage 支付账户配置信息
+     * @param configStorage 网络代理配置
      */
     public FuiouPayService (PayConfigStorage payConfigStorage, HttpConfigStorage configStorage) {
         super(payConfigStorage, configStorage);
     }
-
     /**
      * 构造函数，初始化时候使用
-     * @param payConfigStorage
+     * @param payConfigStorage 支付账户配置信息
      */
     public FuiouPayService (PayConfigStorage payConfigStorage) {
-        super(payConfigStorage, null);
+        super(payConfigStorage);
     }
 
 
@@ -400,6 +397,7 @@ public class FuiouPayService extends BasePayService {
     public <T> T downloadbill (Date billDate, String billType, Callback<T> callback) {
         return null;
     }
+
 
     /**
      * 通用查询接口

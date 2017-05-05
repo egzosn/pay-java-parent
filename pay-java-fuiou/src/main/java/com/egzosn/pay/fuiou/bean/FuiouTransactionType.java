@@ -5,7 +5,7 @@ import com.egzosn.pay.common.bean.TransactionType;
 /**
  * 支付类型
  * @author Fuzx
- * @create 2017 2017/1/24 0024
+ * create 2017 2017/1/24 0024
  */
 public enum FuiouTransactionType implements TransactionType {
     B2B("B2B"),
@@ -25,7 +25,7 @@ public enum FuiouTransactionType implements TransactionType {
 
     /**
      * 获取接口名称
-     * @return
+     * @return 接口名称
      */
     @Override
     public String getMethod() {

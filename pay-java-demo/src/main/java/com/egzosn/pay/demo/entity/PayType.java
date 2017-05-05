@@ -10,6 +10,8 @@ import com.egzosn.pay.demo.service.handler.FuiouPayMessageHandler;
 import com.egzosn.pay.fuiou.api.FuiouPayConfigStorage;
 import com.egzosn.pay.fuiou.api.FuiouPayService;
 import com.egzosn.pay.fuiou.bean.FuiouTransactionType;
+import com.egzosn.pay.fuiou.api.FuiouPayConfigStorage;
+import com.egzosn.pay.fuiou.api.FuiouPayService;
 import com.egzosn.pay.wx.api.WxPayConfigStorage;
 import com.egzosn.pay.wx.api.WxPayService;
 import com.egzosn.pay.wx.bean.WxTransactionType;
@@ -18,18 +20,20 @@ import com.egzosn.pay.wx.youdian.api.WxYouDianPayService;
 import com.egzosn.pay.wx.youdian.bean.YoudianTransactionType;
 
 
+
 /**
  * 支付类型
+ *
  * @author egan
- * @email egzosn@gmail.com
- * @date 2016/11/20 0:30
+ * email egzosn@gmail.com
+ * date 2016/11/20 0:30
  */
 public enum PayType implements BasePayType {
 
 
     aliPay{
         /**
-         *  @see com.egzosn.pay.ali.before.api.AliPayService 17年更新的版本,旧版本请自行切换
+         *  @see com.egzosn.pay.ali.api.AliPayService 17年更新的版本,旧版本请自行切换
          * @param apyAccount
          * @return
          */

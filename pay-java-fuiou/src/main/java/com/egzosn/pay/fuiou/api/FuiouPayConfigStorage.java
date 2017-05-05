@@ -1,12 +1,11 @@
-package com.egzosn.pay.fuiou.api;/**
- * Created by Fuzx on 2017/1/16 0016.
- */
-
+package com.egzosn.pay.fuiou.api;
 import com.egzosn.pay.common.api.BasePayConfigStorage;
 
 /**
  * @author Fuzx
- * @create 2017 2017/1/16 0016
+ *  <pre>
+ * create 2017 2017/1/16 0016
+ * </pre>
  */
 public class FuiouPayConfigStorage extends BasePayConfigStorage {
 
