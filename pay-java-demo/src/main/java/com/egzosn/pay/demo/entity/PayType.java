@@ -1,6 +1,7 @@
 package com.egzosn.pay.demo.entity;
 
 import com.egzosn.pay.ali.api.AliPayConfigStorage;
+import com.egzosn.pay.ali.api.AliPayService;
 import com.egzosn.pay.ali.bean.AliTransactionType;
 import com.egzosn.pay.common.api.PayService;
 import com.egzosn.pay.common.bean.BasePayType;
@@ -24,7 +25,7 @@ public enum PayType implements BasePayType {
 
     aliPay{
         /**
-         *  @see AliPayService 17年更新的版本,旧版本请自行切换
+         *  @see com.egzosn.pay.ali.before.api.AliPayService 17年更新的版本,旧版本请自行切换
          * @param apyAccount
          * @return
          */
@@ -43,11 +44,13 @@ public enum PayType implements BasePayType {
             aliPayConfigStorage.setMsgType(apyAccount.getMsgType());
             aliPayConfigStorage.setInputCharset(apyAccount.getInputCharset());
             aliPayConfigStorage.setTest(apyAccount.isTest());
-            return new com.egzosn.pay.ali.api.AliPayService(aliPayConfigStorage);
+            return new AliPayService(aliPayConfigStorage);
         }
 
         @Override
         public TransactionType getTransactionType(String transactionType) {
+            // com.egzosn.pay.ali.before.bean.AliTransactionType 17年更新的版本,旧版本请自行切换
+
             // AliTransactionType 17年更新的版本,旧版本请自行切换
             return AliTransactionType.valueOf(transactionType);
         }
@@ -111,6 +114,33 @@ public enum PayType implements BasePayType {
 
             return YoudianTransactionType.valueOf(transactionType);
         }
+    },fuiou{
+
+        @Override
+        public PayService getPayService(ApyAccount apyAccount) {
+            AliPayConfigStorage aliPayConfigStorage = new AliPayConfigStorage();
+            aliPayConfigStorage.setPid(apyAccount.getPartner());
+            aliPayConfigStorage.setAppId(apyAccount.getAppid());
+            aliPayConfigStorage.setAliPublicKey(apyAccount.getPublicKey());
+            aliPayConfigStorage.setKeyPrivate(apyAccount.getPrivateKey());
+            aliPayConfigStorage.setNotifyUrl(apyAccount.getNotifyUrl());
+            aliPayConfigStorage.setReturnUrl(apyAccount.getReturnUrl());
+            aliPayConfigStorage.setSignType(apyAccount.getSignType());
+            aliPayConfigStorage.setSeller(apyAccount.getSeller());
+            aliPayConfigStorage.setPayType(apyAccount.getPayType().toString());
+            aliPayConfigStorage.setMsgType(apyAccount.getMsgType());
+            aliPayConfigStorage.setInputCharset(apyAccount.getInputCharset());
+            aliPayConfigStorage.setTest(apyAccount.isTest());
+            return new AliPayService(aliPayConfigStorage);
+        }
+
+        @Override
+        public TransactionType getTransactionType(String transactionType) {
+            // in.egan.pay.ali.before.bean.AliTransactionType 17年更新的版本,旧版本请自行切换
+            return AliTransactionType.valueOf(transactionType);
+        }
+
+
     };
 
     public abstract PayService getPayService(ApyAccount apyAccount);
