@@ -58,6 +58,14 @@ public class FuiouPayService extends BasePayService {
         super(payConfigStorage, configStorage);
     }
 
+    /**
+     * 构造函数，初始化时候使用
+     * @param payConfigStorage
+     */
+    public FuiouPayService (PayConfigStorage payConfigStorage) {
+        super(payConfigStorage, null);
+    }
+
 
     /**
      * 回调校验

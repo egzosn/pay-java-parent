@@ -3,6 +3,7 @@
 package com.egzosn.pay.demo.service;
 
 import com.egzosn.pay.ali.bean.AliTransactionType;
+import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.demo.entity.ApyAccount;
 import com.egzosn.pay.demo.entity.PayType;
 import com.egzosn.pay.demo.service.handler.AliPayMessageHandler;

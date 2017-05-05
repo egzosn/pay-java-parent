@@ -6,6 +6,10 @@ import com.egzosn.pay.ali.bean.AliTransactionType;
 import com.egzosn.pay.common.api.PayService;
 import com.egzosn.pay.common.bean.BasePayType;
 import com.egzosn.pay.common.bean.TransactionType;
+import com.egzosn.pay.demo.service.handler.FuiouPayMessageHandler;
+import com.egzosn.pay.fuiou.api.FuiouPayConfigStorage;
+import com.egzosn.pay.fuiou.api.FuiouPayService;
+import com.egzosn.pay.fuiou.bean.FuiouTransactionType;
 import com.egzosn.pay.wx.api.WxPayConfigStorage;
 import com.egzosn.pay.wx.api.WxPayService;
 import com.egzosn.pay.wx.bean.WxTransactionType;
@@ -118,26 +122,22 @@ public enum PayType implements BasePayType {
 
         @Override
         public PayService getPayService(ApyAccount apyAccount) {
-            AliPayConfigStorage aliPayConfigStorage = new AliPayConfigStorage();
-            aliPayConfigStorage.setPid(apyAccount.getPartner());
-            aliPayConfigStorage.setAppId(apyAccount.getAppid());
-            aliPayConfigStorage.setAliPublicKey(apyAccount.getPublicKey());
-            aliPayConfigStorage.setKeyPrivate(apyAccount.getPrivateKey());
-            aliPayConfigStorage.setNotifyUrl(apyAccount.getNotifyUrl());
-            aliPayConfigStorage.setReturnUrl(apyAccount.getReturnUrl());
-            aliPayConfigStorage.setSignType(apyAccount.getSignType());
-            aliPayConfigStorage.setSeller(apyAccount.getSeller());
-            aliPayConfigStorage.setPayType(apyAccount.getPayType().toString());
-            aliPayConfigStorage.setMsgType(apyAccount.getMsgType());
-            aliPayConfigStorage.setInputCharset(apyAccount.getInputCharset());
-            aliPayConfigStorage.setTest(apyAccount.isTest());
-            return new AliPayService(aliPayConfigStorage);
+            FuiouPayConfigStorage fuiouPayConfigStorage = new FuiouPayConfigStorage();
+            fuiouPayConfigStorage.setKeyPrivate(apyAccount.getPrivateKey());
+            fuiouPayConfigStorage.setNotifyUrl(apyAccount.getNotifyUrl());
+            fuiouPayConfigStorage.setReturnUrl(apyAccount.getReturnUrl());
+            fuiouPayConfigStorage.setSignType(apyAccount.getSignType());
+            fuiouPayConfigStorage.setPayType(apyAccount.getPayType().toString());
+            fuiouPayConfigStorage.setMsgType(apyAccount.getMsgType());
+            fuiouPayConfigStorage.setInputCharset(apyAccount.getInputCharset());
+            fuiouPayConfigStorage.setTest(apyAccount.isTest());
+            return new FuiouPayService(fuiouPayConfigStorage);
         }
 
         @Override
         public TransactionType getTransactionType(String transactionType) {
             // in.egan.pay.ali.before.bean.AliTransactionType 17年更新的版本,旧版本请自行切换
-            return AliTransactionType.valueOf(transactionType);
+            return FuiouTransactionType.valueOf(transactionType);
         }
 
 
