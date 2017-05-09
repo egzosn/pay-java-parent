@@ -24,6 +24,30 @@
      1. pay-java-common  公共lib,支付核心与规范定义
      2. pay-java-demo  具体的支付demo
      3. pay-java-*  具体的支付实现库
+###Maven配置
+支付核心模块
+```xml
+
+<dependency>
+    <groupId>com.egzosn</groupId>
+    <artifactId>pay-java-common</artifactId>
+    <version>2.0.1</version>
+</dependency>
+
+```
+
+具体支付模块 "{module-name}" 为具体的支付渠道的模块名 pay-java-ali，pay-java-wx等
+
+```xml
+
+<dependency>
+    <groupId>com.egzosn</groupId>
+    <artifactId>{module-name}</artifactId>
+    <version>2.0.1</version>
+</dependency>
+
+```
+
 
 
 ###使用

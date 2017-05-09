@@ -9,16 +9,16 @@ import com.egzosn.pay.common.bean.CurType;
  */
 public enum FuiouCurType  implements CurType {
 
-        CNY("人民币"),
-     	USD("美元"),
-     	HKD("港币"),
-    	MOP("澳门元"),
-        EUR("欧元"),
-    	TWD("新台币"),
-      	KRW("韩元"),
-        JPY("日元"),
-    	SGD("新加坡元"),
-        AUD("澳大利亚元");
+    CNY("人民币"),
+    USD("美元"),
+    HKD("港币"),
+    MOP("澳门元"),
+    EUR("欧元"),
+    TWD("新台币"),
+    KRW("韩元"),
+    JPY("日元"),
+    SGD("新加坡元"),
+    AUD("澳大利亚元");
     /**
      * 币种名称
      */
@@ -43,4 +43,4 @@ public enum FuiouCurType  implements CurType {
         return this.name();
     }
 
-    }
+}
