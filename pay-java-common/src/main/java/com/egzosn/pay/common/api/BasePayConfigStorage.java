@@ -8,8 +8,10 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * 支付基础配置存储
  * @author: egan
- * @email egzosn@gmail.com
- * @date 2017/3/5 20:33
+ * <pre>
+ *     email egzosn@gmail.com
+ *     date 2017/3/5 20:33
+ *  </pre>
  */
 public abstract class BasePayConfigStorage implements PayConfigStorage{
 

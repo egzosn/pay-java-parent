@@ -6,8 +6,10 @@ import com.egzosn.pay.common.bean.PayOutMessage;
 
 /**
  * @author: egan
- * @email egzosn@gmail.com
- * @date 2017/1/13 14:30
+ *  <pre>
+ *      email egzosn@gmail.com
+ *      date 2017/1/13 14:30
+ *   </pre>
  */
 public class JsonBuilder  extends BaseBuilder<JsonBuilder, PayOutMessage>{
     JSONObject json = null;

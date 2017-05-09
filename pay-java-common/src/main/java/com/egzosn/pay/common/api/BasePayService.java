@@ -9,8 +9,10 @@ import java.util.Map;
 /**
  * 支付基础服务
  * @author: egan
- * @email egzosn@gmail.com
- * @date 2017/3/5 20:36
+ *  <pre>
+ *      email egzosn@gmail.com
+ *      date 2017/3/5 20:36
+ *   </pre>
  */
 public abstract class BasePayService implements PayService {
 
@@ -42,7 +44,7 @@ public abstract class BasePayService implements PayService {
     /**
      * 设置并创建请求模版， 代理请求配置这里是否合理？？，
      * @param configStorage http请求配置
-     * @return
+     * @return 支付服务
      */
     @Override
     public BasePayService setRequestTemplateConfigStorage(HttpConfigStorage configStorage) {
@@ -59,12 +61,25 @@ public abstract class BasePayService implements PayService {
         setPayConfigStorage(payConfigStorage);
         setRequestTemplateConfigStorage(configStorage);
     }
+    /**
+     * 创建签名
+     *
+     * @param content           需要签名的内容
+     * @param characterEncoding 字符编码
+     * @return 签名
+     */
     @Override
     public String createSign(String content, String characterEncoding) {
 
         return  SignUtils.valueOf(payConfigStorage.getSignType()).createSign(content, payConfigStorage.getKeyPrivate(),characterEncoding);
     }
-
+    /**
+     * 创建签名
+     *
+     * @param content           需要签名的内容
+     * @param characterEncoding 字符编码
+     * @return 签名
+     */
     @Override
     public String createSign(Map<String, Object> content, String characterEncoding) {
         return  SignUtils.valueOf(payConfigStorage.getSignType()).sign(content, payConfigStorage.getKeyPrivate(),characterEncoding);

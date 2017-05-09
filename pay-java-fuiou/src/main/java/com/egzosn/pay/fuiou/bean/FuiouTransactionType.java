@@ -3,19 +3,18 @@ package com.egzosn.pay.fuiou.bean;
 import com.egzosn.pay.common.bean.TransactionType;
 
 /**
- * 微信交易类型
- * @author egan
- * @email egzosn@gmail.com
- * @date 2016/10/19 22:58
+ * 支付类型
+ * @author Fuzx
+ * create 2017 2017/1/24 0024
  */
 public enum FuiouTransactionType implements TransactionType {
-    B2B(""),
-    B2C("")
+    B2B("B2B"),
+    B2C("B2C")
     ;
 
     private String method;
 
-    private FuiouTransactionType(String method) {
+    FuiouTransactionType(String method) {
         this.method = method;
     }
 
@@ -26,7 +25,7 @@ public enum FuiouTransactionType implements TransactionType {
 
     /**
      * 获取接口名称
-     * @return
+     * @return 接口名称
      */
     @Override
     public String getMethod() {

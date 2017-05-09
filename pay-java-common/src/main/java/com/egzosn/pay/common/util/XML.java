@@ -18,14 +18,16 @@ import java.util.Map;
 /**
  * XML工具
  * @author  egan
- * @email egzosn@gmail.com
- * @date 2016-6-2 19:45:06
+ * <pre>
+ * email egzosn@gmail.com
+ * date 2016-6-2 19:45:06
+ * </pre>
  */
 public class XML {
     /**
      * 解析xml并转化为Json值
      * @param content json字符串
-     * @return
+     * @return Json值
      */
     public static JSONObject toJSONObject(String content){
 
@@ -45,7 +47,7 @@ public class XML {
     /**
      * 解析xml并转化为json值
      * @param in 输入流
-     * @return
+     * @return Json值
      */
     public static JSONObject toJSONObject(InputStream in) {
 
@@ -63,7 +65,13 @@ public class XML {
 
     }
 
-
+    /**
+     *
+     * @param in xml输入流
+     * @param m 参数集
+     * @return 整理完成的参数集
+     * @throws IOException xml io转化异常
+     */
     public static Map inputStream2Map(InputStream in, Map m) throws IOException {
         if (null == m){
             m = new JSONObject();
@@ -97,8 +105,8 @@ public class XML {
     /**
      * 获取子结点的xml
      *
-     * @param children
-     * @return String
+     * @param children 集合
+     * @return String 子结点的xml
      */
     public static String getChildrenText(List children) {
         StringBuffer sb = new StringBuffer();
@@ -122,9 +130,9 @@ public class XML {
     }
 
     /**
-     * @Description：将请求参数转换为xml格式的string
+     * 将请求参数转换为xml格式的string
      * @param parameters 请求参数
-     * @return
+     * @return xml
      */
     public static String getMap2Xml(Map<String, Object> parameters) {
         StringBuffer sb = new StringBuffer();

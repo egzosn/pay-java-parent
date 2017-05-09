@@ -18,36 +18,39 @@ import java.util.Map;
  * 支付服务
  *
  * @author egan
- * @email egzosn@gmail.com
- * @date 2016-5-18 14:09:01
+ * <pre>
+ * email egzosn@gmail.com
+ * date 2016-5-18 14:09:01
+ *</pre>
  */
 public interface PayService {
 
 
+
     /**
      * 设置支付配置
-     *
-     * @param payConfigStorage
+     * @param payConfigStorage 支付配置
+     * @return 支付服务
      */
     PayService setPayConfigStorage(PayConfigStorage payConfigStorage);
 
     /**
      * 获取支付配置
      *
-     * @return
+     * @return 支付配置
      */
     PayConfigStorage getPayConfigStorage();
     /**
      * 获取http请求工具
      *
-     * @return
+     * @return http请求工具
      */
     HttpRequestTemplate getHttpRequestTemplate();
 
     /**
-     * 设置 请求工具配置
+     * 设置 请求工具配置  设置并创建请求模版， 代理请求配置这里是否合理？？，
      * @param configStorage http请求配置
-     * @return
+     * @return  支付服务
      */
     PayService setRequestTemplateConfigStorage(HttpConfigStorage configStorage);
 
@@ -55,7 +58,7 @@ public interface PayService {
      * 回调校验
      *
      * @param params 回调回来的参数集
-     * @return
+     * @return 签名校验 true通过
      */
     boolean verify(Map<String, String> params);
 
@@ -64,16 +67,16 @@ public interface PayService {
      *
      * @param params 参数集
      * @param sign   签名
-     * @return
+     * @return 签名校验 true通过
      */
     boolean signVerify(Map<String, String> params, String sign);
 
 
     /**
+     * 支付宝需要,微信是否也需要再次校验来源，进行订单查询
      * 校验数据来源
-     *
      * @param id 业务id, 数据的真实性.
-     * @return
+     * @return true通过
      */
     boolean verifySource(String id);
 
@@ -82,8 +85,8 @@ public interface PayService {
      * 返回创建的订单信息
      *
      * @param order 支付订单
-     * @return
-     * @see PayOrder
+     * @return 订单信息
+     * @see PayOrder 支付订单信息
      */
     Map orderInfo(PayOrder order);
 
@@ -92,7 +95,7 @@ public interface PayService {
      *
      * @param content           需要签名的内容
      * @param characterEncoding 字符编码
-     * @return
+     * @return 签名
      */
     String createSign(String content, String characterEncoding);
 
@@ -101,7 +104,7 @@ public interface PayService {
      *
      * @param content           需要签名的内容
      * @param characterEncoding 字符编码
-     * @return
+     * @return 签名
      */
     String createSign(Map<String, Object> content, String characterEncoding);
 
@@ -110,16 +113,16 @@ public interface PayService {
      *
      * @param parameterMap 请求参数
      * @param is           请求流
-     * @return
+     * @return 获得回调的请求参数
      */
     Map<String, String> getParameter2Map(Map<String, String[]> parameterMap, InputStream is);
 
     /**
      * 获取输出消息，用户返回给支付端
      *
-     * @param code
-     * @param message
-     * @return
+     * @param code 状态
+     * @param message 消息
+     * @return 返回输出消息
      */
     PayOutMessage getPayOutMessage(String code, String message);
 
@@ -128,8 +131,8 @@ public interface PayService {
      *
      * @param orderInfo 发起支付的订单信息
      * @param method    请求方式  "post" "get",
-     * @return
-     * @see MethodType
+     * @return 获取输出消息，用户返回给支付端, 针对于web端
+     * @see MethodType 请求类型
      */
     String buildRequest(Map<String, Object> orderInfo, MethodType method);
 
@@ -137,7 +140,7 @@ public interface PayService {
      * 获取输出二维码，用户返回给支付端,
      *
      * @param order 发起支付的订单信息
-     * @return
+     * @return 返回图片信息，支付时需要的
      */
     BufferedImage genQrPay(PayOrder order);
 
@@ -146,17 +149,17 @@ public interface PayService {
      *
      * @param tradeNo    支付平台订单号
      * @param outTradeNo 商户单号
-     * @return
+     * @return 返回查询回来的结果集，支付方原值返回
      */
     Map<String, Object> query(String tradeNo, String outTradeNo);
 
     /**
-     * 交易查询接口
+     * 交易查询接口，带处理器
      * @param tradeNo    支付平台订单号
      * @param outTradeNo 商户单号
      * @param callback 处理器
      * @param <T> 返回类型
-     * @return
+     * @return  返回查询回来的结果集
      */
     <T>T query(String tradeNo, String outTradeNo, Callback<T> callback);
 
@@ -165,7 +168,7 @@ public interface PayService {
      *
      * @param tradeNo    支付平台订单号
      * @param outTradeNo 商户单号
-     * @return
+     * @return 返回支付方交易关闭后的结果
      */
     Map<String, Object> close(String tradeNo, String outTradeNo);
 
@@ -176,7 +179,7 @@ public interface PayService {
      * @param outTradeNo 商户单号
      * @param callback 处理器
      * @param <T> 返回类型
-     * @return
+     * @return 返回支付方交易关闭后的结果
      */
     <T>T close(String tradeNo, String outTradeNo, Callback<T> callback);
 
@@ -187,7 +190,7 @@ public interface PayService {
      * @param outTradeNo 商户单号
      * @param refundAmount 退款金额
      * @param totalAmount 总金额
-     * @return
+     * @return 返回支付方申请退款后的结果
      */
     Map<String, Object> refund(String tradeNo, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount);
     /**
@@ -199,7 +202,7 @@ public interface PayService {
      * @param totalAmount 总金额
      * @param callback 处理器
      * @param <T> 返回类型
-     * @return
+     * @return 返回支付方申请退款后的结果
      */
     <T>T refund(String tradeNo, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount, Callback<T> callback);
 
@@ -208,7 +211,7 @@ public interface PayService {
      *
      * @param tradeNo    支付平台订单号
      * @param outTradeNo 商户单号
-     * @return
+     * @return 返回支付方查询退款后的结果
      */
     Map<String, Object> refundquery(String tradeNo, String outTradeNo);
     /**
@@ -218,7 +221,7 @@ public interface PayService {
      * @param outTradeNo 商户单号
      * @param callback 处理器
      * @param <T> 返回类型
-     * @return
+     * @return 返回支付方查询退款后的结果
      */
     <T>T refundquery(String tradeNo, String outTradeNo, Callback<T> callback);
 
@@ -227,7 +230,7 @@ public interface PayService {
      *
      * @param billDate 账单时间：日账单格式为yyyy-MM-dd，月账单格式为yyyy-MM。
      * @param billType 账单类型，商户通过接口或商户经开放平台授权后其所属服务商通过接口可以获取以下账单类型：trade、signcustomer；trade指商户基于支付宝交易收单的业务账单；signcustomer是指基于商户支付宝余额收入及支出等资金变动的帐务账单；
-     * @return
+     * @return 返回支付方下载对账单的结果
      */
     Object downloadbill(Date billDate, String billType);
 
@@ -238,7 +241,7 @@ public interface PayService {
      * @param billType 账单类型，具体请查看对应支付平台
      * @param callback 处理器
      * @param <T> 返回类型
-     * @return
+     * @return 返回支付方下载对账单的结果
      */
     <T>T downloadbill(Date billDate, String billType, Callback<T> callback);
 
@@ -251,7 +254,7 @@ public interface PayService {
      * @param transactionType 交易类型
      * @param callback 处理器
      * @param <T> 返回类型
-     * @return
+     * @return 返回支付方对应接口的结果
      */
     <T>T secondaryInterface(Object tradeNoOrBillDate, String outTradeNoBillType, TransactionType transactionType, Callback<T> callback);
 

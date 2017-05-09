@@ -1,18 +1,19 @@
-
-
 package com.egzosn.pay.demo.service;
 
-import com.egzosn.pay.ali.bean.AliTransactionType;
+import com.egzosn.pay.common.api.PayMessageRouter;
 import com.egzosn.pay.common.http.HttpConfigStorage;
+import com.egzosn.pay.demo.service.handler.FuiouPayMessageHandler;
 import com.egzosn.pay.demo.service.handler.YouDianPayMessageHandler;
 import com.egzosn.pay.demo.service.interceptor.AliPayMessageInterceptor;
 import com.egzosn.pay.demo.entity.ApyAccount;
 import com.egzosn.pay.demo.entity.PayType;
 import com.egzosn.pay.demo.service.handler.AliPayMessageHandler;
+import com.egzosn.pay.demo.service.handler.FuiouPayMessageHandler;
 import com.egzosn.pay.demo.service.handler.WxPayMessageHandler;
+import com.egzosn.pay.demo.service.handler.YouDianPayMessageHandler;
+import com.egzosn.pay.demo.service.interceptor.AliPayMessageInterceptor;
 import com.egzosn.pay.common.api.PayConfigStorage;
 import com.egzosn.pay.common.api.PayMessageHandler;
-import com.egzosn.pay.common.api.PayMessageRouter;
 import com.egzosn.pay.common.api.PayService;
 import com.egzosn.pay.common.bean.MsgType;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
@@ -84,7 +85,7 @@ public class PayResponse {
                 .async(false)
                 .msgType(MsgType.text.name()) //消息类型
                 .payType(PayType.aliPay.name()) //支付账户事件类型
-                .transactionType(AliTransactionType.UNAWARE.name())//交易类型，有关回调的可在这处理
+//                .transactionType(AliTransactionType.UNAWARE.name())//交易类型，有关回调的可在这处理
                 .interceptor(new AliPayMessageInterceptor(payId)) //拦截器
                 .handler(autowire(new AliPayMessageHandler(payId))) //处理器
                 .end()
@@ -99,6 +100,12 @@ public class PayResponse {
                 .msgType(MsgType.json.name())
                 .payType(PayType.youdianPay.name())
                 .handler(autowire(new YouDianPayMessageHandler(payId)))
+                .end()
+                .rule()
+                .async(false)
+                .msgType(MsgType.xml.name())
+                .payType(PayType.fuiou.name())
+                .handler(autowire(new FuiouPayMessageHandler(payId)))
                 .end()
 
         ;
