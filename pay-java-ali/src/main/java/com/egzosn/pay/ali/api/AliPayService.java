@@ -72,7 +72,7 @@ public class AliPayService extends BasePayService {
      * @return 签名校验 true通过
      */
     @Override
-    public boolean verify(Map<String, String> params) {
+    public boolean verify(Map<String, Object> params) {
 
 
         if (params.get("sign") == null || params.get("notify_id") == null) {
@@ -80,7 +80,7 @@ public class AliPayService extends BasePayService {
             return false;
         }
 
-         return signVerify(params, params.get("sign")) && verifySource(params.get("notify_id"));
+         return signVerify(params, (String) params.get("sign")) && verifySource( (String)params.get("notify_id"));
 
     }
 
@@ -91,7 +91,7 @@ public class AliPayService extends BasePayService {
      * @return 生成的签名结果
      */
     @Override
-    public boolean signVerify(Map<String, String> params, String sign) {
+    public boolean signVerify(Map<String, Object> params, String sign) {
 
         return SignUtils.valueOf(payConfigStorage.getSignType()).verify(params,  sign,  payConfigStorage.getKeyPublic(), payConfigStorage.getInputCharset());
     }
