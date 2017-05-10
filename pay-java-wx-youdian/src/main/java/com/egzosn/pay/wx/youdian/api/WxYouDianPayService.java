@@ -135,7 +135,7 @@ public class WxYouDianPayService extends BasePayService {
      * @return 签名校验 true通过
      */
     @Override
-    public boolean verify(Map<String, String> params) {
+    public boolean verify(Map<String, Object> params) {
         if (!"SUCCESS".equals(params.get("return_code"))){
             log.debug(String.format("友店微信支付异常：return_code=%s,参数集=%s", params.get("return_code"), params));
             return false;
@@ -143,7 +143,7 @@ public class WxYouDianPayService extends BasePayService {
         if(params.get("sign") == null) {log.debug("友店微信支付异常：签名为空！out_trade_no=" + params.get("out_trade_no"));}
 
         try {
-            return signVerify(params, params.get("sign")) && verifySource(params.get("out_trade_no"));
+            return signVerify(params, (String) params.get("sign")) && verifySource((String)params.get("out_trade_no"));
         } catch (PayErrorException e) {
             e.printStackTrace();
         }
@@ -158,7 +158,7 @@ public class WxYouDianPayService extends BasePayService {
      * @return 生成的签名结果
      */
     @Override
-    public boolean signVerify(Map<String, String> params, String sign) {
+    public boolean signVerify(Map<String, Object> params, String sign) {
         return SignUtils.valueOf(payConfigStorage.getSignType()).verify(params, sign, "&key=" + payConfigStorage.getKeyPrivate(), payConfigStorage.getInputCharset());
     }
 
@@ -286,8 +286,8 @@ public class WxYouDianPayService extends BasePayService {
      * @return 获得回调的请求参数
      */
     @Override
-    public Map<String, String> getParameter2Map(Map<String, String[]> parameterMap, InputStream is) {
-        Map<String,String> params = new TreeMap<>();
+    public Map<String, Object> getParameter2Map(Map<String, String[]> parameterMap, InputStream is) {
+        Map<String, Object> params = new TreeMap<String, Object>();
         for (Iterator iter = parameterMap.keySet().iterator(); iter.hasNext();) {
             String name = (String) iter.next();
             String[] values = parameterMap.get(name);
@@ -340,10 +340,21 @@ public class WxYouDianPayService extends BasePayService {
         throw new UnsupportedOperationException();
     }
 
+
     @Override
     public BufferedImage genQrPay(PayOrder order) {
         JSONObject orderInfo = orderInfo(order);
         return  MatrixToImageWriter.writeInfoToJpgBuff((String) orderInfo.get("code_url"));
+    }
+
+    /**
+     *  暂未实现或无此功能
+     * @param order 发起支付的订单信息
+     * @return 返回支付结果
+     */
+    @Override
+    public Map<String, Object> microPay(PayOrder order) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

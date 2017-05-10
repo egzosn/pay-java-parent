@@ -60,7 +60,7 @@ public interface PayService {
      * @param params 回调回来的参数集
      * @return 签名校验 true通过
      */
-    boolean verify(Map<String, String> params);
+    boolean verify(Map<String, Object> params);
 
     /**
      * 签名校验
@@ -69,7 +69,7 @@ public interface PayService {
      * @param sign   签名
      * @return 签名校验 true通过
      */
-    boolean signVerify(Map<String, String> params, String sign);
+    boolean signVerify(Map<String, Object> params, String sign);
 
 
     /**
@@ -115,7 +115,7 @@ public interface PayService {
      * @param is           请求流
      * @return 获得回调的请求参数
      */
-    Map<String, String> getParameter2Map(Map<String, String[]> parameterMap, InputStream is);
+    Map<String, Object> getParameter2Map(Map<String, String[]> parameterMap, InputStream is);
 
     /**
      * 获取输出消息，用户返回给支付端
@@ -143,6 +143,14 @@ public interface PayService {
      * @return 返回图片信息，支付时需要的
      */
     BufferedImage genQrPay(PayOrder order);
+
+    /**
+     * 刷卡付,pos主动扫码付款(条码付)
+     *
+     * @param order 发起支付的订单信息
+     * @return 返回支付结果
+     */
+    Map<String, Object>  microPay(PayOrder order);
 
     /**
      * 交易查询接口

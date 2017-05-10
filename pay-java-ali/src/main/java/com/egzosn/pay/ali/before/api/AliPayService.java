@@ -62,7 +62,7 @@ public class AliPayService extends BasePayService {
      * @return 签名校验 true通过
      */
     @Override
-    public boolean verify(Map<String, String> params) {
+    public boolean verify(Map<String, Object> params) {
 
         if (params.get("sign") == null || params.get("notify_id") == null) {
             log.debug("支付宝支付异常：params：" + params);
@@ -70,7 +70,7 @@ public class AliPayService extends BasePayService {
         }
 
         try {
-            return signVerify(params, params.get("sign")) && verifySource(params.get("notify_id"));
+            return signVerify(params, (String) params.get("sign")) && verifySource((String) params.get("notify_id"));
         } catch (PayErrorException e) {
             e.printStackTrace();
         }
@@ -95,7 +95,7 @@ public class AliPayService extends BasePayService {
      * @return 生成的签名结果
      */
     @Override
-    public boolean signVerify(Map<String, String> params, String sign) {
+    public boolean signVerify(Map<String, Object> params, String sign) {
 
         return SignUtils.valueOf(payConfigStorage.getSignType()).verify(params,  sign,  payConfigStorage.getKeyPublic(), payConfigStorage.getInputCharset());
     }
@@ -215,9 +215,9 @@ public class AliPayService extends BasePayService {
      * @return 获得回调的请求参数
      */
     @Override
-    public Map<String, String> getParameter2Map(Map<String, String[]> parameterMap, InputStream is) {
+    public Map<String, Object> getParameter2Map(Map<String, String[]> parameterMap, InputStream is) {
 
-        Map<String,String> params = new TreeMap<String,String>();
+        Map<String, Object> params = new TreeMap<String,Object>();
         for (Iterator iter = parameterMap.keySet().iterator(); iter.hasNext();) {
             String name = (String) iter.next();
             String[] values = parameterMap.get(name);
@@ -290,6 +290,16 @@ public class AliPayService extends BasePayService {
      */
     @Override
     public BufferedImage genQrPay(PayOrder orderInfo) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * 刷卡付,pos主动扫码付款(条码付)
+     * @param order 发起支付的订单信息
+     * @return 支付结果
+     */
+    @Override
+    public Map<String, Object> microPay(PayOrder order) {
         throw new UnsupportedOperationException();
     }
 

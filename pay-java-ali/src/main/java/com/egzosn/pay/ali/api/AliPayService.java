@@ -214,13 +214,13 @@ public class AliPayService extends BasePayService {
     private  Map<String, Object> getOrderBefore(PayOrder order) {
         Map<String, Object> orderInfo = new TreeMap<>();
         // 签约合作者身份ID
-        orderInfo.put("partner", payConfigStorage.getPartner());
+        orderInfo.put("partner", payConfigStorage.getPid());
 
         // 签约卖家支付宝账号
         orderInfo.put("seller_id", payConfigStorage.getSeller());
 
         // 商户网站唯一订单号
-        orderInfo.put("out_trade_no", order.getTradeNo());
+        orderInfo.put("out_trade_no", order.getOutTradeNo());
 
         // 商品名称
         orderInfo.put("subject", order.getSubject());
@@ -270,9 +270,9 @@ public class AliPayService extends BasePayService {
      * @return 获得回调的请求参数
      */
     @Override
-    public Map<String, String> getParameter2Map(Map<String, String[]> parameterMap, InputStream is) {
+    public Map<String, Object> getParameter2Map(Map<String, String[]> parameterMap, InputStream is) {
 
-        Map<String,String> params = new TreeMap<String,String>();
+        Map<String, Object> params = new TreeMap<String, Object>();
         for (Iterator iter = parameterMap.keySet().iterator(); iter.hasNext();) {
             String name = (String) iter.next();
             String[] values = parameterMap.get(name);
@@ -365,6 +365,27 @@ public class AliPayService extends BasePayService {
         throw new PayErrorException(new PayException(response.getString("code"), response.getString("msg"), result.toJSONString()));
 
     }
+
+    /**
+     * pos主动扫码付款(条码付)
+     * @param order 发起支付的订单信息
+     * @return 支付结果
+     */
+    @Override
+    public Map<String, Object> microPay(PayOrder order) {
+        Map<String, Object> orderInfo = orderInfo(order);
+
+//        Map<String, Object> content = new HashMap<>(1);
+//        content.put("biz_content", orderInfo.remove("biz_content"));
+        //预订单
+        JSONObject result = getHttpRequestTemplate().postForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(orderInfo), null, JSONObject.class);
+        JSONObject response = result.getJSONObject("alipay_trade_precreate_response");
+        if ("10000".equals(response.getString("code"))){
+            return response;
+        }
+        throw new PayErrorException(new PayException(response.getString("code"), response.getString("msg"), result.toJSONString()));
+    }
+
     /**
      *  交易查询接口
      * @param tradeNo 支付平台订单号

@@ -71,7 +71,7 @@ public class WxPayService extends BasePayService {
      * @return 签名校验 true通过
      */
     @Override
-    public boolean verify(Map<String, String> params) {
+    public boolean verify(Map<String, Object> params) {
         if (!"SUCCESS".equals(params.get("return_code"))){
             log.debug(String.format("微信支付异常：return_code=%s,参数集=%s", params.get("return_code"), params));
             return false;
@@ -83,7 +83,7 @@ public class WxPayService extends BasePayService {
         }
 
         try {
-            return signVerify(params, params.get("sign")) && verifySource(params.get("out_trade_no"));
+            return signVerify(params, (String) params.get("sign")) && verifySource((String)params.get("out_trade_no"));
         } catch (PayErrorException e) {
             e.printStackTrace();
         }
@@ -108,7 +108,7 @@ public class WxPayService extends BasePayService {
      * @param sign 比对的签名结果
      * @return 生成的签名结果
      */
-    public boolean signVerify(Map<String, String> params, String sign) {
+    public boolean signVerify(Map<String, Object> params, String sign) {
        return SignUtils.valueOf(payConfigStorage.getSignType()).verify(params,  sign, "&key=" +  payConfigStorage.getKeyPublic(), payConfigStorage.getInputCharset());
     }
 
@@ -120,13 +120,56 @@ public class WxPayService extends BasePayService {
 
         Map<String, Object> parameters = new TreeMap<String, Object>();
         parameters.put("appid", payConfigStorage.getAppid());
-        parameters.put("mch_id", payConfigStorage.getPartner());
+        parameters.put("mch_id", payConfigStorage.getPid());
         parameters.put("nonce_str", SignUtils.randomStr());
         return parameters;
 
 
     }
 
+
+    /**
+     * 微信统一下单接口
+     *
+     * @param order 支付订单集
+     * @return 下单结果
+     */
+    public JSONObject unifiedOrder(PayOrder order) {
+
+        ////统一下单
+        Map<String, Object> parameters = getPublicParameters();
+
+        parameters.put("body", order.getSubject());// 购买支付信息
+
+        //刷卡付
+        if (WxTransactionType.MICROPAY == order.getTransactionType()) {
+            parameters.put("auth_code", order.getAuthCode());
+        } else {
+            parameters.put("notify_url", payConfigStorage.getNotifyUrl());
+
+        }
+
+        parameters.put("out_trade_no", order.getOutTradeNo());// 订单号
+        parameters.put("spbill_create_ip", "192.168.1.150");
+        parameters.put("total_fee", order.getPrice().multiply(new BigDecimal(100)).intValue());// 总金额单位为分
+        parameters.put("trade_type", order.getTransactionType().getType());
+        parameters.put("attach", order.getBody());
+        if (WxTransactionType.NATIVE == order.getTransactionType()) {
+            parameters.put("product_id", order.getOutTradeNo());
+        }
+        String sign = createSign(SignUtils.parameterText(parameters), payConfigStorage.getInputCharset());
+        parameters.put("sign", sign);
+
+        String requestXML = XML.getMap2Xml(parameters);
+        log.debug("requestXML：" + requestXML);
+        //调起支付的参数列表
+        JSONObject result = requestTemplate.postForObject(getUrl(order.getTransactionType()), requestXML, JSONObject.class);
+
+        if (!"SUCCESS".equals(result.get("return_code"))){
+            throw new PayErrorException(new WxPayError(result.getString("return_code"),  result.getString("return_msg"), result.toJSONString()));
+        }
+        return result;
+    }
 
 
     /**
@@ -140,33 +183,10 @@ public class WxPayService extends BasePayService {
     public Map<String, Object> orderInfo(PayOrder order) {
 
         ////统一下单
-        Map<String, Object> parameters = getPublicParameters();
-     /*   parameters.put("appid", payConfigStorage.getAppid());
-        parameters.put("mch_id", payConfigStorage.getPartner());
-        parameters.put("nonce_str", SignUtils.randomStr());*/
-        parameters.put("body", order.getSubject());// 购买支付信息
-        parameters.put("notify_url", payConfigStorage.getNotifyUrl());
-        parameters.put("out_trade_no", order.getOutTradeNo());// 订单号
-        parameters.put("spbill_create_ip", "192.168.1.150");
-        parameters.put("total_fee", order.getPrice().multiply(new BigDecimal(100)).intValue());// 总金额单位为分
-        parameters.put("trade_type", order.getTransactionType().getType());
-        parameters.put("attach", order.getBody());
-        if (WxTransactionType.NATIVE == order.getTransactionType()){
-            parameters.put("product_id",  order.getOutTradeNo());
-        }
-        String sign = createSign(SignUtils.parameterText(parameters), payConfigStorage.getInputCharset());
-        parameters.put("sign", sign);
+        JSONObject result = unifiedOrder(order);
 
-       String requestXML = XML.getMap2Xml(parameters);
-        log.debug("requestXML：" + requestXML);
-        /////////APP端调起支付的参数列表
-        JSONObject result = requestTemplate.postForObject(getUrl(order.getTransactionType()), requestXML, JSONObject.class);
-
-        if (!"SUCCESS".equals(result.get("return_code"))){
-            throw new PayErrorException(new WxPayError(result.getString("return_code"),  result.getString("return_msg"), result.toJSONString()));
-        }
-        //如果是扫码支付无需处理，直接返回
-        if (WxTransactionType.NATIVE == order.getTransactionType()){
+        //如果是扫码支付或者刷卡付无需处理，直接返回
+        if (WxTransactionType.NATIVE == order.getTransactionType() || WxTransactionType.MICROPAY == order.getTransactionType()) {
             return result;
         }
 
@@ -221,8 +241,8 @@ public class WxPayService extends BasePayService {
      * @return 获得回调的请求参数
      */
     @Override
-    public Map<String, String> getParameter2Map(Map<String, String[]> parameterMap, InputStream is) {
-        TreeMap<String, String> map = new TreeMap();
+    public Map<String, Object> getParameter2Map(Map<String, String[]> parameterMap, InputStream is) {
+        TreeMap<String, Object> map = new TreeMap<String, Object>();
         try {
             return  XML.inputStream2Map(is, map);
         } catch (IOException e) {
@@ -259,7 +279,7 @@ public class WxPayService extends BasePayService {
 
     /**
      * 获取输出二维码，用户返回给支付端,
-     *
+     * 暂未实现或无此功能
      * @param order 发起支付的订单信息
      * @return 返回图片信息，支付时需要的
      */
@@ -274,6 +294,18 @@ public class WxPayService extends BasePayService {
 
         return  MatrixToImageWriter.writeInfoToJpgBuff((String) orderInfo.get("code_url"));
     }
+
+    /**
+     * 刷卡付,pos主动扫码付款
+     * @param order 发起支付的订单信息
+     * @return 返回支付结果
+     */
+    @Override
+    public Map<String, Object> microPay(PayOrder order) {
+
+        return orderInfo(order);
+    }
+
 
     /**
      * 交易查询接口
