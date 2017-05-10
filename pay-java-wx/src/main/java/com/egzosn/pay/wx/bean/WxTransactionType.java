@@ -11,13 +11,13 @@ import com.egzosn.pay.common.bean.TransactionType;
  */
 public enum  WxTransactionType implements TransactionType {
     //公众号支付
-    JSAPI("pay/unifiedorder"),//暂未接触
+    JSAPI("pay/unifiedorder"),
     //扫码付
     NATIVE("pay/unifiedorder"),
     //移动支付
     APP("pay/unifiedorder"),
     //刷卡付，暂未接触
-    MICROPAY("pay/unifiedorder"),
+    MICROPAY("pay/micropay"),
     // TODO 2017/3/8 19:14 author: egan  交易辅助接口
     //查询订单
     QUERY("pay/orderquery"),

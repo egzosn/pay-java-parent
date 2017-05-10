@@ -85,6 +85,32 @@ public class PayController {
 
 
     /**
+     * 刷卡付,pos主动扫码付款(条码付)
+     *
+     * @return 支付结果
+     */
+    @RequestMapping(value = "microPay")
+    public Map<String, Object> microPay(Integer payId, String transactionType, BigDecimal price, String authCode) throws IOException {
+        //获取对应的支付账户操作工具（可根据账户id）
+        PayResponse payResponse = service.getPayResponse(payId);
+
+        PayOrder order = new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType));
+        //设置授权码，条码等
+        order.setAuthCode(authCode);
+        //支付结果
+        Map<String, Object> params = payResponse.getService().microPay(order);
+        PayConfigStorage storage = payResponse.getStorage();
+        //校验
+        if (payResponse.getService().verify(params)) {
+            PayMessage message = new PayMessage(params, storage.getPayType(), storage.getMsgType().name());
+            //支付校验通过后的处理
+            payResponse.getRouter().route(message);
+        }
+        //这里开发者自行处理
+        return params;
+    }
+
+    /**
      * 获取二维码图像
      * 二维码支付
      *
@@ -132,7 +158,7 @@ public class PayController {
         PayResponse payResponse = service.getPayResponse(payId);
         PayConfigStorage storage = payResponse.getStorage();
         //获取支付方返回的对应参数
-        Map<String, String> params = payResponse.getService().getParameter2Map(request.getParameterMap(), request.getInputStream());
+        Map<String, Object> params = payResponse.getService().getParameter2Map(request.getParameterMap(), request.getInputStream());
         if (null == params) {
             return payResponse.getService().getPayOutMessage("fail", "失败").toMessage();
         }

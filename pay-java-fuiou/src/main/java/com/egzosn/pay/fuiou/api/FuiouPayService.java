@@ -70,14 +70,14 @@ public class FuiouPayService extends BasePayService {
      * @return 返回检验结果 0000 成功 其他失败
      */
     @Override
-    public boolean verify(Map<String, String> params) {
+    public boolean verify(Map<String, Object> params) {
         if (!"0000".equals(params.get("order_pay_code"))) {
             log.debug(String.format("富友支付异常：order_pay_code=%s,错误原因=%s,参数集=%s", params.get("order_pay_code"), params.get("order_pay_error"), params));
             return false;
         }
         try {
             //返回参数校验  和 重新请求订单检查数据是否合法
-            return (signVerify(params, params.get("md5")) && verifySource(params.get("order_id")));
+            return (signVerify(params, (String) params.get("md5")) && verifySource((String) params.get("order_id")));
         } catch (PayErrorException e) {
             e.printStackTrace();
         }
@@ -92,7 +92,7 @@ public class FuiouPayService extends BasePayService {
      * @return 校验结果
      */
     @Override
-    public boolean signVerify (Map<String, String> params, String responseSign   ) {
+    public boolean signVerify (Map<String, Object> params, String responseSign) {
         LinkedHashSet<String> keySet = new LinkedHashSet<>();
         keySet.add("mchnt_cd");//商户代码
         keySet.add("order_id");//商户订单号
@@ -105,7 +105,7 @@ public class FuiouPayService extends BasePayService {
         keySet.add("fy_ssn");//富友流水号
         StringBuilder verifyMD5Str = new StringBuilder();
         for (String keyStr : keySet) {
-            String keyValue = params.get(keyStr);
+            String keyValue = (String) params.get(keyStr);
             if (null == keyValue){
                 log.debug(String.format("富友支付返回结果校验:<参数:%s>不能为空,",keyStr));
             }
@@ -186,7 +186,7 @@ public class FuiouPayService extends BasePayService {
      * @return 返回参数集合
      */
     @Override
-    public Map<String, String> getParameter2Map(Map<String, String[]> parameterMap, InputStream is) {
+    public Map<String, Object> getParameter2Map(Map<String, String[]> parameterMap, InputStream is) {
         return null;
     }
 
@@ -216,13 +216,23 @@ public class FuiouPayService extends BasePayService {
 
     /**
      * 获取输出二维码，用户返回给支付端,
-     *
+     * 暂未实现或无此功能
      * @param order 发起支付的订单信息
      * @return 空
      */
     @Override
     public BufferedImage genQrPay (PayOrder order) {
-        return null;
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * 暂未实现或无此功能
+     * @param order 发起支付的订单信息
+     * @return 不支持的操作异常
+     */
+    @Override
+    public Map<String, Object> microPay(PayOrder order) {
+        throw new UnsupportedOperationException();
     }
 
     /**
