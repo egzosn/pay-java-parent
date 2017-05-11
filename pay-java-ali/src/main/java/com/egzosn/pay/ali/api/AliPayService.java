@@ -379,7 +379,7 @@ public class AliPayService extends BasePayService {
 //        content.put("biz_content", orderInfo.remove("biz_content"));
         //预订单
         JSONObject result = getHttpRequestTemplate().postForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(orderInfo), null, JSONObject.class);
-        JSONObject response = result.getJSONObject("alipay_trade_precreate_response");
+        JSONObject response = result.getJSONObject("alipay_trade_pay_response");
         if ("10000".equals(response.getString("code"))){
             return response;
         }
