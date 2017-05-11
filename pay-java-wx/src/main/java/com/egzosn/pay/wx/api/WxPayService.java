@@ -146,13 +146,13 @@ public class WxPayService extends BasePayService {
             parameters.put("auth_code", order.getAuthCode());
         } else {
             parameters.put("notify_url", payConfigStorage.getNotifyUrl());
-
+            parameters.put("trade_type", order.getTransactionType().getType());
         }
 
         parameters.put("out_trade_no", order.getOutTradeNo());// 订单号
         parameters.put("spbill_create_ip", "192.168.1.150");
         parameters.put("total_fee", order.getPrice().multiply(new BigDecimal(100)).intValue());// 总金额单位为分
-        parameters.put("trade_type", order.getTransactionType().getType());
+
         parameters.put("attach", order.getBody());
         if (WxTransactionType.NATIVE == order.getTransactionType()) {
             parameters.put("product_id", order.getOutTradeNo());
