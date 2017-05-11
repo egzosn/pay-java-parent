@@ -75,7 +75,7 @@ public class AliPayService extends BasePayService {
     public boolean verify(Map<String, Object> params) {
 
 
-        if (params.get("sign") == null || params.get("notify_id") == null) {
+        if (params.get("sign") == null) {
             log.debug("支付宝支付异常：params：" + params);
             return false;
         }
