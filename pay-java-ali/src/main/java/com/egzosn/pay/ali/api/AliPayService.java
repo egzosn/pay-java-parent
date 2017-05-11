@@ -381,7 +381,7 @@ public class AliPayService extends BasePayService {
         JSONObject result = getHttpRequestTemplate().postForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(orderInfo), null, JSONObject.class);
         JSONObject response = result.getJSONObject("alipay_trade_pay_response");
         if ("10000".equals(response.getString("code"))){
-            return response;
+            return result;
         }
         throw new PayErrorException(new PayException(response.getString("code"), response.getString("msg"), result.toJSONString()));
     }
