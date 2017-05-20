@@ -87,6 +87,17 @@ APP提交(返回对应的json，具体实现，app端demo暂时未实现)
     <br>
     <input type="submit" value="提交">
 </form>
+<br>
+公众号支付(请用微信访问)
+<form id="jsapi" >
+    账户id<input type="text" name="payId">
+    <br>
+    金额<input type="text" name="price">
+    <br>
+    openid<input type="text" name="openid">
+    <br>
+    <button id="js_submit">提交</button>
+</form>
 
 <br>
 二维码
@@ -193,9 +204,57 @@ APP提交(返回对应的json，具体实现，app端demo暂时未实现)
                     alert("服务器异常")
                 }
             })
+        }) ;
+       $("#js_submit").click(function () {
+            $.ajax({
+                url : "jsapi",
+                type : "post",
+                async: true,
+                data : $("#jsapi").serialize(),
+                dataType : 'json',
+                success : function(data) {
+                    if (data.code == 0){
+                        if (typeof WeixinJSBridge == "undefined"){
+                            if( document.addEventListener ){
+                                document.addEventListener('WeixinJSBridgeReady', onBridgeReady(data), false);
+                            }else if (document.attachEvent){
+                                document.attachEvent('WeixinJSBridgeReady', onBridgeReady(data));
+                                document.attachEvent('onWeixinJSBridgeReady', onBridgeReady(data));
+                            }
+                        }else{
+                            onBridgeReady(data);
+                        }
+                        return;
+                    }
+                    alert("保存失败");
+                },
+                error : function(edata) {
+                    alert("服务器异常")
+                }
+            })
         })
    });
+   function onBridgeReady(data){
+       WeixinJSBridge.invoke(
+           'getBrandWCPayRequest', {
+               "appId": data.appid,     //公众号名称，由商户传入
+               "timeStamp": data.timestamp,         //时间戳，自1970年以来的秒数
+               "nonceStr": data.noncestr, //随机串
+               "package": data.package,
+               "signType": data.signType,         //微信签名方式：
+               "paySign": data.sign //微信签名
+           },
+           function(res){
+               // 使用以断前端返回,微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。
+               if(res.err_msg == "get_brand_wcpay_request:ok" ) {
+                   alert("支付成功")
+
+               }
+           }
+       );
+   }
 
 </script>
+<script type="text/javascript" src="jweixin-1.0.0.js"></script>
 </body>
 </html>
