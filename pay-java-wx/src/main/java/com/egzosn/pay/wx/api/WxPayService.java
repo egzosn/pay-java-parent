@@ -156,7 +156,10 @@ public class WxPayService extends BasePayService {
         parameters.put("attach", order.getBody());
         if (WxTransactionType.NATIVE == order.getTransactionType()) {
             parameters.put("product_id", order.getOutTradeNo());
+        }else  if (WxTransactionType.JSAPI == order.getTransactionType()) {
+            parameters.put("openid", order.getOpenid());
         }
+
         String sign = createSign(SignUtils.parameterText(parameters), payConfigStorage.getInputCharset());
         parameters.put("sign", sign);
 

@@ -26,6 +26,8 @@ public class PayOrder {
     private String deviceInfo;
     //付款条码串  与设备号类似？？？
     private String authCode;
+    //
+    private String openid;
     //交易类型
     private TransactionType transactionType;
     //支付币种
@@ -145,8 +147,11 @@ public class PayOrder {
         this.transactionType = transactionType;
     }
 
+    public String getOpenid() {
+        return openid;
+    }
 
-
-
-
+    public void setOpenid(String openid) {
+        this.openid = openid;
+    }
 }
