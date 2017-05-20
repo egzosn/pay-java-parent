@@ -75,7 +75,7 @@ public class AliPayService extends BasePayService {
     public boolean verify(Map<String, Object> params) {
 
 
-        if (params.get("sign") == null || params.get("notify_id") == null) {
+        if (params.get("sign") == null) {
             log.debug("支付宝支付异常：params：" + params);
             return false;
         }
@@ -379,9 +379,9 @@ public class AliPayService extends BasePayService {
 //        content.put("biz_content", orderInfo.remove("biz_content"));
         //预订单
         JSONObject result = getHttpRequestTemplate().postForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(orderInfo), null, JSONObject.class);
-        JSONObject response = result.getJSONObject("alipay_trade_precreate_response");
+        JSONObject response = result.getJSONObject("alipay_trade_pay_response");
         if ("10000".equals(response.getString("code"))){
-            return response;
+            return result;
         }
         throw new PayErrorException(new PayException(response.getString("code"), response.getString("msg"), result.toJSONString()));
     }
