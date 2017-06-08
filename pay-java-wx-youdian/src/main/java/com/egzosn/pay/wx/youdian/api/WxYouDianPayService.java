@@ -178,10 +178,17 @@ public class WxYouDianPayService extends BasePayService {
         data.put("order_sn", id);
         String sign = createSign(SignUtils.parameterText(data, "") + apbNonce, payConfigStorage.getInputCharset());
         String queryParam =  SignUtils.parameterText(data) +  "&apb_nonce=" + apbNonce + "&sign=" + sign;
+        try {
+            JSONObject jsonObject = execute(getHttpsVerifyUrl() + "?"  +  queryParam, MethodType.GET, null);
 
-        JSONObject jsonObject = execute(getHttpsVerifyUrl() + "?"  +  queryParam, MethodType.GET, null);
+            return 0 == jsonObject.getIntValue("errorcode");
+        }catch (PayErrorException e){
+            if (Integer.parseInt(e.getPayError().getErrorCode()) >= 400){
+                throw e;
+            }
+            return false;
+        }
 
-        return 0 == jsonObject.getIntValue("errorcode");
     }
 
 
