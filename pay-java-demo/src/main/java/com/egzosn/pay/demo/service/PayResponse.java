@@ -16,6 +16,7 @@ import com.egzosn.pay.common.api.PayConfigStorage;
 import com.egzosn.pay.common.api.PayMessageHandler;
 import com.egzosn.pay.common.api.PayService;
 import com.egzosn.pay.common.bean.MsgType;
+import com.egzosn.pay.demo.service.interceptor.YoudianPayMessageInterceptor;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 
 import javax.annotation.Resource;
@@ -85,8 +86,7 @@ public class PayResponse {
                 .async(false)
                 .msgType(MsgType.text.name()) //消息类型
                 .payType(PayType.aliPay.name()) //支付账户事件类型
-//                .transactionType(AliTransactionType.UNAWARE.name())//交易类型，有关回调的可在这处理
-                .interceptor(new AliPayMessageInterceptor(payId)) //拦截器
+                .interceptor(new AliPayMessageInterceptor()) //拦截器
                 .handler(autowire(new AliPayMessageHandler(payId))) //处理器
                 .end()
                 .rule()
@@ -99,6 +99,7 @@ public class PayResponse {
                 .async(false)
                 .msgType(MsgType.json.name())
                 .payType(PayType.youdianPay.name())
+                .interceptor(new YoudianPayMessageInterceptor()) //拦截器
                 .handler(autowire(new YouDianPayMessageHandler(payId)))
                 .end()
                 .rule()
