@@ -5,6 +5,7 @@ import com.egzosn.pay.common.bean.PayMessage;
 import com.egzosn.pay.common.bean.PayOutMessage;
 import com.egzosn.pay.common.exception.PayErrorException;
 
+import java.math.BigDecimal;
 import java.util.Map;
 
 /**
@@ -22,26 +23,25 @@ public class AliPayMessageHandler extends BasePayMessageHandler {
 
     @Override
     public PayOutMessage handle(PayMessage payMessage, Map<String, Object> context, PayService payService) throws PayErrorException {
+
+        Map<String, Object> message = payMessage.getPayMessage();
         //交易状态
-        String trade_status = (String) payMessage.getPayMessage().get("trade_status");
+        String trade_status = (String) message.get("trade_status");
 
-        if ("TRADE_SUCCESS".equals(trade_status)){
-            //判断该笔订单是否在商户网站中已经做过处理
-            //如果没有做过处理，根据订单号（out_trade_no）在商户网站的订单系统中查到该笔订单的详细，并执行商户的业务程序
-            //如果有做过处理，不执行商户的业务程序
-            //注意：
-            //付款完成后，支付宝系统发送该交易状态通知
+        //上下文对象中获取账单
+//        AmtApply amtApply = (AmtApply)context.get("amtApply");
+        //日志存储
+//        amtPaylogService.createAmtPaylogByCallBack(amtApply,  message.toString());
+        //交易完成
+        if ("TRADE_SUCCESS".equals(trade_status) || "TRADE_FINISHED".equals(trade_status)) {
 
-        } else if("TRADE_FINISHED".equals(trade_status)) {
-            //判断该笔订单是否在商户网站中已经做过处理
-            //如果没有做过处理，根据订单号（out_trade_no）在商户网站的订单系统中查到该笔订单的详细，并执行商户的业务程序
-            //如果有做过处理，不执行商户的业务程序
-            //注意：
-            //退款日期超过可退款期限后（如三个月可退款），支付宝系统发送该交易状态通知
-        } else if ("WAIT_BUYER_PAY".equals(trade_status) || "TRADE_CLOSED".equals(trade_status)) {
+            BigDecimal payAmount = new BigDecimal((String) message.get("total_fee"));
 
-        }
+            return payService.getPayOutMessage("success", "成功");
 
-        return payService.getPayOutMessage("success", "成功");
+        }/* else if ("WAIT_BUYER_PAY".equals(trade_status) || "TRADE_CLOSED".equals(trade_status)) {
+
+        }*/
+        return payService.getPayOutMessage("fail", "失败");
     }
 }

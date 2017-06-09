@@ -10,12 +10,15 @@ import com.egzosn.pay.common.exception.PayErrorException;
 import java.util.Map;
 
 /**
- * 支付宝回调信息拦截器
+ * 回调信息拦截器
  * @author: egan
  * email egzosn@gmail.com
  * date 2017/1/18 19:28
  */
-public class AliPayMessageInterceptor implements PayMessageInterceptor {
+public class YoudianPayMessageInterceptor implements PayMessageInterceptor {
+
+//    @Autowired
+//    private AmtApplyService amtApplyService;
 
     /**
      * 拦截支付消息
@@ -30,19 +33,21 @@ public class AliPayMessageInterceptor implements PayMessageInterceptor {
     public boolean intercept(PayMessage payMessage, Map<String, Object> context, PayService payService) throws PayErrorException {
 
         //这里进行拦截器处理，自行实现
-        String outTradeNo = payMessage.getOutTradeNo();
+
+        Map<String, Object> message = payMessage.getPayMessage();
+
         // 设置外部单号
-//        amtApplyService.fillApplyoutId(outTradeNo, (String) payMessage.getPayMessage().get("trade_no"));
+        String outId = payMessage.getOutTradeNo();
 
-
-        //获取账单
-//        AmtApply amtApply = amtApplyService.getAmtApplyByApplyId(outTradeNo);
+        //根据outId获取账单
+//        AmtApply amtApply = amtApplyService.getAmtApplyByApplyOutid(outId);
 //        if (null == amtApply){
-//            Log4jUtil.info("app 阿里pay：" + outTradeNo);
+//            Log4jUtil.info("友店outId：" + outId);
+//
 //            return false;
 //        }
-//
-//        重复回调不进行处理
+
+        //重复回调不进行处理
 //        if(amtApply.getApplyState().shortValue()== ApplyStateEnum.success.getCode()){
 //            return false;
 //        }
@@ -50,6 +55,7 @@ public class AliPayMessageInterceptor implements PayMessageInterceptor {
 //        context.put("amtApply", amtApply);
 
 
+//        amtPaylogService.createAmtPaylogByCheckFail(amtApply, payMessage.getPayMessage());
         return true;
     }
 }

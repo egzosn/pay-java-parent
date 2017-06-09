@@ -6,10 +6,7 @@ import com.egzosn.pay.ali.bean.AliTransactionType;
 import com.egzosn.pay.common.api.BasePayService;
 import com.egzosn.pay.common.api.Callback;
 import com.egzosn.pay.common.api.PayConfigStorage;
-import com.egzosn.pay.common.bean.MethodType;
-import com.egzosn.pay.common.bean.PayOrder;
-import com.egzosn.pay.common.bean.PayOutMessage;
-import com.egzosn.pay.common.bean.TransactionType;
+import com.egzosn.pay.common.bean.*;
 import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpConfigStorage;
@@ -36,11 +33,11 @@ public class AliPayService extends BasePayService {
     protected final Log log = LogFactory.getLog(AliPayService.class);
 
       //正式测试环境
-    private String httpsReqUrl = "https://openapi.alipay.com/gateway.do";
+    private final static String httpsReqUrl = "https://openapi.alipay.com/gateway.do";
     //沙箱测试环境账号
-    private String devReqUrl = "https://openapi.alipaydev.com/gateway.do";
+    private final static String devReqUrl = "https://openapi.alipaydev.com/gateway.do";
     //兼容上一版本即时收款
-    private String httpsReqUrlBefore = "https://mapi.alipay.com/gateway.do";
+    private  final static String httpsReqUrlBefore = "https://mapi.alipay.com/gateway.do";
 
 
     /**
@@ -298,6 +295,17 @@ public class AliPayService extends BasePayService {
     }
 
     /**
+     * 获取成功输出消息，用户返回给支付端
+     * 主要用于拦截器中返回
+     * @param payMessage 支付回调消息
+     * @return 返回输出消息
+     */
+    @Override
+    public PayOutMessage successPayOutMessage(PayMessage payMessage) {
+        return PayOutMessage.TEXT().content("success").build();
+    }
+
+    /**
      *
      * @param orderInfo 发起支付的订单信息
      * @param method    请求方式  "post" "get",
@@ -305,7 +313,6 @@ public class AliPayService extends BasePayService {
      */
     @Override
     public String buildRequest(Map<String, Object> orderInfo, MethodType method) {
-
         StringBuffer formHtml = new StringBuffer();
         formHtml.append("<form id=\"_alipaysubmit_\" name=\"alipaysubmit\" action=\"");
         if (null == orderInfo.get("method")) {
@@ -332,11 +339,6 @@ public class AliPayService extends BasePayService {
 
             formHtml.append("<input type=\"hidden\" name=\"biz_content\" value=\"" + biz_content.replace("\"", "&quot;") + "\"/>");
         }
-
-
-
-        //submit按钮控件请不要含有name属性
-//        formHtml.append("<input type=\"submit\" value=\"\" style=\"display:none;\">");
         formHtml.append("</form>");
         formHtml.append("<script>document.forms['_alipaysubmit_'].submit();</script>");
 

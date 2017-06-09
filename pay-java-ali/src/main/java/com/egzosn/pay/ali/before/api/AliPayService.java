@@ -85,7 +85,7 @@ public class AliPayService extends BasePayService {
      */
     @Override
     public boolean verifySource(String id) {
-        return "true".equals(requestTemplate.getForObject( getHttpsVerifyUrl() + "partner=" + payConfigStorage.getPid() + "&notify_id=" + id, String.class));
+        return "true".equals(requestTemplate.getForObject( getHttpsVerifyUrl() + "&partner=" + payConfigStorage.getPid() + "&notify_id=" + id, String.class));
     }
 
     /**
@@ -228,6 +228,15 @@ public class AliPayService extends BasePayService {
             }
             //乱码解决，这段代码在出现乱码时使用。如果mysign和sign不相等也可以使用这段代码转化
             //valueStr = new String(valueStr.getBytes("ISO-8859-1"), "gbk");
+            if (!valueStr.matches("\\w+")){
+                try {
+                    if(valueStr.equals(new String(valueStr.getBytes("iso8859-1"), "iso8859-1"))){
+                        valueStr=new String(valueStr.getBytes("iso8859-1"), payConfigStorage.getInputCharset());
+                    }
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+            }
             params.put(name, valueStr);
         }
 

@@ -1,9 +1,6 @@
 package com.egzosn.pay.common.api;
 
-import com.egzosn.pay.common.bean.MethodType;
-import com.egzosn.pay.common.bean.PayOrder;
-import com.egzosn.pay.common.bean.PayOutMessage;
-import com.egzosn.pay.common.bean.TransactionType;
+import com.egzosn.pay.common.bean.*;
 import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.common.http.HttpRequestTemplate;
@@ -125,6 +122,14 @@ public interface PayService {
      * @return 返回输出消息
      */
     PayOutMessage getPayOutMessage(String code, String message);
+
+    /**
+     * 获取成功输出消息，用户返回给支付端
+     * 主要用于拦截器中返回
+     * @param payMessage 支付回调消息
+     * @return 返回输出消息
+     */
+    PayOutMessage successPayOutMessage(PayMessage payMessage);
 
     /**
      * 获取输出消息，用户返回给支付端, 针对于web端

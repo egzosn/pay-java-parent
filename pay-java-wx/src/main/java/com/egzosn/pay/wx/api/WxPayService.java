@@ -1,13 +1,11 @@
 package com.egzosn.pay.wx.api;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.api.BasePayService;
 import com.egzosn.pay.common.api.Callback;
 import com.egzosn.pay.common.api.PayConfigStorage;
-import com.egzosn.pay.common.bean.MethodType;
-import com.egzosn.pay.common.bean.PayOrder;
-import com.egzosn.pay.common.bean.PayOutMessage;
-import com.egzosn.pay.common.bean.TransactionType;
+import com.egzosn.pay.common.bean.*;
 import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpConfigStorage;
@@ -156,7 +154,10 @@ public class WxPayService extends BasePayService {
         parameters.put("attach", order.getBody());
         if (WxTransactionType.NATIVE == order.getTransactionType()) {
             parameters.put("product_id", order.getOutTradeNo());
+        }else  if (WxTransactionType.JSAPI == order.getTransactionType()) {
+            parameters.put("openid", order.getOpenid());
         }
+
         String sign = createSign(SignUtils.parameterText(parameters), payConfigStorage.getInputCharset());
         parameters.put("sign", sign);
 
@@ -261,6 +262,18 @@ public class WxPayService extends BasePayService {
     @Override
     public PayOutMessage getPayOutMessage(String code, String message) {
         return PayOutMessage.XML().code(code.toUpperCase()).content(message).build();
+    }
+
+
+    /**
+     * 获取成功输出消息，用户返回给支付端
+     * 主要用于拦截器中返回
+     * @param payMessage 支付回调消息
+     * @return 返回输出消息
+     */
+    @Override
+    public PayOutMessage successPayOutMessage(PayMessage payMessage) {
+        return   PayOutMessage.XML().code("Success").content("成功").build();
     }
 
 

@@ -85,6 +85,29 @@ public class PayController {
 
 
     /**
+     * 公众号支付
+     *
+     *
+     * @param payId           账户id
+     * @param openid openid
+     * @return 跳到支付页面
+     */
+    @RequestMapping(value = "jsapi" )
+    public Map toPay(Integer payId, String openid, BigDecimal price) {
+        //获取对应的支付账户操作工具（可根据账户id）
+        PayResponse payResponse = service.getPayResponse(payId);
+
+        PayOrder order = new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType("JSAPI"));
+        order.setOpenid(openid);
+
+        Map orderInfo = payResponse.getService().orderInfo(order);
+        orderInfo.put("code", 0);
+
+       return orderInfo;
+    }
+
+
+    /**
      * 刷卡付,pos主动扫码付款(条码付)
      *
      * @return 支付结果

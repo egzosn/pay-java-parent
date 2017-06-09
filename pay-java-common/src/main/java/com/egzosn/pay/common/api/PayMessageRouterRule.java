@@ -288,7 +288,8 @@ public class PayMessageRouterRule {
             // 如果拦截器不通过
             for (PayMessageInterceptor interceptor : this.interceptors) {
                 if (!interceptor.intercept(payMessage, context, payService)) {
-                    return null;
+                    //这里直接返回成功，解决外层判断问题
+                    return payService.successPayOutMessage(payMessage);
                 }
             }
 
