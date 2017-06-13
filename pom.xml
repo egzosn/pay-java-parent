@@ -70,7 +70,6 @@
                 <version>${httpmime.version}</version>
             </dependency>
             <!--/httpcomponents-->
-
             <dependency>
                 <groupId>com.alibaba</groupId>
                 <artifactId>fastjson</artifactId>
