@@ -44,6 +44,7 @@
         <module>pay-java-wx-youdian</module>
         <module>pay-java-fuiou</module>
         <module>pay-java-demo</module>
+        <module>pay-java-union</module>
     </modules>
 
 
