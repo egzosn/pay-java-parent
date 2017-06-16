@@ -15,6 +15,7 @@ import com.egzosn.pay.common.util.MatrixToImageWriter;
 import com.egzosn.pay.common.util.sign.SignUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -89,6 +90,20 @@ public class AliPayService extends BasePayService {
      */
     @Override
     public boolean signVerify(Map<String, Object> params, String sign) {
+
+        if (params instanceof JSONObject){
+            for (String key : params.keySet()){
+                if ("sign".equals(key)){
+                    continue;
+                }
+                TreeMap response = new TreeMap((Map) params.get(key));
+                LinkedHashMap<Object, Object> linkedHashMap = new LinkedHashMap<>();
+                linkedHashMap.put("code", response.remove("code") );
+                linkedHashMap.put("msg", response.remove("msg") );
+                linkedHashMap.putAll(response);
+                return SignUtils.valueOf(payConfigStorage.getSignType()).verify(JSON.toJSONString(linkedHashMap),  sign,  payConfigStorage.getKeyPublic(), payConfigStorage.getInputCharset());
+            }
+        }
 
         return SignUtils.valueOf(payConfigStorage.getSignType()).verify(params,  sign,  payConfigStorage.getKeyPublic(), payConfigStorage.getInputCharset());
     }
