@@ -324,12 +324,12 @@ public class WxYouDianPayService extends BasePayService {
      */
     @Override
     public PayOutMessage getPayOutMessage(String code, String message) {
-
-        JsonBuilder builder = PayOutMessage.JSON()
-                .content("return_code", code.toUpperCase())
-                .content("return_msg", message)
-                .content("nonce_str", SignUtils.randomStr());
-        return builder.content("sign", SignUtils.valueOf(payConfigStorage.getSignType()).sign(builder.getJson(), "&key=" + payConfigStorage.getKeyPrivate(), payConfigStorage.getInputCharset())).build();
+        Map<String, Object> builder = new TreeMap<>();
+        builder.put("return_code", code.toUpperCase());
+        builder.put("return_msg", message);
+        builder.put("nonce_str", SignUtils.randomStr());
+        String sgin = SignUtils.valueOf(payConfigStorage.getSignType()).sign(builder, "&key=" + payConfigStorage.getKeyPrivate(), payConfigStorage.getInputCharset());
+        return PayOutMessage.TEXT().content("{\"return_code\":\""+builder.get("return_code")+"\",\"return_msg\":\""+builder.get("return_msg")+"\",\"nonce_str\":\""+builder.get("nonce_str")+"\",\"sign\":\""+ sgin +"\"}").build();
     }
 
 

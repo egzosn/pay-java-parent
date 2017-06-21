@@ -166,15 +166,12 @@ public enum SignUtils {
             Set<String >  keys = (Set<String>) ((LinkedHashMap)parameters).keySet();
             for(String key : keys){
                 String val = ((LinkedHashMap)parameters).get(key).toString();
-                if(StringUtils.isNotBlank(val)){
-                    sb.append(val).append(separator);
-                }
+                sb.append(val).append(separator);
+
             }
         }else if(parameters instanceof List){
             for(BasicNameValuePair bnv :((List<BasicNameValuePair>)parameters) ){
-                if(StringUtils.isNotBlank(bnv.getValue())){
                     sb.append(bnv.getValue()).append(separator);
-                }
             }
         }
 
