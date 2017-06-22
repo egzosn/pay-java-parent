@@ -84,7 +84,7 @@ public class FuiouPayService extends BasePayService {
         }
         try {
             //返回参数校验  和 重新请求订单检查数据是否合法
-            return (signVerify(params, (String) params.get("md5")) && verifySource((String) params.get("order_id")));
+            return (signVerify(params, (String) params.remove("md5")) && verifySource((String) params.get("order_id")));
         } catch (PayErrorException e) {
             e.printStackTrace();
         }
@@ -99,27 +99,12 @@ public class FuiouPayService extends BasePayService {
      * @return 校验结果
      */
     @Override
-    public boolean signVerify (Map<String, Object> params, String responseSign) {
-        LinkedHashSet<String> keySet = new LinkedHashSet<>();
-        keySet.add("mchnt_cd");//商户代码
-        keySet.add("order_id");//商户订单号
-        keySet.add("order_date");//订单日期
-        keySet.add("order_amt");//交易金额
-        keySet.add("order_st");//订单状态
-        keySet.add("order_pay_code");//错误代码
-        keySet.add("order_pay_error");//错误中文描述
-        keySet.add("resv1");//保留字段
-        keySet.add("fy_ssn");//富友流水号
-        StringBuilder verifyMD5Str = new StringBuilder();
-        for (String keyStr : keySet) {
-            String keyValue = (String) params.get(keyStr);
-            if (null == keyValue){
-                log.debug(String.format("富友支付返回结果校验:<参数:%s>不能为空,",keyStr));
-            }
-            verifyMD5Str.append(keyValue).append("|");
-        }
-        String sign  = createSign(verifyMD5Str.deleteCharAt(verifyMD5Str.length() -1).toString(),payConfigStorage.getInputCharset());
-//        System.out.println("加密串"+verifyMD5Str+",,返回参数生成MD5="+sign+",,返回MD5摘要值"+returnSign);
+    public boolean signVerify(Map<String, Object> params, String responseSign) {
+
+        params = new LinkedHashMap<>(params);
+
+        String sign = createSign(SignUtils.parameters2MD5Str(params, "|"), payConfigStorage.getInputCharset());
+
         return responseSign.equals(sign);
     }
 
@@ -130,13 +115,13 @@ public class FuiouPayService extends BasePayService {
      * @return 返回校验结果
      */
     @Override
-    public boolean verifySource (String order_id) {
-        LinkedHashMap<String ,Object> params = new LinkedHashMap<>();
-        params.put("mchnt_cd",payConfigStorage.getPid());
-        params.put("order_id",order_id);
-        params.put("md5",createSign(SignUtils.parameters2MD5Str(params,"|"),payConfigStorage.getInputCharset()));
-        JSONObject resultJson   = getHttpRequestTemplate().postForObject(getReqUrl() + URL_FuiouSmpAQueryGate,params,JSONObject.class);
-        return resultJson.getString("order_pay_code").equals("0000");
+    public boolean verifySource(String order_id) {
+        LinkedHashMap<String, Object> params = new LinkedHashMap<>();
+        params.put("mchnt_cd", payConfigStorage.getPid());
+        params.put("order_id", order_id);
+        params.put("md5", createSign(SignUtils.parameters2MD5Str(params, "|"), payConfigStorage.getInputCharset()));
+        JSONObject resultJson = getHttpRequestTemplate().postForObject(getReqUrl() + URL_FuiouSmpAQueryGate, params, JSONObject.class);
+        return "0000".equals(resultJson.getString("order_pay_code"));
     }
 
     /**
@@ -161,7 +146,7 @@ public class FuiouPayService extends BasePayService {
         LinkedHashMap<String, Object> parameters = new LinkedHashMap<String, Object>();
         parameters.put("mchnt_cd", payConfigStorage.getPartner());//商户代码
         parameters.put("order_id", order.getOutTradeNo());//商户订单号
-        parameters.put("order_amt", order.getPrice());//交易金额
+        parameters.put("order_amt", (int)(order.getPrice().doubleValue() * 100));//交易金额
 //        parameters.put("cur_type", null == order.getCurType() ? FuiouCurType.CNY:order.getCurType());//交易币种
         parameters.put("order_pay_type", order.getTransactionType());//支付类型
         parameters.put("page_notify_url", payConfigStorage.getReturnUrl());//商户接受支付结果通知地址
@@ -169,8 +154,8 @@ public class FuiouPayService extends BasePayService {
         parameters.put("order_valid_time", "30m");//超时时间 1m-15天，m：分钟、h：小时、d天、1c当天有效，
         parameters.put("iss_ins_cd", order.getBankType());//银行代码
         parameters.put("goods_name", order.getSubject());
-        parameters.put("goods_display_url", "1");//商品展示网址 //非必填
-        parameters.put("rem", "1");//备注 //非必填
+        parameters.put("goods_display_url", "");//商品展示网址 //非必填
+        parameters.put("rem", "");//备注 //非必填
         parameters.put("ver", "1.0.1");//版本号
         return parameters;
     }
@@ -261,27 +246,25 @@ public class FuiouPayService extends BasePayService {
      */
     private String getFormString(Map<String, Object> param, MethodType method,String url) {
         StringBuffer formHtml = new StringBuffer();
-
-        formHtml.append("<form id=\"fuiousubmit\" name=\"fuiousubmit\" action=\"")
-                .append(url)
-                .append("\" accept-charset=\"UTF-8\" onsubmit=\"document.charset='UTF-8';")
-//                .append( payConfigStorage.getInputCharset())
-                .append("\" method=\"")
-                .append(method.name().toLowerCase()).append("\">");
+        formHtml.append("<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">");
+        formHtml.append( "<title>提交到富友交易系统</title></head>");
+        formHtml.append( "<script type=\"text/javascript\">function submitForm()");
+        formHtml.append( "{document.getElementById(\"form\").submit();} </script>");
+        formHtml.append(  "<body onload=\"javascript:submitForm();\">");
+        formHtml.append(  "<form name=\"pay\" method=\""+method.name().toLowerCase()+"\" ");
+        formHtml.append(  "action=\""+url+"\" id = \"form\">");
 
         for (String key : param.keySet()) {
             Object o = param.get(key);
-            if (null == o || "null".equals(o) || "".equals(o)) {
-                continue;
-            }
-            formHtml.append("<input type=\"hidden\" name=\"" + key + "\" value=\"" + param.get(key) + "\"/>");
+
+
+            formHtml.append("<input type=\"hidden\" value = '"+o+"' name=\""+key+"\"/>");
         }
 
 
         //submit按钮控件请不要含有name属性
 //        formHtml.append("<input type=\"submit\" value=\"\" style=\"display:none;\">");
-        formHtml.append("</form>");
-        formHtml.append("<script>document.forms['fuiousubmit'].submit();</script>");
+        formHtml.append("</form></body></html>");
 
         return formHtml.toString();
     }
