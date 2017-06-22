@@ -84,7 +84,7 @@ public class FuiouPayService extends BasePayService {
         }
         try {
             //返回参数校验  和 重新请求订单检查数据是否合法
-            return (signVerify(params, (String) params.get("md5")) && verifySource((String) params.get("order_id")));
+            return (signVerify(params, (String) params.remove("md5")) && verifySource((String) params.get("order_id")));
         } catch (PayErrorException e) {
             e.printStackTrace();
         }
@@ -100,26 +100,11 @@ public class FuiouPayService extends BasePayService {
      */
     @Override
     public boolean signVerify (Map<String, Object> params, String responseSign) {
-        LinkedHashSet<String> keySet = new LinkedHashSet<>();
-        keySet.add("mchnt_cd");//商户代码
-        keySet.add("order_id");//商户订单号
-        keySet.add("order_date");//订单日期
-        keySet.add("order_amt");//交易金额
-        keySet.add("order_st");//订单状态
-        keySet.add("order_pay_code");//错误代码
-        keySet.add("order_pay_error");//错误中文描述
-        keySet.add("resv1");//保留字段
-        keySet.add("fy_ssn");//富友流水号
-        StringBuilder verifyMD5Str = new StringBuilder();
-        for (String keyStr : keySet) {
-            String keyValue = (String) params.get(keyStr);
-            if (null == keyValue){
-                log.debug(String.format("富友支付返回结果校验:<参数:%s>不能为空,",keyStr));
-            }
-            verifyMD5Str.append(keyValue).append("|");
-        }
-        String sign  = createSign(verifyMD5Str.deleteCharAt(verifyMD5Str.length() -1).toString(),payConfigStorage.getInputCharset());
-//        System.out.println("加密串"+verifyMD5Str+",,返回参数生成MD5="+sign+",,返回MD5摘要值"+returnSign);
+
+        params = new LinkedHashMap<>(params);
+
+        String sign  = createSign(SignUtils.parameters2MD5Str(params,"|"),payConfigStorage.getInputCharset());
+
         return responseSign.equals(sign);
     }
 
