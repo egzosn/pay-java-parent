@@ -99,11 +99,11 @@ public class FuiouPayService extends BasePayService {
      * @return 校验结果
      */
     @Override
-    public boolean signVerify (Map<String, Object> params, String responseSign) {
+    public boolean signVerify(Map<String, Object> params, String responseSign) {
 
         params = new LinkedHashMap<>(params);
 
-        String sign  = createSign(SignUtils.parameters2MD5Str(params,"|"),payConfigStorage.getInputCharset());
+        String sign = createSign(SignUtils.parameters2MD5Str(params, "|"), payConfigStorage.getInputCharset());
 
         return responseSign.equals(sign);
     }
@@ -115,13 +115,13 @@ public class FuiouPayService extends BasePayService {
      * @return 返回校验结果
      */
     @Override
-    public boolean verifySource (String order_id) {
-        LinkedHashMap<String ,Object> params = new LinkedHashMap<>();
-        params.put("mchnt_cd",payConfigStorage.getPid());
-        params.put("order_id",order_id);
-        params.put("md5",createSign(SignUtils.parameters2MD5Str(params,"|"),payConfigStorage.getInputCharset()));
-        JSONObject resultJson   = getHttpRequestTemplate().postForObject(getReqUrl() + URL_FuiouSmpAQueryGate,params,JSONObject.class);
-        return resultJson.getString("order_pay_code").equals("0000");
+    public boolean verifySource(String order_id) {
+        LinkedHashMap<String, Object> params = new LinkedHashMap<>();
+        params.put("mchnt_cd", payConfigStorage.getPid());
+        params.put("order_id", order_id);
+        params.put("md5", createSign(SignUtils.parameters2MD5Str(params, "|"), payConfigStorage.getInputCharset()));
+        JSONObject resultJson = getHttpRequestTemplate().postForObject(getReqUrl() + URL_FuiouSmpAQueryGate, params, JSONObject.class);
+        return "0000".equals(resultJson.getString("order_pay_code"));
     }
 
     /**
