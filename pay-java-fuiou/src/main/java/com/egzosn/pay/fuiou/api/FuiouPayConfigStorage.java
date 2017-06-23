@@ -61,5 +61,6 @@ public class FuiouPayConfigStorage extends BasePayConfigStorage {
 
     public void setSecretKey(String mchntKey){
         this.mchntKey = mchntKey;
+        setKeyPrivate(mchntKey);
     }
 }
