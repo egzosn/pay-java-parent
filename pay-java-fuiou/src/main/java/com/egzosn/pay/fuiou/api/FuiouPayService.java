@@ -1,5 +1,4 @@
 package com.egzosn.pay.fuiou.api;
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.api.BasePayService;
 import com.egzosn.pay.common.api.Callback;
@@ -7,6 +6,7 @@ import com.egzosn.pay.common.api.PayConfigStorage;
 import com.egzosn.pay.common.bean.*;
 import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpConfigStorage;
+import com.egzosn.pay.common.http.UriVariables;
 import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.str.StringUtils;
 import org.apache.commons.logging.Log;
@@ -101,8 +101,6 @@ public class FuiouPayService extends BasePayService {
     @Override
     public boolean signVerify(Map<String, Object> params, String responseSign) {
 
-        params = new LinkedHashMap<>(params);
-
         String sign = createSign(SignUtils.parameters2MD5Str(params, "|"), payConfigStorage.getInputCharset());
 
         return responseSign.equals(sign);
@@ -120,9 +118,13 @@ public class FuiouPayService extends BasePayService {
         params.put("mchnt_cd", payConfigStorage.getPid());
         params.put("order_id", order_id);
         params.put("md5", createSign(SignUtils.parameters2MD5Str(params, "|"), payConfigStorage.getInputCharset()));
-        JSONObject resultJson = getHttpRequestTemplate().postForObject(getReqUrl() + URL_FuiouSmpAQueryGate, params, JSONObject.class);
-        return "0000".equals(resultJson.getString("order_pay_code"));
+        JSONObject resultJson = getHttpRequestTemplate().postForObject(getReqUrl() + URL_FuiouSmpAQueryGate + "?" + UriVariables.getMapToParameters(params), null, JSONObject.class);
+        if (null == resultJson){
+            return false;
+        }
+        return "0000".equals(resultJson.getJSONObject("plain").getString("order_pay_code"));
     }
+
 
     /**
      * 将支付请求参数加密成md5
@@ -168,7 +170,7 @@ public class FuiouPayService extends BasePayService {
      */
     @Override
     public String createSign(String content, String characterEncoding) {
-        return SignUtils.valueOf(payConfigStorage.getSignType().toUpperCase()).createSign(content, "|" + payConfigStorage.getSecretKey(), characterEncoding);
+        return SignUtils.valueOf(payConfigStorage.getSignType().toUpperCase()).createSign(content, "|" + payConfigStorage.getKeyPrivate(), characterEncoding);
     }
 
     /**
@@ -179,7 +181,34 @@ public class FuiouPayService extends BasePayService {
      */
     @Override
     public Map<String, Object> getParameter2Map(Map<String, String[]> parameterMap, InputStream is) {
-        return null;
+        Map<String, Object> params  = conversion(parameterMap,  new LinkedHashMap<String, Object>(), "mchnt_cd");
+        conversion(parameterMap,  params, "order_id");
+        conversion(parameterMap,  params, "order_date");
+        conversion(parameterMap,  params, "order_amt");
+        conversion(parameterMap,  params, "order_st");
+        conversion(parameterMap,  params, "order_pay_code");
+        conversion(parameterMap,  params, "order_pay_error");
+        conversion(parameterMap,  params, "resv1");
+        conversion(parameterMap,  params, "fy_ssn");
+        conversion(parameterMap,  params, "md5");
+        return params;
+    }
+
+    /**
+     *  将parameterMap对应的key存放至params
+     * @param parameterMap 请求参数
+     * @param params 转化的对象
+     * @param key 需要取值的key
+     * @return params
+     */
+    public Map<String, Object> conversion(Map<String, String[]> parameterMap,  Map<String, Object> params ,String key){
+        String[] values = parameterMap.get(key);
+        String valueStr = "";
+        for (int i = 0,len =  values.length; i < len; i++) {
+            valueStr += (i == len - 1) ?  values[i] : values[i] + ",";
+        }
+        params.put(key, valueStr);
+        return params;
     }
 
     /**
@@ -201,7 +230,7 @@ public class FuiouPayService extends BasePayService {
      */
     @Override
     public PayOutMessage successPayOutMessage(PayMessage payMessage) {
-        return PayOutMessage.JSON().content("success","成功").build();
+        return PayOutMessage.TEXT().content("success").build();
     }
 
     /**
