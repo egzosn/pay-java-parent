@@ -19,8 +19,8 @@ import com.egzosn.pay.common.bean.TransactionType;
  * date 2016/10/19 22:58
  */
 public enum  AliTransactionType implements TransactionType {
-    //app支付                      //手机网站支付
-    APP("alipay.trade.app.pay"),WAP("alipay.trade.wap.pay")
+    //即时到帐                      //手机网站支付
+    DIRECT("alipay.trade.page.pay"),APP("alipay.trade.app.pay"),WAP("alipay.trade.wap.pay")
     // TODO 2017/2/23 20:26 author: egan 以下三个为主动交易类型 暂未测试，
     //扫码付                                   //条码付                        // 声波付
     ,SWEEPPAY("alipay.trade.precreate"),BAR_CODE("alipay.trade.pay"),WAVE_CODE("alipay.trade.pay")
