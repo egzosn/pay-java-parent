@@ -214,7 +214,7 @@ public class WxYouDianPayService extends BasePayService {
             return  result;
         }catch (PayErrorException e){
             PayError error = e.getPayError();
-            if ("401".equals(error.getErrorCode()) ) {
+            if ("401".equals(error.getErrorCode()) ||  "500".equals(error.getErrorCode())) {
                 // 强制设置wxMpConfigStorage它的access token过期了，这样在下一次请求里就会刷新access token
                 payConfigStorage.expireAccessToken();
                 //进行重新登陆授权
