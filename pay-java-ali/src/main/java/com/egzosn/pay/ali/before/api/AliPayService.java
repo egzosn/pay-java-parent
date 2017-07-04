@@ -133,6 +133,7 @@ public class AliPayService extends BasePayService {
 
 
 
+
     /**
      * 返回创建的订单信息
      *
@@ -145,7 +146,12 @@ public class AliPayService extends BasePayService {
 
         Map<String, Object> orderInfo = getOrder(order);
 
-        String sign = createSign(orderInfo, "UTF-8");
+        String sign = null;
+        if (AliTransactionType.APP == order.getTransactionType() ){
+            sign = createSign(getOrderInfo(order), payConfigStorage.getInputCharset());
+        }else {
+            sign = createSign(orderInfo, payConfigStorage.getInputCharset());
+        }
 
         try {
             sign = URLEncoder.encode(sign, "UTF-8");
@@ -154,6 +160,22 @@ public class AliPayService extends BasePayService {
         }
         orderInfo.put("sign", sign);
         orderInfo.put("sign_type", payConfigStorage.getSignType());
+        return orderInfo;
+    }
+
+    private String getOrderInfo(PayOrder order) {
+        String orderInfo = "partner=\"" + this.payConfigStorage.getPartner() + "\"";
+        orderInfo = orderInfo + "&seller_id=\"" + this.payConfigStorage.getSeller() + "\"";
+        orderInfo = orderInfo + "&out_trade_no=\"" + order.getOutTradeNo() + "\"";
+        orderInfo = orderInfo + "&subject=\"" + order.getSubject() + "\"";
+        orderInfo = orderInfo + "&body=\"" + order.getBody() + "\"";
+        orderInfo = orderInfo + "&total_fee=\"" + order.getPrice().setScale(2, BigDecimal.ROUND_HALF_UP).toString()  + "\"";
+        orderInfo = orderInfo + "&notify_url=\"" + this.payConfigStorage.getNotifyUrl() + "\"";
+        orderInfo = orderInfo + "&service=\"mobile.securitypay.pay\"";
+        orderInfo = orderInfo + "&payment_type=\"1\"";
+        orderInfo = orderInfo + "&_input_charset=\""+ payConfigStorage.getInputCharset()+"\"";
+        orderInfo = orderInfo + "&it_b_pay=\"30m\"";
+        orderInfo = orderInfo + "&return_url=\""+payConfigStorage.getReturnUrl()+"\"";
         return orderInfo;
     }
 
