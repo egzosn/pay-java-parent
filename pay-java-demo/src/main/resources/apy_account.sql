@@ -7,7 +7,7 @@ CREATE TABLE `pay_account` (
   `pay_id` INT(11) NOT NULL AUTO_INCREMENT COMMENT '支付账号id',
   `partner` VARCHAR(32) DEFAULT NULL COMMENT '支付合作id,商户id，差不多是支付平台的账号或id',
   `appid` VARCHAR(32) DEFAULT NULL COMMENT '应用id',
-  `public_key` VARCHAR(1204) DEFAULT NULL COMMENT '支付公钥，sign_type只有单一key时public_key与private_key相等，比如sign_type=MD5的情况',
+  `public_key` VARCHAR(1204) DEFAULT NULL COMMENT '支付公钥，sign_type只有单一key时public_key与private_key相等，比如sign_type=MD5(友店支付除外)的情况',
   `private_key` VARCHAR(2048) DEFAULT NULL COMMENT '支付私钥',
   `notify_url` VARCHAR(1024) DEFAULT NULL COMMENT '异步回调地址',
   `return_url` VARCHAR(1024) DEFAULT NULL COMMENT '同步回调地址',
