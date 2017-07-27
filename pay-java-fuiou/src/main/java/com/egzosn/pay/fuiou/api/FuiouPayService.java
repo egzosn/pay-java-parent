@@ -146,7 +146,7 @@ public class FuiouPayService extends BasePayService {
      */
     private LinkedHashMap<String, Object> getOrderInfo(PayOrder order) {
         LinkedHashMap<String, Object> parameters = new LinkedHashMap<String, Object>();
-        parameters.put("mchnt_cd", payConfigStorage.getPartner());//商户代码
+        parameters.put("mchnt_cd", payConfigStorage.getPid());//商户代码
         parameters.put("order_id", order.getOutTradeNo());//商户订单号
         parameters.put("order_amt", (int)(order.getPrice().doubleValue() * 100));//交易金额
 //        parameters.put("cur_type", null == order.getCurType() ? FuiouCurType.CNY:order.getCurType());//交易币种
@@ -358,7 +358,7 @@ public class FuiouPayService extends BasePayService {
     @Override
     public Map<String, Object> refund (String tradeNo, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount) {
         Map<String ,Object> params = new HashMap<>();
-        params.put("mchnt_cd",payConfigStorage.getSecretKey());//商户代码
+        params.put("mchnt_cd",payConfigStorage.getPid());//商户代码
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
         df.setTimeZone(TimeZone.getTimeZone("GMT+8"));
         params.put("origin_order_date",df.format(new Date()));//原交易日期
