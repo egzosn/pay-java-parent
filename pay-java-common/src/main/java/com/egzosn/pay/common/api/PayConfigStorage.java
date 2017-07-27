@@ -67,20 +67,15 @@ import java.util.concurrent.locks.Lock;
      * @return 字符编码
      */
      String getInputCharset();
-    /**
-     *  获取密钥 与 #getKeyPrivate 类似
-     *  @return 获取密钥
-     */
-     String getSecretKey();
 
     /**
-     * 公钥
+     * 支付平台公钥(签名校验使用)
      * @return 公钥
      */
      String getKeyPublic();
 
     /**
-     * 私钥
+     *  应用私钥(生成签名时使用)
      * @return 私钥
      */
      String getKeyPrivate();

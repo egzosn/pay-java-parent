@@ -26,9 +26,9 @@ public class ApyAccount {
     // 应用id
 //    @Column(name = "appid")
     private String appid;
-    //  支付公钥，sign_type只有单一key时public_key与private_key相等，比如sign_type=MD5的情况
+    //   支付平台公钥(签名校验使用)，sign_type只有单一key时public_key与private_key相等，比如sign_type=MD5的情况
     private String publicKey;
-    // 支付私钥
+    // 应用私钥(生成签名)
 //    @Column(name = "private_key")
     private String privateKey;
     // 异步回调地址

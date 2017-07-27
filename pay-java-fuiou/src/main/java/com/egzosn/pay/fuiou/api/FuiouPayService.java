@@ -59,14 +59,14 @@ public class FuiouPayService extends BasePayService {
      * @param payConfigStorage 支付账户配置信息
      * @param configStorage 网络代理配置
      */
-    public FuiouPayService (PayConfigStorage payConfigStorage, HttpConfigStorage configStorage) {
+    public FuiouPayService(PayConfigStorage payConfigStorage, HttpConfigStorage configStorage) {
         super(payConfigStorage, configStorage);
     }
     /**
      * 构造函数，初始化时候使用
      * @param payConfigStorage 支付账户配置信息
      */
-    public FuiouPayService (PayConfigStorage payConfigStorage) {
+    public FuiouPayService(PayConfigStorage payConfigStorage) {
         super(payConfigStorage);
     }
 
@@ -146,7 +146,7 @@ public class FuiouPayService extends BasePayService {
      */
     private LinkedHashMap<String, Object> getOrderInfo(PayOrder order) {
         LinkedHashMap<String, Object> parameters = new LinkedHashMap<String, Object>();
-        parameters.put("mchnt_cd", payConfigStorage.getPartner());//商户代码
+        parameters.put("mchnt_cd", payConfigStorage.getPid());//商户代码
         parameters.put("order_id", order.getOutTradeNo());//商户订单号
         parameters.put("order_amt", (int)(order.getPrice().doubleValue() * 100));//交易金额
 //        parameters.put("cur_type", null == order.getCurType() ? FuiouCurType.CNY:order.getCurType());//交易币种
@@ -273,7 +273,7 @@ public class FuiouPayService extends BasePayService {
      * @param url 支付请求url地址
      * @return form表单html代码
      */
-    private String getFormString(Map<String, Object> param, MethodType method,String url) {
+    private String getFormString(Map<String, Object> param, MethodType method, String url) {
         StringBuffer formHtml = new StringBuffer();
         formHtml.append("<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">");
         formHtml.append( "<title>提交到富友交易系统</title></head>");
@@ -358,7 +358,7 @@ public class FuiouPayService extends BasePayService {
     @Override
     public Map<String, Object> refund (String tradeNo, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount) {
         Map<String ,Object> params = new HashMap<>();
-        params.put("mchnt_cd",payConfigStorage.getSecretKey());//商户代码
+        params.put("mchnt_cd",payConfigStorage.getPid());//商户代码
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
         df.setTimeZone(TimeZone.getTimeZone("GMT+8"));
         params.put("origin_order_date",df.format(new Date()));//原交易日期
