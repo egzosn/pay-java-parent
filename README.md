@@ -57,7 +57,7 @@
 
 服务端+网页端详细使用与简单教程请看 [pay-java-demo](pay-java-demo?dir=1&filepath=pay-java-demo)
 
-android 例子 [pay-java-android](http://git.oschina.net/egzosn/pay-java-android)
+android 例子 [pay-java-android](../pay-java-android)
 
 
 ##交流
