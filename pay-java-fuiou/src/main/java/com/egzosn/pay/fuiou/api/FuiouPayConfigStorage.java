@@ -10,7 +10,6 @@ import com.egzosn.pay.common.api.BasePayConfigStorage;
 public class FuiouPayConfigStorage extends BasePayConfigStorage {
 
     public String mchntCd;//商户代码
-    public String mchntKey;//商户密钥
 
     /**
      *  应用id
@@ -54,13 +53,4 @@ public class FuiouPayConfigStorage extends BasePayConfigStorage {
         return null;
     }
 
-    @Override
-    public String getSecretKey() {
-        return super.getKeyPrivate();
-    }
-
-    public void setSecretKey(String mchntKey){
-        this.mchntKey = mchntKey;
-        setKeyPrivate(mchntKey);
-    }
 }
