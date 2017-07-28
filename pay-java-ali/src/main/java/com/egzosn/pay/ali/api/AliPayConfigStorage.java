@@ -33,11 +33,6 @@ public class AliPayConfigStorage extends BasePayConfigStorage {
         this.aliPublicKey = aliPublicKey;
     }
 
-    @Override
-    public String getSecretKey() {
-        return aliPublicKey;
-    }
-
 
     public void setAppId(String appId) {
         this.appId = appId;

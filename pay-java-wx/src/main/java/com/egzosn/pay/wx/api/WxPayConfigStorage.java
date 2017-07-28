@@ -20,14 +20,8 @@ public class WxPayConfigStorage extends BasePayConfigStorage {
     public  String mchId;
 
 
-    @Override
-    public String getSecretKey() {
-        return appSecret;
-    }
 
-    public void setAppSecret(String appSecret) {
-        this.appSecret = appSecret;
-    }
+
 
     @Override
     public String getAppid() {

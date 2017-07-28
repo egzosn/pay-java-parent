@@ -69,7 +69,6 @@ public enum PayType implements BasePayType {
         public PayService getPayService(ApyAccount apyAccount) {
             WxPayConfigStorage wxPayConfigStorage = new WxPayConfigStorage();
             wxPayConfigStorage.setMchId(apyAccount.getPartner());
-            wxPayConfigStorage.setAppSecret(apyAccount.getPublicKey());
             wxPayConfigStorage.setKeyPublic(apyAccount.getPublicKey());
             wxPayConfigStorage.setAppid(apyAccount.getAppid());
             wxPayConfigStorage.setKeyPrivate(apyAccount.getPrivateKey());
@@ -127,6 +126,7 @@ public enum PayType implements BasePayType {
         @Override
         public PayService getPayService(ApyAccount apyAccount) {
             FuiouPayConfigStorage fuiouPayConfigStorage = new FuiouPayConfigStorage();
+            fuiouPayConfigStorage.setKeyPublic(apyAccount.getPublicKey());
             fuiouPayConfigStorage.setKeyPrivate(apyAccount.getPrivateKey());
             fuiouPayConfigStorage.setNotifyUrl(apyAccount.getNotifyUrl());
             fuiouPayConfigStorage.setReturnUrl(apyAccount.getReturnUrl());

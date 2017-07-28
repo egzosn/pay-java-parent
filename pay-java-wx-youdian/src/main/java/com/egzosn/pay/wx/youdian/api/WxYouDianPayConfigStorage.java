@@ -17,14 +17,6 @@ public class WxYouDianPayConfigStorage extends BasePayConfigStorage {
 
 
 
-    public void setSecretKey(String secretKey) {
-        this.secretKey = secretKey;
-    }
-
-    @Override
-    public String getSecretKey() {
-        return secretKey;
-    }
 
 
     @Override
