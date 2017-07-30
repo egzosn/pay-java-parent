@@ -2,8 +2,10 @@
 package com.egzosn.pay.demo.controller;
 
 
+import com.egzosn.pay.ali.bean.AliTransactionType;
 import com.egzosn.pay.common.api.Callback;
 import com.egzosn.pay.common.bean.*;
+import com.egzosn.pay.common.util.MatrixToImageWriter;
 import com.egzosn.pay.common.util.str.StringUtils;
 import com.egzosn.pay.demo.entity.ApyAccount;
 import com.egzosn.pay.demo.request.QueryOrder;
@@ -11,6 +13,7 @@ import com.egzosn.pay.demo.service.ApyAccountService;
 import com.egzosn.pay.demo.service.PayResponse;
 import com.egzosn.pay.demo.entity.PayType;
 import com.egzosn.pay.common.api.PayConfigStorage;
+import com.egzosn.pay.wx.bean.WxTransactionType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -66,6 +69,7 @@ public class PayController {
      * @param payId           账户id
      * @param transactionType 交易类型， 这个针对于每一个 支付类型的对应的几种交易方式
      * @param bankType        针对刷卡支付，卡的类型，类型值
+     * @param price       金额
      * @return 跳到支付页面
      */
     @RequestMapping(value = "toPay.html", produces = "text/html;charset=UTF-8")
@@ -90,6 +94,7 @@ public class PayController {
      *
      * @param payId           账户id
      * @param openid openid
+     * @param price 金额
      * @return 跳到支付页面
      */
     @RequestMapping(value = "jsapi" )
@@ -109,7 +114,10 @@ public class PayController {
 
     /**
      * 刷卡付,pos主动扫码付款(条码付)
-     *
+     * @param payId           账户id
+     * @param transactionType 交易类型， 这个针对于每一个 支付类型的对应的几种交易方式
+     * @param authCode        授权码，条码等
+     * @param price       金额
      * @return 支付结果
      */
     @RequestMapping(value = "microPay")
@@ -136,7 +144,9 @@ public class PayController {
     /**
      * 获取二维码图像
      * 二维码支付
-     *
+     * @param payId           账户id
+     * @param transactionType 交易类型， 这个针对于每一个 支付类型的对应的几种交易方式
+     * @param price       金额
      * @return 二维码图像
      */
     @RequestMapping(value = "toQrPay.jpg", produces = "image/jpeg;charset=UTF-8")
@@ -148,6 +158,85 @@ public class PayController {
         ImageIO.write(payResponse.getService().genQrPay(new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType))), "JPEG", baos);
         return baos.toByteArray();
     }
+
+    /**
+     * 获取一码付二维码图像
+     * 二维码支付
+     * @param wxPayId           微信账户id
+     * @param aliPayId           支付宝id
+     * @param price       金额
+     * @return 二维码图像
+     */
+    @RequestMapping(value = "toWxAliQrPay.jpg", produces = "image/jpeg;charset=UTF-8")
+    public byte[] toWxAliQrPay(Integer wxPayId,Integer aliPayId, BigDecimal price) throws IOException {
+        //获取对应的支付账户操作工具（可根据账户id）
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        //这里为需要生成二维码的地址
+        StringBuilder url =  new StringBuilder("http://192.168.1.107:9096/toWxAliPay.html?");
+        if (null != wxPayId){
+            url.append("wxPayId=").append(wxPayId).append("&");
+        }
+        if (null != aliPayId){
+            url.append("aliPayId=").append(aliPayId).append("&");
+        }
+        url.append("price=").append(price);
+
+        ImageIO.write(MatrixToImageWriter.writeInfoToJpgBuff(url.toString()), "JPEG", baos);
+        return baos.toByteArray();
+    }
+
+    /**
+     *
+     * 支付宝与微信平台的判断 并进行支付的转跳
+     * @param wxPayId           微信账户id
+     * @param aliPayId           支付宝id
+     * @param price       金额
+     * @return 支付宝与微信平台的判断
+     */
+    @RequestMapping(value = "toWxAliPay.html", produces = "text/html;charset=UTF-8")
+    public String toWxAliPay(Integer wxPayId,Integer aliPayId, BigDecimal price) throws IOException {
+        StringBuilder html = new StringBuilder();
+
+        //这里为WAP支付的地址，根据需求自行修改
+        String url = "http://192.168.1.107:9096/toPay.html";
+
+        html.append("<html><head></head><body><script type=\"text/javascript\"> ");
+//        html.append("\nalert('111');\n");
+
+        if (null != wxPayId){
+            html.append("if(isWxPay()){\n");
+            html.append("window.location='");
+            //这里使用H5支付，公众号支付是否可以？请开发者自行尝试
+            html.append(url).append("?payId=").append(wxPayId).append("&transactionType=").append(WxTransactionType.MWEB.getType()).append("&price=").append(price);
+            html.append("';\n }else\n");
+        }
+
+        if (null != aliPayId) {
+            html.append("if(isAliPay()){\n");
+            html.append("window.location='");
+            html.append(url).append("?payId=").append(aliPayId).append("&transactionType=").append(AliTransactionType.WAP.getType()).append("&price=").append(price);
+            html.append("';\n } else");
+        }
+        html.append("{\n alert('请使用微信或者支付宝App扫码'+window.navigator.userAgent.toLowerCase());\n }");
+        //判断是否为微信
+        html.append("function isWxPay(){ \n" +
+                " var ua = window.navigator.userAgent.toLowerCase();\n" +
+                " if(ua.match(/MicroMessenger/i) == 'micromessenger'){\n" +
+                " return true;\n" +
+                " }\n" +
+                " return false;\n" +
+                "} \n");
+        //判断是否为支付宝
+        html.append("function isAliPay(){\n" +
+                " var ua = window.navigator.userAgent.toLowerCase();\n" +
+                " if(ua.match(/AlipayClient/i) =='alipayclient'){\n" +
+                "  return true;\n" +
+                " }\n" +
+                "  return false;\n" +
+                "}</script> <body></html>");
+        return html.toString();
+    }
+
 
 
     /**
