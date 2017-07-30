@@ -202,7 +202,7 @@ public class PayController {
         //这里为WAP支付的地址，根据需求自行修改
         StringBuffer url = request.getRequestURL();
         url = new StringBuffer(url.substring(0, url.lastIndexOf(request.getRequestURI())));
-        url .append("/toWxAliPay.html?");
+        url .append("/toPay.html");
 
         html.append("<html><head></head><body><script type=\"text/javascript\"> ");
 //        html.append("\nalert('111');\n");
@@ -211,7 +211,7 @@ public class PayController {
             html.append("if(isWxPay()){\n");
             html.append("window.location='");
             //这里使用H5支付，公众号支付是否可以？请开发者自行尝试
-            html.append(url).append("?payId=").append(wxPayId).append("&transactionType=").append(WxTransactionType.MWEB.getType()).append("&price=").append(price);
+            html.append(url.toString()).append("?payId=").append(wxPayId).append("&transactionType=").append(WxTransactionType.MWEB.getType()).append("&price=").append(price);
             html.append("';\n }else\n");
         }
 
