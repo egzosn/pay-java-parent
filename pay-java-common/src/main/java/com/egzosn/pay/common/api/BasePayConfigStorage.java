@@ -17,9 +17,9 @@ public abstract class BasePayConfigStorage implements PayConfigStorage{
 
 
     // ali rsa_private 商户私钥，pkcs8格式
-    //wx api_key 商户密钥
+    //wx api_key 应用私钥(生成签名时使用)
     private volatile  String keyPrivate ;
-    // 支付公钥
+    // 支付平台公钥(签名校验使用)
     private volatile  String keyPublic;
     //异步回调地址
     private volatile  String notifyUrl;

@@ -17,9 +17,9 @@
     <br>
     应用id<input type="text" name="appid">
     <br>
-    支付公钥<input type="text" name="publicKey"><b>如签名类型为MD5时，当前的值与支付私钥想等</b>
+    支付平台公钥(签名校验使用)<input type="text" name="publicKey"><b>支付公钥，sign_type只有单一key时public_key与private_key相等，比如sign_type=MD5(友店支付除外)的情况</b>
     <br>
-    支付私钥<input type="text" name="privateKey">
+    应用私钥(生成签名使用)<input type="text" name="privateKey">
     <br>
     异步回调地址<input type="text" name="notifyUrl"><b>友店支付用不到此参数，在友店管理端进行配置</b>
     <br>
@@ -30,6 +30,7 @@
     签名类型<select name="signType">
     <option>MD5</option>
     <option>RSA</option>
+    <option>RSA2</option>
 </select>
     <br>
     编码类型(建议UTF-8)<input type="text" name="inputCharset" value="UTF-8">
@@ -38,6 +39,7 @@
     <option value="aliPay">aliPay</option>
     <option value="wxPay">wxPay</option>
     <option value="youdianPay">youdianPay</option>
+    <option value="youdianPay">fuiou</option>
 </select><b>此处为开发者自定义，详情请查看 com.egzosn.pay.demo.entity.PayType</b>
     <br>
     消息类型 <select name="msgType">
@@ -58,9 +60,10 @@
 <br/>
 <div>各个支付对应的<b>交易类型</b>可自行查看对应的官方文档，本项目已实现几种交易类型,对应各个支付类型的<code>com.egzosn.pay.common.bean.TransactionType</code>具体实现</div>
 <div>旧版支付宝(<code>com.egzosn.pay.ali.before.bean.AliTransactionType</code>)： 即时付款=DIRECT ， 移动支付=APP ， 手机网站支付=WAP</div>
-<div>新版支付宝(<code>com.egzosn.pay.ali.bean.AliTransactionType</code>)：  app支付=APP ， 手机网站支付=WAP , 扫码付=SWEEPPAY, 条码付=BAR_CODE, 声波付=WAVE_CODE </div>
+<div>新版支付宝(<code>com.egzosn.pay.ali.bean.AliTransactionType</code>)：  即时付款=DIRECT ， app支付=APP ， 手机网站支付=WAP , 扫码付=SWEEPPAY, 条码付=BAR_CODE, 声波付=WAVE_CODE </div>
 <div>微信(<code>com.egzosn.pay.wx.bean.WxTransactionType</code>)： 公众号支付=JSAPI ， 移动支付=APP ， 扫码付=NATIVE</div>
 <div>友店微信(<code>com.egzosn.pay.wx.youdian.bean.YoudianTransactionType</code>)： 扫码付=NATIVE</div>
+<div>富友(<code>com.egzosn.pay.fuiou.bean.FuiouTransactionType</code>)： B2B，B2C</div>
 
 <br>
 <br>

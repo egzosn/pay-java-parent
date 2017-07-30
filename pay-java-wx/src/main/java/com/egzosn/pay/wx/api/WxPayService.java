@@ -1,6 +1,5 @@
 package com.egzosn.pay.wx.api;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.api.BasePayService;
 import com.egzosn.pay.common.api.Callback;
@@ -566,10 +565,10 @@ public class WxPayService extends BasePayService {
 
         //获取公共参数
         Map<String, Object> parameters = getPublicParameters();
-        if (null != transactionIdOrBillDate){
-            parameters.put("transaction_id", transactionIdOrBillDate);
-        }else {
+        if (null == transactionIdOrBillDate ||  "".equals(transactionIdOrBillDate)){
             parameters.put("out_trade_no", outTradeNoBillType);
+        }else {
+            parameters.put("transaction_id", transactionIdOrBillDate);
         }
         //设置签名
         setSign(parameters);

@@ -157,7 +157,7 @@ public class WxYouDianPayService extends BasePayService {
      */
     @Override
     public boolean signVerify(Map<String, Object> params, String sign) {
-        return SignUtils.valueOf(payConfigStorage.getSignType()).verify(params, sign, "&key=" + payConfigStorage.getKeyPrivate(), payConfigStorage.getInputCharset());
+        return SignUtils.valueOf(payConfigStorage.getSignType()).verify(params, sign, "&key=" + payConfigStorage.getKeyPublic(), payConfigStorage.getInputCharset());
     }
 
 
@@ -214,18 +214,18 @@ public class WxYouDianPayService extends BasePayService {
             return  result;
         }catch (PayErrorException e){
             PayError error = e.getPayError();
-            if ("401".equals(error.getErrorCode()) ) {
-                // 强制设置wxMpConfigStorage它的access token过期了，这样在下一次请求里就会刷新access token
-                payConfigStorage.expireAccessToken();
-                //进行重新登陆授权
-                login();
-                int sleepMillis = retrySleepMillis * (1 << retryTimes);
+            if ("401".equals(error.getErrorCode()) ||  "500".equals(error.getErrorCode())) {
                 try {
+                    int sleepMillis = retrySleepMillis * (1 << retryTimes);
                     log.debug(String.format("友店微信系统繁忙，(%s)ms 后重试(第%s次)", sleepMillis, retryTimes + 1));
                     Thread.sleep(sleepMillis);
                 } catch (InterruptedException e1) {
                     throw new PayErrorException(new YdPayError(-1, "友店支付服务端重试失败", e1.getMessage()));
                 }
+                // 强制设置wxMpConfigStorage它的access token过期了，这样在下一次请求里就会刷新access token
+                payConfigStorage.expireAccessToken();
+                //进行重新登陆授权
+                login();
             }else {
                 throw e;
             }
@@ -280,7 +280,7 @@ public class WxYouDianPayService extends BasePayService {
      */
     @Override
     public String createSign(String content, String characterEncoding) {
-        return  SignUtils.valueOf(payConfigStorage.getSignType().toUpperCase()).createSign(content, payConfigStorage.getKeyPublic(), characterEncoding);
+        return  SignUtils.valueOf(payConfigStorage.getSignType().toUpperCase()).createSign(content, "&source=http://life.51youdian.com", characterEncoding);
     }
 
     /**
@@ -324,12 +324,12 @@ public class WxYouDianPayService extends BasePayService {
      */
     @Override
     public PayOutMessage getPayOutMessage(String code, String message) {
-
-        JsonBuilder builder = PayOutMessage.JSON()
-                .content("return_code", code.toUpperCase())
-                .content("return_msg", message)
-                .content("nonce_str", SignUtils.randomStr());
-        return builder.content("sign", SignUtils.valueOf(payConfigStorage.getSignType()).sign(builder.getJson(), "&key=" + payConfigStorage.getKeyPrivate(), payConfigStorage.getInputCharset())).build();
+        Map<String, Object> builder = new TreeMap<>();
+        builder.put("return_code", code.toUpperCase());
+        builder.put("return_msg", message);
+        builder.put("nonce_str", SignUtils.randomStr());
+        String sgin = SignUtils.valueOf(payConfigStorage.getSignType()).sign(builder, "&key=" + payConfigStorage.getKeyPrivate(), payConfigStorage.getInputCharset());
+        return PayOutMessage.TEXT().content("{\"return_code\":\""+builder.get("return_code")+"\",\"return_msg\":\""+builder.get("return_msg")+"\",\"nonce_str\":\""+builder.get("nonce_str")+"\",\"sign\":\""+ sgin +"\"}").build();
     }
 
 

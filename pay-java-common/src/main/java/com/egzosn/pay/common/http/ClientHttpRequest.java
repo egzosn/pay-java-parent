@@ -134,8 +134,12 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
             responseType = (Class<T>) String.class;
         }
 
-
-        String[] value = entity.getContentType().getValue().split(";");
+        String[] value = null;
+        if (null == entity.getContentType()){
+            value = new String[]{"application/x-www-form-urlencoded"};
+        }else {
+            value = entity.getContentType().getValue().split(";");
+        }
 
         if (ContentType.APPLICATION_OCTET_STREAM.getMimeType().equals(value[0])){
 
@@ -160,7 +164,6 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
             charset = value[1].substring(value[1].indexOf("=") + 1);
         }
         String result = EntityUtils.toString(entity, charset);
-
         if (responseType.isAssignableFrom(String.class)){
             return (T)result;
         }

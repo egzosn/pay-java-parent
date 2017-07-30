@@ -36,8 +36,6 @@ public class AliPayService extends BasePayService {
     private final static String httpsReqUrl = "https://openapi.alipay.com/gateway.do";
     //沙箱测试环境账号
     private final static String devReqUrl = "https://openapi.alipaydev.com/gateway.do";
-    //兼容上一版本即时收款
-    private  final static String httpsReqUrlBefore = "https://mapi.alipay.com/gateway.do";
 
 
     /**
@@ -177,21 +175,33 @@ public class AliPayService extends BasePayService {
 
 
         Map<String, Object> bizContent = new TreeMap<>();
-        if (order.getTransactionType() == AliTransactionType.WAP){
-            bizContent.put("product_code", "QUICK_WAP_PAY");
-            orderInfo.put("return_url", payConfigStorage.getReturnUrl());
-        }else if ("alipay.trade.pay".equals(order.getTransactionType().getMethod())){
-            bizContent.put("scene", order.getTransactionType().toString().toLowerCase());
-            bizContent.put("product_code", "FACE_TO_FACE_PAYMENT");
-            bizContent.put("auth_code", order.getAuthCode());
-        }else  if (order.getTransactionType() != AliTransactionType.SWEEPPAY){
-            bizContent.put("product_code", "QUICK_MSECURITY_PAY");
-        }
         bizContent.put("body", order.getBody());
         bizContent.put("seller_id", payConfigStorage.getSeller());
         bizContent.put("subject", order.getSubject());
         bizContent.put("out_trade_no", order.getOutTradeNo());
         bizContent.put("total_amount", order.getPrice().setScale(2, BigDecimal.ROUND_HALF_UP).toString());
+        switch ((AliTransactionType)order.getTransactionType()){
+            case DIRECT:
+                bizContent.put("product_code", "FAST_INSTANT_TRADE_PAY");
+                orderInfo.put("return_url", payConfigStorage.getReturnUrl());
+//                bizContent.remove("seller_id");
+                break;
+            case WAP:
+                bizContent.put("product_code", "QUICK_WAP_PAY");
+                orderInfo.put("return_url", payConfigStorage.getReturnUrl());
+                break;
+            case BAR_CODE:
+            case WAVE_CODE:
+                bizContent.put("scene", order.getTransactionType().toString().toLowerCase());
+                bizContent.put("product_code", "FACE_TO_FACE_PAYMENT");
+                bizContent.put("auth_code", order.getAuthCode());
+                break;
+            default:
+                if (order.getTransactionType() != AliTransactionType.SWEEPPAY) {
+                    bizContent.put("product_code", "QUICK_MSECURITY_PAY");
+                }
+        }
+
         orderInfo.put("biz_content", JSON.toJSONString(bizContent));
         return orderInfo;
     }
@@ -208,70 +218,12 @@ public class AliPayService extends BasePayService {
         orderInfo.put("charset", payConfigStorage.getInputCharset());
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         df.setTimeZone(TimeZone.getTimeZone("GMT+8"));
-//      DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         orderInfo.put("timestamp", df.format(new Date()));
         orderInfo.put("version", "1.0");
         return  orderInfo;
     }
 
-    /**
-     * 支付宝创建订单信息
-     * create the order info
-     *
-     * @param order 支付订单
-     * @return 返回过时的交易订单，兼容即时收款
-     * @see PayOrder 支付订单信息
-     */
-    private  Map<String, Object> getOrderBefore(PayOrder order) {
-        Map<String, Object> orderInfo = new TreeMap<>();
-        // 签约合作者身份ID
-        orderInfo.put("partner", payConfigStorage.getPid());
 
-        // 签约卖家支付宝账号
-        orderInfo.put("seller_id", payConfigStorage.getSeller());
-
-        // 商户网站唯一订单号
-        orderInfo.put("out_trade_no", order.getOutTradeNo());
-
-        // 商品名称
-        orderInfo.put("subject", order.getSubject());
-
-        // 商品详情
-        orderInfo.put("body", order.getBody());
-
-        // 商品金额
-        orderInfo.put("total_fee", order.getPrice().setScale(2, BigDecimal.ROUND_HALF_UP).toString() );
-
-        // 服务器异步通知页面路径
-        orderInfo.put("notify_url", payConfigStorage.getNotifyUrl() );
-
-        // 服务接口名称， 固定值
-        orderInfo.put("service",  order.getTransactionType().getType()  );
-
-        // 支付类型， 固定值
-        orderInfo.put("payment_type",  "1" );
-
-        // 参数编码， 固定值
-        orderInfo.put("_input_charset",  payConfigStorage.getInputCharset());
-
-        // 设置未付款交易的超时时间
-        // 默认30分钟，一旦超时，该笔交易就会自动被关闭。
-        // 取值范围：1m～15d。
-        // m-分钟，h-小时，d-天，1c-当天（无论交易何时创建，都在0点关闭）。
-        // 该参数数值不接受小数点，如1.5h，可转换为90m。
-        // TODO 2017/2/6 11:05 author: egan  目前写死，这一块建议配置
-        orderInfo.put("it_b_pay",  "30m");
-        // extern_token为经过快登授权获取到的alipay_open_id,带上此参数用户将使用授权的账户进行支付
-        //  orderInfo.put("extern_token", extern_token );
-        // 支付宝处理完请求后，当前页面跳转到商户指定页面的路径，可空
-        orderInfo.put("return_url", payConfigStorage.getReturnUrl());
-
-        // 调用银行卡支付，需配置此参数，参与签名， 固定值 （需要签约《无线银行卡快捷支付》才能使用）
-//        if (order.getTransactionType().getType())
-//          orderInfo.put("paymethod","expressGateway");
-
-        return orderInfo;
-    }
 
 
     /**
@@ -329,30 +281,10 @@ public class AliPayService extends BasePayService {
     public String buildRequest(Map<String, Object> orderInfo, MethodType method) {
         StringBuffer formHtml = new StringBuffer();
         formHtml.append("<form id=\"_alipaysubmit_\" name=\"alipaysubmit\" action=\"");
-        if (null == orderInfo.get("method")) {
-            formHtml.append(httpsReqUrlBefore)
-                    .append("?_input_charset=")
-                    .append(payConfigStorage.getInputCharset())
-                    .append("\" method=\"")
-                    .append(method.name().toLowerCase()).append("\">");
-            for (String key : orderInfo.keySet()) {
-                Object o = orderInfo.get(key);
-                if (null == o || "null".equals(o) || "".equals(o)) {
-                    continue;
-                }
-
-                formHtml.append("<input type=\"hidden\" name=\"" + key + "\" value=\"" + orderInfo.get(key) + "\"/>");
-
-            }
-
-        } else {
-            String biz_content = (String)orderInfo.remove("biz_content");
-            formHtml.append(getReqUrl()).append("?").append(UriVariables.getMapToParameters(orderInfo))
-            .append("\" method=\"")
-                    .append(method.name().toLowerCase()).append("\">");
-
-            formHtml.append("<input type=\"hidden\" name=\"biz_content\" value=\"" + biz_content.replace("\"", "&quot;") + "\"/>");
-        }
+        String biz_content = (String)orderInfo.remove("biz_content");
+        formHtml.append(getReqUrl()).append("?").append(UriVariables.getMapToParameters(orderInfo))
+        .append("\" method=\"").append(method.name().toLowerCase()).append("\">");
+        formHtml.append("<input type=\"hidden\" name=\"biz_content\" value=\'" + biz_content + "\'/>");
         formHtml.append("</form>");
         formHtml.append("<script>document.forms['_alipaysubmit_'].submit();</script>");
 
