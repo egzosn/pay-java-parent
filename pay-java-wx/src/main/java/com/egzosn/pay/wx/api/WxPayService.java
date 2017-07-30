@@ -138,25 +138,47 @@ public class WxPayService extends BasePayService {
         Map<String, Object> parameters = getPublicParameters();
 
         parameters.put("body", order.getSubject());// 购买支付信息
-
-        //刷卡付
-        if (WxTransactionType.MICROPAY == order.getTransactionType()) {
-            parameters.put("auth_code", order.getAuthCode());
-        } else {
-            parameters.put("notify_url", payConfigStorage.getNotifyUrl());
-            parameters.put("trade_type", order.getTransactionType().getType());
-        }
-
         parameters.put("out_trade_no", order.getOutTradeNo());// 订单号
         parameters.put("spbill_create_ip", "192.168.1.150");
         parameters.put("total_fee", order.getPrice().multiply(new BigDecimal(100)).intValue());// 总金额单位为分
 
         parameters.put("attach", order.getBody());
-        if (WxTransactionType.NATIVE == order.getTransactionType()) {
-            parameters.put("product_id", order.getOutTradeNo());
-        }else  if (WxTransactionType.JSAPI == order.getTransactionType()) {
-            parameters.put("openid", order.getOpenid());
+        parameters.put("notify_url", payConfigStorage.getNotifyUrl());
+        parameters.put("trade_type", order.getTransactionType().getType());
+
+        switch ((WxTransactionType)order.getTransactionType()){
+            //刷卡付
+            case MICROPAY:
+                parameters.put("auth_code", order.getAuthCode());
+                parameters.remove("notify_url");
+                parameters.remove("trade_type");
+                break;
+             // 公众号支付
+            case JSAPI:
+                parameters.put("openid", order.getOpenid());
+                break;
+            //二维码
+            case NATIVE:
+                parameters.put("product_id", order.getOutTradeNo());
+                break;
+            case MWEB:
+                //h5支付固定传"h5_info"
+                String sceneInfo = "{\"h5_info\": " +
+                        //场景类型
+                        "   {\"type\": \"Wap\", " +
+                        //WAP网站URL地址 同步回调地址
+                        "    \"wap_url\": \""+ payConfigStorage.getReturnUrl()+"\"," +
+                        //WAP 网站名
+                        "    \"wap_name\": \"支付充值\"}}";
+
+                parameters.put("scene_info", sceneInfo);
+                break;
         }
+
+
+
+
+
 
         String sign = createSign(SignUtils.parameterText(parameters), payConfigStorage.getInputCharset());
         parameters.put("sign", sign);
@@ -187,7 +209,7 @@ public class WxPayService extends BasePayService {
         JSONObject result = unifiedOrder(order);
 
         //如果是扫码支付或者刷卡付无需处理，直接返回
-        if (WxTransactionType.NATIVE == order.getTransactionType() || WxTransactionType.MICROPAY == order.getTransactionType()) {
+        if (WxTransactionType.NATIVE == order.getTransactionType() || WxTransactionType.MICROPAY == order.getTransactionType()|| WxTransactionType.MWEB == order.getTransactionType()) {
             return result;
         }
 
@@ -287,7 +309,14 @@ public class WxPayService extends BasePayService {
      */
     @Override
     public String buildRequest(Map<String, Object> orderInfo, MethodType method) {
+        if (!"SUCCESS".equals(orderInfo.get("return_code")) ){
+            throw new PayErrorException(new WxPayError((String) orderInfo.get("return_code"), (String) orderInfo.get("return_msg")));
+        }
+        if (WxTransactionType.MWEB.equals(orderInfo.get("trade_type"))){
+            return  "<script type=\"text/javascript\">location.href=\""+ orderInfo.get("mweb_url")+";\"</script>";
+        }
         throw new UnsupportedOperationException();
+
     }
 
     /**

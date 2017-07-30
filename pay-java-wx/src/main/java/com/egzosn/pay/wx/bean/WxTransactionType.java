@@ -16,6 +16,7 @@ public enum  WxTransactionType implements TransactionType {
     NATIVE("pay/unifiedorder"),
     //移动支付
     APP("pay/unifiedorder"),
+    MWEB("pay/unifiedorder"),
     //刷卡付，暂未接触
     MICROPAY("pay/micropay"),
     // TODO 2017/3/8 19:14 author: egan  交易辅助接口
