@@ -168,11 +168,13 @@ public class PayController {
      * @return 二维码图像
      */
     @RequestMapping(value = "toWxAliQrPay.jpg", produces = "image/jpeg;charset=UTF-8")
-    public byte[] toWxAliQrPay(Integer wxPayId,Integer aliPayId, BigDecimal price) throws IOException {
+    public byte[] toWxAliQrPay(Integer wxPayId,Integer aliPayId, BigDecimal price, HttpServletRequest request) throws IOException {
         //获取对应的支付账户操作工具（可根据账户id）
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         //这里为需要生成二维码的地址
-        StringBuilder url =  new StringBuilder("http://192.168.1.107:9096/toWxAliPay.html?");
+        StringBuffer url = request.getRequestURL();
+        url = new StringBuffer(url.substring(0, url.lastIndexOf(request.getRequestURI())));
+         url .append("/toWxAliPay.html?");
         if (null != wxPayId){
             url.append("wxPayId=").append(wxPayId).append("&");
         }
@@ -194,11 +196,13 @@ public class PayController {
      * @return 支付宝与微信平台的判断
      */
     @RequestMapping(value = "toWxAliPay.html", produces = "text/html;charset=UTF-8")
-    public String toWxAliPay(Integer wxPayId,Integer aliPayId, BigDecimal price) throws IOException {
+    public String toWxAliPay(Integer wxPayId,Integer aliPayId, BigDecimal price, HttpServletRequest request) throws IOException {
         StringBuilder html = new StringBuilder();
 
         //这里为WAP支付的地址，根据需求自行修改
-        String url = "http://192.168.1.107:9096/toPay.html";
+        StringBuffer url = request.getRequestURL();
+        url = new StringBuffer(url.substring(0, url.lastIndexOf(request.getRequestURI())));
+        url .append("/toWxAliPay.html?");
 
         html.append("<html><head></head><body><script type=\"text/javascript\"> ");
 //        html.append("\nalert('111');\n");
