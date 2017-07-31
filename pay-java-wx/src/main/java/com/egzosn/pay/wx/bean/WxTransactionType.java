@@ -9,13 +9,14 @@ import com.egzosn.pay.common.bean.TransactionType;
  * email egzosn@gmail.com
  * date 2016/10/19 22:58
  */
-public enum  WxTransactionType implements TransactionType {
+public enum WxTransactionType implements TransactionType {
     //公众号支付
     JSAPI("pay/unifiedorder"),
     //扫码付
     NATIVE("pay/unifiedorder"),
     //移动支付
     APP("pay/unifiedorder"),
+    MWEB("pay/unifiedorder"),
     //刷卡付，暂未接触
     MICROPAY("pay/micropay"),
     // TODO 2017/3/8 19:14 author: egan  交易辅助接口
