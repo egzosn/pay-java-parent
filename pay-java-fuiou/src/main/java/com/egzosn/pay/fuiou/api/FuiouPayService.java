@@ -452,10 +452,4 @@ public class FuiouPayService extends BasePayService {
         return null;
     }
 
-    public static void main(String[] args) {
-        BigDecimal decimal = new BigDecimal(2295.204);
-        System.out.println(decimal.toString());
-        System.out.println(decimal.multiply(new BigDecimal(100)).setScale( 0, BigDecimal.ROUND_HALF_UP));
-    }
-
 }
