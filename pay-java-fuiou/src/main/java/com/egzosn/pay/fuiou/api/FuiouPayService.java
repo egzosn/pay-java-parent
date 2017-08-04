@@ -148,7 +148,7 @@ public class FuiouPayService extends BasePayService {
         LinkedHashMap<String, Object> parameters = new LinkedHashMap<String, Object>();
         parameters.put("mchnt_cd", payConfigStorage.getPid());//商户代码
         parameters.put("order_id", order.getOutTradeNo());//商户订单号
-        parameters.put("order_amt", (int)(order.getPrice().doubleValue() * 100));//交易金额
+        parameters.put("order_amt", order.getPrice().multiply(new BigDecimal(100)).setScale( 0, BigDecimal.ROUND_HALF_UP).intValue());//交易金额
 //        parameters.put("cur_type", null == order.getCurType() ? FuiouCurType.CNY:order.getCurType());//交易币种
         parameters.put("order_pay_type", order.getTransactionType());//支付类型
         parameters.put("page_notify_url", payConfigStorage.getReturnUrl());//商户接受支付结果通知地址
@@ -452,5 +452,10 @@ public class FuiouPayService extends BasePayService {
         return null;
     }
 
+    public static void main(String[] args) {
+        BigDecimal decimal = new BigDecimal(2295.204);
+        System.out.println(decimal.toString());
+        System.out.println(decimal.multiply(new BigDecimal(100)).setScale( 0, BigDecimal.ROUND_HALF_UP));
+    }
 
 }

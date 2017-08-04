@@ -139,7 +139,7 @@ public class WxPayService extends BasePayService {
         parameters.put("body", order.getSubject());// 购买支付信息
         parameters.put("out_trade_no", order.getOutTradeNo());// 订单号
         parameters.put("spbill_create_ip", "192.168.1.150");
-        parameters.put("total_fee", order.getPrice().multiply(new BigDecimal(100)).intValue());// 总金额单位为分
+        parameters.put("total_fee",  order.getPrice().multiply(new BigDecimal(100)).setScale( 0, BigDecimal.ROUND_HALF_UP).intValue());// 总金额单位为分
 
         parameters.put("attach", order.getBody());
         parameters.put("notify_url", payConfigStorage.getNotifyUrl());
