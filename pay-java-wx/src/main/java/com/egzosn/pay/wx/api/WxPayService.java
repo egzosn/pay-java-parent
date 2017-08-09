@@ -453,8 +453,8 @@ public class WxPayService extends BasePayService {
             parameters.put("out_trade_no", outTradeNo);
             parameters.put("out_refund_no", outTradeNo);
         }
-        parameters.put("total_fee", totalAmount.multiply(new BigDecimal(100)).intValue());
-        parameters.put("refund_fee", refundAmount.multiply(new BigDecimal(100)).intValue());
+        parameters.put("total_fee", totalAmount.multiply(new BigDecimal(100)).setScale( 0, BigDecimal.ROUND_HALF_UP).intValue());
+        parameters.put("refund_fee", refundAmount.multiply(new BigDecimal(100)).setScale( 0, BigDecimal.ROUND_HALF_UP).intValue());
         parameters.put("op_user_id", payConfigStorage.getPid());
 
         //设置签名
