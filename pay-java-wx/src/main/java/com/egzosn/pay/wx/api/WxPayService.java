@@ -9,13 +9,12 @@ import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.common.util.MatrixToImageWriter;
-import com.egzosn.pay.common.util.XML;
 import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.wx.bean.WxPayError;
 import com.egzosn.pay.wx.bean.WxTransactionType;
+import com.egzosn.pay.common.util.XML;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
@@ -140,7 +139,7 @@ public class WxPayService extends BasePayService {
         parameters.put("body", order.getSubject());// 购买支付信息
         parameters.put("out_trade_no", order.getOutTradeNo());// 订单号
         parameters.put("spbill_create_ip", "192.168.1.150");
-        parameters.put("total_fee", order.getPrice().multiply(new BigDecimal(100)).setScale( 0, BigDecimal.ROUND_HALF_UP).intValue());// 总金额单位为分
+        parameters.put("total_fee",  order.getPrice().multiply(new BigDecimal(100)).setScale( 0, BigDecimal.ROUND_HALF_UP).intValue());// 总金额单位为分
 
         parameters.put("attach", order.getBody());
         parameters.put("notify_url", payConfigStorage.getNotifyUrl());

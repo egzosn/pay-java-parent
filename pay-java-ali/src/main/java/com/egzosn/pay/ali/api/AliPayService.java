@@ -15,7 +15,6 @@ import com.egzosn.pay.common.util.MatrixToImageWriter;
 import com.egzosn.pay.common.util.sign.SignUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
 import java.math.BigDecimal;

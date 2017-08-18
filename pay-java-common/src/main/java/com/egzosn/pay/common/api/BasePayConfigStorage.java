@@ -13,7 +13,7 @@ import java.util.concurrent.locks.ReentrantLock;
  *     date 2017/3/5 20:33
  *  </pre>
  */
-public abstract class BasePayConfigStorage implements PayConfigStorage {
+public abstract class BasePayConfigStorage implements PayConfigStorage{
 
 
     // ali rsa_private 商户私钥，pkcs8格式

@@ -140,7 +140,6 @@ public enum PayType implements BasePayType {
 
         @Override
         public TransactionType getTransactionType(String transactionType) {
-            // in.egan.pay.ali.before.bean.AliTransactionType 17年更新的版本,旧版本请自行切换
             return FuiouTransactionType.valueOf(transactionType);
         }
 

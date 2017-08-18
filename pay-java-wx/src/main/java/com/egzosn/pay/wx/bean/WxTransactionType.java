@@ -9,7 +9,7 @@ import com.egzosn.pay.common.bean.TransactionType;
  * email egzosn@gmail.com
  * date 2016/10/19 22:58
  */
-public enum WxTransactionType implements TransactionType {
+public enum  WxTransactionType implements TransactionType {
     //公众号支付
     JSAPI("pay/unifiedorder"),
     //扫码付

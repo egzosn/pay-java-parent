@@ -146,6 +146,12 @@ public class PayOrder {
         this.outTradeNo = outTradeNo;
         this.transactionType = transactionType;
     }
+    public PayOrder(String subject, String body, BigDecimal price, String outTradeNo) {
+        this.subject = subject;
+        this.body = body;
+        this.price = price;
+        this.outTradeNo = outTradeNo;
+    }
 
     public String getOpenid() {
         return openid;

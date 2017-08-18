@@ -59,14 +59,14 @@ public class FuiouPayService extends BasePayService {
      * @param payConfigStorage 支付账户配置信息
      * @param configStorage 网络代理配置
      */
-    public FuiouPayService(PayConfigStorage payConfigStorage, HttpConfigStorage configStorage) {
+    public FuiouPayService (PayConfigStorage payConfigStorage, HttpConfigStorage configStorage) {
         super(payConfigStorage, configStorage);
     }
     /**
      * 构造函数，初始化时候使用
      * @param payConfigStorage 支付账户配置信息
      */
-    public FuiouPayService(PayConfigStorage payConfigStorage) {
+    public FuiouPayService (PayConfigStorage payConfigStorage) {
         super(payConfigStorage);
     }
 
@@ -273,7 +273,7 @@ public class FuiouPayService extends BasePayService {
      * @param url 支付请求url地址
      * @return form表单html代码
      */
-    private String getFormString(Map<String, Object> param, MethodType method, String url) {
+    private String getFormString(Map<String, Object> param, MethodType method,String url) {
         StringBuffer formHtml = new StringBuffer();
         formHtml.append("<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">");
         formHtml.append( "<title>提交到富友交易系统</title></head>");
@@ -451,6 +451,5 @@ public class FuiouPayService extends BasePayService {
     public <T> T secondaryInterface (Object tradeNoOrBillDate, String outTradeNoBillType, TransactionType transactionType, Callback<T> callback) {
         return null;
     }
-
 
 }

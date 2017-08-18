@@ -53,6 +53,4 @@ public class FuiouPayConfigStorage extends BasePayConfigStorage {
         return null;
     }
 
-
-
 }

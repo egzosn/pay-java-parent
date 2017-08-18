@@ -11,9 +11,10 @@ import com.egzosn.pay.common.api.BasePayConfigStorage;
  */
 public class WxYouDianPayConfigStorage extends BasePayConfigStorage {
 
-    public volatile String secretKey;
+
     //账号
     public volatile String seller;
+
 
 
 

@@ -34,6 +34,7 @@ public class AliPayConfigStorage extends BasePayConfigStorage {
     }
 
 
+
     public void setAppId(String appId) {
         this.appId = appId;
     }
