@@ -55,7 +55,8 @@
 
 测试链接 ： http://pay.egzosn.com/index.html
 
-#######单一支付教程 
+######单一支付教程 
+
  [支付宝](pay-java-ali?dir=1&filepath=pay-java-ali)
  [微信](pay-java-wx?dir=1&filepath=pay-java-wx)
  [友店微信](pay-java-wx-youdian?dir=1&filepath=pay-java-youdian)
