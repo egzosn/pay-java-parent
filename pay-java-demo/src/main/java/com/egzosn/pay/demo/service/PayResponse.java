@@ -57,12 +57,14 @@ public class PayResponse {
     }
 
     /**
-     * 获取http配置，如果配置为null则为默认配置，无代理。
-     * 此处非必需
-     * @return
+     * 获取http配置，如果配置为null则为默认配置，无代理,无证书的请求方式。
+     *  此处非必需
+     * @param apyAccount 账户信息
+     * @return 请求配置
      */
-    public HttpConfigStorage getHttpConfigStorage(){
+    public HttpConfigStorage getHttpConfigStorage(ApyAccount apyAccount){
         HttpConfigStorage httpConfigStorage = new HttpConfigStorage();
+     /*
         //http代理地址
         httpConfigStorage.setHttpProxyHost("192.168.1.69");
         //代理端口
@@ -71,6 +73,10 @@ public class PayResponse {
         httpConfigStorage.setHttpProxyUsername("user");
         //代理密码
         httpConfigStorage.setHttpProxyPassword("password");
+
+        */
+        httpConfigStorage.setKeystorePath(apyAccount.getKeystorePath());
+        httpConfigStorage.setStorePassword(apyAccount.getStorePassword());
         return httpConfigStorage;
     }
 

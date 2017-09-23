@@ -40,6 +40,13 @@ public class ApyAccount {
     // 收款账号
 //    @Column(name = "seller")
     private String seller;
+
+    //请求证书地址，请使用绝对路径
+    private String keystorePath;
+    //证书对应的密码
+    private String storePassword;
+
+
     // 签名类型
 //    @Column(name = "sign_type")
     private String signType;
@@ -154,6 +161,22 @@ public class ApyAccount {
 
     public boolean isTest() {
         return isTest;
+    }
+
+    public String getKeystorePath() {
+        return keystorePath;
+    }
+
+    public void setKeystorePath(String keystorePath) {
+        this.keystorePath = keystorePath;
+    }
+
+    public String getStorePassword() {
+        return storePassword;
+    }
+
+    public void setStorePassword(String storePassword) {
+        this.storePassword = storePassword;
     }
 
     public void setTest(boolean test) {

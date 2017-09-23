@@ -7,21 +7,27 @@ import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.conn.ssl.DefaultHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-
+import org.apache.http.ssl.SSLContexts;
+import javax.net.ssl.SSLContext;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URI;
+import java.security.*;
 import java.util.Map;
 
 /**
  * http请求工具
  * @author: egan
- *  <pre>
- * email egzosn@gmail.com
+ *  <code>
+ * email egzosn@gmail.com <br/>
  * date 2017/3/3 21:33
- *  </pre>
+ *  </code>
  */
 public class HttpRequestTemplate {
 
@@ -29,6 +35,10 @@ public class HttpRequestTemplate {
 
     protected HttpHost httpProxy;
 
+    /**
+     *  获取代理带代理地址的 HttpHost
+     * @return 获取代理带代理地址的 HttpHost
+     */
     public HttpHost getHttpProxy() {
         return httpProxy;
     }
@@ -37,6 +47,10 @@ public class HttpRequestTemplate {
         return httpClient;
     }
 
+    /**
+     *  初始化
+     * @param configStorage 请求配置
+     */
     public HttpRequestTemplate(HttpConfigStorage configStorage) {
         setHttpConfigStorage(configStorage);
     }
@@ -45,39 +59,92 @@ public class HttpRequestTemplate {
         setHttpConfigStorage(null);
     }
 
+
+    /**
+     *  创建ssl配置
+     * @param configStorage 请求配置
+     * @return SSLConnectionSocketFactory  Layered socket factory for TLS/SSL connections.
+     */
+    public SSLConnectionSocketFactory createSSL( HttpConfigStorage configStorage){
+
+        if (StringUtils.isEmpty(configStorage.getKeystorePath()) || StringUtils.isEmpty(configStorage.getKeystorePath())){
+            return null;
+        }
+
+            //读取本机存放的PKCS12证书文件
+        try(FileInputStream instream = new FileInputStream(new File(configStorage.getKeystorePath()))){
+                //指定读取证书格式为PKCS12
+                KeyStore keyStore = KeyStore.getInstance("PKCS12");
+
+                char[] password = configStorage.getStorePassword().toCharArray();
+                //指定PKCS12的密码
+                keyStore.load(instream, password);
+                SSLContext sslcontext = SSLContexts.custom()
+                        .loadKeyMaterial(keyStore, password).build();
+
+                //指定TLS版本
+                SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
+                        sslcontext, new String[]{"TLSv1"}, null,
+                        new DefaultHostnameVerifier());
+
+                return sslsf;
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (GeneralSecurityException e) {
+            e.printStackTrace();
+        }
+        return null;
+
+    }
+
+    /**
+     * 创建代理服务器
+     * @param configStorage 请求配置
+     * @return 代理服务器配置
+     */
+    public CredentialsProvider createProxy(HttpConfigStorage configStorage){
+
+        if (StringUtils.isBlank(configStorage.getHttpProxyHost())) {
+            return null;
+        }
+        //http代理地址设置
+        httpProxy = new HttpHost(configStorage.getHttpProxyHost(), configStorage.getHttpProxyPort());
+
+        if (StringUtils.isNotBlank(configStorage.getHttpProxyHost())) {
+            return null;
+        }
+
+        // 需要用户认证的代理服务器
+        CredentialsProvider credsProvider = new BasicCredentialsProvider();
+        credsProvider.setCredentials(
+                new AuthScope(configStorage.getHttpProxyHost(), configStorage.getHttpProxyPort()),
+                new UsernamePasswordCredentials(configStorage.getHttpProxyUsername(), configStorage.getHttpProxyPassword()));
+
+
+        return credsProvider;
+    }
+
     /**
      * 设置HTTP请求的配置
+     *
      * @param configStorage 请求配置
      * @return 当前HTTP请求的客户端模板
      */
-    public HttpRequestTemplate setHttpConfigStorage(HttpConfigStorage configStorage){
+    public HttpRequestTemplate setHttpConfigStorage(HttpConfigStorage configStorage) {
 
-        if (null == configStorage){
+        if (null == configStorage) {
             httpClient = HttpClients.createDefault();
             return this;
         }
 
+        httpClient = HttpClients
+                .custom()
+                //设置代理
+                .setDefaultCredentialsProvider(createProxy(configStorage))
+                //设置httpclient的SSLSocketFactory
+                .setSSLSocketFactory(createSSL(configStorage))
+                .build();
 
-        if (StringUtils.isNotBlank(configStorage.getHttpProxyHost())) {
-            // 使用代理服务器
-            if (StringUtils.isNotBlank(configStorage.getHttpProxyUsername())) {
-                // 需要用户认证的代理服务器
-                CredentialsProvider credsProvider = new BasicCredentialsProvider();
-                credsProvider.setCredentials(
-                        new AuthScope(configStorage.getHttpProxyHost(), configStorage.getHttpProxyPort()),
-                        new UsernamePasswordCredentials(configStorage.getHttpProxyUsername(), configStorage.getHttpProxyPassword()));
-                httpClient = HttpClients
-                        .custom()
-                        .setDefaultCredentialsProvider(credsProvider)
-                        .build();
-            } else {
-                // 无需用户认证的代理服务器
-                httpClient = HttpClients.createDefault();
-            }
-            httpProxy = new HttpHost(configStorage.getHttpProxyHost(), configStorage.getHttpProxyPort());
-        } else {
-            httpClient = HttpClients.createDefault();
-        }
         return this;
     }
 
@@ -132,10 +199,13 @@ public class HttpRequestTemplate {
      * @param <T>          响应类型
      * @return 类型对象
      * <code>
-     * Map&lt;String, String&gt; uriVariables = new HashMap&lt;String, String&gt;();
-     * uriVariables.put(&quot;id&quot;, &quot;1&quot;);
-     * uriVariables.put(&quot;type&quot;, &quot;APP&quot;);
-     * getForObject(&quot;http://egan.in/pay/{id}/f/{type}&quot;, String.class, uriVariables)
+     * Map&lt;String, String&gt; uriVariables = new HashMap&lt;String, String&gt;();<br/>
+     *
+     * uriVariables.put(&quot;id&quot;, &quot;1&quot;);<br/>
+     *
+     * uriVariables.put(&quot;type&quot;, &quot;APP&quot;);<br/>
+     *
+     * getForObject(&quot;http://egan.in/pay/{id}/f/{type}&quot;, String.class, uriVariables)<br/>
      * </code>
      */
     public <T> T getForObject(String uri, Class<T> responseType, Map<String, ?> uriVariables){

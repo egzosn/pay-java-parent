@@ -19,6 +19,11 @@ public class HttpConfigStorage {
     //代理密码
     protected String httpProxyPassword;
 
+    //https请求所需的证书（PKCS12）地址，请使用绝对路径
+    private String keystorePath;
+    //证书对应的密码
+    private String storePassword;
+
 
     /**
      * http代理地址
@@ -68,5 +73,27 @@ public class HttpConfigStorage {
         this.httpProxyPassword = httpProxyPassword;
     }
 
+    /**
+     * https请求所需的证书（PKCS12）地址，请使用绝对路径
+     * @return 证书（PKCS12）地址
+     */
+    public String getKeystorePath() {
+        return keystorePath;
+    }
 
+    public void setKeystorePath(String keystorePath) {
+        this.keystorePath = keystorePath;
+    }
+
+    /**
+     * 证书对应的密码
+     * @return 密码
+     */
+    public String getStorePassword() {
+        return storePassword;
+    }
+
+    public void setStorePassword(String storePassword) {
+        this.storePassword = storePassword;
+    }
 }
