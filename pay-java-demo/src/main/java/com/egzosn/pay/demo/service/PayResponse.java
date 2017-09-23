@@ -51,7 +51,7 @@ public class PayResponse {
         //根据不同的账户类型 初始化支付配置
         this.service = apyAccount.getPayType().getPayService(apyAccount);
         this.storage = service.getPayConfigStorage();
-        //这里设置代理配置
+        //这里设置http请求配置
 //        service.setRequestTemplateConfigStorage(getHttpConfigStorage());
         buildRouter(apyAccount.getPayId());
     }
@@ -75,7 +75,9 @@ public class PayResponse {
         httpConfigStorage.setHttpProxyPassword("password");
 
         */
+        //设置ssl证书路径
         httpConfigStorage.setKeystorePath(apyAccount.getKeystorePath());
+        //设置ssl证书对应的密码
         httpConfigStorage.setStorePassword(apyAccount.getStorePassword());
         return httpConfigStorage;
     }

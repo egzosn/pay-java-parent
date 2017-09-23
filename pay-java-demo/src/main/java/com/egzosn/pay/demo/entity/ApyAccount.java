@@ -42,8 +42,10 @@ public class ApyAccount {
     private String seller;
 
     //请求证书地址，请使用绝对路径
+//    @Column(name = "keystore_path")
     private String keystorePath;
     //证书对应的密码
+//    @Column(name = "store_password")
     private String storePassword;
 
 

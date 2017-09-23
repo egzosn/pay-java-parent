@@ -124,20 +124,44 @@ public class PayResponse {
 
     }
 
+ 
     /**
      * 初始化支付配置
      * @param apyAccount 账户信息
-     * @see com.egzosn.pay.demo.entity.ApyAccount 对应表结构详情--》 pay-java-demo/resources/apy_account.sql
+     * @see ApyAccount 对应表结构详情--》 /pay-java-demo/resources/apy_account.sql
      */
     public void init(ApyAccount apyAccount) {
-
         //根据不同的账户类型 初始化支付配置
         this.service = apyAccount.getPayType().getPayService(apyAccount);
         this.storage = service.getPayConfigStorage();
-
+        //这里设置代理配置
+//        service.setRequestTemplateConfigStorage(getHttpConfigStorage());
         buildRouter(apyAccount.getPayId());
     }
 
+    /**
+     * 获取http配置，如果配置为null则为默认配置，无代理,无证书的请求方式。
+     *  此处非必需
+     * @param apyAccount 账户信息
+     * @return 请求配置
+     */
+    public HttpConfigStorage getHttpConfigStorage(ApyAccount apyAccount){
+        HttpConfigStorage httpConfigStorage = new HttpConfigStorage();
+     /*
+        //http代理地址
+        httpConfigStorage.setHttpProxyHost("192.168.1.69");
+        //代理端口
+        httpConfigStorage.setHttpProxyPort(3308);
+        //代理用户名
+        httpConfigStorage.setHttpProxyUsername("user");
+        //代理密码
+        httpConfigStorage.setHttpProxyPassword("password");
+
+        */
+        httpConfigStorage.setKeystorePath(apyAccount.getKeystorePath());
+        httpConfigStorage.setStorePassword(apyAccount.getStorePassword());
+        return httpConfigStorage;
+    }
 
 
 
