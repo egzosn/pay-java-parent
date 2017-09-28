@@ -25,7 +25,7 @@ import java.util.Map;
  * http请求工具
  * @author: egan
  *  <code>
- * email egzosn@gmail.com <br/>
+ * email egzosn@gmail.com <br>
  * date 2017/3/3 21:33
  *  </code>
  */
@@ -199,13 +199,13 @@ public class HttpRequestTemplate {
      * @param <T>          响应类型
      * @return 类型对象
      * <code>
-     * Map&lt;String, String&gt; uriVariables = new HashMap&lt;String, String&gt;();<br/>
+     * Map&lt;String, String&gt; uriVariables = new HashMap&lt;String, String&gt;();<br>
      *
-     * uriVariables.put(&quot;id&quot;, &quot;1&quot;);<br/>
+     * uriVariables.put(&quot;id&quot;, &quot;1&quot;);<br>
      *
-     * uriVariables.put(&quot;type&quot;, &quot;APP&quot;);<br/>
+     * uriVariables.put(&quot;type&quot;, &quot;APP&quot;);<br>
      *
-     * getForObject(&quot;http://egan.in/pay/{id}/f/{type}&quot;, String.class, uriVariables)<br/>
+     * getForObject(&quot;http://egan.in/pay/{id}/f/{type}&quot;, String.class, uriVariables)<br>
      * </code>
      */
     public <T> T getForObject(String uri, Class<T> responseType, Map<String, ?> uriVariables){
