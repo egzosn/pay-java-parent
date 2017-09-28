@@ -363,7 +363,7 @@ public class FuiouPayService extends BasePayService {
         df.setTimeZone(TimeZone.getTimeZone("GMT+8"));
         params.put("origin_order_date",df.format(new Date()));//原交易日期
         params.put("origin_order_id",tradeNo);//原订单号
-        params.put("refund_amt",refundAmount);//退款金额
+        params.put("refund_amt",refundAmount.multiply(new BigDecimal(100)).setScale( 0, BigDecimal.ROUND_HALF_UP).intValue());//退款金额
         params.put("rem","");//备注
         params.put("md5",createSign(SignUtils.parameters2MD5Str(params,"|"),payConfigStorage.getInputCharset()));
         JSONObject resultJson   = getHttpRequestTemplate().postForObject(getReqUrl() + URL_FuiouSmpRefundGate,params,JSONObject.class);
