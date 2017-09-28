@@ -145,3 +145,43 @@
 
 ```
 
+
+####支付订单查询
+
+```java
+        
+      Map result = service..query("支付宝单号", "我方系统单号");
+
+```
+
+
+####交易关闭接口
+  ```java
+
+          Map result = service..query("支付宝单号", "我方系统单号");
+
+```
+
+
+####申请退款接口
+  ```java
+
+          Map result = service.refund("支付宝单号", "我方系统单号", "退款金额", "订单总金额");
+
+```
+
+
+####查询退款
+  ```java
+
+          Map result = service.refundquery("支付宝单号", "我方系统单号");
+
+```
+
+####下载对账单
+  ```java
+
+          Map result = service.downloadbill("账单时间：日账单格式为yyyy-MM-dd，月账单格式为yyyy-MM", "账单类型");
+
+```
+
