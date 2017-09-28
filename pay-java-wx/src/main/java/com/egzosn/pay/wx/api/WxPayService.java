@@ -24,7 +24,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
- *  支付宝支付通知
+ *   微信支付服务
  * @author  egan
  * <pre>
  * email egzosn@gmail.com
@@ -320,7 +320,6 @@ public class WxPayService extends BasePayService {
 
     /**
      * 获取输出二维码，用户返回给支付端,
-     * 暂未实现或无此功能
      * @param order 发起支付的订单信息
      * @return 返回图片信息，支付时需要的
      */
@@ -453,8 +452,8 @@ public class WxPayService extends BasePayService {
             parameters.put("out_trade_no", outTradeNo);
             parameters.put("out_refund_no", outTradeNo);
         }
-        parameters.put("total_fee", totalAmount.multiply(new BigDecimal(100)).intValue());
-        parameters.put("refund_fee", refundAmount.multiply(new BigDecimal(100)).intValue());
+        parameters.put("total_fee", totalAmount.multiply(new BigDecimal(100)).setScale( 0, BigDecimal.ROUND_HALF_UP).intValue());
+        parameters.put("refund_fee", refundAmount.multiply(new BigDecimal(100)).setScale( 0, BigDecimal.ROUND_HALF_UP).intValue());
         parameters.put("op_user_id", payConfigStorage.getPid());
 
         //设置签名
