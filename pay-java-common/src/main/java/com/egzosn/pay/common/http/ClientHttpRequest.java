@@ -121,6 +121,7 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
 
     }
 
+
     @Override
     public T handleResponse(HttpResponse response) throws ClientProtocolException, IOException {
         final StatusLine statusLine = response.getStatusLine();
