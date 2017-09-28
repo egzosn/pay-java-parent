@@ -23,12 +23,41 @@
 ```
 
 
+#### 网络请求配置
+
+```java
+
+        HttpConfigStorage httpConfigStorage = new HttpConfigStorage();
+        /* 网路代理配置 根据需求进行设置**/
+        //http代理地址
+        httpConfigStorage.setHttpProxyHost("192.168.1.69");
+        //代理端口
+        httpConfigStorage.setHttpProxyPort(3308);
+        //代理用户名
+        httpConfigStorage.setHttpProxyUsername("user");
+        //代理密码
+        httpConfigStorage.setHttpProxyPassword("password");
+        /* /网路代理配置 根据需求进行设置**/
+    
+         /* 网络请求ssl证书 根据需求进行设置**/
+        //设置ssl证书路径
+        httpConfigStorage.setKeystorePath("证书绝对路径");
+        //设置ssl证书对应的密码
+        httpConfigStorage.setStorePassword("证书对应的密码");
+        /* /网络请求ssl证书**/
+        
+```
+
+
 ####创建支付服务
 
 
 ```java
     //支付服务
      PayService service = new AliPayService(aliPayConfigStorage);
+
+     //设置网络请求配置根据需求进行设置
+     //service.setRequestTemplateConfigStorage(httpConfigStorage)
 
 ```
 

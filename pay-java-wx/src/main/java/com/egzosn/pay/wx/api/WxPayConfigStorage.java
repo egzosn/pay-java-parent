@@ -3,7 +3,7 @@ package com.egzosn.pay.wx.api;
 import com.egzosn.pay.common.api.BasePayConfigStorage;
 
 /**
- * 支付客户端配置存储
+ * 微信配置存储
  * @author  egan
  *
  * <pre>

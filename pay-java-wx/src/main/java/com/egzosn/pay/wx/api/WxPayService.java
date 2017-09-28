@@ -24,7 +24,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
- *  支付宝支付通知
+ *   微信支付服务
  * @author  egan
  * <pre>
  * email egzosn@gmail.com
@@ -320,7 +320,6 @@ public class WxPayService extends BasePayService {
 
     /**
      * 获取输出二维码，用户返回给支付端,
-     * 暂未实现或无此功能
      * @param order 发起支付的订单信息
      * @return 返回图片信息，支付时需要的
      */
