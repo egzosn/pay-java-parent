@@ -16,6 +16,8 @@ CREATE TABLE `pay_account` (
   `input_charset` VARCHAR(16) DEFAULT NULL COMMENT '枚举值，字符编码 utf-8,gbk等等',
   `pay_type` CHAR(16) DEFAULT NULL COMMENT '支付类型,aliPay：支付宝，wxPay：微信, youdianPay: 友店微信,此处开发者自定义对应com.egzosn.pay.demo.entity.PayType枚举值',
   `msg_type` CHAR(8) DEFAULT NULL COMMENT '消息类型，text,xml,json',
+  `keystore_path` VARCHAR(256) DEFAULT NULL COMMENT '请求证书地址，请使用绝对路径',
+  `store_password` VARCHAR(256) DEFAULT NULL COMMENT '证书对应的密码',
   `is_test` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '是否为测试环境',
   `create_by` CHAR(32) DEFAULT NULL COMMENT '创建人',
   `create_time` TIMESTAMP NULL DEFAULT NULL COMMENT '创建时间',

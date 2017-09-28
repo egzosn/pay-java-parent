@@ -51,26 +51,34 @@ public class PayResponse {
         //根据不同的账户类型 初始化支付配置
         this.service = apyAccount.getPayType().getPayService(apyAccount);
         this.storage = service.getPayConfigStorage();
-        //这里设置代理配置
+        //这里设置http请求配置
 //        service.setRequestTemplateConfigStorage(getHttpConfigStorage());
         buildRouter(apyAccount.getPayId());
     }
 
     /**
-     * 获取http配置，如果配置为null则为默认配置，无代理。
-     * 此处非必需
-     * @return
+     * 获取http配置，如果配置为null则为默认配置，无代理,无证书的请求方式。
+     *  此处非必需
+     * @param apyAccount 账户信息
+     * @return 请求配置
      */
-    public HttpConfigStorage getHttpConfigStorage(){
+    public HttpConfigStorage getHttpConfigStorage(ApyAccount apyAccount){
         HttpConfigStorage httpConfigStorage = new HttpConfigStorage();
-        //http代理地址
-        httpConfigStorage.setHttpProxyHost("192.168.1.69");
-        //代理端口
-        httpConfigStorage.setHttpProxyPort(3308);
-        //代理用户名
-        httpConfigStorage.setHttpProxyUsername("user");
-        //代理密码
-        httpConfigStorage.setHttpProxyPassword("password");
+     /* 网路代理配置 根据需求进行设置*/
+//        //http代理地址
+//        httpConfigStorage.setHttpProxyHost("192.168.1.69");
+//        //代理端口
+//        httpConfigStorage.setHttpProxyPort(3308);
+//        //代理用户名
+//        httpConfigStorage.setHttpProxyUsername("user");
+//        //代理密码
+//        httpConfigStorage.setHttpProxyPassword("password");
+
+
+        //设置ssl证书路径
+        httpConfigStorage.setKeystorePath(apyAccount.getKeystorePath());
+        //设置ssl证书对应的密码
+        httpConfigStorage.setStorePassword(apyAccount.getStorePassword());
         return httpConfigStorage;
     }
 
