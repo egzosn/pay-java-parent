@@ -3,7 +3,7 @@ package com.egzosn.pay.ali.api;
 import com.egzosn.pay.common.api.BasePayConfigStorage;
 
 /**
- * 支付客户端配置存储
+ * 支付配置存储
  * author  egan
  *
  * email egzosn@gmail.com

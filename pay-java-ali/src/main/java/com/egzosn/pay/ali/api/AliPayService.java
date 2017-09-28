@@ -23,7 +23,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
- *  支付宝支付通知
+ *  支付宝支付服务
  * @author  egan
  *
  * email egzosn@gmail.com
@@ -293,7 +293,6 @@ public class AliPayService extends BasePayService {
 
     /**
      * 生成二维码支付
-     * 暂未实现或无此功能
      * @param order 发起支付的订单信息
      * @return 返回图片信息，支付时需要的
      */
