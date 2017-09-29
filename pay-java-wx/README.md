@@ -143,7 +143,7 @@
 
 ```java
         
-      Map result = service..query("支付宝单号", "我方系统单号");
+      Map result = service..query("微信单号", "我方系统单号");
 
 ```
 
@@ -151,7 +151,7 @@
 ####交易关闭接口
   ```java
 
-          Map result = service..query("支付宝单号", "我方系统单号");
+          Map result = service..query("微信单号", "我方系统单号");
 
 ```
 
@@ -159,7 +159,7 @@
 ####申请退款接口
   ```java
 
-          Map result = service.refund("支付宝单号", "我方系统单号", "退款金额", "订单总金额");
+          Map result = service.refund("微信单号", "我方系统单号", "退款金额", "订单总金额");
 
 ```
 
@@ -167,7 +167,7 @@
 ####查询退款
   ```java
 
-          Map result = service.refundquery("支付宝单号", "我方系统单号");
+          Map result = service.refundquery("微信单号", "我方系统单号");
 
 ```
 
