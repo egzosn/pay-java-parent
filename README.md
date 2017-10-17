@@ -72,6 +72,8 @@ android 例子 [pay-java-android](http://git.oschina.net/egzosn/pay-java-android
 
 这里感谢[ouyangxiangshao](https://github.com/ouyangxiangshao),[ZhuangXiong](https://github.com/ZhuangXiong) 与[Actinian](http://git.oschina.net/Actinia517) 所提交的安卓例子或者分支
 
+也感谢各大友友同学帮忙进行接口测试
+
 非常欢迎和感谢对本项目发起Pull Request的同学，不过本项目基于git flow开发流程，因此在发起Pull Request的时候请选择develop分支。
 
 E-Mail：egzosn@gmail.com
