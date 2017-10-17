@@ -10,6 +10,7 @@ import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.common.util.MatrixToImageWriter;
 import com.egzosn.pay.common.util.sign.SignUtils;
+import com.egzosn.pay.common.util.str.StringUtils;
 import com.egzosn.pay.wx.bean.WxPayError;
 import com.egzosn.pay.wx.bean.WxTransactionType;
 import com.egzosn.pay.common.util.XML;
@@ -32,21 +33,29 @@ import java.util.*;
  * </pre>
  */
 public class WxPayService extends BasePayService {
-    protected final Log log = LogFactory.getLog(WxPayService.class);
+    protected final Log LOG = LogFactory.getLog(WxPayService.class);
 
 
-
-
-    public final static String uri = "https://api.mch.weixin.qq.com/";
+    /**
+     * 微信请求地址
+     */
+    public final static String URI = "https://api.mch.weixin.qq.com/";
 //    public final static String unifiedOrderUrl = "https://api.mch.weixin.qq.com/pay/unifiedorder";
     //    public final static String orderqueryUrl = "https://api.mch.weixin.qq.com/pay/orderquery";
 
 
-
+    /**
+     * 创建支付服务
+     * @param payConfigStorage 微信对应的支付配置
+     */
     public WxPayService(PayConfigStorage payConfigStorage) {
         super(payConfigStorage);
     }
-
+    /**
+     * 创建支付服务
+     * @param payConfigStorage 微信对应的支付配置
+     * @param configStorage 微信对应的网络配置，包含代理配置、ssl证书配置
+     */
     public WxPayService(PayConfigStorage payConfigStorage, HttpConfigStorage configStorage) {
         super(payConfigStorage, configStorage);
     }
@@ -58,7 +67,7 @@ public class WxPayService extends BasePayService {
      */
     private String getUrl(TransactionType transactionType){
 
-        return uri + transactionType.getMethod();
+        return URI + transactionType.getMethod();
     }
 
     /**
@@ -70,19 +79,19 @@ public class WxPayService extends BasePayService {
     @Override
     public boolean verify(Map<String, Object> params) {
         if (!"SUCCESS".equals(params.get("return_code"))){
-            log.debug(String.format("微信支付异常：return_code=%s,参数集=%s", params.get("return_code"), params));
+            LOG.debug(String.format("微信支付异常：return_code=%s,参数集=%s", params.get("return_code"), params));
             return false;
         }
 
         if(null == params.get("sign")) {
-            log.debug("微信支付异常：签名为空！out_trade_no=" + params.get("out_trade_no"));
+            LOG.debug("微信支付异常：签名为空！out_trade_no=" + params.get("out_trade_no"));
             return false;
         }
 
         try {
             return signVerify(params, (String) params.get("sign")) && verifySource((String)params.get("out_trade_no"));
         } catch (PayErrorException e) {
-            e.printStackTrace();
+            LOG.error(e);
         }
         return false;
     }
@@ -183,7 +192,7 @@ public class WxPayService extends BasePayService {
         parameters.put("sign", sign);
 
         String requestXML = XML.getMap2Xml(parameters);
-        log.debug("requestXML：" + requestXML);
+        LOG.debug("requestXML：" + requestXML);
         //调起支付的参数列表
         JSONObject result = requestTemplate.postForObject(getUrl(order.getTransactionType()), requestXML, JSONObject.class);
 
@@ -268,9 +277,9 @@ public class WxPayService extends BasePayService {
         try {
             return  XML.inputStream2Map(is, map);
         } catch (IOException e) {
-            e.printStackTrace();
+           throw new PayErrorException(new PayException("IOException", e.getMessage()));
         }
-        return map;
+
     }
 
     /**
@@ -544,7 +553,7 @@ public class WxPayService extends BasePayService {
      * @return 返回支付方对应接口的结果
      */
     @Override
-    public <T> T secondaryInterface(Object transactionIdOrBillDate, String outTradeNoBillType, TransactionType transactionType, Callback<T> callback) {
+    public  <T> T secondaryInterface(Object transactionIdOrBillDate, String outTradeNoBillType, TransactionType transactionType, Callback<T> callback) {
 
         if (transactionType == WxTransactionType.REFUND){
             throw new PayErrorException(new PayException("failure", "通用接口不支持:" + transactionType));
@@ -558,13 +567,13 @@ public class WxPayService extends BasePayService {
             throw new PayErrorException(new PayException("failure", "非法类型异常:" + transactionIdOrBillDate.getClass()));
         }
 
-        if (!(transactionIdOrBillDate instanceof  String)){
+        if (!(null == transactionIdOrBillDate || transactionIdOrBillDate instanceof  String)){
             throw new PayErrorException(new PayException("failure", "非法类型异常:" + transactionIdOrBillDate.getClass()));
         }
 
         //获取公共参数
-        Map<String, Object> parameters = getPublicParameters();
-        if (null == transactionIdOrBillDate ||  "".equals(transactionIdOrBillDate)){
+        Map<String, Object> parameters = new HashMap<>();//getPublicParameters();
+        if (StringUtils.isEmpty((String)transactionIdOrBillDate)){
             parameters.put("out_trade_no", outTradeNoBillType);
         }else {
             parameters.put("transaction_id", transactionIdOrBillDate);
@@ -574,6 +583,9 @@ public class WxPayService extends BasePayService {
         return  callback.perform(requestTemplate.postForObject(getUrl(transactionType), XML.getMap2Xml(parameters) , JSONObject.class));
     }
 
-
+    public static void main(String[] args) {
+        WxPayService service = new WxPayService(null);
+        service.secondaryInterface(null, "aaa", WxTransactionType.MWEB, null);
+    }
 
 }

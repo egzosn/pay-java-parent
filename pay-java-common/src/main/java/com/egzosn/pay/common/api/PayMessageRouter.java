@@ -43,18 +43,32 @@ import java.util.concurrent.Future;
  */
 public class PayMessageRouter {
 
-  protected final Log log = LogFactory.getLog(PayMessageRouter.class);
-
+  protected final Log LOG = LogFactory.getLog(PayMessageRouter.class);
+  /**
+   * 异步线程大小
+   */
   private static final int DEFAULT_THREAD_POOL_SIZE = 100;
-
+  /**
+   * 规则集
+   */
   private final List<PayMessageRouterRule> rules = new ArrayList<PayMessageRouterRule>();
-
+  /**
+   * 支付服务
+   */
   private final PayService payService;
-
+  /**
+   * 异步线程处理器
+   */
   private ExecutorService executorService;
-
+  /**
+   * 支付异常处理器
+   */
   private PayErrorExceptionHandler exceptionHandler;
 
+  /**
+   * 根据支付服务创建路由
+   * @param payService 支付服务
+   */
   public PayMessageRouter(PayService payService) {
     this.payService = payService;
     this.executorService = Executors.newFixedThreadPool(DEFAULT_THREAD_POOL_SIZE);
@@ -138,7 +152,7 @@ public class PayMessageRouter {
       } else {
         res = rule.service(payMessage, payService, exceptionHandler);
         // 在同步操作结束，session访问结束
-        log.debug("End session access: async=false, fromPay=" + payMessage.getFromPay());
+        LOG.debug("End session access: async=false, fromPay=" + payMessage.getFromPay());
       }
     }
 
@@ -149,12 +163,12 @@ public class PayMessageRouter {
           for (Future future : futures) {
             try {
               future.get();
-              log.debug("End session access: async=true, fromPay=" + payMessage.getFromPay());
+              LOG.debug("End session access: async=true, fromPay=" + payMessage.getFromPay());
 
             } catch (InterruptedException e) {
-              log.error("Error happened when wait task finish", e);
+              LOG.error("Error happened when wait task finish", e);
             } catch (ExecutionException e) {
-              log.error("Error happened when wait task finish", e);
+              LOG.error("Error happened when wait task finish", e);
             }
           }
         }

@@ -2,6 +2,8 @@ package com.egzosn.pay.common.util;
 
 
 import com.alibaba.fastjson.JSONObject;
+import com.egzosn.pay.common.bean.result.PayException;
+import com.egzosn.pay.common.exception.PayErrorException;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
@@ -38,9 +40,9 @@ public class XML {
         try (InputStream in = new ByteArrayInputStream(content.getBytes("UTF-8"))){
             return (JSONObject) inputStream2Map(in, null);
         } catch (IOException e) {
-            e.printStackTrace();
+             throw new PayErrorException(new PayException("IOException", e.getMessage()));
         }
-        return null;
+
 
     }
 
@@ -58,9 +60,8 @@ public class XML {
         try {
             return (JSONObject)inputStream2Map(in, null);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new PayErrorException(new PayException("IOException", e.getMessage()));
         }
-        return null;
 
 
     }
@@ -95,7 +96,7 @@ public class XML {
                 m.put(k, v);
             }
         } catch (JDOMException e) {
-            e.printStackTrace();
+            throw new PayErrorException(new PayException("JDOMException", e.getMessage()));
         }
         return m;
     }

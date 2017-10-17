@@ -153,11 +153,11 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
                     entity.writeTo((OutputStream)t);
                     return t;
                 } catch (InstantiationException e) {
-                    e.printStackTrace();
+                    throw new PayErrorException(new PayException("InstantiationException", e.getMessage()));
                 } catch (IllegalAccessException e) {
-                    e.printStackTrace();
+                    throw new PayErrorException(new PayException("IllegalAccessException", e.getMessage()));
                 }
-                throw  new HttpResponseException(statusLine.getStatusCode(), responseType + " 无法进行类型转换");
+
             }
         }
         String charset = "UTF-8";
@@ -174,7 +174,7 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
             try {
                 return JSON.parseObject(result, responseType);
             }catch (JSONException e){
-                throw new PayErrorException(new PayException("failure", "类型转化异常,contentType:" + entity.getContentType().getValue(), result));
+                throw new PayErrorException(new PayException("failure", String.format("类型转化异常,contentType: %s\n%s", entity.getContentType().getValue(), e.getMessage() ), result));
             }
         }
 
