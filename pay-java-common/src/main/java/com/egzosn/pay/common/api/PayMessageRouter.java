@@ -2,6 +2,7 @@ package com.egzosn.pay.common.api;
 
 import com.egzosn.pay.common.bean.PayMessage;
 import com.egzosn.pay.common.bean.PayOutMessage;
+
 import com.egzosn.pay.common.util.LogExceptionHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -144,6 +145,7 @@ public class PayMessageRouter {
       if(rule.isAsync()) {
         futures.add(
             executorService.submit(new Runnable() {
+              @Override
               public void run() {
                 rule.service(payMessage, payService, exceptionHandler);
               }

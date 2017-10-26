@@ -12,7 +12,9 @@ import com.egzosn.pay.common.api.BasePayConfigStorage;
 public class WxYouDianPayConfigStorage extends BasePayConfigStorage {
 
 
-    //账号
+    /**
+     * 账号
+     */
     public volatile String seller;
 
 
@@ -25,11 +27,6 @@ public class WxYouDianPayConfigStorage extends BasePayConfigStorage {
         return null;
     }
 
-
-    @Override
-    public String getPartner() {
-        return null;
-    }
 
     @Override
     public String getPid() {

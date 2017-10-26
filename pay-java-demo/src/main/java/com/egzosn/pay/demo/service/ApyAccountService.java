@@ -23,7 +23,9 @@ public class ApyAccountService {
     @Resource
     private AutowireCapableBeanFactory spring;
 
-    //缓存
+    /**
+     * 缓存
+     */
     private final static Map<Integer, PayResponse> payResponses = new HashMap<Integer, PayResponse>();
 
     /**

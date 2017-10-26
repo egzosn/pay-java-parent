@@ -32,9 +32,13 @@ import static com.egzosn.pay.common.http.UriVariables.getMapToParameters;
  *  </pre>
  */
 public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase implements  org.apache.http.client.ResponseHandler<T>{
-    //http请求
+    /**
+     * http请求方式 get pos
+     */
     private MethodType method;
-    //响应类型
+    /**
+     *  响应类型
+     */
     private Class<T> responseType;
 
 
@@ -43,40 +47,80 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
         return this;
     }
 
+    /**
+     * 空构造
+     */
     public ClientHttpRequest() {
     }
 
+    /**
+     *  根据请求地址 请求方法，请求内容对象
+     * @param uri 请求地址
+     * @param method  请求方法
+     * @param request 请求内容
+     */
     public ClientHttpRequest(URI uri, MethodType method, Object request) {
-        this.setURI(uri);
-        this.method = method;
+       this(uri, method);
         setParameters(request);
     }
+    /**
+     * 根据请求地址 请求方法
+     * @param uri 请求地址
+     * @param method  请求方法
+     */
     public ClientHttpRequest(URI uri, MethodType method) {
         this.setURI(uri);
         this.method = method;
     }
+
+    /**
+     * 根据请求地址
+     * @param uri  请求地址
+     */
     public ClientHttpRequest(URI uri) {
         this.setURI(uri);
     }
-
+    /**
+     * 根据请求地址
+     * @param uri  请求地址
+     */
     public ClientHttpRequest(String uri) {
         this.setURI(URI.create(uri));
     }
+    /**
+     * 根据请求地址 请求方法
+     * @param uri 请求地址
+     * @param method  请求方法
+     */
     public ClientHttpRequest(String uri, MethodType method) {
         this.setURI(URI.create(uri));
         this.method = method;
     }
-
+    /**
+     *  根据请求地址 请求方法，请求内容对象
+     * @param uri 请求地址
+     * @param method  请求方法
+     * @param request 请求内容
+     */
     public ClientHttpRequest(String uri, MethodType method, Object request) {
-        this.setURI(URI.create(uri));
-        this.method = method;
+        this(uri, method);
         setParameters(request);
     }
 
+    /**
+     * 设置请求方式
+     *
+     * @param method 请求方式
+     * {@link com.egzosn.pay.common.bean.MethodType} 请求方式
+     */
     public void setMethod(MethodType method) {
         this.method = method;
     }
 
+    /**
+     * 获取请求方式
+     * @return 请求方式
+     */
     @Override
     public String getMethod() {
         return method.name();

@@ -33,13 +33,21 @@ import java.util.concurrent.locks.Lock;
  */
 public class WxYouDianPayService extends BasePayService {
     protected static final Log LOG = LogFactory.getLog(WxYouDianPayService.class);
-    //登录获取授权码
+    /**
+     * 登录获取授权码
+     */
     public final static String LOGIN_URL = "http://life.51youdian.com/Api/CheckoutCounter/login";
-    //刷新授权码
+    /**
+     * 刷新授权码
+     */
     public final static String RESET_LOGIN_URL = "http://life.51youdian.com/Api/CheckoutCounter/resetLogin";
-    //查看付款订单状态
+    /**
+     * 查看付款订单状态
+     */
     public final static String UNIFIEDORDER_STATUS_URL = "http://life.51youdian.com/Api/CheckoutCounter/unifiedorderStatus";
-    //预下单链接
+    /**
+     * 预下单链接
+     */
     public final static String UNIFIED_ORDER_URL = "http://life.51youdian.com/Api/CheckoutCounter/unifiedorder";
 
 
@@ -310,14 +318,16 @@ public class WxYouDianPayService extends BasePayService {
 
     /**
      * 具体需要返回的数据为
-     *return_code 返回码只有SUCCESS和FAIL
-     *return_msg 返回具体信息
-     *nonce_str 您的服务器新生成随机生成32位字符串
-     *sign 为签名，签名规则是您需要发送的所有数据(除了sign)按照字典升序排列后加上&amp;key=xxxxxxxx您的密钥后md5加密，最后转成小写
-     *最后把得到的所有需要返回的数据用json格式化成json对象格式如下
-     *{&quot;return_code&quot;:&quot;SUCCESS&quot;,&quot;return_msg&quot;:&quot;ok&quot;,&quot;nonce_str&quot;:&quot;dddddddddddddddddddd’,’sign’:’sdddddddddddddddddd&quot;}
-     * @param code return_code
+     * return_code 返回码只有SUCCESS和FAIL
+     * return_msg 返回具体信息
+     * nonce_str 您的服务器新生成随机生成32位字符串
+     * sign 为签名，签名规则是您需要发送的所有数据(除了sign)按照字典升序排列后加上&amp;key=xxxxxxxx您的密钥后md5加密，最后转成小写
+     * 最后把得到的所有需要返回的数据用json格式化成json对象格式如下
+     * {&quot;return_code&quot;:&quot;SUCCESS&quot;,&quot;return_msg&quot;:&quot;ok&quot;,&quot;nonce_str&quot;:&quot;dddddddddddddddddddd’,’sign’:’sdddddddddddddddddd&quot;}
+     *
+     * @param code    return_code
      * @param message return_msg
+     *
      * @return 返回输出消息
      */
     @Override

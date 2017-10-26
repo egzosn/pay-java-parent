@@ -16,22 +16,35 @@ import java.util.concurrent.locks.ReentrantLock;
 public abstract class BasePayConfigStorage implements PayConfigStorage{
 
 
-    // ali rsa_private 商户私钥，pkcs8格式
-    //wx api_key 应用私钥(生成签名时使用)
-    private volatile  String keyPrivate ;
-    // 支付平台公钥(签名校验使用)
+    /**
+     *   应用私钥，rsa_private pkcs8格式 生成签名时使用
+     */
+    private volatile  String keyPrivate;
+    /**
+     *  支付平台公钥(签名校验使用)
+     */
     private volatile  String keyPublic;
-    //异步回调地址
+    /**
+     * 异步回调地址
+     */
     private volatile  String notifyUrl;
-    //同步回调地址
+    /**
+     * 同步回调地址，支付完成后展示的页面
+     */
     private volatile  String returnUrl;;
-    //签名加密类型
+    /**
+     * 签名加密类型
+     */
     private volatile  String signType;
-    //字符类型
+    /**
+     * 字符类型
+     */
     private volatile  String inputCharset;
 
 
-    //支付类型 aliPay 支付宝， wxPay微信..等等，开发者自定义，唯一
+    /**
+     * 支付类型 aliPay 支付宝， wxPay微信..等等，扩展支付模块定义唯一。
+     */
     private volatile  String payType;
 
     /**
@@ -40,13 +53,21 @@ public abstract class BasePayConfigStorage implements PayConfigStorage{
     private volatile MsgType msgType;
 
 
-    // 访问令牌 每次请求其他方法都要传入的值
+    /**
+     *  访问令牌 每次请求其他方法都要传入的值
+     */
     private volatile String accessToken;
-    // access token 到期时间时间戳
+    /**
+     * access token 到期时间时间戳
+     */
     private volatile long expiresTime;
-    //授权码锁
+    /**
+     * 授权码锁
+     */
     private Lock accessTokenLock = new ReentrantLock();
-
+    /**
+     * 是否为沙箱环境，默认为正式环境
+     */
     private boolean isTest = false;
 
 
@@ -76,6 +97,7 @@ public abstract class BasePayConfigStorage implements PayConfigStorage{
     public void setNotifyUrl(String notifyUrl) {
         this.notifyUrl = notifyUrl;
     }
+
 
     @Override
     public String getReturnUrl() {

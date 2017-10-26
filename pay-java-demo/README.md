@@ -1,6 +1,6 @@
 
 ### 快速入门
-#####1.支付整合配置
+##### 1.支付整合配置
 ```java
 
 
@@ -220,7 +220,7 @@ public class PayResponse {
 
 ```
 
-#####2.支付处理器与拦截器简单实现
+##### 2.支付处理器与拦截器简单实现
 
 ```java
     /**
@@ -271,7 +271,7 @@ public class PayResponse {
 ```
 
 
-#####3.支付响应PayResponse的获取
+##### 3.支付响应PayResponse的获取
 
 
 ```java
@@ -318,7 +318,7 @@ public class ApyAccountService {
 ```
 
 
-#####4.根据账户id与业务id，组拼订单信息（支付宝、微信支付订单）获取支付信息所需的数据
+##### 4.根据账户id与业务id，组拼订单信息（支付宝、微信支付订单）获取支付信息所需的数据
 
 ```java
 
@@ -466,7 +466,7 @@ public class ApyAccountService {
 
 ```
 
-#####5.支付回调
+##### 5.支付回调
 ```java
 
 
