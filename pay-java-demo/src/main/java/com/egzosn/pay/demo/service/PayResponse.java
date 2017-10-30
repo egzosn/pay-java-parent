@@ -92,10 +92,14 @@ public class PayResponse {
         router
                 .rule()
                 .async(false)
-                .msgType(MsgType.text.name()) //消息类型
-                .payType(PayType.aliPay.name()) //支付账户事件类型
-                .interceptor(new AliPayMessageInterceptor()) //拦截器
-                .handler(autowire(new AliPayMessageHandler(payId))) //处理器
+                //消息类型
+                .msgType(MsgType.text.name())
+                //支付账户事件类型
+                .payType(PayType.aliPay.name())
+                //拦截器
+                .interceptor(new AliPayMessageInterceptor())
+                //处理器
+                .handler(autowire(new AliPayMessageHandler(payId)))
                 .end()
                 .rule()
                 .async(false)

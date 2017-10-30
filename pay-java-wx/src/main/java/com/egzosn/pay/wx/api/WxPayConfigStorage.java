@@ -15,8 +15,13 @@ public class WxPayConfigStorage extends BasePayConfigStorage {
 
 
     public  String appSecret;
+    /**
+     * 应用id
+     */
     public  String appid ;
-    // 商户号 合作者id
+    /**
+     *  商户号 合作者id
+     */
     public  String mchId;
 
 
@@ -35,22 +40,25 @@ public class WxPayConfigStorage extends BasePayConfigStorage {
         this.appid = appid;
     }
 
-    /**
-     * 合作商唯一标识
-     *  @see #getPid()  代替者
-     */
-    public String getPartner() {
-        return mchId;
-    }
+
+
 
     /**
      * 合作商唯一标识
-     * @see #getPartner()  代替者
      */
     @Override
     public String getPid() {
         return mchId;
     }
+
+
+    /**
+     * 合作商唯一标识
+     */
+    public void setPid(String mchId) {
+         this.mchId = mchId;
+    }
+
 
 
     @Override

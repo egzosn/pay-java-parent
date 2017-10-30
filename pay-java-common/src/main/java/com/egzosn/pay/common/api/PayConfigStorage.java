@@ -14,21 +14,14 @@ import java.util.concurrent.locks.Lock;
  */
  public interface PayConfigStorage {
 
-    /*
+    /**
      *  应用id
      *  @return 应用id
      */
      String getAppid();
+
     /**
      * 合作商唯一标识
-     *  @see #getPid()  代替者
-     *  @return 合作商唯一标识
-     */
-    @Deprecated
-     String getPartner();
-    /**
-     * 合作商唯一标识
-     * @see #getPartner()  代替者
      *  @return 合作商唯一标识
      */
      String getPid();
