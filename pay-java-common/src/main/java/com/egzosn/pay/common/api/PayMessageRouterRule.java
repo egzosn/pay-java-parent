@@ -30,22 +30,34 @@ public class PayMessageRouterRule {
 
     private boolean async = true;
 
-    private String fromPay;
-
+    /**
+     * 消息类型
+     */
     private String msgType;
-
+    /**
+     * 支付类型
+     */
     private String payType;
-
+    /**
+     * 交易类型
+     */
     private String[] transactionType;
-
-    private String discount;
-
-    private String rDiscount;
-
+    /**
+     * 简介
+     */
     private String subject;
-
+    /**
+     * 正则匹配
+     */
     private String rSubject;
-
+    /**
+     * 匹配的键名称
+     */
+    private String key;
+    /**
+     * 匹配的键名称对应的值 正则
+     */
+    private String rValue;
 
     private boolean reEnter = false;
 
@@ -101,27 +113,7 @@ public class PayMessageRouterRule {
         return this;
     }
 
-    /**
-     * 如果discount等于某值
-     *
-     * @param discount discount等于某值
-     * @return Route规则
-     */
-    public PayMessageRouterRule discount(String discount) {
-        this.discount = discount;
-        return this;
-    }
 
-    /**
-     * 如果discount匹配该正则表达式
-     *
-     * @param regex discount匹配该正则表达式
-     * @return Route规则
-     */
-    public PayMessageRouterRule rDiscount(String regex) {
-        this.rDiscount = regex;
-        return this;
-    }
 
     /**
      * 如果subject等于某值
@@ -142,6 +134,18 @@ public class PayMessageRouterRule {
      */
     public PayMessageRouterRule rSubject(String regex) {
         this.rSubject = regex;
+        return this;
+    }
+    /**
+     * 如果subject匹配该正则表达式
+     *
+     * @param key 需要匹配支付消息内键的名字
+     * @param regex key值对应的正则
+     * @return Route规则
+     */
+    public PayMessageRouterRule key2RValue(String key, String regex) {
+        this.key = key;
+        this.rValue = regex;
         return this;
     }
 
@@ -228,19 +232,14 @@ public class PayMessageRouterRule {
      */
     protected boolean test(PayMessage payMessage) {
         return (
-                        (this.fromPay == null || this.fromPay.toLowerCase().equals((payMessage.getFromPay() ==null?null:payMessage.getFromPay().toLowerCase())))
-                        &&
-                        (this.msgType == null || this.msgType.toLowerCase().equals((payMessage.getMsgType() ==null?null:payMessage.getMsgType().toLowerCase())))
+                       (this.msgType == null || this.msgType.toLowerCase().equals((payMessage.getMsgType() ==null?null:payMessage.getMsgType().toLowerCase())))
                         &&
                         (this.payType == null || this.payType.equals((payMessage.getPayType() == null ? null : payMessage.getPayType())))
                         &&
                         (this.transactionType == null || equalsTransactionType(payMessage.getTransactionType()))
                         &&
-                        (this.discount == null || this.discount
-                                .equals(payMessage.getDiscount() == null ? null : payMessage.getDiscount().trim()))
-                        &&
-                        (this.rDiscount == null || Pattern
-                                .matches(this.rDiscount, payMessage.getDiscount() == null ? "" : payMessage.getDiscount().trim()))
+                        (this.key == null ||this.rValue == null || Pattern
+                                .matches(this.rValue, payMessage.getPayMessage().get(key) == null ? "" : payMessage.getPayMessage().get(key).toString().trim()))
                          &&
                         (this.subject == null || this.subject
                                 .equals(payMessage.getSubject() == null ? null : payMessage.getSubject().trim()))
@@ -319,13 +318,6 @@ public class PayMessageRouterRule {
         this.async = async;
     }
 
-    public String getFromPay() {
-        return fromPay;
-    }
-
-    public void setFromPay(String fromPay) {
-        this.fromPay = fromPay;
-    }
 
     public String getMsgType() {
         return msgType;
@@ -351,20 +343,20 @@ public class PayMessageRouterRule {
         this.transactionType = transactionType;
     }
 
-    public String getDiscount() {
-        return discount;
+    public String getKey() {
+        return key;
     }
 
-    public void setDiscount(String discount) {
-        this.discount = discount;
+    public void setKey(String key) {
+        this.key = key;
     }
 
-    public String getrDiscount() {
-        return rDiscount;
+    public String getrValue() {
+        return rValue;
     }
 
-    public void setrDiscount(String rDiscount) {
-        this.rDiscount = rDiscount;
+    public void setrValue(String rValue) {
+        this.rValue = rValue;
     }
 
     public String getSubject() {
