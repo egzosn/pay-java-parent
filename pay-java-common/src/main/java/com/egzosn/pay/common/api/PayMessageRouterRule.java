@@ -27,8 +27,10 @@ public class PayMessageRouterRule {
 
 
     private final PayMessageRouter routerBuilder;
-
-    private boolean async = true;
+    /**
+     * 默认同步
+     */
+    private boolean async = false;
 
     /**
      * 消息类型

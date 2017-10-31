@@ -163,11 +163,6 @@ public class AliPayService extends BasePayService {
      */
     private  Map<String, Object> getOrder(PayOrder order) {
 
-        //兼容上一版本 即时收款
-  /*      if (AliTransactionType.DIRECT == order.getTransactionType() || AliTransactionType.MOBILE == order.getTransactionType() || AliTransactionType.WAPPAY == order.getTransactionType()){
-            return getOrderBefore(order);
-        }
-*/
 
         Map<String, Object> orderInfo = getPublicParameters(order.getTransactionType());
 
@@ -185,7 +180,6 @@ public class AliPayService extends BasePayService {
             case DIRECT:
                 bizContent.put("product_code", "FAST_INSTANT_TRADE_PAY");
                 orderInfo.put("return_url", payConfigStorage.getReturnUrl());
-//                bizContent.remove("seller_id");
                 break;
             case WAP:
                 bizContent.put("product_code", "QUICK_WAP_PAY");
@@ -245,7 +239,6 @@ public class AliPayService extends BasePayService {
                 valueStr += (i == len - 1) ?  values[i] : values[i] + ",";
             }
             //乱码解决，这段代码在出现乱码时使用。如果mysign和sign不相等也可以使用这段代码转化
-            //valueStr = new String(valueStr.getBytes("ISO-8859-1"), "gbk");
             if (!valueStr.matches("\\w+")){
                 try {
                     if(valueStr.equals(new String(valueStr.getBytes("iso8859-1"), "iso8859-1"))){
@@ -313,8 +306,7 @@ public class AliPayService extends BasePayService {
 
         Map<String, Object> orderInfo = orderInfo(order);
 
-//        Map<String, Object> content = new HashMap<>(1);
-//        content.put("biz_content", orderInfo.remove("biz_content"));
+
         //预订单
         JSONObject result = getHttpRequestTemplate().postForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(orderInfo), null, JSONObject.class);
         JSONObject response = result.getJSONObject("alipay_trade_precreate_response");

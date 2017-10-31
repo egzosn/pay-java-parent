@@ -12,32 +12,18 @@ import com.egzosn.pay.common.api.BasePayConfigStorage;
 public class AliPayConfigStorage extends BasePayConfigStorage {
 
     /**
-     *  商户PID
+     *  商户应用id
      */
-    public volatile  String appId ;
+    private volatile  String appId ;
     /**
      *  商户签约拿到的pid,partner_id的简称，合作伙伴身份等同于 partner
      */
-    public volatile  String pid ;
+    private volatile  String pid ;
 
     /**
      * 商户收款账号
      */
-    public volatile  String seller;
-    /**
-     * 公钥
-     */
-    private volatile String aliPublicKey;
-
-
-    public String getAliPublicKey() {
-        return aliPublicKey;
-    }
-
-    public void setAliPublicKey(String aliPublicKey) {
-        setKeyPublic(aliPublicKey);
-        this.aliPublicKey = aliPublicKey;
-    }
+    private volatile  String seller;
 
 
 

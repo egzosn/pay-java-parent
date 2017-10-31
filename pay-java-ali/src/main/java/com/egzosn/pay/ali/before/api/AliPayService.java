@@ -36,8 +36,8 @@ public class AliPayService extends BasePayService {
     protected final Log LOG = LogFactory.getLog(AliPayService.class);
 
 
-    private String HTTPS_REQ_URL = "https://mapi.alipay.com/gateway.do";
-    private String QUERY_REQ_URL = "https://openapi.alipay.com/gateway.do";
+    private static final String HTTPS_REQ_URL = "https://mapi.alipay.com/gateway.do";
+    private static final String QUERY_REQ_URL = "https://openapi.alipay.com/gateway.do";
 
     public AliPayService(PayConfigStorage payConfigStorage) {
         super(payConfigStorage);
@@ -164,7 +164,7 @@ public class AliPayService extends BasePayService {
     }
 
     private String getOrderInfo(PayOrder order) {
-        String orderInfo = "partner=\"" + this.payConfigStorage.getPartner() + "\"";
+        String orderInfo = "partner=\"" + this.payConfigStorage.getPid() + "\"";
         orderInfo = orderInfo + "&seller_id=\"" + this.payConfigStorage.getSeller() + "\"";
         orderInfo = orderInfo + "&out_trade_no=\"" + order.getOutTradeNo() + "\"";
         orderInfo = orderInfo + "&subject=\"" + order.getSubject() + "\"";
@@ -190,7 +190,7 @@ public class AliPayService extends BasePayService {
     private  Map<String, Object> getOrder(PayOrder order) {
         Map<String, Object> orderInfo = new TreeMap<>();
         // 签约合作者身份ID
-        orderInfo.put("partner", payConfigStorage.getPartner());
+        orderInfo.put("partner", payConfigStorage.getPid());
         // 签约卖家支付宝账号
         orderInfo.put("seller_id", payConfigStorage.getSeller());
         // 商户网站唯一订单号

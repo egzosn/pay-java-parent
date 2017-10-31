@@ -22,13 +22,41 @@ import com.egzosn.pay.common.bean.TransactionType;
  */
 @Deprecated
 public enum  AliTransactionType implements TransactionType {
-    //即时到帐                                //移动支付                      //手机网站支付
-    DIRECT("create_direct_pay_by_user"),APP("mobile.securitypay.pay"),WAP("alipay.wap.create.direct.pay.by.user"),
-    //交易辅助接口
-    QUERY("alipay.trade.query"),CLOSE("alipay.trade.close"),REFUND("alipay.trade.refund"),REFUNDQUERY("alipay.trade.fastpay.refund.query"),DOWNLOADBILL("alipay.data.dataservice.bill.downloadurl.query")
+    /**
+     * 即时到帐
+      */
+    DIRECT("create_direct_pay_by_user"),
+    /**
+     * 移动支付
+     */
+    APP("mobile.securitypay.pay"),
+    /**
+     * 手机网站支付
+     */
+    WAP("alipay.wap.create.direct.pay.by.user"),
 
-    //不知道交易类型，主要用于回调通知，回调后不清楚交易类型，以此定义
-    ,UNAWARE("UNAWARE")
+    //交易辅助接口
+
+    /**
+     * 交易订单查询
+     */
+    QUERY("alipay.trade.query"),
+    /**
+     * 交易订单关闭
+     */
+    CLOSE("alipay.trade.close"),
+    /**
+     * 退款
+     */
+    REFUND("alipay.trade.refund"),
+    /**
+     * 退款查询
+     */
+    REFUNDQUERY("alipay.trade.fastpay.refund.query"),
+    /**
+     * 下载对账单
+     */
+    DOWNLOADBILL("alipay.data.dataservice.bill.downloadurl.query")
     ;
 
     private String method;

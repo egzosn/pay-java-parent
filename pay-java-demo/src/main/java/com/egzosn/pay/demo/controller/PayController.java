@@ -95,7 +95,7 @@ public class PayController {
      * @param payId           账户id
      * @param openid openid
      * @param price 金额
-     * @return 跳到支付页面
+     * @return 返回jsapi所需参数
      */
     @RequestMapping(value = "jsapi" )
     public Map toPay(Integer payId, String openid, BigDecimal price) {
@@ -130,7 +130,7 @@ public class PayController {
         order.setAuthCode(authCode);
         //支付结果
         Map<String, Object> params = payResponse.getService().microPay(order);
-        PayConfigStorage storage = payResponse.getStorage();
+        PayConfigStorage storage = payResponse.getService().getPayConfigStorage();
         //校验
         if (payResponse.getService().verify(params)) {
             PayMessage message = new PayMessage(params, storage.getPayType(), storage.getMsgType().name());

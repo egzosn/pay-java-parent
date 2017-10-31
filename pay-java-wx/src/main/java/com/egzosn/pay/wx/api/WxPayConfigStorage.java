@@ -14,22 +14,18 @@ import com.egzosn.pay.common.api.BasePayConfigStorage;
 public class WxPayConfigStorage extends BasePayConfigStorage {
 
 
-    public  String appSecret;
     /**
      * 应用id
      */
-    public  String appid ;
+    private   String appid ;
     /**
      *  商户号 合作者id
      */
-    public  String mchId;
+    private  String mchId;
 
 
 
 
-    public void setAppSecret(String appSecret) {
-        this.appSecret = appSecret;
-    }
 
     @Override
     public String getAppid() {

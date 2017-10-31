@@ -3,6 +3,7 @@ package com.egzosn.pay.demo.service.handler;
 import com.egzosn.pay.common.api.PayService;
 import com.egzosn.pay.common.bean.PayMessage;
 import com.egzosn.pay.common.bean.PayOutMessage;
+import com.egzosn.pay.common.bean.outbuilder.TextBuilder;
 import com.egzosn.pay.common.exception.PayErrorException;
 
 import java.math.BigDecimal;
@@ -42,6 +43,7 @@ public class AliPayMessageHandler extends BasePayMessageHandler {
         }/* else if ("WAIT_BUYER_PAY".equals(trade_status) || "TRADE_CLOSED".equals(trade_status)) {
 
         }*/
+
         return payService.getPayOutMessage("fail", "失败");
     }
 }
