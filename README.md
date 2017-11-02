@@ -59,7 +59,7 @@
 
 ######单一支付教程 
 
- [基础模块支付宝微信讲解](pay-java-parent/wikis/Home)
+ [基础模块支付宝微信讲解](wikis/Home)
  
  [友店微信](pay-java-wx-youdian?dir=1&filepath=pay-java-youdian)
  [富友](pay-java-fuiou?dir=1&filepath=pay-java-fuiou)
