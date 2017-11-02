@@ -7,6 +7,8 @@
 
 开发版 https://git.oschina.net/egzosn/pay-java-parent/tree/develop
 
+详细文档请看 [wiki](wikis/Home)。
+
 ###特性
 
 
