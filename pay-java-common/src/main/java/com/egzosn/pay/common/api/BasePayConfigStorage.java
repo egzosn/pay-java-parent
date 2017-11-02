@@ -31,7 +31,7 @@ public abstract class BasePayConfigStorage implements PayConfigStorage{
     /**
      * 同步回调地址，支付完成后展示的页面
      */
-    private volatile  String returnUrl;;
+    private volatile  String returnUrl;
     /**
      * 签名加密类型
      */

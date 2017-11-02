@@ -91,7 +91,6 @@ public class PayResponse {
         router = new PayMessageRouter(this.service);
         router
                 .rule()
-                .async(false)
                 //消息类型
                 .msgType(MsgType.text.name())
                 //支付账户事件类型
@@ -102,20 +101,17 @@ public class PayResponse {
                 .handler(autowire(new AliPayMessageHandler(payId)))
                 .end()
                 .rule()
-                .async(false)
                 .msgType(MsgType.xml.name())
                 .payType(PayType.wxPay.name())
                 .handler(autowire(new WxPayMessageHandler(payId)))
                 .end()
                 .rule()
-                .async(false)
                 .msgType(MsgType.json.name())
                 .payType(PayType.youdianPay.name())
                 .interceptor(new YoudianPayMessageInterceptor()) //拦截器
                 .handler(autowire(new YouDianPayMessageHandler(payId)))
                 .end()
                 .rule()
-                .async(false)
                 .msgType(MsgType.xml.name())
                 .payType(PayType.fuiou.name())
                 .handler(autowire(new FuiouPayMessageHandler(payId)))

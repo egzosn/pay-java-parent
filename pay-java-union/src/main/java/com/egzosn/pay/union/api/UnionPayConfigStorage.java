@@ -20,19 +20,10 @@ public class UnionPayConfigStorage extends BasePayConfigStorage {
 
     // 商户收款账号
     public volatile  String seller;
-    //公钥
-    private volatile String aliPublicKey;
+
     //全渠道固定值
     public static String version = "5.0.0";
 
-    public String getAliPublicKey() {
-        return aliPublicKey;
-    }
-
-    public void setAliPublicKey(String aliPublicKey) {
-        setKeyPublic(aliPublicKey);
-        this.aliPublicKey = aliPublicKey;
-    }
 
 
 
@@ -41,26 +32,7 @@ public class UnionPayConfigStorage extends BasePayConfigStorage {
         return null;
     }
 
-    /**
-     * @see #getPid()
-     * @return 合作者id
-     */
-    @Deprecated
-    @Override
-    public String getPartner() {
-        return pid;
-    }
 
-
-    /**
-     * 设置合作者id
-     * @see #setPid(String)
-     * @param partner 合作者id
-     */
-    @Deprecated
-    public void setPartner(String partner) {
-        this.pid = partner;
-    }
 
     @Override
     public String getPid() {
