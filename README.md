@@ -7,9 +7,9 @@
 
 开发版 https://git.oschina.net/egzosn/pay-java-parent/tree/develop
 
-详细文档请看 [wiki](https://gitee.com/egzosn/pay-java-parent/wikis/Home)。
+##### 详细文档请看 [wiki](https://gitee.com/egzosn/pay-java-parent/wikis/Home)。
 
-###特性
+### 特性
 
 
 
@@ -21,12 +21,12 @@
     6. 简单快速完成支付模块的开发
     7. 支持多种支付类型多支付账户扩展（目前已支持微信支付，支付宝支付，友店支付）
 
-###本项目包含 3 个部分：
+### 本项目包含 3 个部分：
 
      1. pay-java-common  公共lib,支付核心与规范定义
      2. pay-java-demo  具体的支付demo
      3. pay-java-*  具体的支付实现库
-###Maven配置
+### Maven配置
 支付核心模块
 ```xml
 
@@ -52,12 +52,12 @@
 
 
 
-###使用
+### 使用
 这里不多说直接上代码  集群的话,友店可能会有bug。
 
 测试链接 ： http://pay.egzosn.com/index.html
 
-######单一支付教程 
+###### 单一支付教程 
 
  [基础模块支付宝微信讲解](https://gitee.com/egzosn/pay-java-parent/wikis/Home)
  
@@ -69,7 +69,7 @@
 android 例子 [pay-java-android](http://git.oschina.net/egzosn/pay-java-android)
 
 
-##交流
+## 交流
 很希望更多志同道合友友一起扩展新的的支付接口。
 
 这里感谢[ouyangxiangshao](https://github.com/ouyangxiangshao),[ZhuangXiong](https://github.com/ZhuangXiong) 与[Actinian](http://git.oschina.net/Actinia517) 所提交的安卓例子或者分支
