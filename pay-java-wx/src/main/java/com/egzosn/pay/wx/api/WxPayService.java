@@ -213,8 +213,6 @@ public class WxPayService extends BasePayService {
 
         SortedMap<String, Object> params = new TreeMap<String, Object>();
 
-
-        params.put("partnerid", payConfigStorage.getPid());
         params.put("package", "prepay_id=" + result.get("prepay_id"));
         if (WxTransactionType.JSAPI == order.getTransactionType()) {
             params.put("signType", payConfigStorage.getSignType());
@@ -223,6 +221,7 @@ public class WxPayService extends BasePayService {
             params.put("timeStamp", System.currentTimeMillis() / 1000);
             params.put("nonceStr", result.get("nonce_str"));
         } else if (WxTransactionType.APP == order.getTransactionType()) {
+            params.put("partnerid", payConfigStorage.getPid());
             params.put("appid", payConfigStorage.getAppid());
             params.put("prepayid", result.get("prepay_id"));
             params.put("timestamp", System.currentTimeMillis() / 1000);
