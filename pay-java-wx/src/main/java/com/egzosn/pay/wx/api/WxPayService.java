@@ -217,7 +217,6 @@ public class WxPayService extends BasePayService {
         if (WxTransactionType.JSAPI == order.getTransactionType()) {
             params.put("signType", payConfigStorage.getSignType());
             params.put("appId", payConfigStorage.getAppid());
-            params.put("prepayid", result.get("prepay_id"));
             params.put("timeStamp", System.currentTimeMillis() / 1000);
             params.put("nonceStr", result.get("nonce_str"));
         } else if (WxTransactionType.APP == order.getTransactionType()) {
