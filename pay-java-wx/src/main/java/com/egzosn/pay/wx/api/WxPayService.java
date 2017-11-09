@@ -107,7 +107,6 @@ public class WxPayService extends BasePayService {
      * @param sign   比对的签名结果
      * @return 生成的签名结果
      */
-    @Override
     public boolean signVerify(Map<String, Object> params, String sign) {
         return SignUtils.valueOf(payConfigStorage.getSignType()).verify(params, sign, "&key=" + payConfigStorage.getKeyPublic(), payConfigStorage.getInputCharset());
     }
@@ -214,16 +213,14 @@ public class WxPayService extends BasePayService {
 
         SortedMap<String, Object> params = new TreeMap<String, Object>();
 
-
-        params.put("partnerid", payConfigStorage.getPid());
         params.put("package", "prepay_id=" + result.get("prepay_id"));
         if (WxTransactionType.JSAPI == order.getTransactionType()) {
             params.put("signType", payConfigStorage.getSignType());
             params.put("appId", payConfigStorage.getAppid());
-            params.put("prepayid", result.get("prepay_id"));
             params.put("timeStamp", System.currentTimeMillis() / 1000);
             params.put("nonceStr", result.get("nonce_str"));
         } else if (WxTransactionType.APP == order.getTransactionType()) {
+            params.put("partnerid", payConfigStorage.getPid());
             params.put("appid", payConfigStorage.getAppid());
             params.put("prepayid", result.get("prepay_id"));
             params.put("timestamp", System.currentTimeMillis() / 1000);
