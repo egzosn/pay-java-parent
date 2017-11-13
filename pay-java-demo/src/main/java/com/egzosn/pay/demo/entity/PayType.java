@@ -42,7 +42,7 @@ public enum PayType implements BasePayType {
             AliPayConfigStorage aliPayConfigStorage = new AliPayConfigStorage();
             aliPayConfigStorage.setPid(apyAccount.getPartner());
             aliPayConfigStorage.setAppId(apyAccount.getAppid());
-            aliPayConfigStorage.setAliPublicKey(apyAccount.getPublicKey());
+            aliPayConfigStorage.setKeyPublic(apyAccount.getPublicKey());
             aliPayConfigStorage.setKeyPrivate(apyAccount.getPrivateKey());
             aliPayConfigStorage.setNotifyUrl(apyAccount.getNotifyUrl());
             aliPayConfigStorage.setReturnUrl(apyAccount.getReturnUrl());
@@ -73,6 +73,7 @@ public enum PayType implements BasePayType {
             wxPayConfigStorage.setAppid(apyAccount.getAppid());
             wxPayConfigStorage.setKeyPrivate(apyAccount.getPrivateKey());
             wxPayConfigStorage.setNotifyUrl(apyAccount.getNotifyUrl());
+            wxPayConfigStorage.setReturnUrl(apyAccount.getReturnUrl());
             wxPayConfigStorage.setSignType(apyAccount.getSignType());
             wxPayConfigStorage.setPayType(apyAccount.getPayType().toString());
             wxPayConfigStorage.setMsgType(apyAccount.getMsgType());

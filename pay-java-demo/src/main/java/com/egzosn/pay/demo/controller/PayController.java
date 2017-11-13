@@ -17,6 +17,7 @@ import com.egzosn.pay.wx.bean.WxTransactionType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.Resource;
 import javax.imageio.ImageIO;
@@ -44,6 +45,10 @@ public class PayController {
     @Resource
     private ApyAccountService service;
 
+    @RequestMapping("/")
+    public ModelAndView index(){
+        return new ModelAndView("/index.html");
+    }
 
     /**
      * 这里模拟账户信息增加
@@ -73,16 +78,46 @@ public class PayController {
      * @return 跳到支付页面
      */
     @RequestMapping(value = "toPay.html", produces = "text/html;charset=UTF-8")
-    public String toPay(Integer payId, String transactionType, String bankType, BigDecimal price) {
+    public String toPay(HttpServletRequest request,Integer payId, String transactionType, String bankType, BigDecimal price) {
         //获取对应的支付账户操作工具（可根据账户id）
         PayResponse payResponse = service.getPayResponse(payId);
 
         PayOrder order = new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType));
+        // ------  微信H5使用----
+        order.setSpbillCreateIp(request.getHeader("X-Real-IP"));
+        StringBuffer requestURL = request.getRequestURL();
+        //设置网页地址
+        order.setWapUrl(requestURL.substring(0, requestURL.indexOf("/") > 0 ? requestURL.indexOf("/") : requestURL.length() ));
+        //设置网页名称
+        order.setWapName("在线充值");
+        // ------  微信H5使用----
 
         //此处只有刷卡支付(银行卡支付)时需要
         if (StringUtils.isNotEmpty(bankType)) {
             order.setBankType(bankType);
         }
+        Map orderInfo = payResponse.getService().orderInfo(order);
+        return payResponse.getService().buildRequest(orderInfo, MethodType.POST);
+    }
+
+    /**
+     * 跳到支付页面
+     * 针对实时支付,即时付款
+     * @return 跳到支付页面
+     */
+    @RequestMapping(value = "toWxPay.html", produces = "text/html;charset=UTF-8")
+    public String toWxPay(HttpServletRequest request) {
+        //获取对应的支付账户操作工具（可根据账户id）
+        PayResponse payResponse = service.getPayResponse(2);
+
+        PayOrder order = new PayOrder("订单title", "摘要",  new BigDecimal(0.01) , UUID.randomUUID().toString().replace("-", ""),  WxTransactionType.MWEB);
+        order.setSpbillCreateIp(request.getHeader("X-Real-IP"));
+        StringBuffer requestURL = request.getRequestURL();
+        //设置网页地址
+        order.setWapUrl(requestURL.substring(0, requestURL.indexOf("/") > 0 ? requestURL.indexOf("/") : requestURL.length() ));
+        //设置网页名称
+        order.setWapName("在线充值");
+
         Map orderInfo = payResponse.getService().orderInfo(order);
         return payResponse.getService().buildRequest(orderInfo, MethodType.POST);
     }
