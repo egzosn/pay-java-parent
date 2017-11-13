@@ -176,17 +176,16 @@ public class WxPayService extends BasePayService {
                 parameters.put("product_id", order.getOutTradeNo());
                 break;
             case MWEB:
-                //h5支付固定传"h5_info"
-                String sceneInfo = "{\"h5_info\": " +
-                        //场景类型
-                        "   {\"type\": \"Wap\", " +
-                        //WAP网站URL地址 同步回调地址
-                        "    \"wap_url\": \"" + payConfigStorage.getReturnUrl() + "\"," +
-                        //WAP 网站名
-                        "    \"wap_name\": \"支付充值\"}}";
-
-                parameters.put("scene_info", sceneInfo);
+                //H5支付专用
+                LinkedHashMap value = new LinkedHashMap();
+                value.put("type", "Wap");
+                value.put("wap_url", order.getWapUrl());////WAP网站URL地址
+                value.put("wap_name", order.getWapName());//WAP 网站名
+                JSONObject sceneInfo = new JSONObject();
+                sceneInfo.put("h5_info", value);
+                parameters.put("scene_info", sceneInfo.toJSONString());
                 break;
+            default:
         }
 
 
