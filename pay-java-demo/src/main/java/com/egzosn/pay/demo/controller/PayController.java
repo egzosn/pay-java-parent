@@ -246,7 +246,7 @@ public class PayController {
             html.append("if(isWxPay()){\n");
             html.append("window.location='");
             //这里使用H5支付，公众号支付是否可以？请开发者自行尝试
-            html.append(url.toString()).append("?payId=").append(wxPayId).append("&transactionType=").append(WxTransactionType.JSAPI.getType()).append("&price=").append(price);
+            html.append(url.toString()).append("?payId=").append(wxPayId).append("&transactionType=").append(WxTransactionType.MWEB.getType()).append("&price=").append(price);
             html.append("';\n }else\n");
         }
 
