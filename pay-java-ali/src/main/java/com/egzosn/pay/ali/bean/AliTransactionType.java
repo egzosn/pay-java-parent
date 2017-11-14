@@ -19,16 +19,54 @@ import com.egzosn.pay.common.bean.TransactionType;
  * date 2016/10/19 22:58
  */
 public enum  AliTransactionType implements TransactionType {
-    //即时到帐                      //手机网站支付
-    DIRECT("alipay.trade.page.pay"),APP("alipay.trade.app.pay"),WAP("alipay.trade.wap.pay")
-    // TODO 2017/2/23 20:26 author: egan 以下三个为主动交易类型 暂未测试，
-    //扫码付                                   //条码付                        // 声波付
-    ,SWEEPPAY("alipay.trade.precreate"),BAR_CODE("alipay.trade.pay"),WAVE_CODE("alipay.trade.pay")
-    //交易辅助接口
-    ,QUERY("alipay.trade.query"),CLOSE("alipay.trade.close"),REFUND("alipay.trade.refund"),REFUNDQUERY("alipay.trade.fastpay.refund.query"),DOWNLOADBILL("alipay.data.dataservice.bill.downloadurl.query")
+    /**
+     * 即时到帐
+     */
+    DIRECT("alipay.trade.page.pay"),
+    /**
+     * APP支付
+     */
+    APP("alipay.trade.app.pay"),
+    /**
+     * 手机网站支付
+     */
+    WAP("alipay.trade.wap.pay")
 
-    //回调通知，回调后不清楚交易类型，以此定义
-    ,UNAWARE("UNAWARE")
+    /**
+     *  扫码付
+     */
+    ,SWEEPPAY("alipay.trade.precreate"),
+    /**
+     * 条码付
+     */
+    BAR_CODE("alipay.trade.pay"),
+    /**
+     * 声波付
+     */
+    WAVE_CODE("alipay.trade.pay")
+    //交易辅助接口
+
+    /**
+     * 交易订单查询
+     */
+    ,QUERY("alipay.trade.query"),
+    /**
+     * 交易订单关闭
+     */
+    CLOSE("alipay.trade.close"),
+    /**
+     * 退款
+     */
+    REFUND("alipay.trade.refund"),
+    /**
+     * 退款查询
+     */
+    REFUNDQUERY("alipay.trade.fastpay.refund.query"),
+    /**
+     * 下载对账单
+     */
+    DOWNLOADBILL("alipay.data.dataservice.bill.downloadurl.query")
+
     ;
 
 
@@ -44,7 +82,7 @@ public enum  AliTransactionType implements TransactionType {
         return this.name();
     }
 
-    /**
+    /* *
      * 获取接口名称
      * @return 接口名称
      */

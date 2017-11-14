@@ -33,11 +33,11 @@ import java.util.*;
  * @see com.egzosn.pay.ali.api.AliPayService
  */
 public class AliPayService extends BasePayService {
-    protected final Log log = LogFactory.getLog(AliPayService.class);
+    protected final Log LOG = LogFactory.getLog(AliPayService.class);
 
 
-    private String httpsReqUrl = "https://mapi.alipay.com/gateway.do";
-    private String queryReqUrl = "https://openapi.alipay.com/gateway.do";
+    private static final String HTTPS_REQ_URL = "https://mapi.alipay.com/gateway.do";
+    private static final String QUERY_REQ_URL = "https://openapi.alipay.com/gateway.do";
 
     public AliPayService(PayConfigStorage payConfigStorage) {
         super(payConfigStorage);
@@ -49,7 +49,7 @@ public class AliPayService extends BasePayService {
 
 
     public String getHttpsVerifyUrl() {
-        return httpsReqUrl + "?service=notify_verify";
+        return HTTPS_REQ_URL + "?service=notify_verify";
     }
 
     /**
@@ -62,14 +62,14 @@ public class AliPayService extends BasePayService {
     public boolean verify(Map<String, Object> params) {
 
         if (params.get("sign") == null || params.get("notify_id") == null) {
-            log.debug("支付宝支付异常：params：" + params);
+            LOG.debug("支付宝支付异常：params：" + params);
             return false;
         }
 
         try {
             return signVerify(params, (String) params.get("sign")) && verifySource((String) params.get("notify_id"));
         } catch (PayErrorException e) {
-            e.printStackTrace();
+            LOG.error(e);
         }
 
         return false;
@@ -164,7 +164,7 @@ public class AliPayService extends BasePayService {
     }
 
     private String getOrderInfo(PayOrder order) {
-        String orderInfo = "partner=\"" + this.payConfigStorage.getPartner() + "\"";
+        String orderInfo = "partner=\"" + this.payConfigStorage.getPid() + "\"";
         orderInfo = orderInfo + "&seller_id=\"" + this.payConfigStorage.getSeller() + "\"";
         orderInfo = orderInfo + "&out_trade_no=\"" + order.getOutTradeNo() + "\"";
         orderInfo = orderInfo + "&subject=\"" + order.getSubject() + "\"";
@@ -190,7 +190,7 @@ public class AliPayService extends BasePayService {
     private  Map<String, Object> getOrder(PayOrder order) {
         Map<String, Object> orderInfo = new TreeMap<>();
         // 签约合作者身份ID
-        orderInfo.put("partner", payConfigStorage.getPartner());
+        orderInfo.put("partner", payConfigStorage.getPid());
         // 签约卖家支付宝账号
         orderInfo.put("seller_id", payConfigStorage.getSeller());
         // 商户网站唯一订单号
@@ -299,7 +299,7 @@ public class AliPayService extends BasePayService {
         StringBuffer formHtml = new StringBuffer();
 
         formHtml.append("<form id=\"_alipaysubmit_\" name=\"alipaysubmit\" action=\"" )
-                .append( httpsReqUrl)
+                .append( HTTPS_REQ_URL)
                 .append(  "?_input_charset=" )
                 .append( payConfigStorage.getInputCharset())
                 .append( "\" method=\"")
@@ -447,7 +447,7 @@ public class AliPayService extends BasePayService {
         parameters.put("biz_content", JSON.toJSONString(bizContent));
         //设置签名
         setSign(parameters);
-        return  callback.perform(requestTemplate.getForObject(queryReqUrl + "?" + UriVariables.getMapToParameters(parameters), JSONObject.class));
+        return  callback.perform(requestTemplate.getForObject(QUERY_REQ_URL + "?" + UriVariables.getMapToParameters(parameters), JSONObject.class));
     }
 
     /**
@@ -521,7 +521,7 @@ public class AliPayService extends BasePayService {
         parameters.put("biz_content", JSON.toJSONString(bizContent));
         //设置签名
         setSign(parameters);
-        return callback.perform(requestTemplate.getForObject(queryReqUrl + "?" + UriVariables.getMapToParameters(parameters), JSONObject.class));
+        return callback.perform(requestTemplate.getForObject(QUERY_REQ_URL + "?" + UriVariables.getMapToParameters(parameters), JSONObject.class));
     }
 
     /**
@@ -553,7 +553,7 @@ public class AliPayService extends BasePayService {
         parameters.put("biz_content", getContentToJson(tradeNoOrBillDate.toString(), outTradeNoBillType));
         //设置签名
         setSign(parameters);
-        return  callback.perform(requestTemplate.getForObject(queryReqUrl + "?" + UriVariables.getMapToParameters(parameters), JSONObject.class));
+        return  callback.perform(requestTemplate.getForObject(QUERY_REQ_URL + "?" + UriVariables.getMapToParameters(parameters), JSONObject.class));
 
     }
 

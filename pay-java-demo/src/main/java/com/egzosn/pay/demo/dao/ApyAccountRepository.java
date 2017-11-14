@@ -48,21 +48,21 @@ public class ApyAccountRepository {
 
         ApyAccount apyAccount2 = new ApyAccount();
         apyAccount2.setPayId(2);
-        apyAccount2.setPartner("2088102169916436");
-        apyAccount2.setAppid("2016080400165436");
+        apyAccount2.setPartner("1469188802");
+        apyAccount2.setAppid("wx3344f4aed352deae");
         // TODO 2017/2/9 16:20 author: egan  sign_type只有单一key时public_key与private_key相等，比如sign_type=MD5的情况
-        apyAccount2.setPublicKey("MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtIlhP1ju6g7fMIcp5cR+v7bk7RUI+irR3HUm0en39K/UnGByAulGFLZU9//IwIu3xCTfGkRHWV8v9iMJhNmxWqbxwehblTCl4f4uEDz9nECc1QzOesGPx6nMsbAx8+3j/Z2p1OCk+Gszs/nUBEjVY/l8NOQoE5kENyWl0WBTFPPONWm8V02YO8dNx0u29egh0dk17OeS+i5G0F+OY7xWnfjSrOqPYAtoo9ccEQUIbhiWz5X3TqmkzjNL3JojsvrymLym97z0COYfl1RlP8tqYhNKLM0FmVndRfcO9HgTx1mO4tj2hsDZN/AnAb3vULaMlESxIg+i6yUBpEOiwj+zLQIDAQAB");
-        apyAccount2.setPrivateKey("MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCKA8XdHGExkLnb2Z3mF+6HQUorznXT0XE0GDiRtR+bIM/lE1o6UvAi2vSL5VT1Ob2+yzaSB2zDbfZJrzWcWveU8emN/xVd/yodUbzWnSQkI0k7suLeZDDCcxjT3g5JFSbcWmUec+OFt4n3Ymvrz0rriXfMV4MYlAmru+2UpiyA18SPXUiWWtHXhM4mJ5qAK6Xy2Xpg8fbqcbBLnV5GMipzno2VU0K1WKSe0qhOjPN7vvyZcRXRo5HGd76/Dhc/LhWgM/Ff2oaqQWhSo0tj33/2xmOLxueZaJw5Tx6sBxaBpIaX1huASmeFNgRNb1hSUwbVqkJKuvyEMQvTcz+9wqd9AgMBAAECggEAbtec33ndbUtImZLqx1LNFP+QrCICa324JxiUxiDrI1F05gtm2ZSmm7ex03D5jIE1LLhUOW+RIFt+A6udqNc+I/ctlgcZiAZYMnfk65AE6KkWNcXzgpyAtIpvlCiw3G0KasqGj7CPOGMxgOcguaAgEY60Ef7uoJy0L6KcqlfTQh3X26lHSyduTT/eFQmGstNnfZSnoSgdWoGYJcYwxeI/FZM/AF+qQxqurrB/MWihA+41dko2s+pG/gsnv3JtPiU7uxmzIhkKKo34bNgne6YtLibzamSe2RQNnqRykasrKEibtrUtFoyyzHRhUEjhW4la9je0H3weeyEIqYYrwq3kmQKBgQDUpKh2rmj54ovN7YAk0RkFj495od7IKN4EXRfjeiZHVrsJ97LNzYh2ldh8LRuHOGNP1jI5lBA6UL+VdjObtAiP0a3i5mLgREQ6vU4aQVEgVXiFTiFpgiwURHk3uX7S7DiOolvChmO9UTR91vaATMsTo4/uBLAkC0tQhxLrP/LAIwKBgQCmJ7tBQ9PgKeZCVcfEJQTSUwYeQD+TozjmkBCyn4S6U3pntZAj9XTUVKRiu1pvRCZZ8xjSHQ+xut8wcO4cBCUxSslDWD84HAAj5Aae80Ws7vBq6gS9G3ko1kVxLOOfA/74rB49BUEOcx9P6E2MWVSYhvtzyPvYi0PvLDQGRx2j3wKBgCRzPTVq3C/Jd7GK/qZQ+XsMismMx8WDy9rvokKqE5my8kjZHttMWhIJyZwvl0Jslgl/bAiWqtl0MgMKyfnsuHL+vFHisBxFV3TCMnspqyBhxlEDfZK6b5fhzO2SbHz3ZRJ+HkCQDNTM8LSJfqOrhjwNk4R3ZUIodXaOUN3mjlQFAoGASUJ7betaIBxZSiZITlOELLgummf5oD73d7FNq3RqMT1dWxzS0QgI2xX25RF2bli+ECr/ZqUpplOe1Nz2H6Q0QeeXlfny5epypWCFCtB4iCdSGdHVBQx3/2l6dMw2EIbShRJewsjuRlC8HZ9vkdJRWm8pr4OOh4vgCDSVO69fgkECgYEA0sjX815xMCwO1PDf+7/DNfJ5a2bYdMkVRe6y6a/Dzf83bJDdYZsOKlmSim49kPKEYU9MAT6Mst0Et9GpbzYDIZ4wj6aL01ckYvI42nhn2iylzYz+rOsg8mircFVcwiOh27BoNm8xpMFNzaY743gn37B8n3PaFboXWMO96y2rl8k=");
-        apyAccount2.setNotifyUrl("http://pay.egan.in/payBack1.json");
+        apyAccount2.setPublicKey("991ded0800933ccf8736ab4f7fc61095");
+        apyAccount2.setPrivateKey("991ded0800933ccf8736ab4f7fc61095");
+        apyAccount2.setNotifyUrl("http://pay.egzosn.com/payBack2.json");
         // 无需同步回调可不填
-        apyAccount2.setReturnUrl("http://192.168.1.58:9096/payBack2.json");
+        apyAccount2.setReturnUrl("http://pay.egzosn.com");
         apyAccount2.setInputCharset("UTF-8");
-        apyAccount2.setSeller("2088102169916436");
-        apyAccount2.setSignType(SignUtils.RSA2.name());
-        apyAccount2.setPayType(PayType.aliPay);
-        apyAccount2.setMsgType(MsgType.text);
+        apyAccount2.setSeller("1469188802");
+        apyAccount2.setSignType(SignUtils.MD5.name());
+        apyAccount2.setPayType(PayType.wxPay);
+        apyAccount2.setMsgType(MsgType.xml);
         //设置测试环境
-        apyAccount2.setTest(true);
+        apyAccount2.setTest(false);
         apyAccounts.put(apyAccount2.getPayId(), apyAccount2);
 
         ApyAccount apyAccount3 = new ApyAccount();

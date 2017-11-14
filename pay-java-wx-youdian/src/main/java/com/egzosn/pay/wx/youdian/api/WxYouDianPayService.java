@@ -32,15 +32,23 @@ import java.util.concurrent.locks.Lock;
  * date 2017/01/12 22:58
  */
 public class WxYouDianPayService extends BasePayService {
-    protected final Log log = LogFactory.getLog(WxYouDianPayService.class);
-    //登录获取授权码
-    public final static String loginUrl = "http://life.51youdian.com/Api/CheckoutCounter/login";
-    //刷新授权码
-    public final static String resetLoginUrl = "http://life.51youdian.com/Api/CheckoutCounter/resetLogin";
-    //查看付款订单状态
-    public final static String unifiedorderStatusUrl = "http://life.51youdian.com/Api/CheckoutCounter/unifiedorderStatus";
-    //预下单链接
-    public final static String unifiedOrderUrl = "http://life.51youdian.com/Api/CheckoutCounter/unifiedorder";
+    protected static final Log LOG = LogFactory.getLog(WxYouDianPayService.class);
+    /**
+     * 登录获取授权码
+     */
+    public final static String LOGIN_URL = "http://life.51youdian.com/Api/CheckoutCounter/login";
+    /**
+     * 刷新授权码
+     */
+    public final static String RESET_LOGIN_URL = "http://life.51youdian.com/Api/CheckoutCounter/resetLogin";
+    /**
+     * 查看付款订单状态
+     */
+    public final static String UNIFIEDORDER_STATUS_URL = "http://life.51youdian.com/Api/CheckoutCounter/unifiedorderStatus";
+    /**
+     * 预下单链接
+     */
+    public final static String UNIFIED_ORDER_URL = "http://life.51youdian.com/Api/CheckoutCounter/unifiedorder";
 
 
     /**
@@ -51,9 +59,8 @@ public class WxYouDianPayService extends BasePayService {
         try {
             return getAccessToken(false);
         } catch (PayErrorException e) {
-            e.printStackTrace();
+            throw e;
         }
-        return null;
     }
 
     /**
@@ -80,7 +87,7 @@ public class WxYouDianPayService extends BasePayService {
                 StringBuilder param = new StringBuilder().append("access_token=").append(payConfigStorage.getAccessToken());
                 String sign = createSign(param.toString() + apbNonce, payConfigStorage.getInputCharset());
                 param.append("&apb_nonce=").append(apbNonce).append("&sign=").append(sign);
-                JSONObject json =  execute(resetLoginUrl + "?" +  param.toString(), MethodType.GET, null );
+                JSONObject json =  execute(RESET_LOGIN_URL + "?" +  param.toString(), MethodType.GET, null );
                 int errorcode = json.getIntValue("errorcode");
                 if (0 == errorcode){
                     payConfigStorage.updateAccessToken(payConfigStorage.getAccessToken(), 7200);
@@ -112,7 +119,7 @@ public class WxYouDianPayService extends BasePayService {
          String sign = createSign(SignUtils.parameterText(data, "") + apbNonce, payConfigStorage.getInputCharset());
          String queryParam =  SignUtils.parameterText(data) +  "&apb_nonce=" + apbNonce + "&sign=" + sign;
 
-         JSONObject json = execute(loginUrl + "?" + queryParam, MethodType.GET, null);
+         JSONObject json = execute(LOGIN_URL + "?" + queryParam, MethodType.GET, null);
          payConfigStorage.updateAccessToken(json.getString("access_token"), json.getLongValue("viptime"));
          return json;
      }
@@ -124,7 +131,7 @@ public class WxYouDianPayService extends BasePayService {
      * @return 请求地址
      */
     public String getHttpsVerifyUrl() {
-        return unifiedorderStatusUrl;
+        return UNIFIEDORDER_STATUS_URL;
     }
     /**
      * 回调校验
@@ -135,15 +142,15 @@ public class WxYouDianPayService extends BasePayService {
     @Override
     public boolean verify(Map<String, Object> params) {
         if (!"SUCCESS".equals(params.get("return_code"))){
-            log.debug(String.format("友店微信支付异常：return_code=%s,参数集=%s", params.get("return_code"), params));
+            LOG.debug(String.format("友店微信支付异常：return_code=%s,参数集=%s", params.get("return_code"), params));
             return false;
         }
-        if(params.get("sign") == null) {log.debug("友店微信支付异常：签名为空！out_trade_no=" + params.get("out_trade_no"));}
+        if(params.get("sign") == null) {LOG.debug("友店微信支付异常：签名为空！out_trade_no=" + params.get("out_trade_no"));}
 
         try {
             return signVerify(params, (String) params.get("sign")) && verifySource((String)params.get("out_trade_no"));
         } catch (PayErrorException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage());
         }
         return false;
     }
@@ -217,7 +224,7 @@ public class WxYouDianPayService extends BasePayService {
             if ("401".equals(error.getErrorCode()) ||  "500".equals(error.getErrorCode())) {
                 try {
                     int sleepMillis = retrySleepMillis * (1 << retryTimes);
-                    log.debug(String.format("友店微信系统繁忙，(%s)ms 后重试(第%s次)", sleepMillis, retryTimes + 1));
+                    LOG.debug(String.format("友店微信系统繁忙，(%s)ms 后重试(第%s次)", sleepMillis, retryTimes + 1));
                     Thread.sleep(sleepMillis);
                 } catch (InterruptedException e1) {
                     throw new PayErrorException(new YdPayError(-1, "友店支付服务端重试失败", e1.getMessage()));
@@ -255,14 +262,13 @@ public class WxYouDianPayService extends BasePayService {
         data.put("PayMoney", data.remove("paymoney"));
         String params =  SignUtils.parameterText(data) +  "&apb_nonce=" + apbNonce + "&sign=" + sign;
         try {
-            JSONObject json = execute(unifiedOrderUrl+ "?" +  params, MethodType.GET, null);
+            JSONObject json = execute(UNIFIED_ORDER_URL+ "?" +  params, MethodType.GET, null);
             //友店比较特殊，需要在下完预订单后，自己存储 order_sn 对应 微信官方文档 out_trade_no
             order.setOutTradeNo(json.getString("order_sn"));
             return json;
         } catch (PayErrorException e) {
-            e.printStackTrace();
+            throw  e;
         }
-        return null;
     }
 
 
@@ -312,14 +318,16 @@ public class WxYouDianPayService extends BasePayService {
 
     /**
      * 具体需要返回的数据为
-     *return_code 返回码只有SUCCESS和FAIL
-     *return_msg 返回具体信息
-     *nonce_str 您的服务器新生成随机生成32位字符串
-     *sign 为签名，签名规则是您需要发送的所有数据(除了sign)按照字典升序排列后加上&amp;key=xxxxxxxx您的密钥后md5加密，最后转成小写
-     *最后把得到的所有需要返回的数据用json格式化成json对象格式如下
-     *{&quot;return_code&quot;:&quot;SUCCESS&quot;,&quot;return_msg&quot;:&quot;ok&quot;,&quot;nonce_str&quot;:&quot;dddddddddddddddddddd’,’sign’:’sdddddddddddddddddd&quot;}
-     * @param code return_code
+     * return_code 返回码只有SUCCESS和FAIL
+     * return_msg 返回具体信息
+     * nonce_str 您的服务器新生成随机生成32位字符串
+     * sign 为签名，签名规则是您需要发送的所有数据(除了sign)按照字典升序排列后加上&amp;key=xxxxxxxx您的密钥后md5加密，最后转成小写
+     * 最后把得到的所有需要返回的数据用json格式化成json对象格式如下
+     * {&quot;return_code&quot;:&quot;SUCCESS&quot;,&quot;return_msg&quot;:&quot;ok&quot;,&quot;nonce_str&quot;:&quot;dddddddddddddddddddd’,’sign’:’sdddddddddddddddddd&quot;}
+     *
+     * @param code    return_code
      * @param message return_msg
+     *
      * @return 返回输出消息
      */
     @Override
