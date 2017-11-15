@@ -153,9 +153,10 @@ public class Base64 {
         Objects.requireNonNull(lineSeparator);
         int[] base64 = Decoder.fromBase64;
         for (byte b : lineSeparator) {
-            if (base64[b & 0xff] != -1)
+            if (base64[b & 0xff] != -1){
                 throw new IllegalArgumentException(
                         "Illegal base64 line separator character 0x" + Integer.toString(b, 16));
+            }
         }
         if (lineLength <= 0) {
             return Encoder.RFC4648;
@@ -264,8 +265,9 @@ public class Base64 {
                 int n = srclen % 3;
                 len = 4 * (srclen / 3) + (n == 0 ? 0 : n + 1);
             }
-            if (linemax > 0)                                  // line separators
+            if (linemax > 0) {                                  // line separators
                 len += (len - 1) / linemax * newline.length;
+            }
             return len;
         }
 
@@ -283,8 +285,9 @@ public class Base64 {
             int len = outLength(src.length);          // dst array size
             byte[] dst = new byte[len];
             int ret = encode0(src, 0, src.length, dst);
-            if (ret != dst.length)
+            if (ret != dst.length) {
                 return Arrays.copyOf(dst, ret);
+            }
             return dst;
         }
 
@@ -367,8 +370,9 @@ public class Base64 {
                 buffer.get(src);
                 ret = encode0(src, 0, src.length, dst);
             }
-            if (ret != dst.length)
+            if (ret != dst.length) {
                 dst = Arrays.copyOf(dst, ret);
+            }
             return ByteBuffer.wrap(dst);
         }
 
@@ -415,8 +419,9 @@ public class Base64 {
             int sp = off;
             int slen = (end - off) / 3 * 3;
             int sl = off + slen;
-            if (linemax > 0 && slen  > linemax / 4 * 3)
+            if (linemax > 0 && slen  > linemax / 4 * 3){
                 slen = linemax / 4 * 3;
+            }
             int dp = 0;
             while (sp < sl) {
                 int sl0 = Math.min(sp + slen, sl);
@@ -507,8 +512,9 @@ public class Base64 {
         private static final int[] fromBase64 = new int[256];
         static {
             Arrays.fill(fromBase64, -1);
-            for (int i = 0; i < Encoder.toBase64.length; i++)
+            for (int i = 0; i < Encoder.toBase64.length; i++){
                 fromBase64[Encoder.toBase64[i]] = i;
+            }
             fromBase64['='] = -2;
         }
 
@@ -520,8 +526,9 @@ public class Base64 {
 
         static {
             Arrays.fill(fromBase64URL, -1);
-            for (int i = 0; i < Encoder.toBase64URL.length; i++)
+            for (int i = 0; i < Encoder.toBase64URL.length; i++){
                 fromBase64URL[Encoder.toBase64URL[i]] = i;
+            }
             fromBase64URL['='] = -2;
         }
 
@@ -568,6 +575,9 @@ public class Base64 {
          *          if {@code src} is not in valid Base64 scheme
          */
         public byte[] decode(String src) {
+            if (null != src){
+                src = src.replaceAll("[\r\n]", "");
+            }
             return decode(src.getBytes(StandardCharsets.ISO_8859_1));
         }
 
@@ -673,11 +683,13 @@ public class Base64 {
             int[] base64 = isURL ? fromBase64URL : fromBase64;
             int paddings = 0;
             int len = sl - sp;
-            if (len == 0)
+            if (len == 0){
                 return 0;
+            }
             if (len < 2) {
-                if (isMIME && base64[0] == -1)
+                if (isMIME && base64[0] == -1){
                     return 0;
+                }
                 throw new IllegalArgumentException(
                         "Input byte[] should at least have 2 bytes for base64 bytes");
             }
@@ -698,12 +710,14 @@ public class Base64 {
             } else {
                 if (src[sl - 1] == '=') {
                     paddings++;
-                    if (src[sl - 2] == '=')
+                    if (src[sl - 2] == '=') {
                         paddings++;
+                    }
                 }
             }
-            if (paddings == 0 && (len & 0x3) !=  0)
+            if (paddings == 0 && (len & 0x3) !=  0) {
                 paddings = 4 - (len & 0x3);
+            }
             return 3 * ((len + 3) / 4) - paddings;
         }
 
@@ -728,12 +742,14 @@ public class Base64 {
                         }
                         break;
                     }
-                    if (isMIME)    // skip if for rfc2045
+                    if (isMIME){    // skip if for rfc2045
                         continue;
-                    else
+                    }
+                    else{
                         throw new IllegalArgumentException(
                                 "Illegal base64 character " +
                                         Integer.toString(src[sp - 1], 16));
+                    }
                 }
                 bits |= (b << shiftto);
                 shiftto -= 6;
@@ -759,8 +775,9 @@ public class Base64 {
             // anything left is invalid, if is not MIME.
             // if MIME, ignore all non-base64 character
             while (sp < sl) {
-                if (isMIME && base64[src[sp++]] < 0)
+                if (isMIME && base64[src[sp++]] < 0) {
                     continue;
+                }
                 throw new IllegalArgumentException(
                         "Input byte array has incorrect ending byte at " + sp);
             }
@@ -808,12 +825,15 @@ public class Base64 {
 
         @Override
         public void write(byte[] b, int off, int len) throws IOException {
-            if (closed)
+            if (closed) {
                 throw new IOException("Stream is closed");
-            if (off < 0 || len < 0 || off + len > b.length)
+            }
+            if (off < 0 || len < 0 || off + len > b.length) {
                 throw new ArrayIndexOutOfBoundsException();
-            if (len == 0)
+            }
+            if (len == 0) {
                 return;
+            }
             if (leftover != 0) {
                 if (leftover == 1) {
                     b1 = b[off++] & 0xff;
@@ -911,17 +931,21 @@ public class Base64 {
 
         @Override
         public int read(byte[] b, int off, int len) throws IOException {
-            if (closed)
+            if (closed) {
                 throw new IOException("Stream is closed");
-            if (eof && nextout < 0)    // eof and no leftover
+            }
+            if (eof && nextout < 0) {    // eof and no leftover
                 return -1;
-            if (off < 0 || len < 0 || len > b.length - off)
+            }
+            if (off < 0 || len < 0 || len > b.length - off) {
                 throw new IndexOutOfBoundsException();
+            }
             int oldOff = off;
             if (nextout >= 0) {       // leftover output byte(s) in bits buf
                 do {
-                    if (len == 0)
+                    if (len == 0) {
                         return off - oldOff;
+                    }
                     b[off++] = (byte)(bits >> nextout);
                     len--;
                     nextout -= 8;
@@ -933,8 +957,9 @@ public class Base64 {
                 if (v == -1) {
                     eof = true;
                     if (nextin != 18) {
-                        if (nextin == 12)
+                        if (nextin == 12) {
                             throw new IOException("Base64 stream has one un-decoded dangling byte.");
+                        }
                         // treat ending xx/xxx without padding character legal.
                         // same logic as v == '=' below
                         b[off++] = (byte)(bits >> (16));
@@ -948,10 +973,11 @@ public class Base64 {
                             }
                         }
                     }
-                    if (off == oldOff)
+                    if (off == oldOff) {
                         return -1;
-                    else
+                    }else {
                         return off - oldOff;
+                    }
                 }
                 if (v == '=') {                  // padding byte(s)
                     // =     shiftto==18 unnecessary padding
@@ -976,11 +1002,12 @@ public class Base64 {
                     break;
                 }
                 if ((v = base64[v]) == -1) {
-                    if (isMIME)                 // skip if for rfc2045
+                    if (isMIME) {             // skip if for rfc2045
                         continue;
-                    else
+                    }else {
                         throw new IOException("Illegal base64 character " +
                                 Integer.toString(v, 16));
+                    }
                 }
                 bits |= (v << nextin);
                 if (nextin == 0) {
@@ -1004,8 +1031,9 @@ public class Base64 {
 
         @Override
         public int available() throws IOException {
-            if (closed)
+            if (closed) {
                 throw new IOException("Stream is closed");
+            }
             return is.available();   // TBD:
         }
 
