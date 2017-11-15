@@ -327,7 +327,7 @@ public class WxPayService extends BasePayService {
             throw new PayErrorException(new WxPayError((String) orderInfo.get("return_code"), (String) orderInfo.get("return_msg")));
         }
         if (WxTransactionType.MWEB.name().equals(orderInfo.get("trade_type"))) {
-            return "<script type=\"text/javascript\">location.href=\"" + orderInfo.get("mweb_url") + ";\"</script>";
+            return String.format("<script type=\"text/javascript\">location.href=\"%s%s;\"</script>",orderInfo.get("mweb_url"), StringUtils.isEmpty(payConfigStorage.getReturnUrl()) ? "" : "&redirect_url=" + payConfigStorage.getReturnUrl());
         }
         throw new UnsupportedOperationException();
 
