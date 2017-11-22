@@ -14,7 +14,7 @@ import com.egzosn.pay.common.api.BasePayConfigStorage;
 public class WxPayConfigStorage extends BasePayConfigStorage {
 
 
-    /*
+    /**
      * 应用id
      */
     private   String appid ;
