@@ -582,7 +582,7 @@ public class WxPayService extends BasePayService {
         }
 
         //获取公共参数
-        Map<String, Object> parameters = new HashMap<>();//getPublicParameters();
+        Map<String, Object> parameters = getPublicParameters();
         if (StringUtils.isEmpty((String)transactionIdOrBillDate)){
             parameters.put("out_trade_no", outTradeNoBillType);
         }else {
