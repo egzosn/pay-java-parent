@@ -20,6 +20,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -153,7 +154,7 @@ public class WxPayService extends BasePayService {
 
         parameters.put("body", order.getSubject());// 购买支付信息
         parameters.put("out_trade_no", order.getOutTradeNo());// 订单号
-        parameters.put("spbill_create_ip", "192.168.1.150");
+        parameters.put("spbill_create_ip", StringUtils.isEmpty(order.getSpbillCreateIp()) ? "192.168.1.150" : order.getSpbillCreateIp() );
         parameters.put("total_fee", order.getPrice().multiply(new BigDecimal(100)).setScale(0, BigDecimal.ROUND_HALF_UP).intValue());// 总金额单位为分
 
         parameters.put("attach", order.getBody());
@@ -327,7 +328,7 @@ public class WxPayService extends BasePayService {
             throw new PayErrorException(new WxPayError((String) orderInfo.get("return_code"), (String) orderInfo.get("return_msg")));
         }
         if (WxTransactionType.MWEB.name().equals(orderInfo.get("trade_type"))) {
-            return String.format("<script type=\"text/javascript\">location.href=\"%s%s;\"</script>",orderInfo.get("mweb_url"), StringUtils.isEmpty(payConfigStorage.getReturnUrl()) ? "" : "&redirect_url=" + payConfigStorage.getReturnUrl());
+            return String.format("<script type=\"text/javascript\">location.href=\"%s%s;\"</script>",orderInfo.get("mweb_url"), StringUtils.isEmpty(payConfigStorage.getReturnUrl()) ? "" : "&redirect_url=" + URLEncoder.encode(payConfigStorage.getReturnUrl()));
         }
         throw new UnsupportedOperationException();
 
