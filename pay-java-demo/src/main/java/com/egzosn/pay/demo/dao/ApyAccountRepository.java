@@ -51,8 +51,8 @@ public class ApyAccountRepository {
         apyAccount2.setPartner("1469188802");
         apyAccount2.setAppid("wx3344f4aed352deae");
         // TODO 2017/2/9 16:20 author: egan  sign_type只有单一key时public_key与private_key相等，比如sign_type=MD5的情况
-        apyAccount2.setPublicKey("991ded0800933ccf8736ab4f7fc61095");
-        apyAccount2.setPrivateKey("991ded0800933ccf8736ab4f7fc61095");
+        apyAccount2.setPublicKey("991ded080***************f7fc61095");
+        apyAccount2.setPrivateKey("991ded080***************f7fc61095");
         apyAccount2.setNotifyUrl("http://pay.egzosn.com/payBack2.json");
         // 无需同步回调可不填
         apyAccount2.setReturnUrl("http://pay.egzosn.com");

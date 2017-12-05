@@ -20,6 +20,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -153,7 +154,7 @@ public class WxPayService extends BasePayService {
 
         parameters.put("body", order.getSubject());// 购买支付信息
         parameters.put("out_trade_no", order.getOutTradeNo());// 订单号
-        parameters.put("spbill_create_ip", "192.168.1.150");
+        parameters.put("spbill_create_ip", StringUtils.isEmpty(order.getSpbillCreateIp()) ? "192.168.1.150" : order.getSpbillCreateIp() );
         parameters.put("total_fee", order.getPrice().multiply(new BigDecimal(100)).setScale(0, BigDecimal.ROUND_HALF_UP).intValue());// 总金额单位为分
 
         parameters.put("attach", order.getBody());
@@ -224,16 +225,14 @@ public class WxPayService extends BasePayService {
 
         SortedMap<String, Object> params = new TreeMap<String, Object>();
 
-
-        params.put("partnerid", payConfigStorage.getPid());
         params.put("package", "prepay_id=" + result.get("prepay_id"));
         if (WxTransactionType.JSAPI == order.getTransactionType()) {
             params.put("signType", payConfigStorage.getSignType());
             params.put("appId", payConfigStorage.getAppid());
-            params.put("prepayid", result.get("prepay_id"));
             params.put("timeStamp", System.currentTimeMillis() / 1000);
             params.put("nonceStr", result.get("nonce_str"));
         } else if (WxTransactionType.APP == order.getTransactionType()) {
+            params.put("partnerid", payConfigStorage.getPid());
             params.put("appid", payConfigStorage.getAppid());
             params.put("prepayid", result.get("prepay_id"));
             params.put("timestamp", System.currentTimeMillis() / 1000);
@@ -328,8 +327,8 @@ public class WxPayService extends BasePayService {
         if (!"SUCCESS".equals(orderInfo.get("return_code"))) {
             throw new PayErrorException(new WxPayError((String) orderInfo.get("return_code"), (String) orderInfo.get("return_msg")));
         }
-        if (WxTransactionType.MWEB.equals(orderInfo.get("trade_type"))) {
-            return "<script type=\"text/javascript\">location.href=\"" + orderInfo.get("mweb_url") + ";\"</script>";
+        if (WxTransactionType.MWEB.name().equals(orderInfo.get("trade_type"))) {
+            return String.format("<script type=\"text/javascript\">location.href=\"%s%s\"</script>",orderInfo.get("mweb_url"), StringUtils.isEmpty(payConfigStorage.getReturnUrl()) ? "" : "&redirect_url=" + URLEncoder.encode(payConfigStorage.getReturnUrl()));
         }
         throw new UnsupportedOperationException();
 
@@ -584,7 +583,7 @@ public class WxPayService extends BasePayService {
         }
 
         //获取公共参数
-        Map<String, Object> parameters = new HashMap<>();//getPublicParameters();
+        Map<String, Object> parameters = getPublicParameters();
         if (StringUtils.isEmpty((String)transactionIdOrBillDate)){
             parameters.put("out_trade_no", outTradeNoBillType);
         }else {

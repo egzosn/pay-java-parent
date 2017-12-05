@@ -1,13 +1,17 @@
 
 #pay-java-parent
 
-## 整合支付模块
+##整合支付模块（微信支付，支付宝）
 
 声明： 本项目最初想法自 https://github.com/chanjarster/weixin-java-tools, 15年1月左右关注chanjarster/weixin-java-tools，并将其回调处理修改并进行使用。
 
 开发版 https://git.oschina.net/egzosn/pay-java-parent/tree/develop
 
+##### 详细文档请看 [wiki](https://gitee.com/egzosn/pay-java-parent/wikis/Home)。
+
 ### 特性
+
+
 
     1. 不依赖任何 mvc 框架
     2. 也不依赖 servlet，仅仅作为工具使用，可轻松嵌入到任何系统里（项目例子利用spring mvc的 @PathVariable进行，推荐使用类似的框架）
@@ -15,7 +19,7 @@
     4. 控制层统一异常处理
     5. LogBack日志记录
     6. 简单快速完成支付模块的开发
-    7. 支持多种支付类型多支付账户扩展
+    7. 支持多种支付类型多支付账户扩展（目前已支持微信支付，支付宝支付，友店支付）
 
 ### 本项目包含 3 个部分：
 
@@ -55,8 +59,8 @@
 
 ###### 单一支付教程 
 
- [基础模块支付宝微信讲解](pay-java-parent/wikis/Home)
-
+ [基础模块支付宝微信讲解](https://gitee.com/egzosn/pay-java-parent/wikis/Home)
+ 
  [友店微信](pay-java-wx-youdian?dir=1&filepath=pay-java-youdian)
  [富友](pay-java-fuiou?dir=1&filepath=pay-java-fuiou)
 

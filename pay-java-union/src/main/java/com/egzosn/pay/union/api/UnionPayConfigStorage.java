@@ -45,7 +45,6 @@ public class UnionPayConfigStorage extends BasePayConfigStorage {
      * @see #getPid()
      */
     @Deprecated
-    @Override
     public String getPartner () {
         return merId;
     }

@@ -111,4 +111,20 @@ public class QueryOrder {
     public void setTransactionType(String transactionType) {
         this.transactionType = transactionType;
     }
+
+    @Override
+    public String toString() {
+        return "QueryOrder{" +
+                "payId=" + payId +
+                ", tradeNo='" + tradeNo + '\'' +
+                ", outTradeNo='" + outTradeNo + '\'' +
+                ", refundAmount=" + refundAmount +
+                ", totalAmount=" + totalAmount +
+                ", billDate=" + billDate +
+                ", billType='" + billType + '\'' +
+                ", tradeNoOrBillDate=" + tradeNoOrBillDate +
+                ", outTradeNoBillType='" + outTradeNoBillType + '\'' +
+                ", transactionType='" + transactionType + '\'' +
+                '}';
+    }
 }
