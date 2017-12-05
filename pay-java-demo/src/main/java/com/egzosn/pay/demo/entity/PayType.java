@@ -6,12 +6,12 @@ import com.egzosn.pay.ali.bean.AliTransactionType;
 import com.egzosn.pay.common.api.PayService;
 import com.egzosn.pay.common.bean.BasePayType;
 import com.egzosn.pay.common.bean.TransactionType;
-import com.egzosn.pay.demo.service.handler.FuiouPayMessageHandler;
 import com.egzosn.pay.fuiou.api.FuiouPayConfigStorage;
 import com.egzosn.pay.fuiou.api.FuiouPayService;
 import com.egzosn.pay.fuiou.bean.FuiouTransactionType;
-import com.egzosn.pay.fuiou.api.FuiouPayConfigStorage;
-import com.egzosn.pay.fuiou.api.FuiouPayService;
+import com.egzosn.pay.union.api.UnionPayConfigStorage;
+import com.egzosn.pay.union.api.UnionPayService;
+import com.egzosn.pay.union.enums.UnionTransactionType;
 import com.egzosn.pay.wx.api.WxPayConfigStorage;
 import com.egzosn.pay.wx.api.WxPayService;
 import com.egzosn.pay.wx.bean.WxTransactionType;
@@ -141,6 +141,29 @@ public enum PayType implements BasePayType {
         @Override
         public TransactionType getTransactionType(String transactionType) {
             return FuiouTransactionType.valueOf(transactionType);
+        }
+
+
+    },unionPay{
+
+        @Override
+        public PayService getPayService(ApyAccount apyAccount) {
+            UnionPayConfigStorage unionPayConfigStorage = new UnionPayConfigStorage();
+            unionPayConfigStorage.setKeyPublic(apyAccount.getPublicKey());
+            unionPayConfigStorage.setKeyPrivate(apyAccount.getPrivateKey());
+            unionPayConfigStorage.setNotifyUrl(apyAccount.getNotifyUrl());
+            unionPayConfigStorage.setReturnUrl(apyAccount.getReturnUrl());
+            unionPayConfigStorage.setSignType(apyAccount.getSignType());
+            unionPayConfigStorage.setPayType(apyAccount.getPayType().toString());
+            unionPayConfigStorage.setMsgType(apyAccount.getMsgType());
+            unionPayConfigStorage.setInputCharset(apyAccount.getInputCharset());
+            unionPayConfigStorage.setTest(apyAccount.isTest());
+            return new UnionPayService(unionPayConfigStorage);
+        }
+
+        @Override
+        public TransactionType getTransactionType(String transactionType) {
+            return UnionTransactionType.valueOf(transactionType);
         }
 
 

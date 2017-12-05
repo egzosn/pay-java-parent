@@ -47,6 +47,29 @@ public class RSA{
 		return null;
 	}
 
+	/**
+	 * RSA签名
+	 * @param content 待签名数据
+	 * @param privateKey 私钥
+	 * @return 签名值
+	 */
+	public static String sign(byte[] content,PrivateKey privateKey) {
+		try {
+
+			java.security.Signature signature = java.security.Signature.getInstance(privateKey.getAlgorithm());
+
+			signature.initSign(privateKey);
+			signature.update(content);
+
+			byte[] signed = signature.sign();
+
+			return Base64.encode(signed);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return null;
+	}
 
 	/**
 	* RSA签名

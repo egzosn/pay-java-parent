@@ -4,15 +4,18 @@ package com.egzosn.pay.demo.controller;
 
 import com.egzosn.pay.ali.bean.AliTransactionType;
 import com.egzosn.pay.common.api.Callback;
+import com.egzosn.pay.common.api.PayConfigStorage;
 import com.egzosn.pay.common.bean.*;
 import com.egzosn.pay.common.util.MatrixToImageWriter;
 import com.egzosn.pay.common.util.str.StringUtils;
 import com.egzosn.pay.demo.entity.ApyAccount;
+import com.egzosn.pay.demo.entity.PayType;
 import com.egzosn.pay.demo.request.QueryOrder;
 import com.egzosn.pay.demo.service.ApyAccountService;
 import com.egzosn.pay.demo.service.PayResponse;
-import com.egzosn.pay.demo.entity.PayType;
-import com.egzosn.pay.common.api.PayConfigStorage;
+import com.egzosn.pay.union.api.UnionPayService;
+import com.egzosn.pay.union.enums.UnionTransactionType;
+import com.egzosn.pay.union.request.UnionQueryOrder;
 import com.egzosn.pay.wx.bean.WxTransactionType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -299,6 +302,19 @@ public class PayController {
     public Map<String, Object> query(QueryOrder order) {
         PayResponse payResponse = service.getPayResponse(order.getPayId());
         return payResponse.getService().query(order.getTradeNo(), order.getOutTradeNo());
+    }
+    /**
+     * 查询
+     *
+     * @param order 订单的请求体
+     * @return 返回查询回来的结果集，支付方原值返回
+     */
+    @RequestMapping("unionRefundOrConsumeUndo")
+    public Map<String, Object> unionQuery(UnionQueryOrder order,String transactionType) {
+        PayResponse payResponse = service.getPayResponse(order.getPayId());
+        UnionPayService service =  (UnionPayService)payResponse.getService();
+
+        return service.unionRefundOrConsumeUndo(order,UnionTransactionType.valueOf(transactionType));
     }
 
     /**

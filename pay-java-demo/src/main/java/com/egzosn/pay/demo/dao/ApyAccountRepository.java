@@ -81,6 +81,22 @@ public class ApyAccountRepository {
         apyAccount3.setMsgType(MsgType.xml);
         apyAccounts.put(apyAccount3.getPayId(), apyAccount3);
 
+        ApyAccount apyAccount4 = new ApyAccount();
+        apyAccount4.setPayId(4);
+        apyAccount4.setPartner("777290058110097");
+//        apyAccount4.setAppid("777290058110097");
+        apyAccount4.setPublicKey("");
+        apyAccount4.setPrivateKey("000000");
+        apyAccount4.setNotifyUrl("http://sailinmu.iok.la:19088/backRcvResponse");
+        // 无需同步回调可不填  app填这个就可以
+        apyAccount4.setReturnUrl("http://sailinmu.iok.la:19088/backRcvResponse");
+        apyAccount4.setSeller("");
+        apyAccount4.setInputCharset("UTF-8");
+        apyAccount4.setSignType(SignUtils.RSA.name());
+        apyAccount4.setPayType(PayType.unionPay);
+        apyAccount4.setMsgType(MsgType.json);
+        apyAccounts.put(apyAccount4.getPayId(), apyAccount3);
+
     }
     //_____________________________________________________________
 

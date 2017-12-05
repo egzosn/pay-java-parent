@@ -19,6 +19,9 @@
             <artifactId>pay-java-common</artifactId>
         </dependency>
         <!-- /pay-java  -->
-
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-debug-jdk15on</artifactId>
+        </dependency>
     </dependencies>
 </project>

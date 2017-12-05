@@ -26,7 +26,7 @@
         </developer>
         <developer>
             <name>Actinia</name>
-            <email>412605202@qq.com</email>
+            <email>hayesfu@qq.com</email>
             <url>https://github.com/Actinian</url>
         </developer>
     </developers>
@@ -76,7 +76,12 @@
                 <artifactId>fastjson</artifactId>
                 <version>1.2.17</version>
             </dependency>
-
+            <!--org.bouncycastle-->
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcprov-debug-jdk15on</artifactId>
+                <version>1.58</version>
+            </dependency>
 
             <!-- log4j  -->
             <dependency>

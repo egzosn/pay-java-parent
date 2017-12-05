@@ -79,6 +79,11 @@
             <artifactId>jackson-databind</artifactId>
             <version>2.8.4</version>
         </dependency>
+        <dependency>
+            <groupId>com.egzosn</groupId>
+            <artifactId>pay-java-union</artifactId>
+            <version>2.0.5-SNAPSHOT</version>
+        </dependency>
 
     </dependencies>
     <profiles>
