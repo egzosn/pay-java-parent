@@ -22,11 +22,17 @@ public class PayOrder {
     private String outTradeNo;
     //银行卡类型
     private String bankType;
-    //设备号
+    //设备信息，
     private String deviceInfo;
+    //支付创建ip
+    private String spbillCreateIp;
     //付款条码串  与设备号类似？？？
     private String authCode;
-    //
+    //WAP支付链接
+    private String wapUrl;
+    //WAP支付网页名称
+    private String wapName;
+    //微信会员唯一标识
     private String openid;
     //交易类型
     private TransactionType transactionType;
@@ -119,6 +125,14 @@ public class PayOrder {
         this.bankType = bankType;
     }
 
+    public String getSpbillCreateIp() {
+        return spbillCreateIp;
+    }
+
+    public void setSpbillCreateIp(String spbillCreateIp) {
+        this.spbillCreateIp = spbillCreateIp;
+    }
+
     public String getAuthCode() {
         return authCode;
     }
@@ -151,6 +165,22 @@ public class PayOrder {
         this.body = body;
         this.price = price;
         this.outTradeNo = outTradeNo;
+    }
+
+    public String getWapUrl() {
+        return wapUrl;
+    }
+
+    public void setWapUrl(String wapUrl) {
+        this.wapUrl = wapUrl;
+    }
+
+    public String getWapName() {
+        return wapName;
+    }
+
+    public void setWapName(String wapName) {
+        this.wapName = wapName;
     }
 
     public String getOpenid() {

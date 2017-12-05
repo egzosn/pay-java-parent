@@ -21,20 +21,10 @@ public class FuiouPayConfigStorage extends BasePayConfigStorage {
         return null;
     }
 
-    /**
-     * 合作商唯一标识
-     *
-     * @see #getPid()  代替者
-     */
-    @Override
-    public String getPartner () {
-        return mchntCd;
-    }
 
     /**
      * 合作商唯一标识
      *
-     * @see #getPartner()  代替者
      */
     @Override
     public String getPid () {
