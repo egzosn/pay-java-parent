@@ -1,4 +1,4 @@
-package com.egzosn.pay.common.util.sign.SM3;
+package com.egzosn.pay.common.util.sign.sm3;
 
 public class SM3
 {

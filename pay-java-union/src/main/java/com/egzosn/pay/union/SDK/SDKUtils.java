@@ -94,8 +94,8 @@ public class SDKUtils {
                     // 验证签名需要用银联发给商户的公钥证书.
                     boolean result = SecureUtil.validateSignBySoft256(x509Cert
                             .getPublicKey(), Base64.decode(stringSign
-                            ), SHA256.sha256X16(
-                            stringData, encoding));
+                            ), SHA256.sign(
+                            stringData, "", encoding).getBytes());
                     log.info("验证签名" + (result? "成功":"失败"));
                     return result;
                 } catch (UnsupportedEncodingException e) {

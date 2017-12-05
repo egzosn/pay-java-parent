@@ -20,19 +20,7 @@ public class UnionPayConfigStorage extends BasePayConfigStorage {
      * 商户收款账号
      */
     public volatile String seller;
-    //公钥
-    private volatile String aliPublicKey;
 
-
-
-    public String getAliPublicKey () {
-        return aliPublicKey;
-    }
-
-    public void setAliPublicKey (String aliPublicKey) {
-        setKeyPublic(aliPublicKey);
-        this.aliPublicKey = aliPublicKey;
-    }
 
 
     @Override

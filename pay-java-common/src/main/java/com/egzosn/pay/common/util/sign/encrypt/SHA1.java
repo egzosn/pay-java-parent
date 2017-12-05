@@ -1,16 +1,18 @@
 package com.egzosn.pay.common.util.sign.encrypt;
 
-
 import com.egzosn.pay.common.util.str.StringUtils;
 import org.apache.commons.codec.digest.DigestUtils;
 
 
-import static com.egzosn.pay.common.util.str.StringUtils.getContentBytes;
-
 /**
- * MD5签名工具
+ * SHA1签名工具
+ * @author Actinia
+ * @email hayesfu@qq.com
+ * @create 2017 2017/11/27 0027
  */
-public class MD5 {
+public class SHA1 {
+
+
 
     /**
      * 签名字符串
@@ -23,8 +25,9 @@ public class MD5 {
     public static String sign(String text, String key, String input_charset) {
         //拼接key
         text = text + key;
-        return DigestUtils.md5Hex(getContentBytes(text, input_charset));
+        return DigestUtils.sha1Hex(  StringUtils.getContentBytes(text, input_charset));
     }
+
 
     /**
      * 签名字符串
@@ -39,8 +42,5 @@ public class MD5 {
         //判断是否一样
         return StringUtils.equals(sign(text, key, input_charset).toUpperCase(), sign.toUpperCase());
     }
-
-
-
 
 }

@@ -216,7 +216,7 @@ public class SDKConfig {
 	}
 
 	/**
-	 * 根据传入的 {@link #load(java.util.Properties)}对象设置配置参数
+	 * 根据传入的 {@link #loadProperties(java.util.Properties)}对象设置配置参数
 	 * 
 	 * @param pro
 	 */
@@ -400,7 +400,7 @@ public class SDKConfig {
 				return SDKConstants.SIGNMETHOD_RSA;
 			case "SHA256":
 				return SDKConstants.SIGNMETHOD_SHA256;
-			case "SM3":
+			case "sm3":
 				return SDKConstants.SIGNMETHOD_SM3;
 			default:
 				return SDKConstants.SIGNMETHOD_RSA;

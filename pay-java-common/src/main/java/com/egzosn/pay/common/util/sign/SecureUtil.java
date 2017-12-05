@@ -1,6 +1,6 @@
 package com.egzosn.pay.common.util.sign;
 
-import com.egzosn.pay.common.util.sign.SM3.SM3Digest;
+import com.egzosn.pay.common.util.sign.sm3.SM3Digest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -150,6 +150,7 @@ public class SecureUtil {
     }
 
     public static boolean validateSignBySoft256(PublicKey publicKey, byte[] signData, byte[] srcData) throws Exception {
+
         Signature st = Signature.getInstance(BC_PROV_ALGORITHM_SHA256RSA, "BC");
         st.initVerify(publicKey);
         st.update(srcData);
