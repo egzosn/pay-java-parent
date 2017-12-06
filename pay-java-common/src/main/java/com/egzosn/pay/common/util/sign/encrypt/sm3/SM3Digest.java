@@ -1,4 +1,4 @@
-package com.egzosn.pay.common.util.sign.sm3;
+package com.egzosn.pay.common.util.sign.encrypt.sm3;
 
 public class SM3Digest
 {
@@ -129,15 +129,5 @@ public class SM3Digest
     {
         return BYTE_LENGTH;
     }
-//
-//    public static void main(String[] args)
-//    {
-//        byte[] md = new byte[32];
-//        byte[] msg1 = "ererfeiisgod".getBytes();
-//        SM3Digest sm3 = new SM3Digest();
-//        sm3.update(msg1, 0, msg1.length);
-//        sm3.doFinal(md, 0);
-//        String s = new String(Hex.encode(md));
-//        System.out.println(s.toUpperCase());
-//    }
+
 }

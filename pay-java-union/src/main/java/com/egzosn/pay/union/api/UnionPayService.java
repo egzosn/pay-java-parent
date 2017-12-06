@@ -9,6 +9,7 @@ import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.common.util.MatrixToImageWriter;
+import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.str.StringUtils;
 import com.egzosn.pay.union.SDK.CertUtil;
 import com.egzosn.pay.union.SDK.SDKConfig;
@@ -47,6 +48,7 @@ public class UnionPayService extends BasePayService {
         SDKConfig.getConfig().loadPropertiesFromSrc();
     }
 
+
     /**
      * 银联全渠道系统，产品参数，除了encoding自行选择外其他不需修改
      * @return 返回参数集合
@@ -55,7 +57,7 @@ public class UnionPayService extends BasePayService {
         Map<String ,String> params = new HashMap<>();
         params.put(SDKConstants.param_version, SDKConfig.getConfig().getVersion());
         params.put(SDKConstants.param_encoding, payConfigStorage.getInputCharset().toUpperCase());
-        params.put(SDKConstants.param_signMethod, SDKConfig.getConfig().getSignMethodByStr(payConfigStorage.getSignType()));
+
         params.put(SDKConstants.param_merId, payConfigStorage.getPid());
         //接入类型，商户接入填0 ，不需修改（0：直连商户， 1： 收单机构 2：平台商户）
         params.put(SDKConstants.param_accessType, "0");
@@ -130,6 +132,7 @@ public class UnionPayService extends BasePayService {
     @Override
     public Map orderInfo (PayOrder order) {
         Map<String, String> params = this.getCommonParam();
+
         UnionTransactionType type =  (UnionTransactionType)order.getTransactionType();
         type.convertMap(params);
         switch (type){
@@ -154,6 +157,55 @@ public class UnionPayService extends BasePayService {
 
 
     /**
+     * 根据签名类型获取银联签名对应的参数
+     * @param signType 签名类型
+     * @return 签名参数
+     */
+    public String getSignMethod(SignUtils signType) {
+        switch (signType) {
+            case RSA:
+            case RSA2:
+                return SDKConstants.SIGNMETHOD_RSA;
+            case SHA256:
+                return SDKConstants.SIGNMETHOD_SHA256;
+            case SM3:
+                return SDKConstants.SIGNMETHOD_SM3;
+            default:
+                return SDKConstants.SIGNMETHOD_RSA;
+        }
+    }
+
+
+
+    /**
+     * 创建签名
+     *
+     * @param content           需要签名的内容
+     * @param characterEncoding 字符编码
+     * @return 签名
+     */
+    @Override
+    public String createSign(String content, String characterEncoding) {
+
+        return  SignUtils.valueOf(payConfigStorage.getSignType()).createSign(content, payConfigStorage.getKeyPrivate(),characterEncoding);
+    }
+
+    /**
+     *  生成并设置签名
+     * @param parameters 请求参数
+     * @return 请求参数
+     */
+    private Map<String, Object> setSign(Map<String, Object> parameters){
+        SignUtils signUtils = SignUtils.valueOf(payConfigStorage.getSignType());
+        parameters.put(SDKConstants.param_signMethod, getSignMethod(signUtils));
+
+        String sign = createSign( SignUtils.parameterText(parameters, "&"), payConfigStorage.getInputCharset());
+
+        parameters.put("sign", sign);
+        return parameters;
+    }
+
+    /**
      * 获取输出二维码，用户返回给支付端,
      *
      * @param order 发起支付的订单信息
@@ -162,6 +214,9 @@ public class UnionPayService extends BasePayService {
     @Override
     public BufferedImage genQrPay (PayOrder order) {
         Map<String ,String > params = orderInfo(order);
+
+
+
         CertUtil.sign(params,payConfigStorage.getInputCharset().toUpperCase());
         JSONObject response =  getHttpRequestTemplate().postForObject(SDKConfig.getConfig().getBackRequestUrl(),params,JSONObject.class);
         if(SDKUtils.validate(response,payConfigStorage.getInputCharset().toUpperCase())){

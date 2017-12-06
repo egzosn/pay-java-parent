@@ -19,10 +19,10 @@ public enum UnionTransactionType implements TransactionType{
     CONSUME("01","06","000000","08"),
     //消费撤销
     CONSUME_UNDO("31","00","000000","08"),
-    //查询
-    QUERY("00","00","000201",""),
     //退款
     REFUND("04","00","000000","08"),
+    //查询
+    QUERY("00","00","000201",""),
     //对账文件下载
     File_Transfer("00","00","000201","")
     ;

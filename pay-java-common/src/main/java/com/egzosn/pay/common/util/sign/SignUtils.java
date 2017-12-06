@@ -67,6 +67,39 @@ public enum SignUtils {
         public boolean verify(String text, String sign, String publicKey, String characterEncoding) {
             return com.egzosn.pay.common.util.sign.encrypt.RSA2.verify(text, sign, publicKey, characterEncoding);
         }
+    },
+    SHA1 {
+        @Override
+        public String createSign(String content, String key, String characterEncoding) {
+            return com.egzosn.pay.common.util.sign.encrypt.SHA1.sign(content, key, characterEncoding);
+        }
+
+        @Override
+        public boolean verify(String text, String sign, String publicKey, String characterEncoding) {
+            return com.egzosn.pay.common.util.sign.encrypt.SHA1.verify(text, sign, publicKey, characterEncoding);
+        }
+    },
+    SHA256 {
+        @Override
+        public String createSign(String content, String key, String characterEncoding) {
+            return com.egzosn.pay.common.util.sign.encrypt.SHA256.sign(content, key, characterEncoding);
+        }
+
+        @Override
+        public boolean verify(String text, String sign, String publicKey, String characterEncoding) {
+            return com.egzosn.pay.common.util.sign.encrypt.SHA256.verify(text, sign, publicKey, characterEncoding);
+        }
+    },
+    SM3 {
+        @Override
+        public String createSign(String content, String key, String characterEncoding) {
+            return com.egzosn.pay.common.util.sign.encrypt.RSA2.sign(content, key, characterEncoding);
+        }
+
+        @Override
+        public boolean verify(String text, String sign, String publicKey, String characterEncoding) {
+            return com.egzosn.pay.common.util.sign.encrypt.RSA2.verify(text, sign, publicKey, characterEncoding);
+        }
     };
 
     /**

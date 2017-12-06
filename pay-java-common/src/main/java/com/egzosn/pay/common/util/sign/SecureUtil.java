@@ -1,6 +1,6 @@
 package com.egzosn.pay.common.util.sign;
 
-import com.egzosn.pay.common.util.sign.sm3.SM3Digest;
+import com.egzosn.pay.common.util.sign.encrypt.sm3.SM3Digest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

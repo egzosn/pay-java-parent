@@ -18,6 +18,7 @@ package com.egzosn.pay.union.SDK;
 import com.egzosn.pay.common.util.str.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import java.io.*;
 import java.math.BigInteger;
@@ -34,7 +35,9 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  */
 public class CertUtil {
-	//日志
+	/**
+	 * 日志
+	 */
 	protected static final Log log = LogFactory.getLog(CertUtil.class);
 
 	public static final String UNIONPAY_CNNAME = "中国银联股份有限公司";

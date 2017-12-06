@@ -1,4 +1,6 @@
-package com.egzosn.pay.common.util.sign.sm3;
+package com.egzosn.pay.common.util.sign.encrypt.sm3;
+
+import com.egzosn.pay.common.util.Util;
 
 public class SM3
 {

@@ -1,8 +1,8 @@
-package com.egzosn.pay.common.util.sign.sm3;
+package com.egzosn.pay.common.util;
 
 import java.math.BigInteger;
 
-public class Util
+public class  Util
 {
     /**
      * 整形转换成网络传输的字节流（字节数组）型数据
@@ -226,7 +226,7 @@ public class Util
      * @return 十六进制char[]
      */
     public static char[] encodeHex(byte[] data, boolean toLowerCase) {
-        return encodeHex(data, toLowerCase ? DIGITS_LOWER : DIGITS_UPPER);
+        return encodeHex(data, toLowerCase ?  DIGITS_LOWER : DIGITS_UPPER);
     }
 
     /**
