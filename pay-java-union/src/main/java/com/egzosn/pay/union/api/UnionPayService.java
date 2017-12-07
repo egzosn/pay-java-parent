@@ -14,7 +14,6 @@ import com.egzosn.pay.common.util.str.StringUtils;
 import com.egzosn.pay.union.SDK.CertUtil;
 import com.egzosn.pay.union.SDK.SDKConfig;
 import com.egzosn.pay.union.SDK.SDKConstants;
-import com.egzosn.pay.union.SDK.SDKUtils;
 import com.egzosn.pay.union.enums.UnionTransactionType;
 import com.egzosn.pay.union.request.UnionQueryOrder;
 import org.apache.commons.logging.Log;
@@ -37,7 +36,32 @@ import java.util.Map;
 public class UnionPayService extends BasePayService {
     //日志
     protected static final Log log = LogFactory.getLog(UnionPayService.class);
-
+    /**
+     * 测试域名
+     */
+    private static final String TEST_BASE_DOMAIN = "test.95516.com";
+    /**
+     * 正式域名
+     */
+    private static final String RELEASE_BASE_DOMAIN = "95516.com";
+    /**
+     * 交易请求地址
+     */
+    private static final String FRONT_TRANS_URL= "https://gateway.%s/gateway/api/frontTransReq.do";
+    private static final String BACK_TRANS_URL= "https://gateway.%s/gateway/api/backTransReq.do";
+    private static final String SINGLE_QUERY_URL= "https://gateway.%s/gateway/api/queryTrans.do";
+    private static final String BATCH_TRANS_URL= "https://gateway.%s/gateway/api/batchTrans.do";
+    private static final String FILE_TRANS_URL= "https://filedownload.%s/";
+    private static final String APP_TRANS_URL= "https://gateway.%s/gateway/api/appTransReq.do";
+    private static final String CARD_TRANS_URL= "https://gateway.%s/gateway/api/cardTransReq.do";
+    /**
+     * 以下缴费产品使用，其余产品用不到
+     */
+//    private static final String JF_FRONT_TRANS_URL= "https://gateway.%s/jiaofei/api/frontTransReq.do";
+//    private static final String JF_BACK_TRANS_URL= "https://gateway.%s/jiaofei/api/backTransReq.do";
+//    private static final String JF_SINGLE_QUERY_URL= "https://gateway.%s/jiaofei/api/queryTrans.do";
+//    private static final String JF_APP_TRANS_URL= "https://gateway.%s/jiaofei/api/appTransReq.do";
+//    private static final String JF_CARD_TRANS_URL= "https://gateway.%s/jiaofei/api/cardTransReq.do";
 
     public UnionPayService (PayConfigStorage payConfigStorage) {
         super(payConfigStorage);
@@ -77,7 +101,7 @@ public class UnionPayService extends BasePayService {
     @Override
     public boolean verify (Map<String, Object> result) {
         if(result != null){
-            if(SDKUtils.validate(result, payConfigStorage.getInputCharset())){
+            if(this.vailSign(result)){
                 String respCode = result.get("respCode").toString();
                 if(("00").equals(respCode)){
 
@@ -195,14 +219,57 @@ public class UnionPayService extends BasePayService {
      * @param parameters 请求参数
      * @return 请求参数
      */
-    private Map<String, Object> setSign(Map<String, Object> parameters){
+    private Map<String, String> setSign(Map<String, String> parameters){
         SignUtils signUtils = SignUtils.valueOf(payConfigStorage.getSignType());
+        String data = SignUtils.parameterText(parameters);
         parameters.put(SDKConstants.param_signMethod, getSignMethod(signUtils));
-
-        String sign = createSign( SignUtils.parameterText(parameters, "&"), payConfigStorage.getInputCharset());
-
-        parameters.put("sign", sign);
+        String stringSign = "";
+        switch (signUtils){
+            case RSA:
+                parameters.put(SDKConstants.param_certId, CertUtil.getSignCertId());
+                stringSign = SignUtils.SHA1.createSign(data,"",payConfigStorage.getInputCharset());
+                stringSign = signUtils.createSign(stringSign,payConfigStorage.getKeyPrivate(),payConfigStorage.getInputCharset());
+                break;
+            case SHA256:
+                String before = SignUtils.SHA256.createSign(SDKConfig.getConfig().getSecureKey(),"",payConfigStorage.getInputCharset());
+                stringSign = SignUtils.SHA256.createSign(data,"&"+before,payConfigStorage.getInputCharset());
+                break;
+            case SM3:
+                stringSign = SignUtils.SM3.createSign(data,SDKConfig.getConfig().getSecureKey(),payConfigStorage.getInputCharset());
+                break;
+            default:
+                parameters.put(SDKConstants.param_certId, CertUtil.getSignCertId());
+                stringSign = SignUtils.SHA1.createSign(data,"",payConfigStorage.getInputCharset());
+                stringSign = signUtils.createSign(stringSign,payConfigStorage.getKeyPrivate(),payConfigStorage.getInputCharset());
+        }
+        parameters.put(SDKConstants.param_signature, stringSign);
         return parameters;
+    }
+
+    /**
+     *  验证数据合法性
+     * @param resData 请求参数
+     * @return 请求参数
+     */
+    private boolean vailSign(Map<String, Object> resData){
+        SignUtils signUtils = SignUtils.valueOf(payConfigStorage.getSignType());
+        //签名原文
+        String stringSign = resData.get(SDKConstants.param_signature).toString();
+        String data = SignUtils.parameterText(resData);
+        switch (signUtils){
+            case RSA:
+                //todo 不确定这样可靠
+                return SignUtils.RSA.verify(resData,stringSign,payConfigStorage.getKeyPublic(),payConfigStorage.getInputCharset());
+            case SHA256:
+                String before = SignUtils.SHA256.createSign(SDKConfig.getConfig().getSecureKey(),"",payConfigStorage.getInputCharset());
+                String nowSign = SignUtils.SHA256.createSign(data,"&"+before,payConfigStorage.getInputCharset());
+                return stringSign.equals(nowSign);
+            case SM3:
+                nowSign = SignUtils.SM3.createSign(data,SDKConfig.getConfig().getSecureKey(),payConfigStorage.getInputCharset());
+                return stringSign.equals(nowSign);
+            default:
+                    return false;
+        }
     }
 
     /**
@@ -214,12 +281,9 @@ public class UnionPayService extends BasePayService {
     @Override
     public BufferedImage genQrPay (PayOrder order) {
         Map<String ,String > params = orderInfo(order);
-
-
-
-        CertUtil.sign(params,payConfigStorage.getInputCharset().toUpperCase());
-        JSONObject response =  getHttpRequestTemplate().postForObject(SDKConfig.getConfig().getBackRequestUrl(),params,JSONObject.class);
-        if(SDKUtils.validate(response,payConfigStorage.getInputCharset().toUpperCase())){
+        this.setSign(params);
+        JSONObject response =  getHttpRequestTemplate().postForObject(this.getBackTransUrl(),params,JSONObject.class);
+        if(this.vailSign(response)){
             if("00".equals(response.getString(SDKConstants.param_respCode))){
                 //成功,获取tn号
                 return MatrixToImageWriter.writeInfoToJpgBuff( response.getString(SDKConstants.param_respCode));
@@ -240,8 +304,8 @@ public class UnionPayService extends BasePayService {
     @Override
     public Map<String, Object> microPay (PayOrder order) {
         Map<String ,String > params = orderInfo(order);
-        CertUtil.sign(params,payConfigStorage.getInputCharset().toUpperCase());
-        return getHttpRequestTemplate().postForObject(SDKConfig.getConfig().getBackRequestUrl(),params,JSONObject.class);
+        this.setSign(params);
+        return getHttpRequestTemplate().postForObject(this.getBackTransUrl(),params,JSONObject.class);
     }
 
 
@@ -257,9 +321,9 @@ public class UnionPayService extends BasePayService {
         Map<String ,String > params = this.getCommonParam();
         UnionTransactionType.QUERY.convertMap(params);
         params.put(SDKConstants.param_orderId,outTradeNo);
-        CertUtil.sign(params,payConfigStorage.getInputCharset().toUpperCase());
-        JSONObject response =  getHttpRequestTemplate().postForObject(SDKConfig.getConfig().getBackRequestUrl(),params,JSONObject.class);
-        if(SDKUtils.validate(response,payConfigStorage.getInputCharset().toUpperCase())){
+        this.setSign(params);
+        JSONObject response =  getHttpRequestTemplate().postForObject(this.getSingleQueryUrl(),params,JSONObject.class);
+        if(this.vailSign(response)){
             if("00".equals(response.getString(SDKConstants.param_respCode))){
                 String origRespCode = response.getString(SDKConstants.param_origRespCode);
                 if(("00").equals(origRespCode)){
@@ -296,9 +360,9 @@ public class UnionPayService extends BasePayService {
         if(StringUtils.isNotBlank(queryOrder.getOrigTxnTime())) {
             params.put(SDKConstants.param_origTxnTime, queryOrder.getOrigOrderId());
         }
-        CertUtil.sign(params,payConfigStorage.getInputCharset().toUpperCase());
-        JSONObject response =  getHttpRequestTemplate().postForObject(SDKConfig.getConfig().getBackRequestUrl(),params,JSONObject.class);
-        if(SDKUtils.validate(response,payConfigStorage.getInputCharset().toUpperCase())){
+        this.setSign(params);
+        JSONObject response =  getHttpRequestTemplate().postForObject(this.getBackTransUrl(),params,JSONObject.class);
+        if(this.vailSign(response)){
             if("00".equals(response.getString(SDKConstants.param_respCode))){
                 String origRespCode = response.getString(SDKConstants.param_origRespCode);
                 //交易成功，更新商户订单状态
@@ -471,9 +535,9 @@ public class UnionPayService extends BasePayService {
         DateFormat df = new SimpleDateFormat("MMDD");
         params.put(SDKConstants.param_settleDate,df.format(new Date()));
         params.put(SDKConstants.param_fileType,billType);
-        CertUtil.sign(params,payConfigStorage.getInputCharset().toUpperCase());
-        Map<String ,Object > response =  getHttpRequestTemplate().postForObject(SDKConfig.getConfig().getBackRequestUrl(),params,Map.class);
-        if(SDKUtils.validate(response,payConfigStorage.getInputCharset().toUpperCase())){
+        this.setSign(params);
+        Map<String ,Object > response =  getHttpRequestTemplate().postForObject(this.getFileTransUrl(),params,Map.class);
+        if(this.vailSign(response)){
             if("00".equals(response.get(SDKConstants.param_respCode))){
 
                 return response.get(SDKConstants.param_fileContent).toString();
@@ -513,7 +577,51 @@ public class UnionPayService extends BasePayService {
         return null;
     }
 
+//    public  String getFrontTransUrl () {
+//        return payConfigStorage.isTest() ? String.format(FRONT_TRANS_URL,TEST_BASE_DOMAIN):String.format(FRONT_TRANS_URL,RELEASE_BASE_DOMAIN);
+//    }
+//
+    public  String getBackTransUrl () {
+        return payConfigStorage.isTest() ? String.format(BACK_TRANS_URL,TEST_BASE_DOMAIN):String.format(BACK_TRANS_URL,RELEASE_BASE_DOMAIN);
+    }
 
+    public  String getSingleQueryUrl () {
+        return payConfigStorage.isTest() ? String.format(SINGLE_QUERY_URL,TEST_BASE_DOMAIN):String.format(SINGLE_QUERY_URL,RELEASE_BASE_DOMAIN);
+    }
+//
+//    public  String getBatchTransUrl () {
+//        return payConfigStorage.isTest() ? String.format(BATCH_TRANS_URL,TEST_BASE_DOMAIN):String.format(BATCH_TRANS_URL,RELEASE_BASE_DOMAIN);
+//    }
 
+    public  String getFileTransUrl () {
+        return payConfigStorage.isTest() ? String.format(FILE_TRANS_URL,TEST_BASE_DOMAIN):String.format(FILE_TRANS_URL,RELEASE_BASE_DOMAIN);
+    }
 
+//    public  String getAppTransUrl () {
+//        return payConfigStorage.isTest() ? String.format(APP_TRANS_URL,TEST_BASE_DOMAIN):String.format(APP_TRANS_URL,RELEASE_BASE_DOMAIN);
+//    }
+//
+//    public  String getCardTransUrl () {
+//        return payConfigStorage.isTest() ? String.format(CARD_TRANS_URL,TEST_BASE_DOMAIN):String.format(CARD_TRANS_URL,RELEASE_BASE_DOMAIN);
+//    }
+//
+//    public  String getJfFrontTransUrl () {
+//        return payConfigStorage.isTest() ? String.format(JF_FRONT_TRANS_URL,TEST_BASE_DOMAIN):String.format(JF_FRONT_TRANS_URL,RELEASE_BASE_DOMAIN);
+//    }
+//
+//    public  String getJfBackTransUrl () {
+//        return payConfigStorage.isTest() ? String.format(JF_BACK_TRANS_URL,TEST_BASE_DOMAIN):String.format(JF_BACK_TRANS_URL,RELEASE_BASE_DOMAIN);
+//    }
+//
+//    public  String getJfSingleQueryUrl () {
+//        return payConfigStorage.isTest() ? String.format(JF_SINGLE_QUERY_URL,TEST_BASE_DOMAIN):String.format(JF_SINGLE_QUERY_URL,RELEASE_BASE_DOMAIN);
+//    }
+//
+//    public  String getJfAppTransUrl () {
+//        return payConfigStorage.isTest() ? String.format(JF_APP_TRANS_URL,TEST_BASE_DOMAIN):String.format(JF_APP_TRANS_URL,RELEASE_BASE_DOMAIN);
+//    }
+//
+//    public  String getJfCardTransUrl () {
+//        return payConfigStorage.isTest() ? String.format(JF_CARD_TRANS_URL,TEST_BASE_DOMAIN):String.format(JF_CARD_TRANS_URL,RELEASE_BASE_DOMAIN);
+//    }
 }

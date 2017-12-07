@@ -61,40 +61,6 @@ public class CertUtil {
 
 
 
-	/**
-	 * 请求报文签名(使用配置文件中配置的私钥证书或者对称密钥签名)<br>
-	 * 功能：对请求报文进行签名,并计算赋值certid,signature字段并返回<br>
-	 * @param reqData 请求报文map<br>
-	 * @param encoding 上送请求报文域encoding字段的值<br>
-	 * @return　签名后的map对象<br>
-	 */
-	public static Map<String, String> sign(Map<String, String> reqData,String encoding) {
-		reqData = filterBlank(reqData);
-		SDKUtils.signParams(reqData, encoding);
-		return reqData;
-	}
-	/**
-	 * 过滤请求报文中的空字符串或者空字符串
-	 * @param contentData
-	 * @return
-	 */
-	public static Map<String, String> filterBlank(Map<String, String> contentData){
-		Map<String, String> submitFromData = new HashMap<String, String>();
-		Set<String> keyset = contentData.keySet();
-		for(String key:keyset){
-			String value = contentData.get(key);
-			if (StringUtils.isNotBlank(value)) {
-				// 对value值进行去除前后空处理
-				submitFromData.put(key, value.trim());
-			}
-		}
-		return submitFromData;
-	}
-
-
-
-
-
 	static {
 		init();
 	}
