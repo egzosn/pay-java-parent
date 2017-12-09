@@ -1,4 +1,4 @@
-package com.egzosn.pay.union.SDK;
+package com.egzosn.pay.union.sdk;
 
 import com.egzosn.pay.common.util.str.StringUtils;
 import org.apache.commons.logging.Log;

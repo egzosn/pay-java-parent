@@ -11,9 +11,9 @@ import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.common.util.MatrixToImageWriter;
 import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.str.StringUtils;
-import com.egzosn.pay.union.SDK.CertUtil;
-import com.egzosn.pay.union.SDK.SDKConfig;
-import com.egzosn.pay.union.SDK.SDKConstants;
+import com.egzosn.pay.union.sdk.CertUtil;
+import com.egzosn.pay.union.sdk.SDKConfig;
+import com.egzosn.pay.union.sdk.SDKConstants;
 import com.egzosn.pay.union.enums.UnionTransactionType;
 import com.egzosn.pay.union.request.UnionQueryOrder;
 import org.apache.commons.logging.Log;
@@ -221,28 +221,27 @@ public class UnionPayService extends BasePayService {
      */
     private Map<String, String> setSign(Map<String, String> parameters){
         SignUtils signUtils = SignUtils.valueOf(payConfigStorage.getSignType());
-        String data = SignUtils.parameterText(parameters);
         parameters.put(SDKConstants.param_signMethod, getSignMethod(signUtils));
-        String stringSign = "";
+        String signStr = SignUtils.parameterText(parameters);
+        String key = payConfigStorage.getKeyPrivate();
+
         switch (signUtils){
             case RSA:
                 parameters.put(SDKConstants.param_certId, CertUtil.getSignCertId());
-                stringSign = SignUtils.SHA1.createSign(data,"",payConfigStorage.getInputCharset());
-                stringSign = signUtils.createSign(stringSign,payConfigStorage.getKeyPrivate(),payConfigStorage.getInputCharset());
+                signStr = SignUtils.SHA1.createSign(signStr,"", payConfigStorage.getInputCharset());
+            case RSA2:
+                parameters.put(SDKConstants.param_certId, CertUtil.getSignCertId());
+                signStr = SignUtils.SHA256.createSign(signStr,"", payConfigStorage.getInputCharset());
                 break;
             case SHA256:
-                String before = SignUtils.SHA256.createSign(SDKConfig.getConfig().getSecureKey(),"",payConfigStorage.getInputCharset());
-                stringSign = SignUtils.SHA256.createSign(data,"&"+before,payConfigStorage.getInputCharset());
-                break;
             case SM3:
-                stringSign = SignUtils.SM3.createSign(data,SDKConfig.getConfig().getSecureKey(),payConfigStorage.getInputCharset());
+                 key = signUtils.createSign(key,"",payConfigStorage.getInputCharset()) + "&";
                 break;
             default:
-                parameters.put(SDKConstants.param_certId, CertUtil.getSignCertId());
-                stringSign = SignUtils.SHA1.createSign(data,"",payConfigStorage.getInputCharset());
-                stringSign = signUtils.createSign(stringSign,payConfigStorage.getKeyPrivate(),payConfigStorage.getInputCharset());
+              throw new PayErrorException(new PayException("sign fail", "未找到的签名类型"));
         }
-        parameters.put(SDKConstants.param_signature, stringSign);
+        signStr = signUtils.createSign(signStr, key,payConfigStorage.getInputCharset());
+        parameters.put(SDKConstants.param_signature, signStr);
         return parameters;
     }
 
@@ -265,8 +264,7 @@ public class UnionPayService extends BasePayService {
                 String nowSign = SignUtils.SHA256.createSign(data,"&"+before,payConfigStorage.getInputCharset());
                 return stringSign.equals(nowSign);
             case SM3:
-                nowSign = SignUtils.SM3.createSign(data,SDKConfig.getConfig().getSecureKey(),payConfigStorage.getInputCharset());
-                return stringSign.equals(nowSign);
+               return SignUtils.SM3.verify(data,stringSign,SDKConfig.getConfig().getSecureKey(),payConfigStorage.getInputCharset());
             default:
                     return false;
         }

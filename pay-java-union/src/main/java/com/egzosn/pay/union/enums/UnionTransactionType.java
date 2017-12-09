@@ -1,7 +1,7 @@
 package com.egzosn.pay.union.enums;
 
 import com.egzosn.pay.common.bean.TransactionType;
-import com.egzosn.pay.union.SDK.SDKConstants;
+import com.egzosn.pay.union.sdk.SDKConstants;
 
 import java.util.Map;
 
