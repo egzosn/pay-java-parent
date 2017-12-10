@@ -2,6 +2,7 @@ package com.egzosn.pay.union.api;
 
 import com.egzosn.pay.common.api.BasePayConfigStorage;
 
+
 /**
  * @author Actinia
  * @email hayesfu@qq.com
@@ -11,10 +12,16 @@ import com.egzosn.pay.common.api.BasePayConfigStorage;
  */
 public class UnionPayConfigStorage extends BasePayConfigStorage {
 
+
     /**
      * 商户号
      */
     private volatile String merId;
+
+    /**
+     *   应用私钥，rsa_private pkcs8格式 生成签名时使用
+     */
+    private volatile  String keyPrivatePwd;
 
     /**
      * 商户收款账号
@@ -29,6 +36,26 @@ public class UnionPayConfigStorage extends BasePayConfigStorage {
      */
     private volatile String accessType = "0";
 
+
+    @Override
+    public void setKeyPrivate(String keyPrivate) {
+        super.setKeyPrivate(keyPrivate);
+        if (isCertSign() && keyPrivate.length() < 1024 && keyPrivate.contains(";")){
+            String[] split = keyPrivate.split(";");
+            keyPrivatePwd = split[1];
+            super.setKeyPrivate(split[0]);
+            getCertDescriptor().initPrivateSignCert(getKeyPrivate(), keyPrivatePwd, "PKCS12");
+        }
+    }
+
+
+    @Override
+    public void setKeyPublic(String keyPublic) {
+        super.setKeyPublic(keyPublic);
+        if (isCertSign() && keyPublic.length() < 1024 ){
+            getCertDescriptor().initPublicCert(keyPublic);
+        }
+    }
 
     @Override
     public String getAppid () {

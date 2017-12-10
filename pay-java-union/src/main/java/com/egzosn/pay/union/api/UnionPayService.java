@@ -10,9 +10,8 @@ import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.common.util.MatrixToImageWriter;
 import com.egzosn.pay.common.util.sign.SignUtils;
+import com.egzosn.pay.common.util.sign.encrypt.*;
 import com.egzosn.pay.common.util.str.StringUtils;
-import com.egzosn.pay.union.sdk.CertUtil;
-import com.egzosn.pay.union.sdk.SDKConfig;
 import com.egzosn.pay.union.sdk.SDKConstants;
 import com.egzosn.pay.union.enums.UnionTransactionType;
 import com.egzosn.pay.union.request.UnionQueryOrder;
@@ -24,10 +23,7 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * @author Actinia
@@ -36,7 +32,7 @@ import java.util.TreeMap;
  */
 public class UnionPayService extends BasePayService {
     //日志
-    protected static final Log log = LogFactory.getLog(UnionPayService.class);
+    protected static final Log LOG = LogFactory.getLog(UnionPayService.class);
     /**
      * 测试域名
      */
@@ -70,7 +66,6 @@ public class UnionPayService extends BasePayService {
 
     public UnionPayService (PayConfigStorage payConfigStorage, HttpConfigStorage configStorage) {
         super(payConfigStorage, configStorage);
-        SDKConfig.getConfig().loadPropertiesFromSrc();
     }
 
 
@@ -208,32 +203,38 @@ public class UnionPayService extends BasePayService {
      * @return 请求参数
      */
     private Map<String, Object> setSign(Map<String, Object> parameters){
+
         SignUtils signUtils = SignUtils.valueOf(payConfigStorage.getSignType());
 
         String signStr;
-        String key = payConfigStorage.getKeyPrivate();
+
 
         switch (signUtils){
             case RSA:
                 parameters.put(SDKConstants.param_signMethod, SDKConstants.SIGNMETHOD_RSA);
-                parameters.put(SDKConstants.param_certId, CertUtil.getSignCertId());
-                signStr = SignUtils.SHA1.createSign(SignUtils.parameterText(parameters),"", payConfigStorage.getInputCharset());
+                parameters.put(SDKConstants.param_certId, payConfigStorage.getCertDescriptor().getSignCertId());
+                signStr = SignUtils.SHA1.createSign( SignUtils.parameterText(parameters, "&", "signature"),"", payConfigStorage.getInputCharset());
+                parameters.put(SDKConstants.param_signature, RSA.sign(signStr, payConfigStorage.getCertDescriptor().getSignCertPrivateKey(), payConfigStorage.getInputCharset()));
                 break;
             case RSA2:
                 parameters.put(SDKConstants.param_signMethod, SDKConstants.SIGNMETHOD_RSA);
-                parameters.put(SDKConstants.param_certId, CertUtil.getSignCertId());
-                signStr = SignUtils.SHA256.createSign(SignUtils.parameterText(parameters),"", payConfigStorage.getInputCharset());
+                parameters.put(SDKConstants.param_certId, payConfigStorage.getCertDescriptor().getSignCertId());
+                signStr = SignUtils.SHA256.createSign( SignUtils.parameterText(parameters, "&", "signature"),"", payConfigStorage.getInputCharset());
+                parameters.put(SDKConstants.param_signature, RSA2.sign(signStr, payConfigStorage.getCertDescriptor().getSignCertPrivateKey(), payConfigStorage.getInputCharset()));
                 break;
+            case SHA1:
             case SHA256:
             case SM3:
-                 signStr = SignUtils.parameterText(parameters);
+                String key = payConfigStorage.getKeyPrivate();
+                signStr = SignUtils.parameterText(parameters, "&", "signature");
                  key = signUtils.createSign(key,"",payConfigStorage.getInputCharset()) + "&";
+                parameters.put(SDKConstants.param_signature, signUtils.createSign(signStr, key, payConfigStorage.getInputCharset()));
                 break;
             default:
               throw new PayErrorException(new PayException("sign fail", "未找到的签名类型"));
         }
 
-        parameters.put(SDKConstants.param_signature, signUtils.createSign(signStr, key, payConfigStorage.getInputCharset()));
+
         return parameters;
     }
 
@@ -246,17 +247,19 @@ public class UnionPayService extends BasePayService {
         SignUtils signUtils = SignUtils.valueOf(payConfigStorage.getSignType());
         //签名原文
         String stringSign = resData.get(SDKConstants.param_signature).toString();
-        String data = SignUtils.parameterText(resData);
+        String data = SignUtils.parameterText(resData, "&", "signature");
         switch (signUtils){
             case RSA:
-                //todo 不确定这样可靠
-                return SignUtils.RSA.verify(resData,stringSign,payConfigStorage.getKeyPublic(),payConfigStorage.getInputCharset());
+                data = SignUtils.SHA1.createSign(data,"", payConfigStorage.getInputCharset());
+                return RSA.verify(data, stringSign, payConfigStorage.getCertDescriptor().getPublicCert().getPublicKey(), payConfigStorage.getInputCharset());
+            case RSA2:
+                data = SignUtils.SHA256.createSign(data,"", payConfigStorage.getInputCharset());
+                return RSA2.verify(data, stringSign, payConfigStorage.getCertDescriptor().getPublicCert().getPublicKey(), payConfigStorage.getInputCharset());
+            case SHA1:
             case SHA256:
-                String before = SignUtils.SHA256.createSign(SDKConfig.getConfig().getSecureKey(),"",payConfigStorage.getInputCharset());
-                String nowSign = SignUtils.SHA256.createSign(data,"&"+before,payConfigStorage.getInputCharset());
-                return stringSign.equals(nowSign);
             case SM3:
-               return SignUtils.SM3.verify(data,stringSign,SDKConfig.getConfig().getSecureKey(),payConfigStorage.getInputCharset());
+                String before = signUtils.createSign(payConfigStorage.getKeyPublic(),"",payConfigStorage.getInputCharset());
+                return  signUtils.verify(data, stringSign, "&"+before, payConfigStorage.getInputCharset());
             default:
                     return false;
         }
@@ -571,11 +574,11 @@ public class UnionPayService extends BasePayService {
 //    }
 //
     public  String getBackTransUrl () {
-        return payConfigStorage.isTest() ? String.format(BACK_TRANS_URL,TEST_BASE_DOMAIN):String.format(BACK_TRANS_URL,RELEASE_BASE_DOMAIN);
+        return String.format(BACK_TRANS_URL, payConfigStorage.isTest() ?  TEST_BASE_DOMAIN : RELEASE_BASE_DOMAIN);
     }
 
     public  String getSingleQueryUrl () {
-        return payConfigStorage.isTest() ? String.format(SINGLE_QUERY_URL,TEST_BASE_DOMAIN):String.format(SINGLE_QUERY_URL,RELEASE_BASE_DOMAIN);
+        return String.format(SINGLE_QUERY_URL, payConfigStorage.isTest() ?  TEST_BASE_DOMAIN : RELEASE_BASE_DOMAIN);
     }
 //
 //    public  String getBatchTransUrl () {
@@ -583,7 +586,7 @@ public class UnionPayService extends BasePayService {
 //    }
 
     public  String getFileTransUrl () {
-        return payConfigStorage.isTest() ? String.format(FILE_TRANS_URL,TEST_BASE_DOMAIN):String.format(FILE_TRANS_URL,RELEASE_BASE_DOMAIN);
+        return String.format(FILE_TRANS_URL, payConfigStorage.isTest() ?  TEST_BASE_DOMAIN : RELEASE_BASE_DOMAIN);
     }
 
 //    public  String getAppTransUrl () {

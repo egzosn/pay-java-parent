@@ -121,7 +121,7 @@ public enum SignUtils {
      * @return 去掉空值与签名参数后的新签名，拼接后字符串
      */
     public static String parameterText(Map parameters, String separator) {
-        return parameterText(parameters, separator, "sign", "key", "sign_type");
+        return parameterText(parameters, separator, "signature", "sign", "key", "sign_type");
     }
 
     /**

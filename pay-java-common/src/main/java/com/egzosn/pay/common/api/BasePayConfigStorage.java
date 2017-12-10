@@ -1,6 +1,9 @@
 package com.egzosn.pay.common.api;
 
 import com.egzosn.pay.common.bean.MsgType;
+import com.egzosn.pay.common.bean.result.PayException;
+import com.egzosn.pay.common.exception.PayErrorException;
+import com.egzosn.pay.common.util.sign.CertDescriptor;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -15,11 +18,19 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public abstract class BasePayConfigStorage implements PayConfigStorage{
 
+    /**
+     * 证书管理器
+     */
+    private volatile CertDescriptor certDescriptor;
 
     /**
      *   应用私钥，rsa_private pkcs8格式 生成签名时使用
      */
     private volatile  String keyPrivate;
+    /**
+     *   应用私钥，rsa_private pkcs8格式 生成签名时使用
+     */
+    private volatile  String keyPrivateCertPwd;
     /**
      *  支付平台公钥(签名校验使用)
      */
@@ -70,6 +81,21 @@ public abstract class BasePayConfigStorage implements PayConfigStorage{
      */
     private boolean isTest = false;
 
+    /**
+     * 是否为证书签名
+     */
+    private boolean isCertSign = false;
+
+
+    public CertDescriptor getCertDescriptor() {
+        if (!isCertSign){
+           throw new PayErrorException(new PayException("certDescriptor fail", "isCertSign is false"));
+        }
+        if(null == certDescriptor){
+            certDescriptor = new CertDescriptor();
+        }
+        return certDescriptor;
+    }
 
     @Override
     public String getKeyPrivate() {
@@ -78,6 +104,14 @@ public abstract class BasePayConfigStorage implements PayConfigStorage{
 
     public void setKeyPrivate(String keyPrivate) {
         this.keyPrivate = keyPrivate;
+    }
+
+    public String getKeyPrivateCertPwd() {
+        return keyPrivateCertPwd;
+    }
+
+    public void setKeyPrivateCertPwd(String keyPrivateCertPwd) {
+        this.keyPrivateCertPwd = keyPrivateCertPwd;
     }
 
     @Override
@@ -206,5 +240,16 @@ public abstract class BasePayConfigStorage implements PayConfigStorage{
 
     public void setTest(boolean test) {
         isTest = test;
+    }
+
+    public boolean isCertSign() {
+        return isCertSign;
+    }
+
+    public void setCertSign(boolean certSign) {
+        isCertSign = certSign;
+        if (certSign){
+            certDescriptor = new CertDescriptor();
+        }
     }
 }
