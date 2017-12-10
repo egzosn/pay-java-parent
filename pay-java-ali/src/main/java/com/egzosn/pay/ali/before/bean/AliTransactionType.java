@@ -7,7 +7,6 @@ import com.egzosn.pay.common.bean.TransactionType;
  * <pre>
  * 说明交易类型主要用于支付接口调用参数所需
  * {@link #APP 新版app支付}
- * {@link #UNAWARE  不知道交易类型，主要用于回调通知，回调后不清楚交易类型，以此定义}
  *
  *
  *
