@@ -7,7 +7,7 @@
     <groupId>com.egzosn</groupId>
     <artifactId>pay-java-parent</artifactId>
     <packaging>pom</packaging>
-    <version>2.0.5-SNAPSHOT</version>
+    <version>2.0.6-SNAPSHOT</version>
 
     <name>Pay Java - Parent</name>
     <description>Pay Java Parent</description>
@@ -49,9 +49,12 @@
 
 
     <properties>
-        <httpmime.version>4.5.2</httpmime.version>
+        <pay.version>2.0.6-SNAPSHOT</pay.version>
+        <httpmime.version>4.5.4</httpmime.version>
         <log4j.version>1.2.17</log4j.version>
-        <pay.version>2.0.5-SNAPSHOT</pay.version>
+        <fastjson.version>1.2.41</fastjson.version>
+        <jdom.version>2.0.2</jdom.version>
+        <zxing.version>3.3.1</zxing.version>
     </properties>
 
 
@@ -74,7 +77,7 @@
             <dependency>
                 <groupId>com.alibaba</groupId>
                 <artifactId>fastjson</artifactId>
-                <version>1.2.17</version>
+                <version>${fastjson.version}</version>
             </dependency>
 
 
@@ -88,7 +91,14 @@
             <dependency>
                 <groupId>org.jdom</groupId>
                 <artifactId>jdom</artifactId>
-                <version>2.0.2</version>
+                <version>${jdom.version}</version>
+            </dependency>
+
+
+            <dependency>
+                <groupId>com.google.zxing</groupId>
+                <artifactId>core</artifactId>
+                <version>${zxing.version}</version>
             </dependency>
 
         </dependencies>
@@ -115,7 +125,7 @@
                     <encoding>utf-8</encoding>
                 </configuration>
             </plugin>
-           <!--<plugin>
+         <!--  <plugin>
                 <groupId>org.sonatype.plugins</groupId>
                 <artifactId>nexus-staging-maven-plugin</artifactId>
                 <version>1.6.3</version>
