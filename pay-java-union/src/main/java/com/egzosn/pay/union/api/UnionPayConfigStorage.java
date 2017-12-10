@@ -14,13 +14,20 @@ public class UnionPayConfigStorage extends BasePayConfigStorage {
     /**
      * 商户号
      */
-    public volatile String merId;
+    private volatile String merId;
 
     /**
      * 商户收款账号
      */
-    public volatile String seller;
+    private volatile String seller;
 
+    private volatile String version = "5.1.0";
+    /**
+     * 0：普通商户直连接入
+     * 1： 收单机构
+     * 2：平台类商户接入
+     */
+    private volatile String accessType = "0";
 
 
     @Override
@@ -74,4 +81,19 @@ public class UnionPayConfigStorage extends BasePayConfigStorage {
         this.merId = merId;
     }
 
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    public String getAccessType() {
+        return accessType;
+    }
+
+    public void setAccessType(String accessType) {
+        this.accessType = accessType;
+    }
 }

@@ -13,9 +13,38 @@ import java.util.Map;
  * </pre>
  */
 public enum UnionTransactionType implements TransactionType{
-    //申码(主扫场景)
+
+    /**
+     * 苹果支付
+     */
+    APPLE("01","01","000802","08"),
+    /**
+     * 手机控件
+     */
+    APP("01","01","000000","08"),
+    /**
+     * 手机网页支付（WAP支付）
+     */
+    WAP("01","01","000201","08"),
+    /**
+     * 网关支付
+     */
+    WEB("01","01","000201","07"),
+    /**
+     * 无跳转支付
+     */
+    NO_JUMP("01","01","000301","07"),
+    /**
+     * 企业网银支付（B2B支付）
+     */
+    B2B("01","01","000202","07"),
+    /**
+     *  申码(主扫场景)
+     */
     APPLY_QR_CODE("01","07","000000","08"),
-    //消费(被扫场景)
+    /**
+     * 消费(被扫场景)
+     */
     CONSUME("01","06","000000","08"),
     //消费撤销
     CONSUME_UNDO("31","00","000000","08"),
@@ -24,7 +53,7 @@ public enum UnionTransactionType implements TransactionType{
     //查询
     QUERY("00","00","000201",""),
     //对账文件下载
-    File_Transfer("00","00","000201","")
+    FILE_TRANSFER("00","00","000201","")
     ;
 
     /**
@@ -42,7 +71,7 @@ public enum UnionTransactionType implements TransactionType{
     private String bizType;
 
     /**
-     * 渠道类型
+     * 渠道类型 05：语音07：互联网08：移动 16：数字机顶盒
      */
     private String channelType;
 
@@ -54,10 +83,14 @@ public enum UnionTransactionType implements TransactionType{
         this.channelType = channelType;
     }
 
-    public void convertMap(Map<String ,String> contentData){
+    public void convertMap(Map<String ,Object> contentData){
+        //交易类型
         contentData.put(SDKConstants.param_txnType, this.getTxnType());
+        //交易子类
         contentData.put(SDKConstants.param_txnSubType,this.getTxnSubType());
+        //业务类型
         contentData.put(SDKConstants.param_bizType,this.getBizType());
+        //渠道类型
         contentData.put(SDKConstants.param_channelType,this.getChannelType());
     }
 

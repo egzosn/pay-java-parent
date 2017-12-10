@@ -67,8 +67,7 @@ public class SDKConfig {
 	private boolean ifValidateRemoteCert = false;
 	/** signMethod，没配按01吧  */
 	private String signMethod = "01";
-	/** version，没配按5.0.0  */
-	private String version = "5.0.0";
+
 	/** frontUrl  */
 	private String frontUrl;
 	/** backUrl  */
@@ -368,10 +367,7 @@ public class SDKConfig {
 		if (!StringUtils.isEmpty(value)) {
 			this.signMethod = value.trim();
 		}
-		value = pro.getProperty(SDK_VERSION);
-		if (!StringUtils.isEmpty(value)) {
-			this.version = value.trim();
-		}
+
 		value = pro.getProperty(SDK_FRONTURL);
 		if (!StringUtils.isEmpty(value)) {
 			this.frontUrl = value.trim();
@@ -655,13 +651,6 @@ public class SDKConfig {
 		this.qrcB2cMerBackTransUrl = qrcB2cMerBackTransUrl;
 	}
 
-	public String getVersion() {
-		return version;
-	}
-
-	public void setVersion(String version) {
-		this.version = version;
-	}
 
 	public String getFrontUrl() {
 		return frontUrl;

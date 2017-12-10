@@ -27,6 +27,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * @author Actinia
@@ -77,17 +78,30 @@ public class UnionPayService extends BasePayService {
      * 银联全渠道系统，产品参数，除了encoding自行选择外其他不需修改
      * @return 返回参数集合
      */
-    private Map<String ,String> getCommonParam(){
-        Map<String ,String> params = new HashMap<>();
-        params.put(SDKConstants.param_version, SDKConfig.getConfig().getVersion());
+    private Map<String ,Object> getCommonParam(){
+        Map<String ,Object> params = new TreeMap<>();
+        UnionPayConfigStorage configStorage = (UnionPayConfigStorage)payConfigStorage;
+        //银联接口版本
+        params.put(SDKConstants.param_version, configStorage.getVersion());
+        //编码方式
         params.put(SDKConstants.param_encoding, payConfigStorage.getInputCharset().toUpperCase());
-
+        //商户代码
         params.put(SDKConstants.param_merId, payConfigStorage.getPid());
-        //接入类型，商户接入填0 ，不需修改（0：直连商户， 1： 收单机构 2：平台商户）
-        params.put(SDKConstants.param_accessType, "0");
+
         DateFormat df = new SimpleDateFormat("YYYYMMDDhhmmss");
-        params.put(SDKConstants.param_txnTime, df.format(new Date()));
-        params.put(SDKConstants.param_backUrl, SDKConfig.getConfig().getBackUrl());
+        //订单发送时间
+        params.put(SDKConstants.param_txnTime, df.format(System.currentTimeMillis()));
+        // 订单超时时间。
+        // 超过此时间后，除网银交易外，其他交易银联系统会拒绝受理，提示超时。 跳转银行网银交易如果超时后交易成功，会自动退款，大约5个工作日金额返还到持卡人账户。
+        // 此时间建议取支付时的北京时间加15分钟。
+        // 超过超时时间调查询接口应答origRespCode不是A6或者00的就可以判断为失败。
+        params.put("payTimeout", df.format(System.currentTimeMillis() + 30 * 60 * 1000));
+        //后台通知地址
+        params.put(SDKConstants.param_backUrl, payConfigStorage.getNotifyUrl());
+        //交易币种
+        params.put(SDKConstants.param_currencyCode, "156");
+        //接入类型，商户接入填0 ，不需修改（0：直连商户， 1： 收单机构 2：平台商户）
+        params.put(SDKConstants.param_accessType, configStorage.getAccessType());
         return params;
     }
 
@@ -155,93 +169,71 @@ public class UnionPayService extends BasePayService {
      */
     @Override
     public Map orderInfo (PayOrder order) {
-        Map<String, String> params = this.getCommonParam();
+        Map<String, Object> params = this.getCommonParam();
 
         UnionTransactionType type =  (UnionTransactionType)order.getTransactionType();
-        type.convertMap(params);
-        switch (type){
-            case APPLY_QR_CODE:
-                params.put(SDKConstants.param_orderId, order.getOutTradeNo());
-                params.put(SDKConstants.param_txnAmt, order.getPrice().toString());
-                params.put(SDKConstants.param_currencyCode, "156");
-                break;
-            case CONSUME:
-                params.put(SDKConstants.param_orderId, order.getOutTradeNo());
-                params.put(SDKConstants.param_txnAmt, order.getPrice().toString());
-                params.put(SDKConstants.param_currencyCode, "156");
 
+        //交易金额
+        params.put(SDKConstants.param_txnAmt, order.getPrice().multiply(new BigDecimal(100)));
+        //设置交易类型相关的参数
+        type.convertMap(params);
+
+        params.put(SDKConstants.param_orderId, order.getOutTradeNo());
+        params.put("orderDesc", order.getSubject());
+
+        switch (type){
+            case WAP:
+            case WEB:
+            case B2B:
+                params.put(SDKConstants.param_frontUrl, payConfigStorage.getReturnUrl());
+                break;
+
+            case CONSUME:
                 params.put(SDKConstants.param_qrNo, order.getAuthCode());
                 params.put(SDKConstants.param_termId, order.getDeviceInfo());
                 break;
             default:
         }
 
-        return params;
-    }
-
-
-    /**
-     * 根据签名类型获取银联签名对应的参数
-     * @param signType 签名类型
-     * @return 签名参数
-     */
-    public String getSignMethod(SignUtils signType) {
-        switch (signType) {
-            case RSA:
-            case RSA2:
-                return SDKConstants.SIGNMETHOD_RSA;
-            case SHA256:
-                return SDKConstants.SIGNMETHOD_SHA256;
-            case SM3:
-                return SDKConstants.SIGNMETHOD_SM3;
-            default:
-                return SDKConstants.SIGNMETHOD_RSA;
-        }
+        return  setSign(params);
     }
 
 
 
-    /**
-     * 创建签名
-     *
-     * @param content           需要签名的内容
-     * @param characterEncoding 字符编码
-     * @return 签名
-     */
-    @Override
-    public String createSign(String content, String characterEncoding) {
 
-        return  SignUtils.valueOf(payConfigStorage.getSignType()).createSign(content, payConfigStorage.getKeyPrivate(),characterEncoding);
-    }
 
     /**
      *  生成并设置签名
      * @param parameters 请求参数
      * @return 请求参数
      */
-    private Map<String, String> setSign(Map<String, String> parameters){
+    private Map<String, Object> setSign(Map<String, Object> parameters){
         SignUtils signUtils = SignUtils.valueOf(payConfigStorage.getSignType());
-        parameters.put(SDKConstants.param_signMethod, getSignMethod(signUtils));
-        String signStr = SignUtils.parameterText(parameters);
+
+        String signStr;
         String key = payConfigStorage.getKeyPrivate();
 
         switch (signUtils){
             case RSA:
+                parameters.put(SDKConstants.param_signMethod, SDKConstants.SIGNMETHOD_RSA);
                 parameters.put(SDKConstants.param_certId, CertUtil.getSignCertId());
-                signStr = SignUtils.SHA1.createSign(signStr,"", payConfigStorage.getInputCharset());
+                signStr = SignUtils.SHA1.createSign(SignUtils.parameterText(parameters),"", payConfigStorage.getInputCharset());
+                break;
             case RSA2:
+                parameters.put(SDKConstants.param_signMethod, SDKConstants.SIGNMETHOD_RSA);
                 parameters.put(SDKConstants.param_certId, CertUtil.getSignCertId());
-                signStr = SignUtils.SHA256.createSign(signStr,"", payConfigStorage.getInputCharset());
+                signStr = SignUtils.SHA256.createSign(SignUtils.parameterText(parameters),"", payConfigStorage.getInputCharset());
                 break;
             case SHA256:
             case SM3:
+                 signStr = SignUtils.parameterText(parameters);
                  key = signUtils.createSign(key,"",payConfigStorage.getInputCharset()) + "&";
                 break;
             default:
               throw new PayErrorException(new PayException("sign fail", "未找到的签名类型"));
         }
-        signStr = signUtils.createSign(signStr, key,payConfigStorage.getInputCharset());
-        parameters.put(SDKConstants.param_signature, signStr);
+
+        parameters.put(SDKConstants.param_signature, signUtils.createSign(signStr, key, payConfigStorage.getInputCharset()));
         return parameters;
     }
 
@@ -278,7 +270,7 @@ public class UnionPayService extends BasePayService {
      */
     @Override
     public BufferedImage genQrPay (PayOrder order) {
-        Map<String ,String > params = orderInfo(order);
+        Map<String ,Object > params = orderInfo(order);
         this.setSign(params);
         JSONObject response =  getHttpRequestTemplate().postForObject(this.getBackTransUrl(),params,JSONObject.class);
         if(this.vailSign(response)){
@@ -301,8 +293,7 @@ public class UnionPayService extends BasePayService {
      */
     @Override
     public Map<String, Object> microPay (PayOrder order) {
-        Map<String ,String > params = orderInfo(order);
-        this.setSign(params);
+        Map<String ,Object > params = orderInfo(order);
         return getHttpRequestTemplate().postForObject(this.getBackTransUrl(),params,JSONObject.class);
     }
 
@@ -316,7 +307,7 @@ public class UnionPayService extends BasePayService {
      */
     @Override
     public Map<String, Object> query (String tradeNo, String outTradeNo) {
-        Map<String ,String > params = this.getCommonParam();
+        Map<String ,Object > params = this.getCommonParam();
         UnionTransactionType.QUERY.convertMap(params);
         params.put(SDKConstants.param_orderId,outTradeNo);
         this.setSign(params);
@@ -345,7 +336,7 @@ public class UnionPayService extends BasePayService {
      * @return 返回支付方申请退款后的结果
      */
     public Map<String, Object> unionRefundOrConsumeUndo (UnionQueryOrder queryOrder,UnionTransactionType type) {
-        Map<String ,String> params = this.getCommonParam();
+        Map<String ,Object> params = this.getCommonParam();
         type.convertMap(params);
         params.put(SDKConstants.param_orderId,queryOrder.getOrderId());
         params.put(SDKConstants.param_txnAmt,queryOrder.getTxnAmt());
@@ -528,8 +519,8 @@ public class UnionPayService extends BasePayService {
      */
     @Override
     public Object downloadbill (Date billDate, String billType) {
-        Map<String ,String > params = this.getCommonParam();
-        UnionTransactionType.File_Transfer.convertMap(params);
+        Map<String ,Object > params = this.getCommonParam();
+        UnionTransactionType.FILE_TRANSFER.convertMap(params);
         DateFormat df = new SimpleDateFormat("MMDD");
         params.put(SDKConstants.param_settleDate,df.format(new Date()));
         params.put(SDKConstants.param_fileType,billType);
