@@ -283,7 +283,7 @@ public class WxPayService extends BasePayService {
         try {
             return XML.inputStream2Map(is, map);
         } catch (IOException e) {
-            throw new PayErrorException(new PayException("IOException", e.getMessage()));
+           throw new PayErrorException(new PayException("IOException", e.getMessage()));
         }
 
     }
