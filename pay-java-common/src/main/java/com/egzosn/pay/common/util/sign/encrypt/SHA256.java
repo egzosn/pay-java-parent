@@ -25,7 +25,7 @@ public class SHA256 {
     public static String sign(String text, String key, String input_charset) {
         //拼接key
         text = text + key;
-        return DigestUtils.sha512Hex(  StringUtils.getContentBytes(text, input_charset));
+        return DigestUtils.sha256Hex(  StringUtils.getContentBytes(text, input_charset));
     }
 
 

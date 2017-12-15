@@ -10,17 +10,21 @@ import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.common.util.MatrixToImageWriter;
 import com.egzosn.pay.common.util.sign.SignUtils;
-import com.egzosn.pay.common.util.sign.encrypt.*;
+import com.egzosn.pay.common.util.sign.encrypt.RSA;
+import com.egzosn.pay.common.util.sign.encrypt.RSA2;
 import com.egzosn.pay.common.util.str.StringUtils;
-import com.egzosn.pay.union.sdk.SDKConstants;
 import com.egzosn.pay.union.enums.UnionTransactionType;
 import com.egzosn.pay.union.request.UnionQueryOrder;
+import com.egzosn.pay.union.sdk.SDKConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.security.cert.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -32,7 +36,7 @@ import java.util.*;
  */
 public class UnionPayService extends BasePayService {
     //日志
-    protected static final Log LOG = LogFactory.getLog(UnionPayService.class);
+    protected static final Log log = LogFactory.getLog(UnionPayService.class);
     /**
      * 测试域名
      */
@@ -66,6 +70,7 @@ public class UnionPayService extends BasePayService {
 
     public UnionPayService (PayConfigStorage payConfigStorage, HttpConfigStorage configStorage) {
         super(payConfigStorage, configStorage);
+
     }
 
 
@@ -83,7 +88,7 @@ public class UnionPayService extends BasePayService {
         //商户代码
         params.put(SDKConstants.param_merId, payConfigStorage.getPid());
 
-        DateFormat df = new SimpleDateFormat("YYYYMMDDhhmmss");
+        DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
         //订单发送时间
         params.put(SDKConstants.param_txnTime, df.format(System.currentTimeMillis()));
         // 订单超时时间。
@@ -126,7 +131,6 @@ public class UnionPayService extends BasePayService {
 //                校验失败
             }
         }else{
-
         }
         return false;
     }
@@ -214,13 +218,13 @@ public class UnionPayService extends BasePayService {
                 parameters.put(SDKConstants.param_signMethod, SDKConstants.SIGNMETHOD_RSA);
                 parameters.put(SDKConstants.param_certId, payConfigStorage.getCertDescriptor().getSignCertId());
                 signStr = SignUtils.SHA1.createSign( SignUtils.parameterText(parameters, "&", "signature"),"", payConfigStorage.getInputCharset());
-                parameters.put(SDKConstants.param_signature, RSA.sign(signStr, payConfigStorage.getCertDescriptor().getSignCertPrivateKey(), payConfigStorage.getInputCharset()));
+                parameters.put(SDKConstants.param_signature, RSA.sign(signStr, payConfigStorage.getCertDescriptor().getSignCertPrivateKey(payConfigStorage.getKeyPrivateCertPwd()), payConfigStorage.getInputCharset()));
                 break;
             case RSA2:
                 parameters.put(SDKConstants.param_signMethod, SDKConstants.SIGNMETHOD_RSA);
                 parameters.put(SDKConstants.param_certId, payConfigStorage.getCertDescriptor().getSignCertId());
                 signStr = SignUtils.SHA256.createSign( SignUtils.parameterText(parameters, "&", "signature"),"", payConfigStorage.getInputCharset());
-                parameters.put(SDKConstants.param_signature, RSA2.sign(signStr, payConfigStorage.getCertDescriptor().getSignCertPrivateKey(), payConfigStorage.getInputCharset()));
+                parameters.put(SDKConstants.param_signature, RSA2.sign(signStr, payConfigStorage.getCertDescriptor().getSignCertPrivateKey(payConfigStorage.getKeyPrivateCertPwd()), payConfigStorage.getInputCharset()));
                 break;
             case SHA1:
             case SHA256:
@@ -254,7 +258,11 @@ public class UnionPayService extends BasePayService {
                 return RSA.verify(data, stringSign, payConfigStorage.getCertDescriptor().getPublicCert().getPublicKey(), payConfigStorage.getInputCharset());
             case RSA2:
                 data = SignUtils.SHA256.createSign(data,"", payConfigStorage.getInputCharset());
-                return RSA2.verify(data, stringSign, payConfigStorage.getCertDescriptor().getPublicCert().getPublicKey(), payConfigStorage.getInputCharset());
+                X509Certificate cert =  genCertificateByStr(resData.get(SDKConstants.param_signPubKeyCert).toString());
+                /*验证证书链*/
+                verifyCertificate(cert);
+                return RSA2.verify(data, stringSign,cert.getPublicKey(), payConfigStorage.getInputCharset());
+//                return RSA2.verify(data, stringSign, payConfigStorage.getCertDescriptor().getPublicCert().getPublicKey(), payConfigStorage.getInputCharset());
             case SHA1:
             case SHA256:
             case SM3:
@@ -265,6 +273,50 @@ public class UnionPayService extends BasePayService {
         }
     }
 
+    /**
+     * 验证证书链
+     * @param cert
+     */
+    private void verifyCertificate (X509Certificate cert) {
+        try {
+            cert.checkValidity();//验证有效期
+            X509Certificate middleCert = payConfigStorage.getCertDescriptor().getPublicCert();
+            X509Certificate rootCert = payConfigStorage.getCertDescriptor().getRootCert();
+
+            X509CertSelector selector = new X509CertSelector();
+            selector.setCertificate(cert);
+
+            Set<TrustAnchor> trustAnchors = new HashSet<TrustAnchor>();
+            trustAnchors.add(new TrustAnchor(rootCert, null));
+            PKIXBuilderParameters pkixParams = new PKIXBuilderParameters(
+                    trustAnchors, selector);
+
+            Set<X509Certificate> intermediateCerts = new HashSet<X509Certificate>();
+            intermediateCerts.add(rootCert);
+            intermediateCerts.add(middleCert);
+            intermediateCerts.add(cert);
+
+            pkixParams.setRevocationEnabled(false);
+
+            CertStore intermediateCertStore = CertStore.getInstance("Collection",
+                    new CollectionCertStoreParameters(intermediateCerts));
+            pkixParams.addCertStore(intermediateCertStore);
+
+            CertPathBuilder builder = CertPathBuilder.getInstance("PKIX");
+
+            @SuppressWarnings("unused")
+            PKIXCertPathBuilderResult result = (PKIXCertPathBuilderResult) builder
+                    .build(pkixParams);
+        } catch (java.security.cert.CertPathBuilderException e) {
+            log.error("verify certificate chain fail.", e);
+        } catch (CertificateExpiredException e) {
+            log.error(e);
+        } catch (CertificateNotYetValidException e) {
+            log.error(e);
+        } catch (Exception e) {
+            log.error(e);
+        }
+    }
     /**
      * 获取输出二维码，用户返回给支付端,
      *
@@ -368,6 +420,24 @@ public class UnionPayService extends BasePayService {
             throw new PayErrorException(new PayException("1000", "验证签名失败", response.toJSONString()));
         }
     }
+    /**
+     * 将字符串转换为X509Certificate对象.
+     *
+     * @param x509CertString
+     * @return
+     */
+    public static X509Certificate genCertificateByStr(String x509CertString) {
+        X509Certificate x509Cert = null;
+        try {
+            CertificateFactory cf = CertificateFactory.getInstance("X.509");
+            InputStream tIn = new ByteArrayInputStream(
+                    x509CertString.getBytes("ISO-8859-1"));
+            x509Cert = (X509Certificate) cf.generateCertificate(tIn);
+        } catch (Exception e) {
+            log.error("gen certificate error", e);
+        }
+        return x509Cert;
+    }
 
     /**
      * 将请求参数或者请求流转化为 Map
@@ -378,7 +448,30 @@ public class UnionPayService extends BasePayService {
      */
     @Override
     public Map<String, Object> getParameter2Map (Map<String, String[]> parameterMap, InputStream is) {
-        return null;
+
+        Map<String, Object> params = new TreeMap<String,Object>();
+        for (Iterator iter = parameterMap.keySet().iterator(); iter.hasNext();) {
+            String name = (String) iter.next();
+            String[] values = parameterMap.get(name);
+            String valueStr = "";
+            for (int i = 0,len =  values.length; i < len; i++) {
+                valueStr += (i == len - 1) ?  values[i]
+                        : values[i] + ",";
+            }
+            //乱码解决，这段代码在出现乱码时使用。如果mysign和sign不相等也可以使用这段代码转化
+            //valueStr = new String(valueStr.getBytes("ISO-8859-1"), "gbk");
+            if (!valueStr.matches("\\w+")){
+                try {
+                    if(valueStr.equals(new String(valueStr.getBytes("iso8859-1"), "iso8859-1"))){
+                        valueStr=new String(valueStr.getBytes("iso8859-1"), payConfigStorage.getInputCharset());
+                    }
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+            }
+            params.put(name, valueStr);
+        }
+        return params;
     }
 
     /**
@@ -415,7 +508,28 @@ public class UnionPayService extends BasePayService {
      */
     @Override
     public String buildRequest (Map<String, Object> orderInfo, MethodType method) {
-        return null;
+        StringBuffer sf = new StringBuffer();
+        sf.append("<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset="+payConfigStorage.getInputCharset()+"\"/></head><body>");
+        sf.append("<form id = \"pay_form\" action=\"" + getFrontTransUrl()
+                + "\" method=\"post\">");
+        if (null != orderInfo && 0 != orderInfo.size()) {
+            Set<Map.Entry<String, Object>> set = orderInfo.entrySet();
+            Iterator<Map.Entry<String, Object>> it = set.iterator();
+            while (it.hasNext()) {
+                Map.Entry<String, Object> ey = it.next();
+                String key = ey.getKey();
+                Object value = ey.getValue();
+                sf.append("<input type=\"hidden\" name=\"" + key + "\" id=\""
+                        + key + "\" value=\"" + value + "\"/>");
+            }
+        }
+        sf.append("</form>");
+        sf.append("</body>");
+        sf.append("<script type=\"text/javascript\">");
+        sf.append("document.all.pay_form.submit();");
+        sf.append("</script>");
+        sf.append("</html>");
+        return sf.toString();
     }
 
 
@@ -543,6 +657,22 @@ public class UnionPayService extends BasePayService {
     }
 
     /**
+     *  将parameterMap对应的key存放至params
+     * @param parameterMap 请求参数
+     * @param params 转化的对象
+     * @param key 需要取值的key
+     * @return params
+     */
+    public Map<String, Object> conversion(Map<String, String[]> parameterMap,  Map<String, Object> params ,String key){
+        String[] values = parameterMap.get(key);
+        String valueStr = "";
+        for (int i = 0,len =  values.length; i < len; i++) {
+            valueStr += (i == len - 1) ?  values[i] : values[i] + ",";
+        }
+        params.put(key, valueStr);
+        return params;
+    }
+    /**
      * 下载对账单
      *
      * @param billDate 账单时间：具体请查看对应支付平台
@@ -569,10 +699,10 @@ public class UnionPayService extends BasePayService {
         return null;
     }
 
-//    public  String getFrontTransUrl () {
-//        return payConfigStorage.isTest() ? String.format(FRONT_TRANS_URL,TEST_BASE_DOMAIN):String.format(FRONT_TRANS_URL,RELEASE_BASE_DOMAIN);
-//    }
-//
+    public  String getFrontTransUrl () {
+        return  String.format(FRONT_TRANS_URL,payConfigStorage.isTest() ? TEST_BASE_DOMAIN : RELEASE_BASE_DOMAIN);
+    }
+
     public  String getBackTransUrl () {
         return String.format(BACK_TRANS_URL, payConfigStorage.isTest() ?  TEST_BASE_DOMAIN : RELEASE_BASE_DOMAIN);
     }

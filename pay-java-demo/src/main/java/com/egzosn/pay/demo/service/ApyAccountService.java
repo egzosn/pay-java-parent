@@ -44,7 +44,7 @@ public class ApyAccountService {
      */
     public PayResponse getPayResponse(Integer id) {
 
-        PayResponse payResponse = payResponses.get(id);
+        PayResponse payResponse = null;
         if (payResponse  == null) {
             ApyAccount apyAccount = dao.findByPayId(id);
             if (apyAccount == null) {

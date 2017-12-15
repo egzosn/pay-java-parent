@@ -83,19 +83,20 @@ public class ApyAccountRepository {
 
         ApyAccount apyAccount4 = new ApyAccount();
         apyAccount4.setPayId(4);
-        apyAccount4.setPartner("777290058110097");
+        apyAccount4.setPartner("777290058154626");
 //        apyAccount4.setAppid("777290058110097");
-        apyAccount4.setPublicKey("");
-        apyAccount4.setPrivateKey("000000");
-        apyAccount4.setNotifyUrl("http://sailinmu.iok.la:19088/backRcvResponse");
+        apyAccount4.setPublicKey("D:\\certs\\acp_test_middle.cer;D:\\certs\\acp_test_root.cer");
+        apyAccount4.setPrivateKey("D:\\certs\\acp_test_sign.pfx;000000");
+        apyAccount4.setNotifyUrl("http://b1234780541.eicp.net/payBack4.json");
         // 无需同步回调可不填  app填这个就可以
-        apyAccount4.setReturnUrl("http://sailinmu.iok.la:19088/backRcvResponse");
+        apyAccount4.setReturnUrl("http://b1234780541.eicp.net/payBack4.json");
         apyAccount4.setSeller("");
         apyAccount4.setInputCharset("UTF-8");
-        apyAccount4.setSignType(SignUtils.RSA.name());
+        apyAccount4.setSignType(SignUtils.RSA2.name());
         apyAccount4.setPayType(PayType.unionPay);
         apyAccount4.setMsgType(MsgType.json);
-        apyAccounts.put(apyAccount4.getPayId(), apyAccount3);
+        apyAccount4.setTest(true);
+        apyAccounts.put(apyAccount4.getPayId(), apyAccount4);
 
     }
     //_____________________________________________________________

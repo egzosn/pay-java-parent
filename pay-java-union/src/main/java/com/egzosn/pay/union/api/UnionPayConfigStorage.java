@@ -18,10 +18,7 @@ public class UnionPayConfigStorage extends BasePayConfigStorage {
      */
     private volatile String merId;
 
-    /**
-     *   应用私钥，rsa_private pkcs8格式 生成签名时使用
-     */
-    private volatile  String keyPrivatePwd;
+
 
     /**
      * 商户收款账号
@@ -42,9 +39,9 @@ public class UnionPayConfigStorage extends BasePayConfigStorage {
         super.setKeyPrivate(keyPrivate);
         if (isCertSign() && keyPrivate.length() < 1024 && keyPrivate.contains(";")){
             String[] split = keyPrivate.split(";");
-            keyPrivatePwd = split[1];
+            setKeyPrivateCertPwd( split[1]);
             super.setKeyPrivate(split[0]);
-            getCertDescriptor().initPrivateSignCert(getKeyPrivate(), keyPrivatePwd, "PKCS12");
+            getCertDescriptor().initPrivateSignCert(getKeyPrivate(), getKeyPrivateCertPwd(), "PKCS12");
         }
     }
 
@@ -53,7 +50,9 @@ public class UnionPayConfigStorage extends BasePayConfigStorage {
     public void setKeyPublic(String keyPublic) {
         super.setKeyPublic(keyPublic);
         if (isCertSign() && keyPublic.length() < 1024 ){
-            getCertDescriptor().initPublicCert(keyPublic);
+            String[] split = keyPublic.split(";");
+            getCertDescriptor().initPublicCert(split[0]);
+            getCertDescriptor().initRootCert(split[1]);
         }
     }
 

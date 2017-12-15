@@ -1,17 +1,9 @@
 package com.egzosn.pay.common.http;
 
-import com.alibaba.fastjson.JSON;
-import org.apache.http.Consts;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * URL表达式处理器
@@ -115,7 +107,7 @@ public class UriVariables {
 
                     continue;
                 }
-                builder.append(key).append("=").append(URLEncoder.encode((String) pe.get(key), "utf-8")).append("&");
+                builder.append(key).append("=").append(URLEncoder.encode( pe.get(key).toString(), "utf-8")).append("&");
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }

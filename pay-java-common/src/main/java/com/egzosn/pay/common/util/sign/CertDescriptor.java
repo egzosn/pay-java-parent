@@ -37,9 +37,10 @@ public class CertDescriptor {
 	/** 证书容器，存储对商户请求报文签名私钥证书. */
 	private  KeyStore keyStore = null;
 
-	/** 验签中级证书 */
+	/** 验签公钥/中级证书 */
 	private  X509Certificate publicKeyCert = null;
-
+	/** 验签根证书 */
+	private  X509Certificate rootKeyCert = null;
 
 
 
@@ -53,7 +54,7 @@ public class CertDescriptor {
 		CertificateFactory cf = null;
 		FileInputStream in = null;
 		try {
-			cf = CertificateFactory.getInstance("X.509", "BC");
+			cf = CertificateFactory.getInstance("X.509");
 			in = new FileInputStream(path);
 			encryptCertTemp = (X509Certificate) cf.generateCertificate(in);
 			// 打印证书加载信息,供测试阶段调试
@@ -63,9 +64,7 @@ public class CertDescriptor {
 			log.error("InitCert Error", e);
 		} catch (FileNotFoundException e) {
 			log.error("InitCert Error File Not Found", e);
-		} catch (NoSuchProviderException e) {
-			log.error("LoadVerifyCert Error No BC Provider", e);
-		} finally {
+		}finally {
 			if (null != in) {
 				try {
 					in.close();
@@ -82,7 +81,7 @@ public class CertDescriptor {
 	 * 
 	 * @return
 	 */
-	public  PrivateKey getSignCertPrivateKey() {
+	public  PrivateKey getSignCertPrivateKey(String pwd) {
 		try {
 			Enumeration<String> aliasenum = keyStore.aliases();
 			String keyAlias = null;
@@ -90,7 +89,7 @@ public class CertDescriptor {
 				keyAlias = aliasenum.nextElement();
 			}
 			PrivateKey privateKey = (PrivateKey) keyStore.getKey(keyAlias,
-					"SDKConfig.getConfig().getSignCertPwd()".toCharArray());
+					pwd.toCharArray());
 			return privateKey;
 		} catch (KeyStoreException e) {
 			log.error("getSignCertPrivateKey Error", e);
@@ -171,11 +170,10 @@ public class CertDescriptor {
 	private  KeyStore getKeyInfo(String pfxkeyfile, String keypwd,
 			String type) throws IOException {
 		log.warn("加载签名证书==>" + pfxkeyfile);
-		FileInputStream fis = null;
-		try {
-			KeyStore ks = KeyStore.getInstance(type, "BC");
+		try(FileInputStream fis = new FileInputStream(pfxkeyfile);) {
+			KeyStore ks = KeyStore.getInstance(type);
 			log.warn("Load RSA CertPath=[" + pfxkeyfile + "],Pwd=["+ keypwd + "],type=["+type+"]");
-			fis = new FileInputStream(pfxkeyfile);
+
 			char[] nPassword = null;
 			nPassword = null == keypwd || "".equals(keypwd.trim()) ? null: keypwd.toCharArray();
 			if (null != ks) {
@@ -185,9 +183,6 @@ public class CertDescriptor {
 		} catch (Exception e) {
 			log.error("getKeyInfo Error", e);
 			return null;
-		} finally {
-			if(null!=fis)
-				fis.close();
 		}
 	}
 
@@ -255,22 +250,42 @@ public class CertDescriptor {
 	}
 
 	/**
-	 * 用配置文件acp_sdk.properties配置路径 加载敏感信息加密证书
+	 * 加载中级证书
 	 */
 	public   void initPublicCert(String certPath) {
 		if (!StringUtils.isEmpty(certPath)) {
 			publicKeyCert = initCert(certPath);
-			log.info("Load MiddleCert Successful");
+			log.info("Load PublicKeyCert Successful");
 		} else {
-			log.info("WARN: acpsdk.middle.path is empty");
+			log.info("PublicKeyCert is empty");
 		}
 	}
 	/**
-	 * 从配置文件acp_sdk.properties中获取验签公钥使用的中级证书
+	 * 加载根证书
+	 */
+	public   void initRootCert(String certPath) {
+		if (!StringUtils.isEmpty(certPath)) {
+			rootKeyCert = initCert(certPath);
+			log.info("Load RootCert Successful");
+		} else {
+			log.info("RootCert is empty");
+		}
+	}
+
+	/**
+	 * 获取公钥/中级证书
 	 * @return
 	 */
 	public  X509Certificate getPublicCert() {
 		return publicKeyCert;
+	}
+
+	/**
+	 * 获取中级证书
+	 * @return
+	 */
+	public  X509Certificate getRootCert() {
+		return rootKeyCert;
 	}
 	
 

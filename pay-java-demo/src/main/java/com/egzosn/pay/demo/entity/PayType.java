@@ -150,6 +150,8 @@ public enum PayType implements BasePayType {
         @Override
         public PayService getPayService(ApyAccount apyAccount) {
             UnionPayConfigStorage unionPayConfigStorage = new UnionPayConfigStorage();
+            unionPayConfigStorage.setMerId(apyAccount.getPartner());
+            unionPayConfigStorage.setCertSign(true);
             unionPayConfigStorage.setKeyPublic(apyAccount.getPublicKey());
             unionPayConfigStorage.setKeyPrivate(apyAccount.getPrivateKey());
             unionPayConfigStorage.setNotifyUrl(apyAccount.getNotifyUrl());
