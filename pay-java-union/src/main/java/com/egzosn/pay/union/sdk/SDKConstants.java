@@ -204,7 +204,7 @@ public class SDKConstants {
     /** 订单超时时间间隔. */
     public static final String param_orderTimeoutInterval = "orderTimeoutInterval";
     /** 支付超时时间. */
-    public static final String param_payTimeoutTime = "payTimeoutTime";
+    public static final String param_payTimeout = "payTimeout";
     /** 默认支付方式. */
     public static final String param_defaultPayType = "defaultPayType";
     /** 支持支付方式. */
@@ -393,6 +393,9 @@ public class SDKConstants {
 
     /** C2B码,1-20位数字*/
     public static final String param_qrNo = "qrNo";
+
+    /** 二维码url */
+    public static final String param_qrCode = "qrCode";
 
     /*原交易商户订单号*/
     public static final String param_origOrderId = "origOrderId";

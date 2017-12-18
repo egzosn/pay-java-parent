@@ -83,7 +83,7 @@ public class ApyAccountRepository {
 
         ApyAccount apyAccount4 = new ApyAccount();
         apyAccount4.setPayId(4);
-        apyAccount4.setPartner("777290058154626");
+        apyAccount4.setPartner("777290058110048");
 //        apyAccount4.setAppid("777290058110097");
         apyAccount4.setPublicKey("D:\\certs\\acp_test_middle.cer;D:\\certs\\acp_test_root.cer");
         apyAccount4.setPrivateKey("D:\\certs\\acp_test_sign.pfx;000000");

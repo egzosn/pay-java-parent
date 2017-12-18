@@ -1,5 +1,9 @@
 package com.egzosn.pay.common.http;
 
+import com.alibaba.fastjson.JSONObject;
+import com.egzosn.pay.common.bean.result.PayException;
+import com.egzosn.pay.common.exception.PayErrorException;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
@@ -118,7 +122,81 @@ public class UriVariables {
         return builder.toString();
     }
 
+    /**
+     * 解析应答字符串，生成应答要素
+     *
+     * @param str 需要解析的字符串
+     * @return 解析的结果map
+     * @throws UnsupportedEncodingException
+     */
+    public static JSONObject getParametersToMap (String str) {
 
+        JSONObject map = new JSONObject();
+        int len = str.length();
+        StringBuilder temp = new StringBuilder();
+        char curChar;
+        String key = null;
+        boolean isKey = true;
+        boolean isOpen = false;//值里有嵌套
+        char openName = 0;
+        if (len > 0) {
+            for (int i = 0; i < len; i++) {// 遍历整个带解析的字符串
+                curChar = str.charAt(i);// 取当前字符
+                if (isKey) {// 如果当前生成的是key
+
+                    if (curChar == '=') {// 如果读取到=分隔符
+                        key = temp.toString();
+                        temp.setLength(0);
+                        isKey = false;
+                    } else {
+                        temp.append(curChar);
+                    }
+                } else {// 如果当前生成的是value
+                    if (isOpen) {
+                        if (curChar == openName) {
+                            isOpen = false;
+                        }
+
+                    } else {//如果没开启嵌套
+                        if (curChar == '{') {//如果碰到，就开启嵌套
+                            isOpen = true;
+                            openName = '}';
+                        }
+                        if (curChar == '[') {
+                            isOpen = true;
+                            openName = ']';
+                        }
+                    }
+                    if (curChar == '&' && !isOpen) {// 如果读取到&分割符,同时这个分割符不是值域，这时将map里添加
+                        putKeyValueToMap(temp, isKey, key, map);
+                        temp.setLength(0);
+                        isKey = true;
+                    } else {
+                        temp.append(curChar);
+                    }
+                }
+
+            }
+            putKeyValueToMap(temp, isKey, key, map);
+        }
+        return map;
+    }
+
+    private static void putKeyValueToMap (StringBuilder temp, boolean isKey,
+                                          String key, Map<String, Object> map) {
+        if (isKey) {
+            key = temp.toString();
+            if (key.length() == 0) {
+                throw new PayErrorException(new PayException("QString format illegal", "内容格式有误"));
+            }
+            map.put(key, "");
+        } else {
+            if (key.length() == 0) {
+                throw new PayErrorException(new PayException("QString format illegal", "内容格式有误"));
+            }
+            map.put(key, temp.toString());
+        }
+    }
 
 
 }

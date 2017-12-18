@@ -8,6 +8,7 @@ import com.egzosn.pay.common.bean.*;
 import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpConfigStorage;
+import com.egzosn.pay.common.http.UriVariables;
 import com.egzosn.pay.common.util.MatrixToImageWriter;
 import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.sign.encrypt.RSA;
@@ -91,11 +92,6 @@ public class UnionPayService extends BasePayService {
         DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
         //订单发送时间
         params.put(SDKConstants.param_txnTime, df.format(System.currentTimeMillis()));
-        // 订单超时时间。
-        // 超过此时间后，除网银交易外，其他交易银联系统会拒绝受理，提示超时。 跳转银行网银交易如果超时后交易成功，会自动退款，大约5个工作日金额返还到持卡人账户。
-        // 此时间建议取支付时的北京时间加15分钟。
-        // 超过超时时间调查询接口应答origRespCode不是A6或者00的就可以判断为失败。
-        params.put("payTimeout", df.format(System.currentTimeMillis() + 30 * 60 * 1000));
         //后台通知地址
         params.put(SDKConstants.param_backUrl, payConfigStorage.getNotifyUrl());
         //交易币种
@@ -172,24 +168,33 @@ public class UnionPayService extends BasePayService {
 
         UnionTransactionType type =  (UnionTransactionType)order.getTransactionType();
 
-        //交易金额
-        params.put(SDKConstants.param_txnAmt, order.getPrice().multiply(new BigDecimal(100)));
+
         //设置交易类型相关的参数
         type.convertMap(params);
 
         params.put(SDKConstants.param_orderId, order.getOutTradeNo());
-        params.put("orderDesc", order.getSubject());
-
         switch (type){
             case WAP:
             case WEB:
             case B2B:
+                //交易金额
+                params.put(SDKConstants.param_txnAmt, order.getPrice().multiply(new BigDecimal(100)));
+                params.put("orderDesc", order.getSubject());
+                DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
+                // 订单超时时间。
+                // 超过此时间后，除网银交易外，其他交易银联系统会拒绝受理，提示超时。 跳转银行网银交易如果超时后交易成功，会自动退款，大约5个工作日金额返还到持卡人账户。
+                // 此时间建议取支付时的北京时间加15分钟。
+                // 超过超时时间调查询接口应答origRespCode不是A6或者00的就可以判断为失败。
+                params.put(SDKConstants.param_payTimeout, df.format(System.currentTimeMillis() + 30 * 60 * 1000));
                 params.put(SDKConstants.param_frontUrl, payConfigStorage.getReturnUrl());
                 break;
-
             case CONSUME:
+                //交易金额
+                params.put(SDKConstants.param_txnAmt, order.getPrice().multiply(new BigDecimal(100)));
                 params.put(SDKConstants.param_qrNo, order.getAuthCode());
-                params.put(SDKConstants.param_termId, order.getDeviceInfo());
+                break;
+            case QUERY:
+
                 break;
             default:
         }
@@ -324,20 +329,21 @@ public class UnionPayService extends BasePayService {
      * @return 返回图片信息，支付时需要的
      */
     @Override
-    public BufferedImage genQrPay (PayOrder order) {
-        Map<String ,Object > params = orderInfo(order);
-        this.setSign(params);
-        JSONObject response =  getHttpRequestTemplate().postForObject(this.getBackTransUrl(),params,JSONObject.class);
-        if(this.vailSign(response)){
-            if("00".equals(response.getString(SDKConstants.param_respCode))){
-                //成功,获取tn号
-                return MatrixToImageWriter.writeInfoToJpgBuff( response.getString(SDKConstants.param_respCode));
-            }else{
-                throw new PayErrorException(new PayException(response.getString(SDKConstants.param_respCode), response.getString(SDKConstants.param_respMsg), response.toJSONString()));
-            }
-        }else{
-            throw new PayErrorException(new PayException("1000", "验证签名失败", response.toJSONString()));
+    public BufferedImage genQrPay (PayOrder order)  {
+        Map<String ,String> params = orderInfo(order);
+        String responseStr =  getHttpRequestTemplate().postForObject(this.getBackTransUrl(),params,String.class);
+        Map<String ,Object> response = UriVariables.getParametersToMap(responseStr);
+        if(response.isEmpty()){
+            throw new PayErrorException(new PayException("failure", "响应内容有误!",responseStr));
         }
+        if(this.vailSign(response)){
+            if("00".equals(response.get(SDKConstants.param_respCode))){
+                //成功,获取tn号
+                    return MatrixToImageWriter.writeInfoToJpgBuff((String)response.get(SDKConstants.param_qrCode));
+            }
+                throw new PayErrorException(new PayException((String)response.get(SDKConstants.param_respCode), (String)response.get(SDKConstants.param_respMsg), responseStr));
+        }
+            throw new PayErrorException(new PayException("failure", "验证签名失败", responseStr));
     }
 
     /**
@@ -349,7 +355,8 @@ public class UnionPayService extends BasePayService {
     @Override
     public Map<String, Object> microPay (PayOrder order) {
         Map<String ,Object > params = orderInfo(order);
-        return getHttpRequestTemplate().postForObject(this.getBackTransUrl(),params,JSONObject.class);
+        String responseStr =  getHttpRequestTemplate().postForObject(this.getBackTransUrl(),params,String.class);
+        return UriVariables.getParametersToMap(responseStr);
     }
 
 
@@ -362,11 +369,9 @@ public class UnionPayService extends BasePayService {
      */
     @Override
     public Map<String, Object> query (String tradeNo, String outTradeNo) {
-        Map<String ,Object > params = this.getCommonParam();
-        UnionTransactionType.QUERY.convertMap(params);
-        params.put(SDKConstants.param_orderId,outTradeNo);
-        this.setSign(params);
-        JSONObject response =  getHttpRequestTemplate().postForObject(this.getSingleQueryUrl(),params,JSONObject.class);
+        Map<String ,Object > params = orderInfo(new PayOrder("交易查询","摘要",null,outTradeNo,UnionTransactionType.QUERY));
+        String responseStr =  getHttpRequestTemplate().postForObject(this.getSingleQueryUrl(),params,String.class);
+        JSONObject response =  UriVariables.getParametersToMap(responseStr);
         if(this.vailSign(response)){
             if("00".equals(response.getString(SDKConstants.param_respCode))){
                 String origRespCode = response.getString(SDKConstants.param_origRespCode);
@@ -381,7 +386,7 @@ public class UnionPayService extends BasePayService {
                 throw new PayErrorException(new PayException(response.getString(SDKConstants.param_respCode), response.getString(SDKConstants.param_respMsg), response.toJSONString()));
             }
         }else{
-            throw new PayErrorException(new PayException("1000", "验证签名失败", response.toJSONString()));
+            throw new PayErrorException(new PayException("failure", "验证签名失败", response.toJSONString()));
         }
     }
 
@@ -405,7 +410,8 @@ public class UnionPayService extends BasePayService {
             params.put(SDKConstants.param_origTxnTime, queryOrder.getOrigOrderId());
         }
         this.setSign(params);
-        JSONObject response =  getHttpRequestTemplate().postForObject(this.getBackTransUrl(),params,JSONObject.class);
+        String responseStr =  getHttpRequestTemplate().postForObject(this.getBackTransUrl(),params,String.class);
+        JSONObject response =  UriVariables.getParametersToMap(responseStr);
         if(this.vailSign(response)){
             if("00".equals(response.getString(SDKConstants.param_respCode))){
                 String origRespCode = response.getString(SDKConstants.param_origRespCode);
@@ -417,7 +423,7 @@ public class UnionPayService extends BasePayService {
                 throw new PayErrorException(new PayException(response.getString(SDKConstants.param_respCode), response.getString(SDKConstants.param_respMsg), response.toJSONString()));
             }
         }else{
-            throw new PayErrorException(new PayException("1000", "验证签名失败", response.toJSONString()));
+            throw new PayErrorException(new PayException("failure", "验证签名失败", response.toJSONString()));
         }
     }
     /**
@@ -501,7 +507,7 @@ public class UnionPayService extends BasePayService {
     /**
      * 获取输出消息，用户返回给支付端, 针对于web端
      *
-     * @param orderInfo 发起支付的订单信息
+     * @param ` 发起支付的订单信息
      * @param method    请求方式  "post" "get",
      * @return 获取输出消息，用户返回给支付端, 针对于web端
      * @see MethodType 请求类型
@@ -642,7 +648,8 @@ public class UnionPayService extends BasePayService {
         params.put(SDKConstants.param_settleDate,df.format(new Date()));
         params.put(SDKConstants.param_fileType,billType);
         this.setSign(params);
-        Map<String ,Object > response =  getHttpRequestTemplate().postForObject(this.getFileTransUrl(),params,Map.class);
+        String responseStr =  getHttpRequestTemplate().postForObject(this.getFileTransUrl(),params,String.class);
+        JSONObject response =  UriVariables.getParametersToMap(responseStr);
         if(this.vailSign(response)){
             if("00".equals(response.get(SDKConstants.param_respCode))){
 
@@ -652,7 +659,7 @@ public class UnionPayService extends BasePayService {
                 throw new PayErrorException(new PayException(response.get(SDKConstants.param_respCode).toString(), response.get(SDKConstants.param_respMsg).toString(), response.toString()));
             }
         }else{
-            throw new PayErrorException(new PayException("1000", "验证签名失败", response.toString()));
+            throw new PayErrorException(new PayException("failure", "验证签名失败", response.toString()));
         }
     }
 
