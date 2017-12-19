@@ -31,7 +31,7 @@ import java.util.*;
 /**
  * @author Actinia
  * @email hayesfu@qq.com
- * @create 2017 2017/11/5 0005
+ * @create 2017 2017/11/5
  */
 public class UnionPayService extends BasePayService {
     private static final Log log = LogFactory.getLog(UnionPayService.class);
@@ -196,7 +196,6 @@ public class UnionPayService extends BasePayService {
             case WAP:
             case WEB:
             case B2B:
-                //交易金额
                 params.put(SDKConstants.param_txnAmt, order.getPrice().multiply(new BigDecimal(100)));
                 params.put("orderDesc", order.getSubject());
                 DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
@@ -208,12 +207,8 @@ public class UnionPayService extends BasePayService {
                 params.put(SDKConstants.param_frontUrl, payConfigStorage.getReturnUrl());
                 break;
             case CONSUME:
-                //交易金额
                 params.put(SDKConstants.param_txnAmt, order.getPrice().multiply(new BigDecimal(100)));
                 params.put(SDKConstants.param_qrNo, order.getAuthCode());
-                break;
-            case QUERY:
-
                 break;
             default:
         }
@@ -235,8 +230,6 @@ public class UnionPayService extends BasePayService {
         SignUtils signUtils = SignUtils.valueOf(payConfigStorage.getSignType());
 
         String signStr;
-
-
         switch (signUtils){
             case RSA:
                 parameters.put(SDKConstants.param_signMethod, SDKConstants.SIGNMETHOD_RSA);
@@ -440,8 +433,10 @@ public class UnionPayService extends BasePayService {
      */
     @Override
     public <T> T query(String tradeNo, String outTradeNo, Callback<T> callback) {
-
-        Map<String, Object> params = orderInfo(new PayOrder("交易查询", "摘要", null, outTradeNo, UnionTransactionType.QUERY));
+        Map<String ,Object > params = this.getCommonParam();
+        UnionTransactionType.QUERY.convertMap(params);
+        params.put(SDKConstants.param_orderId,outTradeNo);
+        this.setSign(params);
         String responseStr = getHttpRequestTemplate().postForObject(this.getSingleQueryUrl(), params, String.class);
         JSONObject response = UriVariables.getParametersToMap(responseStr);
         if (this.verify(response)) {
@@ -481,10 +476,10 @@ public class UnionPayService extends BasePayService {
 
     /**
      *  消费撤销/退货接口
-     * @param origQryId
-     * @param orderId
-     * @param totalAmount
-     * @param type
+     * @param origQryId 原交易查询流水号.
+     * @param orderId 订单号
+     * @param totalAmount 金额
+     * @param type UnionTransactionType.REFUND  或者UnionTransactionType.CONSUME_UNDO
      * @return 返回支付方申请退款后的结果
      */
     public Map<String, Object> unionRefundOrConsumeUndo (String origQryId, String orderId, BigDecimal totalAmount,UnionTransactionType type) {

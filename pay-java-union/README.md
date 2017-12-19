@@ -6,17 +6,16 @@
 
 ```java
 
-        UnionPayConfigStorage configStorage = new UnionPayConfigStorage();
-        configStorage.setMchId("合作者id（商户号）");
-        configStorage.setAppid("应用id");
-        configStorage.setKeyPublic("密钥");
-        configStorage.setKeyPrivate("密钥");
-        configStorage.setNotifyUrl("异步回调地址");
-        configStorage.setReturnUrl("同步回调地址");
-        configStorage.setSignType("签名方式");
-        configStorage.setInputCharset("utf-8");
-        //是否为测试账号，沙箱环境 此处暂未实现
-        configStorage.setTest(true);
+       UnionPayConfigStorage unionPayConfigStorage = new UnionPayConfigStorage();
+       unionPayConfigStorage.setMerId("合作者id");
+       unionPayConfigStorage.setKeyPublic("支付密钥");
+       unionPayConfigStorage.setKeyPrivate("支付密钥");
+       unionPayConfigStorage.setNotifyUrl("异步回调地址");
+       unionPayConfigStorage.setReturnUrl("同步回调地址");
+       unionPayConfigStorage.setSignType("MD5");
+       unionPayConfigStorage.setInputCharset("utf-8");
+       //是否为测试账号，沙箱环境
+       unionPayConfigStorage.setTest(true);
         
 ```
 
@@ -49,19 +48,57 @@
 
 ```java 
 
-        //支付服务
-        PayService service =  new WxPayService(configStorage);
-        
-        //设置网络请求配置根据需求进行设置
-        //service.setRequestTemplateConfigStorage(httpConfigStorage)
-
+      UnionPayService service = new UnionPayService(unionPayConfigStorage);
+  
 ```
 
 #### 创建支付订单信息
 
 ```java
+      PayOrder payOrder = new PayOrder("订单title", "摘要",  new BigDecimal(0.01) , new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()));
+``` 
 
-        //支付订单基础信息
-           PayOrder payOrder = new PayOrder("订单title", "摘要",  new BigDecimal(0.01) , UUID.randomUUID().toString().replace("-", ""));
+#### 主扫申请二维码交易
+
+```java
+       payOrder.setTransactionType(UnionTransactionType.APPLY_QR_CODE);
+       BufferedImage image = service.genQrPay(payOrder);
+``` 
+
+#### 消费(被扫场景)待定
+
+```java
+       payOrder.setTransactionType(UnionTransactionType.CONSUME);
+       params =   service.microPay(payOrder);
+``` 
+#### 消费撤销
+
+```java
+       params =   service.unionRefundOrConsumeUndo("原交易查询流水号", "订单号", new BigDecimal("退款金额" ),UnionTransactionType.CONSUME_UNDO);
   
 ``` 
+#### 交易状态查询交易：只有同步应答
+  
+  ```java
+       payOrder.setTransactionType(UnionTransactionType.QUERY);
+       params =   service.query(null,"商户单号");
+    
+``` 
+
+
+#### 退货交易：后台资金类交易，有同步应答和后台通知应答
+  
+  ```java
+       payOrder.setTransactionType(UnionTransactionType.REFUND);
+       params =   service.refund("原交易查询流水号", "订单号", null,new BigDecimal("退款金额" ));
+    
+``` 
+
+
+#### 文件传输类接口：后台获取对账文件交易，只有同步应答
+ 
+ ```java
+       String fileConten =   service.downloadbill(new Date(),"格式为MMDD");
+``` 
+
+       
