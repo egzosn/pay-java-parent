@@ -5,6 +5,7 @@ import com.egzosn.pay.common.api.BasePayService;
 import com.egzosn.pay.common.api.Callback;
 import com.egzosn.pay.common.api.PayConfigStorage;
 import com.egzosn.pay.common.bean.*;
+import com.egzosn.pay.common.bean.outbuilder.PayTextOutMessage;
 import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpConfigStorage;
@@ -13,17 +14,14 @@ import com.egzosn.pay.common.util.MatrixToImageWriter;
 import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.sign.encrypt.RSA;
 import com.egzosn.pay.common.util.sign.encrypt.RSA2;
-import com.egzosn.pay.common.util.str.StringUtils;
-import com.egzosn.pay.union.enums.UnionTransactionType;
-import com.egzosn.pay.union.request.UnionQueryOrder;
-import com.egzosn.pay.union.sdk.SDKConstants;
+import com.egzosn.pay.union.bean.UnionTransactionType;
+import com.egzosn.pay.union.bean.SDKConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.security.cert.*;
 import java.text.DateFormat;
@@ -36,8 +34,7 @@ import java.util.*;
  * @create 2017 2017/11/5 0005
  */
 public class UnionPayService extends BasePayService {
-    //日志
-    protected static final Log log = LogFactory.getLog(UnionPayService.class);
+    private static final Log log = LogFactory.getLog(UnionPayService.class);
     /**
      * 测试域名
      */
@@ -73,15 +70,32 @@ public class UnionPayService extends BasePayService {
         super(payConfigStorage, configStorage);
 
     }
+    public  String getFrontTransUrl () {
+        return  String.format(FRONT_TRANS_URL,payConfigStorage.isTest() ? TEST_BASE_DOMAIN : RELEASE_BASE_DOMAIN);
+    }
+
+    public  String getBackTransUrl () {
+        return String.format(BACK_TRANS_URL, payConfigStorage.isTest() ?  TEST_BASE_DOMAIN : RELEASE_BASE_DOMAIN);
+    }
+
+    public  String getSingleQueryUrl () {
+        return String.format(SINGLE_QUERY_URL, payConfigStorage.isTest() ?  TEST_BASE_DOMAIN : RELEASE_BASE_DOMAIN);
+    }
+
+
+    public  String getFileTransUrl () {
+        return String.format(FILE_TRANS_URL, payConfigStorage.isTest() ?  TEST_BASE_DOMAIN : RELEASE_BASE_DOMAIN);
+    }
 
 
     /**
      * 银联全渠道系统，产品参数，除了encoding自行选择外其他不需修改
+     *
      * @return 返回参数集合
      */
-    private Map<String ,Object> getCommonParam(){
-        Map<String ,Object> params = new TreeMap<>();
-        UnionPayConfigStorage configStorage = (UnionPayConfigStorage)payConfigStorage;
+    private Map<String, Object> getCommonParam() {
+        Map<String, Object> params = new TreeMap<>();
+        UnionPayConfigStorage configStorage = (UnionPayConfigStorage) payConfigStorage;
         //银联接口版本
         params.put(SDKConstants.param_version, configStorage.getVersion());
         //编码方式
@@ -106,41 +120,46 @@ public class UnionPayService extends BasePayService {
      * 回调校验
      *
      * @param result 回调回来的参数集
+     *
      * @return 签名校验 true通过
      */
     @Override
-    public boolean verify (Map<String, Object> result) {
-        if(result != null){
-            if(this.vailSign(result)){
-                String respCode = result.get("respCode").toString();
-                if(("00").equals(respCode)){
+    public boolean verify(Map<String, Object> result) {
 
-                    //成功,获取tn号
-                    //String tn = resmap.get("tn");
-                    //TODO
-                    return true;
-                }else{
-                    //其他应答码为失败请排查原因或做失败处理
-                    //TODO
-                }
-            }else{
-//                校验失败
-            }
-        }else{
+        if (null == result || result.get(SDKConstants.param_signature) == null) {
+            log.debug("银联支付验签异常：params：" + result);
+            return false;
         }
-        return false;
+        return this.signVerify(result, (String) result.get(SDKConstants.param_signature));
     }
 
     /**
      * 签名校验
      *
      * @param params 参数集
-     * @param sign   签名
+     * @param sign   签名原文
      * @return 签名校验 true通过
      */
     @Override
     public boolean signVerify (Map<String, Object> params, String sign) {
-        return false;
+        SignUtils signUtils = SignUtils.valueOf(payConfigStorage.getSignType());
+
+        String data = SignUtils.parameterText(params, "&", "signature");
+        switch (signUtils){
+            case RSA:
+                data = SignUtils.SHA1.createSign(data,"", payConfigStorage.getInputCharset());
+                return RSA.verify(data, sign, verifyCertificate(genCertificateByStr((String)params.get(SDKConstants.param_signPubKeyCert))).getPublicKey(), payConfigStorage.getInputCharset());
+            case RSA2:
+                data = SignUtils.SHA256.createSign(data,"", payConfigStorage.getInputCharset());
+                return RSA2.verify(data, sign, verifyCertificate(genCertificateByStr((String)params.get(SDKConstants.param_signPubKeyCert))).getPublicKey(), payConfigStorage.getInputCharset());
+            case SHA1:
+            case SHA256:
+            case SM3:
+                String before = signUtils.createSign(payConfigStorage.getKeyPublic(),"",payConfigStorage.getInputCharset());
+                return signUtils.verify(data, sign, "&" + before, payConfigStorage.getInputCharset());
+            default:
+                return false;
+        }
     }
 
     /**
@@ -247,42 +266,13 @@ public class UnionPayService extends BasePayService {
         return parameters;
     }
 
-    /**
-     *  验证数据合法性
-     * @param resData 请求参数
-     * @return 请求参数
-     */
-    private boolean vailSign(Map<String, Object> resData){
-        SignUtils signUtils = SignUtils.valueOf(payConfigStorage.getSignType());
-        //签名原文
-        String stringSign = resData.get(SDKConstants.param_signature).toString();
-        String data = SignUtils.parameterText(resData, "&", "signature");
-        switch (signUtils){
-            case RSA:
-                data = SignUtils.SHA1.createSign(data,"", payConfigStorage.getInputCharset());
-                return RSA.verify(data, stringSign, payConfigStorage.getCertDescriptor().getPublicCert().getPublicKey(), payConfigStorage.getInputCharset());
-            case RSA2:
-                data = SignUtils.SHA256.createSign(data,"", payConfigStorage.getInputCharset());
-                X509Certificate cert =  genCertificateByStr(resData.get(SDKConstants.param_signPubKeyCert).toString());
-                /*验证证书链*/
-                verifyCertificate(cert);
-                return RSA2.verify(data, stringSign,cert.getPublicKey(), payConfigStorage.getInputCharset());
-//                return RSA2.verify(data, stringSign, payConfigStorage.getCertDescriptor().getPublicCert().getPublicKey(), payConfigStorage.getInputCharset());
-            case SHA1:
-            case SHA256:
-            case SM3:
-                String before = signUtils.createSign(payConfigStorage.getKeyPublic(),"",payConfigStorage.getInputCharset());
-                return  signUtils.verify(data, stringSign, "&"+before, payConfigStorage.getInputCharset());
-            default:
-                    return false;
-        }
-    }
+
 
     /**
      * 验证证书链
-     * @param cert
+     * @param cert 需要验证的证书
      */
-    private void verifyCertificate (X509Certificate cert) {
+    private X509Certificate verifyCertificate (X509Certificate cert) {
         try {
             cert.checkValidity();//验证有效期
             X509Certificate middleCert = payConfigStorage.getCertDescriptor().getPublicCert();
@@ -312,6 +302,7 @@ public class UnionPayService extends BasePayService {
             @SuppressWarnings("unused")
             PKIXCertPathBuilderResult result = (PKIXCertPathBuilderResult) builder
                     .build(pkixParams);
+            return cert;
         } catch (java.security.cert.CertPathBuilderException e) {
             log.error("verify certificate chain fail.", e);
         } catch (CertificateExpiredException e) {
@@ -321,6 +312,7 @@ public class UnionPayService extends BasePayService {
         } catch (Exception e) {
             log.error(e);
         }
+        return null;
     }
     /**
      * 获取输出二维码，用户返回给支付端,
@@ -336,8 +328,8 @@ public class UnionPayService extends BasePayService {
         if(response.isEmpty()){
             throw new PayErrorException(new PayException("failure", "响应内容有误!",responseStr));
         }
-        if(this.vailSign(response)){
-            if("00".equals(response.get(SDKConstants.param_respCode))){
+        if(this.verify(response)){
+            if(SDKConstants.OK_RESP_CODE.equals(response.get(SDKConstants.param_respCode))){
                 //成功,获取tn号
                     return MatrixToImageWriter.writeInfoToJpgBuff((String)response.get(SDKConstants.param_qrCode));
             }
@@ -361,72 +353,6 @@ public class UnionPayService extends BasePayService {
 
 
     /**
-     * 交易查询接口
-     *
-     * @param tradeNo    支付平台订单号
-     * @param outTradeNo 商户单号
-     * @return 返回查询回来的结果集，支付方原值返回
-     */
-    @Override
-    public Map<String, Object> query (String tradeNo, String outTradeNo) {
-        Map<String ,Object > params = orderInfo(new PayOrder("交易查询","摘要",null,outTradeNo,UnionTransactionType.QUERY));
-        String responseStr =  getHttpRequestTemplate().postForObject(this.getSingleQueryUrl(),params,String.class);
-        JSONObject response =  UriVariables.getParametersToMap(responseStr);
-        if(this.vailSign(response)){
-            if("00".equals(response.getString(SDKConstants.param_respCode))){
-                String origRespCode = response.getString(SDKConstants.param_origRespCode);
-                if(("00").equals(origRespCode)){
-                    //交易成功，更新商户订单状态
-                    //TODO
-                    return response;
-                }else{
-                    throw new PayErrorException(new PayException(response.getString(SDKConstants.param_respCode), response.getString(SDKConstants.param_respMsg), response.toJSONString()));
-                }
-            }else{
-                throw new PayErrorException(new PayException(response.getString(SDKConstants.param_respCode), response.getString(SDKConstants.param_respMsg), response.toJSONString()));
-            }
-        }else{
-            throw new PayErrorException(new PayException("failure", "验证签名失败", response.toJSONString()));
-        }
-    }
-
-    /**
-     * 消费撤销/退货接口
-     *
-     * @return 返回支付方申请退款后的结果
-     */
-    public Map<String, Object> unionRefundOrConsumeUndo (UnionQueryOrder queryOrder,UnionTransactionType type) {
-        Map<String ,Object> params = this.getCommonParam();
-        type.convertMap(params);
-        params.put(SDKConstants.param_orderId,queryOrder.getOrderId());
-        params.put(SDKConstants.param_txnAmt,queryOrder.getTxnAmt());
-        if(StringUtils.isNotBlank(queryOrder.getOrigQryId())) {
-            params.put(SDKConstants.param_origQryId, queryOrder.getOrigQryId());
-        }
-        if(StringUtils.isNotBlank(queryOrder.getOrigOrderId())){
-            params.put(SDKConstants.param_origOrderId,queryOrder.getOrigOrderId());
-        }
-        if(StringUtils.isNotBlank(queryOrder.getOrigTxnTime())) {
-            params.put(SDKConstants.param_origTxnTime, queryOrder.getOrigOrderId());
-        }
-        this.setSign(params);
-        String responseStr =  getHttpRequestTemplate().postForObject(this.getBackTransUrl(),params,String.class);
-        JSONObject response =  UriVariables.getParametersToMap(responseStr);
-        if(this.vailSign(response)){
-            if("00".equals(response.getString(SDKConstants.param_respCode))){
-                String origRespCode = response.getString(SDKConstants.param_origRespCode);
-                //交易成功，更新商户订单状态
-                //TODO
-                return response;
-
-            }else{
-                throw new PayErrorException(new PayException(response.getString(SDKConstants.param_respCode), response.getString(SDKConstants.param_respMsg), response.toJSONString()));
-            }
-        }else{
-            throw new PayErrorException(new PayException("failure", "验证签名失败", response.toJSONString()));
-        }
-    }
-    /**
      * 将字符串转换为X509Certificate对象.
      *
      * @param x509CertString
@@ -446,41 +372,6 @@ public class UnionPayService extends BasePayService {
     }
 
     /**
-     * 将请求参数或者请求流转化为 Map
-     *
-     * @param parameterMap 请求参数
-     * @param is           请求流
-     * @return 获得回调的请求参数
-     */
-    @Override
-    public Map<String, Object> getParameter2Map (Map<String, String[]> parameterMap, InputStream is) {
-
-        Map<String, Object> params = new TreeMap<String,Object>();
-        for (Iterator iter = parameterMap.keySet().iterator(); iter.hasNext();) {
-            String name = (String) iter.next();
-            String[] values = parameterMap.get(name);
-            String valueStr = "";
-            for (int i = 0,len =  values.length; i < len; i++) {
-                valueStr += (i == len - 1) ?  values[i]
-                        : values[i] + ",";
-            }
-            //乱码解决，这段代码在出现乱码时使用。如果mysign和sign不相等也可以使用这段代码转化
-            //valueStr = new String(valueStr.getBytes("ISO-8859-1"), "gbk");
-            if (!valueStr.matches("\\w+")){
-                try {
-                    if(valueStr.equals(new String(valueStr.getBytes("iso8859-1"), "iso8859-1"))){
-                        valueStr=new String(valueStr.getBytes("iso8859-1"), payConfigStorage.getInputCharset());
-                    }
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                }
-            }
-            params.put(name, valueStr);
-        }
-        return params;
-    }
-
-    /**
      * 获取输出消息，用户返回给支付端
      *
      * @param code    状态
@@ -489,7 +380,7 @@ public class UnionPayService extends BasePayService {
      */
     @Override
     public PayOutMessage getPayOutMessage (String code, String message) {
-        return null;
+        return PayTextOutMessage.TEXT().content(code.toLowerCase()).build();
     }
 
     /**
@@ -501,23 +392,23 @@ public class UnionPayService extends BasePayService {
      */
     @Override
     public PayOutMessage successPayOutMessage (PayMessage payMessage) {
-        return null;
+        return getPayOutMessage("ok", null);
     }
 
     /**
      * 获取输出消息，用户返回给支付端, 针对于web端
      *
-     * @param ` 发起支付的订单信息
-     * @param method    请求方式  "post" "get",
+     * @param `      发起支付的订单信息
+     * @param method 请求方式  "post" "get",
+     *
      * @return 获取输出消息，用户返回给支付端, 针对于web端
      * @see MethodType 请求类型
      */
     @Override
-    public String buildRequest (Map<String, Object> orderInfo, MethodType method) {
+    public String buildRequest(Map<String, Object> orderInfo, MethodType method) {
         StringBuffer sf = new StringBuffer();
-        sf.append("<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset="+payConfigStorage.getInputCharset()+"\"/></head><body>");
-        sf.append("<form id = \"pay_form\" action=\"" + getFrontTransUrl()
-                + "\" method=\"post\">");
+        sf.append("<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=" + payConfigStorage.getInputCharset() + "\"/></head><body>");
+        sf.append("<form id = \"pay_form\" action=\"" + getFrontTransUrl()  + "\" method=\"post\">");
         if (null != orderInfo && 0 != orderInfo.size()) {
             Set<Map.Entry<String, Object>> set = orderInfo.entrySet();
             Iterator<Map.Entry<String, Object>> it = set.iterator();
@@ -525,8 +416,7 @@ public class UnionPayService extends BasePayService {
                 Map.Entry<String, Object> ey = it.next();
                 String key = ey.getKey();
                 Object value = ey.getValue();
-                sf.append("<input type=\"hidden\" name=\"" + key + "\" id=\""
-                        + key + "\" value=\"" + value + "\"/>");
+                sf.append("<input type=\"hidden\" name=\"" + key + "\" id=\"" + key + "\" value=\"" + value + "\"/>");
             }
         }
         sf.append("</form>");
@@ -545,13 +435,81 @@ public class UnionPayService extends BasePayService {
      * @param tradeNo    支付平台订单号
      * @param outTradeNo 商户单号
      * @param callback   处理器
+     *
      * @return 返回查询回来的结果集
      */
     @Override
-    public <T> T query (String tradeNo, String outTradeNo, Callback<T> callback) {
-        return null;
+    public <T> T query(String tradeNo, String outTradeNo, Callback<T> callback) {
+
+        Map<String, Object> params = orderInfo(new PayOrder("交易查询", "摘要", null, outTradeNo, UnionTransactionType.QUERY));
+        String responseStr = getHttpRequestTemplate().postForObject(this.getSingleQueryUrl(), params, String.class);
+        JSONObject response = UriVariables.getParametersToMap(responseStr);
+        if (this.verify(response)) {
+            if (SDKConstants.OK_RESP_CODE.equals(response.getString(SDKConstants.param_respCode))) {
+                String origRespCode = response.getString(SDKConstants.param_origRespCode);
+                if ((SDKConstants.OK_RESP_CODE).equals(origRespCode)) {
+                    //交易成功，更新商户订单状态
+                    //TODO
+                    return callback.perform(response);
+                }
+            }
+            throw new PayErrorException(new PayException(response.getString(SDKConstants.param_respCode), response.getString(SDKConstants.param_respMsg), response.toJSONString()));
+        }
+        throw new PayErrorException(new PayException("failure", "验证签名失败", response.toJSONString()));
+
     }
 
+    /**
+     * 交易查询接口
+     *
+     * @param tradeNo    支付平台订单号
+     * @param outTradeNo 商户单号
+     *
+     * @return 返回查询回来的结果集，支付方原值返回
+     */
+    @Override
+    public Map<String, Object> query(String tradeNo, String outTradeNo) {
+
+    return query(tradeNo, outTradeNo, new Callback<Map<String, Object>>() {
+        @Override
+        public Map<String, Object> perform(Map<String, Object> map) {
+            return map;
+        }
+    });
+    }
+
+
+    /**
+     *  消费撤销/退货接口
+     * @param origQryId
+     * @param orderId
+     * @param totalAmount
+     * @param type
+     * @return 返回支付方申请退款后的结果
+     */
+    public Map<String, Object> unionRefundOrConsumeUndo (String origQryId, String orderId, BigDecimal totalAmount,UnionTransactionType type) {
+        Map<String ,Object> params = this.getCommonParam();
+        type.convertMap(params);
+        params.put(SDKConstants.param_orderId,orderId);
+        params.put(SDKConstants.param_txnAmt, totalAmount);
+        params.put(SDKConstants.param_origQryId, origQryId);
+        this.setSign(params);
+        String responseStr =  getHttpRequestTemplate().postForObject(this.getBackTransUrl(),params,String.class);
+        JSONObject response =  UriVariables.getParametersToMap(responseStr);
+        if(this.verify(response)){
+            if(SDKConstants.OK_RESP_CODE.equals(response.getString(SDKConstants.param_respCode))){
+                String origRespCode = response.getString(SDKConstants.param_origRespCode);
+                //交易成功，更新商户订单状态
+                //TODO
+                return response;
+
+            }
+                throw new PayErrorException(new PayException(response.getString(SDKConstants.param_respCode), response.getString(SDKConstants.param_respMsg), response.toJSONString()));
+
+        }
+            throw new PayErrorException(new PayException("failure", "验证签名失败", response.toJSONString()));
+
+    }
     /**
      * 交易关闭接口
      *
@@ -588,7 +546,7 @@ public class UnionPayService extends BasePayService {
      */
     @Override
     public Map<String, Object> refund (String tradeNo, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount) {
-        return null;
+        return unionRefundOrConsumeUndo(tradeNo, outTradeNo, totalAmount, UnionTransactionType.REFUND);
     }
 
 
@@ -605,7 +563,7 @@ public class UnionPayService extends BasePayService {
      */
     @Override
     public <T> T refund (String tradeNo, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount, Callback<T> callback) {
-        return null;
+        return callback.perform(unionRefundOrConsumeUndo(tradeNo, outTradeNo, totalAmount, UnionTransactionType.REFUND));
     }
 
     /**
@@ -641,44 +599,16 @@ public class UnionPayService extends BasePayService {
      * @return 返回fileContent 请自行将数据落地
      */
     @Override
-    public Object downloadbill (Date billDate, String billType) {
-        Map<String ,Object > params = this.getCommonParam();
-        UnionTransactionType.FILE_TRANSFER.convertMap(params);
-        DateFormat df = new SimpleDateFormat("MMDD");
-        params.put(SDKConstants.param_settleDate,df.format(new Date()));
-        params.put(SDKConstants.param_fileType,billType);
-        this.setSign(params);
-        String responseStr =  getHttpRequestTemplate().postForObject(this.getFileTransUrl(),params,String.class);
-        JSONObject response =  UriVariables.getParametersToMap(responseStr);
-        if(this.vailSign(response)){
-            if("00".equals(response.get(SDKConstants.param_respCode))){
-
+    public String downloadbill (Date billDate, String billType) {
+        return downloadbill(billDate, billType, new Callback<String>() {
+            @Override
+            public String perform(Map<String, Object> response) {
                 return response.get(SDKConstants.param_fileContent).toString();
-
-            }else{
-                throw new PayErrorException(new PayException(response.get(SDKConstants.param_respCode).toString(), response.get(SDKConstants.param_respMsg).toString(), response.toString()));
             }
-        }else{
-            throw new PayErrorException(new PayException("failure", "验证签名失败", response.toString()));
-        }
+        });
     }
 
-    /**
-     *  将parameterMap对应的key存放至params
-     * @param parameterMap 请求参数
-     * @param params 转化的对象
-     * @param key 需要取值的key
-     * @return params
-     */
-    public Map<String, Object> conversion(Map<String, String[]> parameterMap,  Map<String, Object> params ,String key){
-        String[] values = parameterMap.get(key);
-        String valueStr = "";
-        for (int i = 0,len =  values.length; i < len; i++) {
-            valueStr += (i == len - 1) ?  values[i] : values[i] + ",";
-        }
-        params.put(key, valueStr);
-        return params;
-    }
+
     /**
      * 下载对账单
      *
@@ -689,7 +619,23 @@ public class UnionPayService extends BasePayService {
      */
     @Override
     public <T> T downloadbill (Date billDate, String billType, Callback<T> callback) {
-        return null;
+        Map<String ,Object > params = this.getCommonParam();
+        UnionTransactionType.FILE_TRANSFER.convertMap(params);
+        DateFormat df = new SimpleDateFormat("MMDD");
+        params.put(SDKConstants.param_settleDate,df.format(new Date()));
+        params.put(SDKConstants.param_fileType,billType);
+        this.setSign(params);
+        String responseStr =  getHttpRequestTemplate().postForObject(this.getFileTransUrl(),params,String.class);
+        JSONObject response =  UriVariables.getParametersToMap(responseStr);
+        if(this.verify(response)){
+            if(SDKConstants.OK_RESP_CODE.equals(response.get(SDKConstants.param_respCode))){
+                return callback.perform(response);
+
+            }
+                throw new PayErrorException(new PayException(response.get(SDKConstants.param_respCode).toString(), response.get(SDKConstants.param_respMsg).toString(), response.toString()));
+
+        }
+            throw new PayErrorException(new PayException("failure", "验证签名失败", response.toString()));
     }
 
     /**
@@ -706,51 +652,6 @@ public class UnionPayService extends BasePayService {
         return null;
     }
 
-    public  String getFrontTransUrl () {
-        return  String.format(FRONT_TRANS_URL,payConfigStorage.isTest() ? TEST_BASE_DOMAIN : RELEASE_BASE_DOMAIN);
-    }
 
-    public  String getBackTransUrl () {
-        return String.format(BACK_TRANS_URL, payConfigStorage.isTest() ?  TEST_BASE_DOMAIN : RELEASE_BASE_DOMAIN);
-    }
 
-    public  String getSingleQueryUrl () {
-        return String.format(SINGLE_QUERY_URL, payConfigStorage.isTest() ?  TEST_BASE_DOMAIN : RELEASE_BASE_DOMAIN);
-    }
-//
-//    public  String getBatchTransUrl () {
-//        return payConfigStorage.isTest() ? String.format(BATCH_TRANS_URL,TEST_BASE_DOMAIN):String.format(BATCH_TRANS_URL,RELEASE_BASE_DOMAIN);
-//    }
-
-    public  String getFileTransUrl () {
-        return String.format(FILE_TRANS_URL, payConfigStorage.isTest() ?  TEST_BASE_DOMAIN : RELEASE_BASE_DOMAIN);
-    }
-
-//    public  String getAppTransUrl () {
-//        return payConfigStorage.isTest() ? String.format(APP_TRANS_URL,TEST_BASE_DOMAIN):String.format(APP_TRANS_URL,RELEASE_BASE_DOMAIN);
-//    }
-//
-//    public  String getCardTransUrl () {
-//        return payConfigStorage.isTest() ? String.format(CARD_TRANS_URL,TEST_BASE_DOMAIN):String.format(CARD_TRANS_URL,RELEASE_BASE_DOMAIN);
-//    }
-//
-//    public  String getJfFrontTransUrl () {
-//        return payConfigStorage.isTest() ? String.format(JF_FRONT_TRANS_URL,TEST_BASE_DOMAIN):String.format(JF_FRONT_TRANS_URL,RELEASE_BASE_DOMAIN);
-//    }
-//
-//    public  String getJfBackTransUrl () {
-//        return payConfigStorage.isTest() ? String.format(JF_BACK_TRANS_URL,TEST_BASE_DOMAIN):String.format(JF_BACK_TRANS_URL,RELEASE_BASE_DOMAIN);
-//    }
-//
-//    public  String getJfSingleQueryUrl () {
-//        return payConfigStorage.isTest() ? String.format(JF_SINGLE_QUERY_URL,TEST_BASE_DOMAIN):String.format(JF_SINGLE_QUERY_URL,RELEASE_BASE_DOMAIN);
-//    }
-//
-//    public  String getJfAppTransUrl () {
-//        return payConfigStorage.isTest() ? String.format(JF_APP_TRANS_URL,TEST_BASE_DOMAIN):String.format(JF_APP_TRANS_URL,RELEASE_BASE_DOMAIN);
-//    }
-//
-//    public  String getJfCardTransUrl () {
-//        return payConfigStorage.isTest() ? String.format(JF_CARD_TRANS_URL,TEST_BASE_DOMAIN):String.format(JF_CARD_TRANS_URL,RELEASE_BASE_DOMAIN);
-//    }
 }

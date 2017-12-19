@@ -12,7 +12,7 @@
  * xshu       2014-05-28       MPI插件包常量定义
  * =============================================================================
  */
-package com.egzosn.pay.union.sdk;
+package com.egzosn.pay.union.bean;
 
 /**
  *
@@ -23,134 +23,9 @@ package com.egzosn.pay.union.sdk;
  */
 public class SDKConstants {
 
-    public final static String COLUMN_DEFAULT = "-";
-
-    public final static String KEY_DELIMITER = "#";
-
-    /** memeber variable: blank. */
-    public static final String BLANK = "";
-
-    /** member variabel: space. */
-    public static final String SPACE = " ";
-
-    /** memeber variable: unline. */
-    public static final String UNLINE = "_";
-
-    /** memeber varibale: star. */
-    public static final String STAR = "*";
-
-    /** memeber variable: line. */
-    public static final String LINE = "-";
-
-    /** memeber variable: add. */
-    public static final String ADD = "+";
-
-    /** memeber variable: colon. */
-    public final static String COLON = "|";
-
-    /** memeber variable: point. */
-    public final static String POINT = ".";
-
-    /** memeber variable: comma. */
-    public final static String COMMA = ",";
-
-    /** memeber variable: slash. */
-    public final static String SLASH = "/";
-
-    /** memeber variable: div. */
-    public final static String DIV = "/";
-
-    /** memeber variable: left . */
-    public final static String LB = "(";
-
-    /** memeber variable: right. */
-    public final static String RB = ")";
-
-    /** memeber variable: rmb. */
-    public final static String CUR_RMB = "RMB";
-
-    /** memeber variable: .page size */
-    public static final int PAGE_SIZE = 10;
-
-    /** memeber variable: String ONE. */
-    public static final String ONE = "1";
-
-    /** memeber variable: String ZERO. */
-    public static final String ZERO = "0";
-
-    /** memeber variable: number six. */
-    public static final int NUM_SIX = 6;
-
-    /** memeber variable: equal mark. */
-    public static final String EQUAL = "=";
-
-    /** memeber variable: operation ne. */
-    public static final String NE = "!=";
-
-    /** memeber variable: operation le. */
-    public static final String LE = "<=";
-
-    /** memeber variable: operation ge. */
-    public static final String GE = ">=";
-
-    /** memeber variable: operation lt. */
-    public static final String LT = "<";
-
-    /** memeber variable: operation gt. */
-    public static final String GT = ">";
-
-    /** memeber variable: list separator. */
-    public static final String SEP = "./";
-
-    /** memeber variable: Y. */
-    public static final String Y = "Y";
-
-    /** memeber variable: AMPERSAND. */
-    public static final String AMPERSAND = "&";
-
-    /** memeber variable: SQL_LIKE_TAG. */
-    public static final String SQL_LIKE_TAG = "%";
-
-    /** memeber variable: @. */
-    public static final String MAIL = "@";
-
-    /** memeber variable: number zero. */
-    public static final int NZERO = 0;
-
-    public static final String LEFT_BRACE = "{";
-
-    public static final String RIGHT_BRACE = "}";
-
-    /** memeber variable: string true. */
-    public static final String TRUE_STRING = "true";
-    /** memeber variable: string false. */
-    public static final String FALSE_STRING = "false";
-
-    /** memeber variable: forward success. */
-    public static final String SUCCESS = "success";
-    /** memeber variable: forward fail. */
-    public static final String FAIL = "fail";
-    /** memeber variable: global forward success. */
-    public static final String GLOBAL_SUCCESS = "$success";
-    /** memeber variable: global forward fail. */
-    public static final String GLOBAL_FAIL = "$fail";
-
-    public static final String UTF_8_ENCODING = "UTF-8";
-    public static final String GBK_ENCODING = "GBK";
-    public static final String CONTENT_TYPE = "Content-type";
-    public static final String APP_XML_TYPE = "application/xml;charset=utf-8";
-    public static final String APP_FORM_TYPE = "application/x-www-form-urlencoded;charset=";
-
-    public static final String VERSION_1_0_0 = "1.0.0";
-    public static final String VERSION_5_0_0 = "5.0.0";
-    public static final String VERSION_5_0_1 = "5.0.1";
-    public static final String VERSION_5_1_0 = "5.1.0";
     public static final String SIGNMETHOD_RSA = "01";
-    public static final String SIGNMETHOD_SHA256 = "11";
-    public static final String SIGNMETHOD_SM3 = "12";
+    public static final String OK_RESP_CODE = "00";
     public static final String UNIONPAY_CNNAME = "中国银联股份有限公司";
-    public static final String CERTTYPE_01 = "01";// 敏感信息加密公钥
-    public static final String CERTTYPE_02 = "02";// 磁道加密公钥
 
     /******************************************** 5.0报文接口定义 ********************************************/
     /** 版本号. */

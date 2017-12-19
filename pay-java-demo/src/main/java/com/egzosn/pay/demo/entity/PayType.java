@@ -11,7 +11,7 @@ import com.egzosn.pay.fuiou.api.FuiouPayService;
 import com.egzosn.pay.fuiou.bean.FuiouTransactionType;
 import com.egzosn.pay.union.api.UnionPayConfigStorage;
 import com.egzosn.pay.union.api.UnionPayService;
-import com.egzosn.pay.union.enums.UnionTransactionType;
+import com.egzosn.pay.union.bean.UnionTransactionType;
 import com.egzosn.pay.wx.api.WxPayConfigStorage;
 import com.egzosn.pay.wx.api.WxPayService;
 import com.egzosn.pay.wx.bean.WxTransactionType;
