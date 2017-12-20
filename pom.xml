@@ -79,12 +79,7 @@
                 <artifactId>fastjson</artifactId>
                 <version>${fastjson.version}</version>
             </dependency>
-            <!--org.bouncycastle-->
-            <dependency>
-                <groupId>org.bouncycastle</groupId>
-                <artifactId>bcprov-debug-jdk15on</artifactId>
-                <version>1.58</version>
-            </dependency>
+
 
             <!-- log4j  -->
             <dependency>
