@@ -4,8 +4,11 @@ import com.egzosn.pay.common.bean.CurType;
 
 /**
  * 货币类型
- * @author Fuzx
- * create 2017 2017/1/24 0024
+ * @author Actinia
+ * @email hayesfu@qq.com
+ *  <pre>
+ * create 2017 2017/1/16 0016
+ * </pre>
  */
 public enum FuiouCurType  implements CurType {
 
