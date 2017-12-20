@@ -4,34 +4,33 @@ import com.egzosn.pay.common.api.PayService;
 import com.egzosn.pay.common.bean.PayMessage;
 import com.egzosn.pay.common.bean.PayOutMessage;
 import com.egzosn.pay.common.exception.PayErrorException;
+import com.egzosn.pay.union.bean.SDKConstants;
 
 import java.util.Map;
 
 /**
  * @author Actinia
  * @email hayesfu@qq.com
- *  <pre>
-create 2017 2017/11/4 0004
+ * <pre>
+ * create 2017 2017/11/4 0004
  * </pre>
  */
 public class UnionPayMessageHandler extends BasePayMessageHandler {
 
 
-
-
-    public UnionPayMessageHandler (Integer payId) {
+    public UnionPayMessageHandler(Integer payId) {
         super(payId);
     }
 
     @Override
     public PayOutMessage handle(PayMessage payMessage, Map<String, Object> context, PayService payService) throws PayErrorException {
         //交易状态
-        if ("0000".equals(payMessage.getPayMessage().get("order_pay_code"))){
+        if (SDKConstants.OK_RESP_CODE.equals(payMessage.getPayMessage().get(SDKConstants.param_respCode))) {
             /////这里进行成功的处理
 
-            return PayOutMessage.JSON().content("success","成功").build();
+            return payService.successPayOutMessage(payMessage);
         }
 
-        return PayOutMessage.JSON().content("fail", "失败").build();
+        return payService.getPayOutMessage("fail", "失败");
     }
 }
