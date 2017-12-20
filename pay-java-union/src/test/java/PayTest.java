@@ -21,19 +21,19 @@ public class PayTest {
 
 
         UnionPayConfigStorage unionPayConfigStorage = new UnionPayConfigStorage();
-        unionPayConfigStorage.setMerId("合作者id");
-        unionPayConfigStorage.setKeyPublic("支付密钥");
-        unionPayConfigStorage.setKeyPrivate("支付密钥");
+        unionPayConfigStorage.setMerId("商户id");
+        unionPayConfigStorage.setKeyPublic("公钥，验签证书链格式： 中级证书路径;根证书路径");
+        unionPayConfigStorage.setKeyPrivate("私钥, 私钥证书格式： 私钥证书路径;私钥证书对应的密码");
         unionPayConfigStorage.setNotifyUrl("异步回调地址");
         unionPayConfigStorage.setReturnUrl("同步回调地址");
-        unionPayConfigStorage.setSignType("MD5");
-        unionPayConfigStorage.setInputCharset("utf-8");
+        unionPayConfigStorage.setSignType("RSA2");
+        unionPayConfigStorage.setInputCharset("UTF-8");
         //是否为测试账号，沙箱环境
         unionPayConfigStorage.setTest(true);
         //支付服务
         UnionPayService service = new UnionPayService(unionPayConfigStorage);
         //支付订单基础信息
-        PayOrder payOrder = new PayOrder("订单title", "摘要",  new BigDecimal(0.01) , new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()));
+        PayOrder payOrder = new PayOrder("订单title", "摘要",  new BigDecimal(0.01) , new SimpleDateFormat("yyyyMMddHHmmss").format(System.currentTimeMillis()));
 
 
         /*----------- 网关支付-------------------*/
@@ -54,6 +54,7 @@ public class PayTest {
 
         /*-----------消费(被扫场景)待定------------------------------*/
         payOrder.setTransactionType(UnionTransactionType.CONSUME);
+        payOrder.setAuthCode("C2B码(条码号),1-20位数字");
         params =   service.microPay(payOrder);
         /*-----------消费(被扫场景)------------------------------*/
 

@@ -7,13 +7,13 @@
 ```java
 
        UnionPayConfigStorage unionPayConfigStorage = new UnionPayConfigStorage();
-       unionPayConfigStorage.setMerId("合作者id");
-       unionPayConfigStorage.setKeyPublic("支付密钥");
-       unionPayConfigStorage.setKeyPrivate("支付密钥");
+       unionPayConfigStorage.setMerId("商户id");
+       unionPayConfigStorage.setKeyPublic("公钥，验签证书链格式： 中级证书路径;根证书路径");
+       unionPayConfigStorage.setKeyPrivate("私钥, 私钥证书格式： 私钥证书路径;私钥证书对应的密码");
        unionPayConfigStorage.setNotifyUrl("异步回调地址");
        unionPayConfigStorage.setReturnUrl("同步回调地址");
-       unionPayConfigStorage.setSignType("MD5");
-       unionPayConfigStorage.setInputCharset("utf-8");
+       unionPayConfigStorage.setSignType("RSA2");
+       unionPayConfigStorage.setInputCharset("UTF-8");
        //是否为测试账号，沙箱环境
        unionPayConfigStorage.setTest(true);
         
@@ -55,7 +55,7 @@
 #### 创建支付订单信息
 
 ```java
-      PayOrder payOrder = new PayOrder("订单title", "摘要",  new BigDecimal(0.01) , new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()));
+      PayOrder payOrder = new PayOrder("订单title", "摘要",  new BigDecimal(0.01) , new SimpleDateFormat("yyyyMMddHHmmss").format(System.currentTimeMillis()));
 ``` 
 
 #### 主扫申请二维码交易
@@ -69,19 +69,20 @@
 
 ```java
        payOrder.setTransactionType(UnionTransactionType.CONSUME);
-       params =   service.microPay(payOrder);
+       payOrder.setAuthCode("C2B码(条码号),1-20位数字");
+       Map<String, Object> params =   service.microPay(payOrder);
 ``` 
 #### 消费撤销
 
 ```java
-       params =   service.unionRefundOrConsumeUndo("原交易查询流水号", "订单号", new BigDecimal("退款金额" ),UnionTransactionType.CONSUME_UNDO);
+       Map<String, Object> params =   service.unionRefundOrConsumeUndo("原交易查询流水号", "订单号", new BigDecimal("退款金额" ),UnionTransactionType.CONSUME_UNDO);
   
 ``` 
 #### 交易状态查询交易：只有同步应答
   
   ```java
        payOrder.setTransactionType(UnionTransactionType.QUERY);
-       params =   service.query(null,"商户单号");
+       Map<String, Object> params =   service.query(null,"商户单号");
     
 ``` 
 
@@ -90,7 +91,7 @@
   
   ```java
        payOrder.setTransactionType(UnionTransactionType.REFUND);
-       params =   service.refund("原交易查询流水号", "订单号", null,new BigDecimal("退款金额" ));
+       Map<String, Object> params =   service.refund("原交易查询流水号", "订单号", null,new BigDecimal("退款金额" ));
     
 ``` 
 
