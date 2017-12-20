@@ -1,6 +1,7 @@
 package com.egzosn.pay.common.api;
 
 import com.egzosn.pay.common.bean.MsgType;
+import com.egzosn.pay.common.util.sign.CertDescriptor;
 
 import java.util.concurrent.locks.Lock;
 
@@ -14,6 +15,17 @@ import java.util.concurrent.locks.Lock;
  */
  public interface PayConfigStorage {
 
+    /**
+     * 获取证书解释器
+     * @return 证书解释器
+     */
+     CertDescriptor getCertDescriptor();
+
+    /**
+     * 获取私钥证书密码
+     * @return 私钥证书密码
+     */
+    String getKeyPrivateCertPwd();
     /**
      *  应用id
      *  @return 应用id

@@ -151,10 +151,10 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
             return this;
         }
         if (request instanceof Map) {
-            StringEntity entity = new StringEntity(getMapToParameters((Map) request), Consts.UTF_8);
+            StringEntity entity = new StringEntity(getMapToParameters((Map) request), ContentType.APPLICATION_FORM_URLENCODED);
             setEntity(entity);
         } else if (request instanceof String) {
-            StringEntity entity = new StringEntity((String) request, Consts.UTF_8);
+            StringEntity entity = new StringEntity((String) request,  ContentType.APPLICATION_FORM_URLENCODED);
             setEntity(entity);
         } else {
             StringEntity entity = new StringEntity(JSON.toJSONString(request), ContentType.APPLICATION_JSON);

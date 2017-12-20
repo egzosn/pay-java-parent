@@ -63,7 +63,7 @@ public interface PayService {
      * 签名校验
      *
      * @param params 参数集
-     * @param sign   签名
+     * @param sign   签名原文
      * @return 签名校验 true通过
      */
     boolean signVerify(Map<String, Object> params, String sign);
