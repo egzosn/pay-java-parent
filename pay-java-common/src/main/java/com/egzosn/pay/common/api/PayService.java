@@ -85,7 +85,7 @@ public interface PayService {
      * @return 订单信息
      * @see PayOrder 支付订单信息
      */
-    Map orderInfo(PayOrder order);
+    Map<String, Object>  orderInfo(PayOrder order);
 
     /**
      * 创建签名
