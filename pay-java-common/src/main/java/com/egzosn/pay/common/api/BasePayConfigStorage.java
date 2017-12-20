@@ -86,7 +86,7 @@ public abstract class BasePayConfigStorage implements PayConfigStorage{
      */
     private boolean isCertSign = false;
 
-
+    @Override
     public CertDescriptor getCertDescriptor() {
         if (!isCertSign){
            throw new PayErrorException(new PayException("certDescriptor fail", "isCertSign is false"));
@@ -105,7 +105,7 @@ public abstract class BasePayConfigStorage implements PayConfigStorage{
     public void setKeyPrivate(String keyPrivate) {
         this.keyPrivate = keyPrivate;
     }
-
+    @Override
     public String getKeyPrivateCertPwd() {
         return keyPrivateCertPwd;
     }
