@@ -7,7 +7,7 @@
 
 开发版 https://git.oschina.net/egzosn/pay-java-parent/tree/develop
 
-##### 详细文档请看 [wiki](https://gitee.com/egzosn/pay-java-parent/wikis/Home)
+##### 详细文档请看 [wiki](https://gitee.com/egzosn/pay-java-parent/wikis/Home)。
 
 ### 特性
 
@@ -63,6 +63,7 @@
  
  [友店微信](pay-java-wx-youdian?dir=1&filepath=pay-java-youdian)
  [富友](pay-java-fuiou?dir=1&filepath=pay-java-fuiou)
+ [银联](pay-java-union?dir=1&filepath=pay-java-union)
 
 支付整合》服务端+网页端详细使用与简单教程请看 [pay-java-demo](pay-java-demo?dir=1&filepath=pay-java-demo)
 
