@@ -7,7 +7,6 @@ import com.egzosn.pay.union.bean.UnionTransactionType;
 import java.awt.image.BufferedImage;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Map;
 
 /**
@@ -21,9 +20,14 @@ public class PayTest {
 
 
         UnionPayConfigStorage unionPayConfigStorage = new UnionPayConfigStorage();
+        //是否为证书签名
+        unionPayConfigStorage.setCertSign(true);
+        //商户id
         unionPayConfigStorage.setMerId("商户id");
-        unionPayConfigStorage.setKeyPublic("公钥，验签证书链格式： 中级证书路径;根证书路径");
-        unionPayConfigStorage.setKeyPrivate("私钥, 私钥证书格式： 私钥证书路径;私钥证书对应的密码");
+        //公钥，验签证书链格式： 中级证书路径;根证书路径
+        unionPayConfigStorage.setKeyPublic("D:/certs/acp_test_middle.cer;D:/certs/acp_test_root.cer");
+        //私钥, 私钥证书格式： 私钥证书路径;私钥证书对应的密码
+        unionPayConfigStorage.setKeyPrivate("D:/certs/acp_test_sign.pfx;000000");
         unionPayConfigStorage.setNotifyUrl("异步回调地址");
         unionPayConfigStorage.setReturnUrl("同步回调地址");
         unionPayConfigStorage.setSignType("RSA2");
@@ -36,8 +40,13 @@ public class PayTest {
         PayOrder payOrder = new PayOrder("订单title", "摘要",  new BigDecimal(0.01) , new SimpleDateFormat("yyyyMMddHHmmss").format(System.currentTimeMillis()));
 
 
-        /*----------- 网关支付-------------------*/
+        /*----------- 网页支付-------------------*/
+//        手机网页支付（WAP支付）
+//        payOrder.setTransactionType(UnionTransactionType.WAP);
+//        网关支付
         payOrder.setTransactionType(UnionTransactionType.WEB);
+//        企业网银支付（B2B支付）
+//        payOrder.setTransactionType(UnionTransactionType.B2B);
         //获取支付所需的信息
         Map directOrderInfo = service.orderInfo(payOrder);
         //获取表单提交对应的字符串，将其序列化到页面即可,
@@ -74,8 +83,7 @@ public class PayTest {
 
 
         /*-----------文件传输类接口：后台获取对账文件交易，只有同步应答 ------------------------------*/
-        String fileConten =   service.downloadbill(new Date(),"格式为MMDD");
-        /*-----------退货交易：后台资金类交易，有同步应答和后台通知应答------------------------------*/
+        String fileConten =   service.downloadbill(null,"文件类型，一般商户填写00即可");      /*-----------退货交易：后台资金类交易，有同步应答和后台通知应答------------------------------*/
 
 
          /*-----------回调处理-------------------*/

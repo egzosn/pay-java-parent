@@ -111,7 +111,7 @@ public class PayResponse {
                 .handler(autowire(new FuiouPayMessageHandler(payId)))
                 .end()
                 .rule()
-                .msgType(MsgType.text.name())
+                .msgType(MsgType.json.name())
                 .payType(PayType.unionPay.name())
                 .handler(autowire(new UnionPayMessageHandler(payId)))
                 .end()
