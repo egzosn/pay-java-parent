@@ -182,7 +182,7 @@ public class UnionPayService extends BasePayService {
      * @see PayOrder 支付订单信息
      */
     @Override
-    public Map orderInfo (PayOrder order) {
+    public Map<String, Object>  orderInfo (PayOrder order) {
         Map<String, Object> params = this.getCommonParam();
 
         UnionTransactionType type =  (UnionTransactionType)order.getTransactionType();
@@ -315,7 +315,7 @@ public class UnionPayService extends BasePayService {
      */
     @Override
     public BufferedImage genQrPay (PayOrder order)  {
-        Map<String ,String> params = orderInfo(order);
+        Map<String ,Object> params = orderInfo(order);
         String responseStr =  getHttpRequestTemplate().postForObject(this.getBackTransUrl(),params,String.class);
         Map<String ,Object> response = UriVariables.getParametersToMap(responseStr);
         if(response.isEmpty()){
