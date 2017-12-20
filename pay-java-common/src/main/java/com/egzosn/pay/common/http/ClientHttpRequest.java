@@ -32,6 +32,10 @@ import static com.egzosn.pay.common.http.UriVariables.getMapToParameters;
  *  </pre>
  */
 public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase implements  org.apache.http.client.ResponseHandler<T>{
+
+    public static final ContentType APPLICATION_FORM_URLENCODED_UTF_8 = ContentType.create("application/x-www-form-urlencoded", Consts.UTF_8);;
+
+
     /**
      * http请求方式 get pos
      */
@@ -151,13 +155,13 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
             return this;
         }
         if (request instanceof Map) {
-            StringEntity entity = new StringEntity(getMapToParameters((Map) request), ContentType.APPLICATION_FORM_URLENCODED);
+            StringEntity entity = new StringEntity(getMapToParameters((Map) request), APPLICATION_FORM_URLENCODED_UTF_8);
             setEntity(entity);
         } else if (request instanceof String) {
-            StringEntity entity = new StringEntity((String) request,  ContentType.APPLICATION_FORM_URLENCODED);
+            StringEntity entity = new StringEntity((String) request,  APPLICATION_FORM_URLENCODED_UTF_8);
             setEntity(entity);
         } else {
-            StringEntity entity = new StringEntity(JSON.toJSONString(request), ContentType.APPLICATION_JSON);
+            StringEntity entity = new StringEntity(JSON.toJSONString(request), APPLICATION_FORM_URLENCODED_UTF_8);
             setEntity(entity);
         }
 
