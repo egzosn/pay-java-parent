@@ -7,6 +7,7 @@ import com.egzosn.pay.union.bean.UnionTransactionType;
 import java.awt.image.BufferedImage;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 
 /**
@@ -83,7 +84,7 @@ public class PayTest {
 
 
         /*-----------文件传输类接口：后台获取对账文件交易，只有同步应答 ------------------------------*/
-        String fileConten =   service.downloadbill(null,"文件类型，一般商户填写00即可");      /*-----------退货交易：后台资金类交易，有同步应答和后台通知应答------------------------------*/
+        String fileConten =   service.downloadbill(new Date(),"文件类型，一般商户填写00即可");      /*-----------退货交易：后台资金类交易，有同步应答和后台通知应答------------------------------*/
 
 
          /*-----------回调处理-------------------*/

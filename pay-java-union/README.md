@@ -114,7 +114,7 @@
 #### 文件传输类接口：后台获取对账文件交易，只有同步应答
  
  ```java
-       String fileConten =   service.downloadbill(null,"文件类型，一般商户填写00即可"); 
+       String fileConten =   service.downloadbill("清算日期格式MMDD","文件类型，一般商户填写00即可"); 
 ``` 
 
        
