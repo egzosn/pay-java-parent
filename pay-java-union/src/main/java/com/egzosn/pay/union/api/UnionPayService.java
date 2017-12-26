@@ -616,9 +616,11 @@ public class UnionPayService extends BasePayService {
     public <T> T downloadbill (Date billDate, String billType, Callback<T> callback) {
         Map<String ,Object > params = this.getCommonParam();
         UnionTransactionType.FILE_TRANSFER.convertMap(params);
-        DateFormat df = new SimpleDateFormat("MMDD");
-        params.put(SDKConstants.param_settleDate,df.format(billDate));
+        DateFormat df = new SimpleDateFormat("MMdd");
+        params.put(SDKConstants.param_settleDate,df);
         params.put(SDKConstants.param_fileType,billType);
+        params.remove(SDKConstants.param_backUrl);
+        params.remove(SDKConstants.param_currencyCode);
         this.setSign(params);
         String responseStr =  getHttpRequestTemplate().postForObject(this.getFileTransUrl(),params,String.class);
         JSONObject response =  UriVariables.getParametersToMap(responseStr);

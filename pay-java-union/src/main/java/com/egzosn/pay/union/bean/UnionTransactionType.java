@@ -53,7 +53,7 @@ public enum UnionTransactionType implements TransactionType{
     //查询
     QUERY("00","00","000201",""),
     //对账文件下载
-    FILE_TRANSFER("00","00","000201","")
+    FILE_TRANSFER("76","01","000000","")
     ;
 
     /**
