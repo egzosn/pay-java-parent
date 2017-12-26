@@ -68,7 +68,7 @@
 
 支付整合》服务端+网页端详细使用与简单教程请看 [pay-java-demo](pay-java-demo?dir=1&filepath=pay-java-demo)
 
-android 例子 [pay-java-android](/egzosn/pay-java-android)
+android 例子 [pay-java-android](https://gitee.com/egzosn/pay-java-android)
 
 
 
