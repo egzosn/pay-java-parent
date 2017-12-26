@@ -49,25 +49,27 @@
 </dependency>
 
 ```
-
+#### 本项目在以下代码托管网站
+* 码云：https://gitee.com/egzosn/pay-java-parent
+* GitHub：https://github.com/egzosn/pay-java-parent
 
 
 ### 使用
-这里不多说直接上代码  集群的话,友店可能会有bug。
+这里不多说直接上代码 
 
 测试链接 ： http://pay.egzosn.com/index.html
 
 ###### 单一支付教程 
 
- [基础模块支付宝微信讲解](https://gitee.com/egzosn/pay-java-parent/wikis/Home)
- 
- [友店微信](pay-java-wx-youdian?dir=1&filepath=pay-java-youdian)
- [富友](pay-java-fuiou?dir=1&filepath=pay-java-fuiou)
- [银联](pay-java-union?dir=1&filepath=pay-java-union)
+ * [基础模块支付宝微信讲解](https://gitee.com/egzosn/pay-java-parent/wikis/Home)
+ * [友店微信](pay-java-wx-youdian?dir=1&filepath=pay-java-youdian)
+ * [富友](pay-java-fuiou?dir=1&filepath=pay-java-fuiou)
+ * [银联](pay-java-union?dir=1&filepath=pay-java-union)
 
 支付整合》服务端+网页端详细使用与简单教程请看 [pay-java-demo](pay-java-demo?dir=1&filepath=pay-java-demo)
 
-android 例子 [pay-java-android](http://git.oschina.net/egzosn/pay-java-android)
+android 例子 [pay-java-android](/egzosn/pay-java-android)
+
 
 
 ## 交流
