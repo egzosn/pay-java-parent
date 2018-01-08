@@ -4,8 +4,8 @@ package com.egzosn.pay.common.util.sign.encrypt;
 import com.egzosn.pay.common.util.str.StringUtils;
 import org.apache.commons.codec.digest.DigestUtils;
 
-import java.io.UnsupportedEncodingException;
-import java.security.SignatureException;
+
+import static com.egzosn.pay.common.util.str.StringUtils.getContentBytes;
 
 /**
  * MD5签名工具
@@ -42,20 +42,5 @@ public class MD5 {
 
 
 
-    /**
-     * @param content 需要加密串
-     * @param charset 字符集
-     * @return 加密后的字节数组
-     */
-    public static byte[] getContentBytes(String content, String charset) {
-        if (StringUtils.isEmpty(charset)) {
-            return content.getBytes();
-        }
-        try {
-            return content.getBytes(charset);
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException("MD5签名过程中出现错误,指定的编码集不对,您目前指定的编码集是:" + charset);
-        }
-    }
 
 }

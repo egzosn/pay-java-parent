@@ -3,7 +3,7 @@ package com.egzosn.pay.wx.api;
 import com.egzosn.pay.common.api.BasePayConfigStorage;
 
 /**
- * 支付客户端配置存储
+ * 微信配置存储
  * @author  egan
  *
  * <pre>
@@ -14,20 +14,18 @@ import com.egzosn.pay.common.api.BasePayConfigStorage;
 public class WxPayConfigStorage extends BasePayConfigStorage {
 
 
-    public  String appSecret;
-    public  String appid ;
-    // 商户号 合作者id
-    public  String mchId;
+    /**
+     * 应用id
+     */
+    private   String appid ;
+    /**
+     *  商户号 合作者id
+     */
+    private  String mchId;
 
 
-    @Override
-    public String getSecretKey() {
-        return appSecret;
-    }
 
-    public void setAppSecret(String appSecret) {
-        this.appSecret = appSecret;
-    }
+
 
     @Override
     public String getAppid() {
@@ -38,22 +36,25 @@ public class WxPayConfigStorage extends BasePayConfigStorage {
         this.appid = appid;
     }
 
-    /**
-     * 合作商唯一标识
-     *  @see #getPid()  代替者
-     */
-    public String getPartner() {
-        return mchId;
-    }
+
+
 
     /**
      * 合作商唯一标识
-     * @see #getPartner()  代替者
      */
     @Override
     public String getPid() {
         return mchId;
     }
+
+
+    /**
+     * 合作商唯一标识
+     */
+    public void setPid(String mchId) {
+         this.mchId = mchId;
+    }
+
 
 
     @Override

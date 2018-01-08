@@ -6,10 +6,7 @@ import com.egzosn.pay.ali.bean.AliTransactionType;
 import com.egzosn.pay.common.api.BasePayService;
 import com.egzosn.pay.common.api.Callback;
 import com.egzosn.pay.common.api.PayConfigStorage;
-import com.egzosn.pay.common.bean.MethodType;
-import com.egzosn.pay.common.bean.PayOrder;
-import com.egzosn.pay.common.bean.PayOutMessage;
-import com.egzosn.pay.common.bean.TransactionType;
+import com.egzosn.pay.common.bean.*;
 import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpConfigStorage;
@@ -20,13 +17,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
- *  支付宝支付通知
+ *  支付宝支付服务
  * @author  egan
  *
  * email egzosn@gmail.com
@@ -36,11 +34,9 @@ public class AliPayService extends BasePayService {
     protected final Log log = LogFactory.getLog(AliPayService.class);
 
       //正式测试环境
-    private String httpsReqUrl = "https://openapi.alipay.com/gateway.do";
+    private final static String httpsReqUrl = "https://openapi.alipay.com/gateway.do";
     //沙箱测试环境账号
-    private String devReqUrl = "https://openapi.alipaydev.com/gateway.do";
-    //兼容上一版本即时收款
-    private String httpsReqUrlBefore = "https://mapi.alipay.com/gateway.do";
+    private final static String devReqUrl = "https://openapi.alipaydev.com/gateway.do";
 
 
     /**
@@ -92,6 +88,20 @@ public class AliPayService extends BasePayService {
      */
     @Override
     public boolean signVerify(Map<String, Object> params, String sign) {
+
+        if (params instanceof JSONObject){
+            for (String key : params.keySet()){
+                if ("sign".equals(key)){
+                    continue;
+                }
+                TreeMap response = new TreeMap((Map) params.get(key));
+                LinkedHashMap<Object, Object> linkedHashMap = new LinkedHashMap<>();
+                linkedHashMap.put("code", response.remove("code") );
+                linkedHashMap.put("msg", response.remove("msg") );
+                linkedHashMap.putAll(response);
+                return SignUtils.valueOf(payConfigStorage.getSignType()).verify(JSON.toJSONString(linkedHashMap),  sign,  payConfigStorage.getKeyPublic(), payConfigStorage.getInputCharset());
+            }
+        }
 
         return SignUtils.valueOf(payConfigStorage.getSignType()).verify(params,  sign,  payConfigStorage.getKeyPublic(), payConfigStorage.getInputCharset());
     }
@@ -153,11 +163,6 @@ public class AliPayService extends BasePayService {
      */
     private  Map<String, Object> getOrder(PayOrder order) {
 
-        //兼容上一版本 即时收款
-  /*      if (AliTransactionType.DIRECT == order.getTransactionType() || AliTransactionType.MOBILE == order.getTransactionType() || AliTransactionType.WAPPAY == order.getTransactionType()){
-            return getOrderBefore(order);
-        }
-*/
 
         Map<String, Object> orderInfo = getPublicParameters(order.getTransactionType());
 
@@ -166,21 +171,32 @@ public class AliPayService extends BasePayService {
 
 
         Map<String, Object> bizContent = new TreeMap<>();
-        if (order.getTransactionType() == AliTransactionType.WAP){
-            bizContent.put("product_code", "QUICK_WAP_PAY");
-            orderInfo.put("return_url", payConfigStorage.getReturnUrl());
-        }else if ("alipay.trade.pay".equals(order.getTransactionType().getMethod())){
-            bizContent.put("scene", order.getTransactionType().toString().toLowerCase());
-            bizContent.put("product_code", "FACE_TO_FACE_PAYMENT");
-            bizContent.put("auth_code", order.getAuthCode());
-        }else  if (order.getTransactionType() != AliTransactionType.SWEEPPAY){
-            bizContent.put("product_code", "QUICK_MSECURITY_PAY");
-        }
         bizContent.put("body", order.getBody());
         bizContent.put("seller_id", payConfigStorage.getSeller());
         bizContent.put("subject", order.getSubject());
         bizContent.put("out_trade_no", order.getOutTradeNo());
         bizContent.put("total_amount", order.getPrice().setScale(2, BigDecimal.ROUND_HALF_UP).toString());
+        switch ((AliTransactionType)order.getTransactionType()){
+            case DIRECT:
+                bizContent.put("product_code", "FAST_INSTANT_TRADE_PAY");
+                orderInfo.put("return_url", payConfigStorage.getReturnUrl());
+                break;
+            case WAP:
+                bizContent.put("product_code", "QUICK_WAP_PAY");
+                orderInfo.put("return_url", payConfigStorage.getReturnUrl());
+                break;
+            case BAR_CODE:
+            case WAVE_CODE:
+                bizContent.put("scene", order.getTransactionType().toString().toLowerCase());
+                bizContent.put("product_code", "FACE_TO_FACE_PAYMENT");
+                bizContent.put("auth_code", order.getAuthCode());
+                break;
+            default:
+                if (order.getTransactionType() != AliTransactionType.SWEEPPAY) {
+                    bizContent.put("product_code", "QUICK_MSECURITY_PAY");
+                }
+        }
+
         orderInfo.put("biz_content", JSON.toJSONString(bizContent));
         return orderInfo;
     }
@@ -197,94 +213,12 @@ public class AliPayService extends BasePayService {
         orderInfo.put("charset", payConfigStorage.getInputCharset());
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         df.setTimeZone(TimeZone.getTimeZone("GMT+8"));
-//      DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         orderInfo.put("timestamp", df.format(new Date()));
         orderInfo.put("version", "1.0");
         return  orderInfo;
     }
 
-    /**
-     * 支付宝创建订单信息
-     * create the order info
-     *
-     * @param order 支付订单
-     * @return 返回过时的交易订单，兼容即时收款
-     * @see PayOrder 支付订单信息
-     */
-    private  Map<String, Object> getOrderBefore(PayOrder order) {
-        Map<String, Object> orderInfo = new TreeMap<>();
-        // 签约合作者身份ID
-        orderInfo.put("partner", payConfigStorage.getPid());
 
-        // 签约卖家支付宝账号
-        orderInfo.put("seller_id", payConfigStorage.getSeller());
-
-        // 商户网站唯一订单号
-        orderInfo.put("out_trade_no", order.getOutTradeNo());
-
-        // 商品名称
-        orderInfo.put("subject", order.getSubject());
-
-        // 商品详情
-        orderInfo.put("body", order.getBody());
-
-        // 商品金额
-        orderInfo.put("total_fee", order.getPrice().setScale(2, BigDecimal.ROUND_HALF_UP).toString() );
-
-        // 服务器异步通知页面路径
-        orderInfo.put("notify_url", payConfigStorage.getNotifyUrl() );
-
-        // 服务接口名称， 固定值
-        orderInfo.put("service",  order.getTransactionType().getType()  );
-
-        // 支付类型， 固定值
-        orderInfo.put("payment_type",  "1" );
-
-        // 参数编码， 固定值
-        orderInfo.put("_input_charset",  payConfigStorage.getInputCharset());
-
-        // 设置未付款交易的超时时间
-        // 默认30分钟，一旦超时，该笔交易就会自动被关闭。
-        // 取值范围：1m～15d。
-        // m-分钟，h-小时，d-天，1c-当天（无论交易何时创建，都在0点关闭）。
-        // 该参数数值不接受小数点，如1.5h，可转换为90m。
-        // TODO 2017/2/6 11:05 author: egan  目前写死，这一块建议配置
-        orderInfo.put("it_b_pay",  "30m");
-        // extern_token为经过快登授权获取到的alipay_open_id,带上此参数用户将使用授权的账户进行支付
-        //  orderInfo.put("extern_token", extern_token );
-        // 支付宝处理完请求后，当前页面跳转到商户指定页面的路径，可空
-        orderInfo.put("return_url", payConfigStorage.getReturnUrl());
-
-        // 调用银行卡支付，需配置此参数，参与签名， 固定值 （需要签约《无线银行卡快捷支付》才能使用）
-//        if (order.getTransactionType().getType())
-//          orderInfo.put("paymethod","expressGateway");
-
-        return orderInfo;
-    }
-
-
-    /**
-     * 将请求参数或者请求流转化为 Map
-     * @param parameterMap 请求参数
-     * @param is           请求流
-     * @return 获得回调的请求参数
-     */
-    @Override
-    public Map<String, Object> getParameter2Map(Map<String, String[]> parameterMap, InputStream is) {
-
-        Map<String, Object> params = new TreeMap<String, Object>();
-        for (Iterator iter = parameterMap.keySet().iterator(); iter.hasNext();) {
-            String name = (String) iter.next();
-            String[] values = parameterMap.get(name);
-            String valueStr = "";
-            for (int i = 0,len =  values.length; i < len; i++) {
-                valueStr += (i == len - 1) ?  values[i] : values[i] + ",";
-            }
-            params.put(name, valueStr);
-        }
-
-        return params;
-    }
 
     /**
      * 获取输出消息，用户返回给支付端
@@ -298,6 +232,17 @@ public class AliPayService extends BasePayService {
     }
 
     /**
+     * 获取成功输出消息，用户返回给支付端
+     * 主要用于拦截器中返回
+     * @param payMessage 支付回调消息
+     * @return 返回输出消息
+     */
+    @Override
+    public PayOutMessage successPayOutMessage(PayMessage payMessage) {
+        return PayOutMessage.TEXT().content("success").build();
+    }
+
+    /**
      *
      * @param orderInfo 发起支付的订单信息
      * @param method    请求方式  "post" "get",
@@ -305,38 +250,12 @@ public class AliPayService extends BasePayService {
      */
     @Override
     public String buildRequest(Map<String, Object> orderInfo, MethodType method) {
-
         StringBuffer formHtml = new StringBuffer();
         formHtml.append("<form id=\"_alipaysubmit_\" name=\"alipaysubmit\" action=\"");
-        if (null == orderInfo.get("method")) {
-            formHtml.append(httpsReqUrlBefore)
-                    .append("?_input_charset=")
-                    .append(payConfigStorage.getInputCharset())
-                    .append("\" method=\"")
-                    .append(method.name().toLowerCase()).append("\">");
-            for (String key : orderInfo.keySet()) {
-                Object o = orderInfo.get(key);
-                if (null == o || "null".equals(o) || "".equals(o)) {
-                    continue;
-                }
-
-                formHtml.append("<input type=\"hidden\" name=\"" + key + "\" value=\"" + orderInfo.get(key) + "\"/>");
-
-            }
-
-        } else {
-            String biz_content = (String)orderInfo.remove("biz_content");
-            formHtml.append(getReqUrl()).append("?").append(UriVariables.getMapToParameters(orderInfo))
-            .append("\" method=\"")
-                    .append(method.name().toLowerCase()).append("\">");
-
-            formHtml.append("<input type=\"hidden\" name=\"biz_content\" value=\"" + biz_content.replace("\"", "&quot;") + "\"/>");
-        }
-
-
-
-        //submit按钮控件请不要含有name属性
-//        formHtml.append("<input type=\"submit\" value=\"\" style=\"display:none;\">");
+        String biz_content = (String)orderInfo.remove("biz_content");
+        formHtml.append(getReqUrl()).append("?").append(UriVariables.getMapToParameters(orderInfo))
+        .append("\" method=\"").append(method.name().toLowerCase()).append("\">");
+        formHtml.append("<input type=\"hidden\" name=\"biz_content\" value=\'" + biz_content + "\'/>");
         formHtml.append("</form>");
         formHtml.append("<script>document.forms['_alipaysubmit_'].submit();</script>");
 
@@ -345,7 +264,6 @@ public class AliPayService extends BasePayService {
 
     /**
      * 生成二维码支付
-     * 暂未实现或无此功能
      * @param order 发起支付的订单信息
      * @return 返回图片信息，支付时需要的
      */
@@ -354,8 +272,7 @@ public class AliPayService extends BasePayService {
 
         Map<String, Object> orderInfo = orderInfo(order);
 
-//        Map<String, Object> content = new HashMap<>(1);
-//        content.put("biz_content", orderInfo.remove("biz_content"));
+
         //预订单
         JSONObject result = getHttpRequestTemplate().postForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(orderInfo), null, JSONObject.class);
         JSONObject response = result.getJSONObject("alipay_trade_precreate_response");

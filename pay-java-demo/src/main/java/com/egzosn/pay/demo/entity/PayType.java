@@ -6,12 +6,12 @@ import com.egzosn.pay.ali.bean.AliTransactionType;
 import com.egzosn.pay.common.api.PayService;
 import com.egzosn.pay.common.bean.BasePayType;
 import com.egzosn.pay.common.bean.TransactionType;
-import com.egzosn.pay.demo.service.handler.FuiouPayMessageHandler;
 import com.egzosn.pay.fuiou.api.FuiouPayConfigStorage;
 import com.egzosn.pay.fuiou.api.FuiouPayService;
 import com.egzosn.pay.fuiou.bean.FuiouTransactionType;
-import com.egzosn.pay.fuiou.api.FuiouPayConfigStorage;
-import com.egzosn.pay.fuiou.api.FuiouPayService;
+import com.egzosn.pay.union.api.UnionPayConfigStorage;
+import com.egzosn.pay.union.api.UnionPayService;
+import com.egzosn.pay.union.bean.UnionTransactionType;
 import com.egzosn.pay.wx.api.WxPayConfigStorage;
 import com.egzosn.pay.wx.api.WxPayService;
 import com.egzosn.pay.wx.bean.WxTransactionType;
@@ -42,7 +42,7 @@ public enum PayType implements BasePayType {
             AliPayConfigStorage aliPayConfigStorage = new AliPayConfigStorage();
             aliPayConfigStorage.setPid(apyAccount.getPartner());
             aliPayConfigStorage.setAppId(apyAccount.getAppid());
-            aliPayConfigStorage.setAliPublicKey(apyAccount.getPublicKey());
+            aliPayConfigStorage.setKeyPublic(apyAccount.getPublicKey());
             aliPayConfigStorage.setKeyPrivate(apyAccount.getPrivateKey());
             aliPayConfigStorage.setNotifyUrl(apyAccount.getNotifyUrl());
             aliPayConfigStorage.setReturnUrl(apyAccount.getReturnUrl());
@@ -69,11 +69,11 @@ public enum PayType implements BasePayType {
         public PayService getPayService(ApyAccount apyAccount) {
             WxPayConfigStorage wxPayConfigStorage = new WxPayConfigStorage();
             wxPayConfigStorage.setMchId(apyAccount.getPartner());
-            wxPayConfigStorage.setAppSecret(apyAccount.getPublicKey());
             wxPayConfigStorage.setKeyPublic(apyAccount.getPublicKey());
             wxPayConfigStorage.setAppid(apyAccount.getAppid());
             wxPayConfigStorage.setKeyPrivate(apyAccount.getPrivateKey());
             wxPayConfigStorage.setNotifyUrl(apyAccount.getNotifyUrl());
+            wxPayConfigStorage.setReturnUrl(apyAccount.getReturnUrl());
             wxPayConfigStorage.setSignType(apyAccount.getSignType());
             wxPayConfigStorage.setPayType(apyAccount.getPayType().toString());
             wxPayConfigStorage.setMsgType(apyAccount.getMsgType());
@@ -127,6 +127,7 @@ public enum PayType implements BasePayType {
         @Override
         public PayService getPayService(ApyAccount apyAccount) {
             FuiouPayConfigStorage fuiouPayConfigStorage = new FuiouPayConfigStorage();
+            fuiouPayConfigStorage.setKeyPublic(apyAccount.getPublicKey());
             fuiouPayConfigStorage.setKeyPrivate(apyAccount.getPrivateKey());
             fuiouPayConfigStorage.setNotifyUrl(apyAccount.getNotifyUrl());
             fuiouPayConfigStorage.setReturnUrl(apyAccount.getReturnUrl());
@@ -140,8 +141,32 @@ public enum PayType implements BasePayType {
 
         @Override
         public TransactionType getTransactionType(String transactionType) {
-            // in.egan.pay.ali.before.bean.AliTransactionType 17年更新的版本,旧版本请自行切换
             return FuiouTransactionType.valueOf(transactionType);
+        }
+
+
+    },unionPay{
+
+        @Override
+        public PayService getPayService(ApyAccount apyAccount) {
+            UnionPayConfigStorage unionPayConfigStorage = new UnionPayConfigStorage();
+            unionPayConfigStorage.setMerId(apyAccount.getPartner());
+            unionPayConfigStorage.setCertSign(true);
+            unionPayConfigStorage.setKeyPublic(apyAccount.getPublicKey());
+            unionPayConfigStorage.setKeyPrivate(apyAccount.getPrivateKey());
+            unionPayConfigStorage.setNotifyUrl(apyAccount.getNotifyUrl());
+            unionPayConfigStorage.setReturnUrl(apyAccount.getReturnUrl());
+            unionPayConfigStorage.setSignType(apyAccount.getSignType());
+            unionPayConfigStorage.setPayType(apyAccount.getPayType().toString());
+            unionPayConfigStorage.setMsgType(apyAccount.getMsgType());
+            unionPayConfigStorage.setInputCharset(apyAccount.getInputCharset());
+            unionPayConfigStorage.setTest(apyAccount.isTest());
+            return new UnionPayService(unionPayConfigStorage);
+        }
+
+        @Override
+        public TransactionType getTransactionType(String transactionType) {
+            return UnionTransactionType.valueOf(transactionType);
         }
 
 

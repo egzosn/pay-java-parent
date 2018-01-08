@@ -4,7 +4,11 @@ import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.common.http.HttpRequestTemplate;
 import com.egzosn.pay.common.util.sign.SignUtils;
 
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * 支付基础服务
@@ -27,6 +31,7 @@ public abstract class BasePayService implements PayService {
      * 设置支付配置
      * @param payConfigStorage 支付配置
      */
+    @Override
     public BasePayService setPayConfigStorage(PayConfigStorage payConfigStorage) {
         this.payConfigStorage = payConfigStorage;
         return this;
@@ -85,6 +90,37 @@ public abstract class BasePayService implements PayService {
         return  SignUtils.valueOf(payConfigStorage.getSignType()).sign(content, payConfigStorage.getKeyPrivate(),characterEncoding);
     }
 
+    /**
+     * 将请求参数或者请求流转化为 Map
+     *
+     * @param parameterMap 请求参数
+     * @param is           请求流
+     * @return 获得回调的请求参数
+     */
+    @Override
+    public Map<String, Object> getParameter2Map (Map<String, String[]> parameterMap, InputStream is) {
+
+        Map<String, Object> params = new TreeMap<String,Object>();
+        for (Iterator iter = parameterMap.keySet().iterator(); iter.hasNext();) {
+            String name = (String) iter.next();
+            String[] values = parameterMap.get(name);
+            String valueStr = "";
+            for (int i = 0,len =  values.length; i < len; i++) {
+                valueStr += (i == len - 1) ?  values[i] : values[i] + ",";
+            }
+            if (!valueStr.matches("\\w+")){
+                try {
+                    if(valueStr.equals(new String(valueStr.getBytes("iso8859-1"), "iso8859-1"))){
+                        valueStr=new String(valueStr.getBytes("iso8859-1"), payConfigStorage.getInputCharset());
+                    }
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+            }
+            params.put(name, valueStr);
+        }
+        return params;
+    }
 
 
 }

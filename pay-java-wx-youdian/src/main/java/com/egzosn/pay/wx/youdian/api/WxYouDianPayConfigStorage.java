@@ -11,20 +11,15 @@ import com.egzosn.pay.common.api.BasePayConfigStorage;
  */
 public class WxYouDianPayConfigStorage extends BasePayConfigStorage {
 
-    public volatile String secretKey;
-    //账号
+
+    /**
+     * 账号
+     */
     public volatile String seller;
 
 
 
-    public void setSecretKey(String secretKey) {
-        this.secretKey = secretKey;
-    }
 
-    @Override
-    public String getSecretKey() {
-        return secretKey;
-    }
 
 
     @Override
@@ -32,11 +27,6 @@ public class WxYouDianPayConfigStorage extends BasePayConfigStorage {
         return null;
     }
 
-
-    @Override
-    public String getPartner() {
-        return null;
-    }
 
     @Override
     public String getPid() {

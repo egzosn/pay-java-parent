@@ -26,9 +26,9 @@ public class ApyAccount {
     // 应用id
 //    @Column(name = "appid")
     private String appid;
-    //  支付公钥，sign_type只有单一key时public_key与private_key相等，比如sign_type=MD5的情况
+    //   支付平台公钥(签名校验使用)，sign_type只有单一key时public_key与private_key相等，比如sign_type=MD5的情况
     private String publicKey;
-    // 支付私钥
+    // 应用私钥(生成签名)
 //    @Column(name = "private_key")
     private String privateKey;
     // 异步回调地址
@@ -40,6 +40,15 @@ public class ApyAccount {
     // 收款账号
 //    @Column(name = "seller")
     private String seller;
+
+    //请求证书地址，请使用绝对路径
+//    @Column(name = "keystore_path")
+    private String keystorePath;
+    //证书对应的密码
+//    @Column(name = "store_password")
+    private String storePassword;
+
+
     // 签名类型
 //    @Column(name = "sign_type")
     private String signType;
@@ -154,6 +163,22 @@ public class ApyAccount {
 
     public boolean isTest() {
         return isTest;
+    }
+
+    public String getKeystorePath() {
+        return keystorePath;
+    }
+
+    public void setKeystorePath(String keystorePath) {
+        this.keystorePath = keystorePath;
+    }
+
+    public String getStorePassword() {
+        return storePassword;
+    }
+
+    public void setStorePassword(String storePassword) {
+        this.storePassword = storePassword;
     }
 
     public void setTest(boolean test) {

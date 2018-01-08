@@ -1,5 +1,6 @@
 package com.egzosn.pay.demo.service.handler;
 
+import com.alibaba.fastjson.JSON;
 import com.egzosn.pay.common.api.PayService;
 import com.egzosn.pay.common.bean.PayMessage;
 import com.egzosn.pay.common.bean.PayOutMessage;
@@ -23,12 +24,17 @@ public class YouDianPayMessageHandler extends BasePayMessageHandler {
     @Override
     public PayOutMessage handle(PayMessage payMessage, Map<String, Object> context, PayService payService) throws PayErrorException {
         //交易状态
-        if ("0000".equals(payMessage.getPayMessage().get("order_pay_code"))){
-            /////这里进行成功的处理
+        Map<String, Object> message = payMessage.getPayMessage();
+        //上下文对象中获取账单
+//        AmtApply amtApply = (AmtApply)context.get("amtApply");
+        //日志存储
+//        amtPaylogService.createAmtPaylogByCallBack(amtApply,  message.toString());
 
-            return PayOutMessage.JSON().content("order_pay_error","成功").build();
+        if ("SUCCESS".equals(message.get("return_code"))){
+            /////这里进行成功的处理，因没有返回金额
+
         }
 
-        return PayOutMessage.JSON().content("order_pay_error",payMessage.getPayMessage().get("order_pay_error")).build();
+        return  PayOutMessage.TEXT().content(JSON.toJSONString(message)).build();
     }
 }

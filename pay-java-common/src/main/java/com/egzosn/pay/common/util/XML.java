@@ -2,6 +2,8 @@ package com.egzosn.pay.common.util;
 
 
 import com.alibaba.fastjson.JSONObject;
+import com.egzosn.pay.common.bean.result.PayException;
+import com.egzosn.pay.common.exception.PayErrorException;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
@@ -38,9 +40,9 @@ public class XML {
         try (InputStream in = new ByteArrayInputStream(content.getBytes("UTF-8"))){
             return (JSONObject) inputStream2Map(in, null);
         } catch (IOException e) {
-            e.printStackTrace();
+             throw new PayErrorException(new PayException("IOException", e.getMessage()));
         }
-        return null;
+
 
     }
 
@@ -58,9 +60,8 @@ public class XML {
         try {
             return (JSONObject)inputStream2Map(in, null);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new PayErrorException(new PayException("IOException", e.getMessage()));
         }
-        return null;
 
 
     }
@@ -85,17 +86,17 @@ public class XML {
             while (it.hasNext()) {
                 Element e = (Element) it.next();
                 String k = e.getName();
-                String v = "";
+                Object v = "";
                 List children = e.getChildren();
                 if (children.isEmpty()) {
                     v = e.getTextNormalize();
                 } else {
-                    v = getChildrenText(children);
+                    v = getChildren(children);
                 }
                 m.put(k, v);
             }
         } catch (JDOMException e) {
-            e.printStackTrace();
+            throw new PayErrorException(new PayException("JDOMException", e.getMessage()));
         }
         return m;
     }
@@ -127,6 +128,32 @@ public class XML {
         }
 
         return sb.toString();
+    }
+
+    /**
+     * 获取子结点的xml
+     *
+     * @param children 集合
+     * @return String 子结点的xml
+     */
+    public static Object getChildren(List children) {
+        JSONObject json = new JSONObject();
+        if (!children.isEmpty()) {
+            Iterator it = children.iterator();
+            while (it.hasNext()) {
+                Element e = (Element) it.next();
+                String name = e.getName();
+                String value = e.getTextNormalize();
+                List list = e.getChildren();
+                if (!list.isEmpty()) {
+                    json.put(name, getChildren(list));
+                }else {
+                    json.put(name, value);
+                }
+            }
+        }
+
+        return json;
     }
 
     /**

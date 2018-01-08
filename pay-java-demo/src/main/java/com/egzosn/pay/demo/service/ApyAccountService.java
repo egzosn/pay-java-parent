@@ -23,7 +23,9 @@ public class ApyAccountService {
     @Resource
     private AutowireCapableBeanFactory spring;
 
-    //缓存
+    /**
+     * 缓存
+     */
     private final static Map<Integer, PayResponse> payResponses = new HashMap<Integer, PayResponse>();
 
     /**
@@ -42,7 +44,7 @@ public class ApyAccountService {
      */
     public PayResponse getPayResponse(Integer id) {
 
-        PayResponse payResponse = payResponses.get(id);
+        PayResponse payResponse = null;
         if (payResponse  == null) {
             ApyAccount apyAccount = dao.findByPayId(id);
             if (apyAccount == null) {

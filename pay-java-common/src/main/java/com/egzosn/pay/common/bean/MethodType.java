@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original huodull or egan.
+ * Copyright 2002-2017 the original  egan.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ package com.egzosn.pay.common.bean;
  *     email egzosn@gmail.com
  *     date 2017/2/7 9:52
  * </pre>
+ * 请求方式
  */
 public enum MethodType {
     GET, POST

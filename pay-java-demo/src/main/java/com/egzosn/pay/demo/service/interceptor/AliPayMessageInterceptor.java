@@ -17,13 +17,6 @@ import java.util.Map;
  */
 public class AliPayMessageInterceptor implements PayMessageInterceptor {
 
-    //支付账户id
-    private Integer payId;
-    public AliPayMessageInterceptor(Integer payId) {
-
-        this.payId = payId;
-    }
-
     /**
      * 拦截支付消息
      *
@@ -37,6 +30,26 @@ public class AliPayMessageInterceptor implements PayMessageInterceptor {
     public boolean intercept(PayMessage payMessage, Map<String, Object> context, PayService payService) throws PayErrorException {
 
         //这里进行拦截器处理，自行实现
+        String outTradeNo = payMessage.getOutTradeNo();
+        // 设置外部单号
+//        amtApplyService.fillApplyoutId(outTradeNo, (String) payMessage.getPayMessage().get("trade_no"));
+
+
+        //获取账单
+//        AmtApply amtApply = amtApplyService.getAmtApplyByApplyId(outTradeNo);
+//        if (null == amtApply){
+//            Log4jUtil.info("app 阿里pay：" + outTradeNo);
+//            return false;
+//        }
+//
+//        重复回调不进行处理
+//        if(amtApply.getApplyState().shortValue()== ApplyStateEnum.success.getCode()){
+//            return false;
+//        }
+        //将账单存储至上下文对象中
+//        context.put("amtApply", amtApply);
+
+
         return true;
     }
 }

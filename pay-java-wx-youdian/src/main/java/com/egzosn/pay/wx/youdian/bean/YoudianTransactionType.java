@@ -11,9 +11,13 @@ import com.egzosn.pay.common.bean.TransactionType;
  */
 public enum  YoudianTransactionType implements TransactionType {
 
-    //扫码付
+    /**
+     * 扫码付
+     */
     NATIVE("unifiedorder"),
-    //刷卡付
+    /**
+     * 刷卡付
+     */
     MICROPAY("micropay");//暂未接触
 
     private String method;

@@ -3,12 +3,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.api.BasePayService;
 import com.egzosn.pay.common.api.Callback;
 import com.egzosn.pay.common.api.PayConfigStorage;
-import com.egzosn.pay.common.bean.MethodType;
-import com.egzosn.pay.common.bean.PayOrder;
-import com.egzosn.pay.common.bean.PayOutMessage;
-import com.egzosn.pay.common.bean.TransactionType;
+import com.egzosn.pay.common.bean.*;
 import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpConfigStorage;
+import com.egzosn.pay.common.http.UriVariables;
 import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.str.StringUtils;
 import org.apache.commons.logging.Log;
@@ -22,8 +20,9 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
- * @author Fuzx
- * <pre>
+ * @author Actinia
+ * @email hayesfu@qq.com
+ *  <pre>
  * create 2017 2017/1/16 0016
  * </pre>
  */
@@ -33,19 +32,28 @@ public class FuiouPayService extends BasePayService {
     //正式域名
     public final static String URL_FuiouBaseDomain = "https://pay.fuiou.com/";
     //测试域名
-//    public final static String URL_FuiouBaseDomain = "http://www-1.fuiou.com:8888/wg1_run/";
+    public final static String DEV_URL_FUIOUBASEDOMAIN = "http://www-1.fuiou.com:8888/wg1_run/";
+
     //B2C/B2B支付
-    public final static String URL_FuiouSmpGate  = URL_FuiouBaseDomain + "smpGate.do";
+    public final static String URL_FuiouSmpGate  = "smpGate.do";
     //B2C/B2B支付(跨境支付)
-    public final static String URL_FuiouNewSmpGate = URL_FuiouBaseDomain + "newSmpGate.do";
+    public final static String URL_FuiouNewSmpGate = "newSmpGate.do";
     //订单退款
-    public final static String URL_FuiouSmpRefundGate = URL_FuiouBaseDomain + "newSmpRefundGate.do";
+    public final static String URL_FuiouSmpRefundGate = "newSmpRefundGate.do";
     //3.2	支付结果查询
-    public final static String URL_FuiouSmpQueryGate = URL_FuiouBaseDomain + "smpQueryGate.do";
+    public final static String URL_FuiouSmpQueryGate = "smpQueryGate.do";
     //3.3	支付结果查询(直接返回)
-    public final static String URL_FuiouSmpAQueryGate = URL_FuiouBaseDomain + "smpAQueryGate.do";
+    public final static String URL_FuiouSmpAQueryGate = "smpAQueryGate.do";
     //3.4订单退款
-    public final static String URL_NewSmpRefundGate = URL_FuiouBaseDomain +  "newSmpRefundGate.do";
+    public final static String URL_NewSmpRefundGate = "newSmpRefundGate.do";
+
+    /**
+     * 获取对应的请求地址
+     * @return 请求地址
+     */
+    public String getReqUrl(){
+        return payConfigStorage.isTest() ? DEV_URL_FUIOUBASEDOMAIN : URL_FuiouBaseDomain;
+    }
 
     /**
      * 构造函数，初始化时候使用
@@ -77,7 +85,7 @@ public class FuiouPayService extends BasePayService {
         }
         try {
             //返回参数校验  和 重新请求订单检查数据是否合法
-            return (signVerify(params, (String) params.get("md5")) && verifySource((String) params.get("order_id")));
+            return (signVerify(params, (String) params.remove("md5")) && verifySource((String) params.get("order_id")));
         } catch (PayErrorException e) {
             e.printStackTrace();
         }
@@ -92,27 +100,10 @@ public class FuiouPayService extends BasePayService {
      * @return 校验结果
      */
     @Override
-    public boolean signVerify (Map<String, Object> params, String responseSign) {
-        LinkedHashSet<String> keySet = new LinkedHashSet<>();
-        keySet.add("mchnt_cd");//商户代码
-        keySet.add("order_id");//商户订单号
-        keySet.add("order_date");//订单日期
-        keySet.add("order_amt");//交易金额
-        keySet.add("order_st");//订单状态
-        keySet.add("order_pay_code");//错误代码
-        keySet.add("order_pay_error");//错误中文描述
-        keySet.add("resv1");//保留字段
-        keySet.add("fy_ssn");//富友流水号
-        StringBuilder verifyMD5Str = new StringBuilder();
-        for (String keyStr : keySet) {
-            String keyValue = (String) params.get(keyStr);
-            if (null == keyValue){
-                log.debug(String.format("富友支付返回结果校验:<参数:%s>不能为空,",keyStr));
-            }
-            verifyMD5Str.append(keyValue).append("|");
-        }
-        String sign  = createSign(verifyMD5Str.deleteCharAt(verifyMD5Str.length() -1).toString(),payConfigStorage.getInputCharset());
-//        System.out.println("加密串"+verifyMD5Str+",,返回参数生成MD5="+sign+",,返回MD5摘要值"+returnSign);
+    public boolean signVerify(Map<String, Object> params, String responseSign) {
+
+        String sign = createSign(SignUtils.parameters2MD5Str(params, "|"), payConfigStorage.getInputCharset());
+
         return responseSign.equals(sign);
     }
 
@@ -123,14 +114,18 @@ public class FuiouPayService extends BasePayService {
      * @return 返回校验结果
      */
     @Override
-    public boolean verifySource (String order_id) {
-        LinkedHashMap<String ,Object> params = new LinkedHashMap<>();
-        params.put("mchnt_cd",payConfigStorage.getPid());
-        params.put("order_id",order_id);
-        params.put("md5",createSign(SignUtils.parameters2MD5Str(params,"|"),payConfigStorage.getInputCharset()));
-        JSONObject resultJson   = getHttpRequestTemplate().postForObject(URL_FuiouSmpAQueryGate,params,JSONObject.class);
-        return resultJson.getString("order_pay_code").equals("0000");
+    public boolean verifySource(String order_id) {
+        LinkedHashMap<String, Object> params = new LinkedHashMap<>();
+        params.put("mchnt_cd", payConfigStorage.getPid());
+        params.put("order_id", order_id);
+        params.put("md5", createSign(SignUtils.parameters2MD5Str(params, "|"), payConfigStorage.getInputCharset()));
+        JSONObject resultJson = getHttpRequestTemplate().postForObject(getReqUrl() + URL_FuiouSmpAQueryGate + "?" + UriVariables.getMapToParameters(params), null, JSONObject.class);
+        if (null == resultJson){
+            return false;
+        }
+        return "0000".equals(resultJson.getJSONObject("plain").getString("order_pay_code"));
     }
+
 
     /**
      * 将支付请求参数加密成md5
@@ -152,9 +147,9 @@ public class FuiouPayService extends BasePayService {
      */
     private LinkedHashMap<String, Object> getOrderInfo(PayOrder order) {
         LinkedHashMap<String, Object> parameters = new LinkedHashMap<String, Object>();
-        parameters.put("mchnt_cd", payConfigStorage.getPartner());//商户代码
-        parameters.put("order_id", order.getTradeNo());//商户订单号
-        parameters.put("order_amt", order.getPrice());//交易金额
+        parameters.put("mchnt_cd", payConfigStorage.getPid());//商户代码
+        parameters.put("order_id", order.getOutTradeNo());//商户订单号
+        parameters.put("order_amt", order.getPrice().multiply(new BigDecimal(100)).setScale( 0, BigDecimal.ROUND_HALF_UP).intValue());//交易金额
 //        parameters.put("cur_type", null == order.getCurType() ? FuiouCurType.CNY:order.getCurType());//交易币种
         parameters.put("order_pay_type", order.getTransactionType());//支付类型
         parameters.put("page_notify_url", payConfigStorage.getReturnUrl());//商户接受支付结果通知地址
@@ -162,8 +157,8 @@ public class FuiouPayService extends BasePayService {
         parameters.put("order_valid_time", "30m");//超时时间 1m-15天，m：分钟、h：小时、d天、1c当天有效，
         parameters.put("iss_ins_cd", order.getBankType());//银行代码
         parameters.put("goods_name", order.getSubject());
-        parameters.put("goods_display_url", "1");//商品展示网址 //非必填
-        parameters.put("rem", "1");//备注 //非必填
+        parameters.put("goods_display_url", "");//商品展示网址 //非必填
+        parameters.put("rem", "");//备注 //非必填
         parameters.put("ver", "1.0.1");//版本号
         return parameters;
     }
@@ -176,7 +171,7 @@ public class FuiouPayService extends BasePayService {
      */
     @Override
     public String createSign(String content, String characterEncoding) {
-        return SignUtils.valueOf(payConfigStorage.getSignType().toUpperCase()).createSign(content, "|" + payConfigStorage.getSecretKey(), characterEncoding);
+        return SignUtils.valueOf(payConfigStorage.getSignType().toUpperCase()).createSign(content, "|" + payConfigStorage.getKeyPrivate(), characterEncoding);
     }
 
     /**
@@ -187,7 +182,34 @@ public class FuiouPayService extends BasePayService {
      */
     @Override
     public Map<String, Object> getParameter2Map(Map<String, String[]> parameterMap, InputStream is) {
-        return null;
+        Map<String, Object> params  = conversion(parameterMap,  new LinkedHashMap<String, Object>(), "mchnt_cd");
+        conversion(parameterMap,  params, "order_id");
+        conversion(parameterMap,  params, "order_date");
+        conversion(parameterMap,  params, "order_amt");
+        conversion(parameterMap,  params, "order_st");
+        conversion(parameterMap,  params, "order_pay_code");
+        conversion(parameterMap,  params, "order_pay_error");
+        conversion(parameterMap,  params, "resv1");
+        conversion(parameterMap,  params, "fy_ssn");
+        conversion(parameterMap,  params, "md5");
+        return params;
+    }
+
+    /**
+     *  将parameterMap对应的key存放至params
+     * @param parameterMap 请求参数
+     * @param params 转化的对象
+     * @param key 需要取值的key
+     * @return params
+     */
+    public Map<String, Object> conversion(Map<String, String[]> parameterMap,  Map<String, Object> params ,String key){
+        String[] values = parameterMap.get(key);
+        String valueStr = "";
+        for (int i = 0,len =  values.length; i < len; i++) {
+            valueStr += (i == len - 1) ?  values[i] : values[i] + ",";
+        }
+        params.put(key, valueStr);
+        return params;
     }
 
     /**
@@ -201,6 +223,16 @@ public class FuiouPayService extends BasePayService {
     public PayOutMessage getPayOutMessage(String code, String message) {
         return PayOutMessage.TEXT().content(code.toLowerCase()).build();
     }
+    /**
+     * 获取成功输出消息，用户返回给支付端
+     * 主要用于拦截器中返回
+     * @param payMessage 支付回调消息
+     * @return 返回输出消息
+     */
+    @Override
+    public PayOutMessage successPayOutMessage(PayMessage payMessage) {
+        return PayOutMessage.TEXT().content("success").build();
+    }
 
     /**
      * 发送支付请求（form表单）
@@ -211,7 +243,7 @@ public class FuiouPayService extends BasePayService {
 
     @Override
     public String buildRequest(Map<String, Object> orderInfo, MethodType method) {
-        return getFormString(orderInfo, method,URL_FuiouSmpGate );
+        return getFormString(orderInfo, method,getReqUrl() + URL_FuiouSmpGate );
     }
 
     /**
@@ -244,27 +276,25 @@ public class FuiouPayService extends BasePayService {
      */
     private String getFormString(Map<String, Object> param, MethodType method,String url) {
         StringBuffer formHtml = new StringBuffer();
-
-        formHtml.append("<form id=\"fuiousubmit\" name=\"fuiousubmit\" action=\"")
-                .append(url)
-                .append("\" accept-charset=\"UTF-8\" onsubmit=\"document.charset='UTF-8';")
-//                .append( payConfigStorage.getInputCharset())
-                .append("\" method=\"")
-                .append(method.name().toLowerCase()).append("\">");
+        formHtml.append("<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">");
+        formHtml.append( "<title>提交到富友交易系统</title></head>");
+        formHtml.append( "<script type=\"text/javascript\">function submitForm()");
+        formHtml.append( "{document.getElementById(\"form\").submit();} </script>");
+        formHtml.append(  "<body onload=\"javascript:submitForm();\">");
+        formHtml.append(  "<form name=\"pay\" method=\""+method.name().toLowerCase()+"\" ");
+        formHtml.append(  "action=\""+url+"\" id = \"form\">");
 
         for (String key : param.keySet()) {
             Object o = param.get(key);
-            if (null == o || "null".equals(o) || "".equals(o)) {
-                continue;
-            }
-            formHtml.append("<input type=\"hidden\" name=\"" + key + "\" value=\"" + param.get(key) + "\"/>");
+
+
+            formHtml.append("<input type=\"hidden\" value = '"+o+"' name=\""+key+"\"/>");
         }
 
 
         //submit按钮控件请不要含有name属性
 //        formHtml.append("<input type=\"submit\" value=\"\" style=\"display:none;\">");
-        formHtml.append("</form>");
-        formHtml.append("<script>document.forms['fuiousubmit'].submit();</script>");
+        formHtml.append("</form></body></html>");
 
         return formHtml.toString();
     }
@@ -329,15 +359,15 @@ public class FuiouPayService extends BasePayService {
     @Override
     public Map<String, Object> refund (String tradeNo, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount) {
         Map<String ,Object> params = new HashMap<>();
-        params.put("mchnt_cd",payConfigStorage.getSecretKey());//商户代码
+        params.put("mchnt_cd",payConfigStorage.getPid());//商户代码
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
         df.setTimeZone(TimeZone.getTimeZone("GMT+8"));
         params.put("origin_order_date",df.format(new Date()));//原交易日期
         params.put("origin_order_id",tradeNo);//原订单号
-        params.put("refund_amt",refundAmount);//退款金额
+        params.put("refund_amt",refundAmount.multiply(new BigDecimal(100)).setScale( 0, BigDecimal.ROUND_HALF_UP).intValue());//退款金额
         params.put("rem","");//备注
         params.put("md5",createSign(SignUtils.parameters2MD5Str(params,"|"),payConfigStorage.getInputCharset()));
-        JSONObject resultJson   = getHttpRequestTemplate().postForObject(URL_FuiouSmpRefundGate,params,JSONObject.class);
+        JSONObject resultJson   = getHttpRequestTemplate().postForObject(getReqUrl() + URL_FuiouSmpRefundGate,params,JSONObject.class);
         //5341标识退款成功
         return resultJson;
 
@@ -422,6 +452,5 @@ public class FuiouPayService extends BasePayService {
     public <T> T secondaryInterface (Object tradeNoOrBillDate, String outTradeNoBillType, TransactionType transactionType, Callback<T> callback) {
         return null;
     }
-
 
 }

@@ -6,10 +6,7 @@ import com.egzosn.pay.ali.before.bean.AliTransactionType;
 import com.egzosn.pay.common.api.BasePayService;
 import com.egzosn.pay.common.api.Callback;
 import com.egzosn.pay.common.api.PayConfigStorage;
-import com.egzosn.pay.common.bean.MethodType;
-import com.egzosn.pay.common.bean.PayOrder;
-import com.egzosn.pay.common.bean.PayOutMessage;
-import com.egzosn.pay.common.bean.TransactionType;
+import com.egzosn.pay.common.bean.*;
 import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpConfigStorage;
@@ -36,11 +33,11 @@ import java.util.*;
  * @see com.egzosn.pay.ali.api.AliPayService
  */
 public class AliPayService extends BasePayService {
-    protected final Log log = LogFactory.getLog(AliPayService.class);
+    protected final Log LOG = LogFactory.getLog(AliPayService.class);
 
 
-    private String httpsReqUrl = "https://mapi.alipay.com/gateway.do";
-    private String queryReqUrl = "https://openapi.alipay.com/gateway.do";
+    private static final String HTTPS_REQ_URL = "https://mapi.alipay.com/gateway.do";
+    private static final String QUERY_REQ_URL = "https://openapi.alipay.com/gateway.do";
 
     public AliPayService(PayConfigStorage payConfigStorage) {
         super(payConfigStorage);
@@ -52,7 +49,7 @@ public class AliPayService extends BasePayService {
 
 
     public String getHttpsVerifyUrl() {
-        return httpsReqUrl + "?service=notify_verify";
+        return HTTPS_REQ_URL + "?service=notify_verify";
     }
 
     /**
@@ -65,14 +62,14 @@ public class AliPayService extends BasePayService {
     public boolean verify(Map<String, Object> params) {
 
         if (params.get("sign") == null || params.get("notify_id") == null) {
-            log.debug("支付宝支付异常：params：" + params);
+            LOG.debug("支付宝支付异常：params：" + params);
             return false;
         }
 
         try {
             return signVerify(params, (String) params.get("sign")) && verifySource((String) params.get("notify_id"));
         } catch (PayErrorException e) {
-            e.printStackTrace();
+            LOG.error(e);
         }
 
         return false;
@@ -85,7 +82,7 @@ public class AliPayService extends BasePayService {
      */
     @Override
     public boolean verifySource(String id) {
-        return "true".equals(requestTemplate.getForObject( getHttpsVerifyUrl() + "partner=" + payConfigStorage.getPid() + "&notify_id=" + id, String.class));
+        return "true".equals(requestTemplate.getForObject( getHttpsVerifyUrl() + "&partner=" + payConfigStorage.getPid() + "&notify_id=" + id, String.class));
     }
 
     /**
@@ -136,6 +133,7 @@ public class AliPayService extends BasePayService {
 
 
 
+
     /**
      * 返回创建的订单信息
      *
@@ -148,7 +146,12 @@ public class AliPayService extends BasePayService {
 
         Map<String, Object> orderInfo = getOrder(order);
 
-        String sign = createSign(orderInfo, "UTF-8");
+        String sign = null;
+        if (AliTransactionType.APP == order.getTransactionType() ){
+            sign = createSign(getOrderInfo(order), payConfigStorage.getInputCharset());
+        }else {
+            sign = createSign(orderInfo, payConfigStorage.getInputCharset());
+        }
 
         try {
             sign = URLEncoder.encode(sign, "UTF-8");
@@ -157,6 +160,22 @@ public class AliPayService extends BasePayService {
         }
         orderInfo.put("sign", sign);
         orderInfo.put("sign_type", payConfigStorage.getSignType());
+        return orderInfo;
+    }
+
+    private String getOrderInfo(PayOrder order) {
+        String orderInfo = "partner=\"" + this.payConfigStorage.getPid() + "\"";
+        orderInfo = orderInfo + "&seller_id=\"" + this.payConfigStorage.getSeller() + "\"";
+        orderInfo = orderInfo + "&out_trade_no=\"" + order.getOutTradeNo() + "\"";
+        orderInfo = orderInfo + "&subject=\"" + order.getSubject() + "\"";
+        orderInfo = orderInfo + "&body=\"" + order.getBody() + "\"";
+        orderInfo = orderInfo + "&total_fee=\"" + order.getPrice().setScale(2, BigDecimal.ROUND_HALF_UP).toString()  + "\"";
+        orderInfo = orderInfo + "&notify_url=\"" + this.payConfigStorage.getNotifyUrl() + "\"";
+        orderInfo = orderInfo + "&service=\"mobile.securitypay.pay\"";
+        orderInfo = orderInfo + "&payment_type=\"1\"";
+        orderInfo = orderInfo + "&_input_charset=\""+ payConfigStorage.getInputCharset()+"\"";
+        orderInfo = orderInfo + "&it_b_pay=\"30m\"";
+        orderInfo = orderInfo + "&return_url=\""+payConfigStorage.getReturnUrl()+"\"";
         return orderInfo;
     }
 
@@ -171,7 +190,7 @@ public class AliPayService extends BasePayService {
     private  Map<String, Object> getOrder(PayOrder order) {
         Map<String, Object> orderInfo = new TreeMap<>();
         // 签约合作者身份ID
-        orderInfo.put("partner", payConfigStorage.getPartner());
+        orderInfo.put("partner", payConfigStorage.getPid());
         // 签约卖家支付宝账号
         orderInfo.put("seller_id", payConfigStorage.getSeller());
         // 商户网站唯一订单号
@@ -228,6 +247,15 @@ public class AliPayService extends BasePayService {
             }
             //乱码解决，这段代码在出现乱码时使用。如果mysign和sign不相等也可以使用这段代码转化
             //valueStr = new String(valueStr.getBytes("ISO-8859-1"), "gbk");
+            if (!valueStr.matches("\\w+")){
+                try {
+                    if(valueStr.equals(new String(valueStr.getBytes("iso8859-1"), "iso8859-1"))){
+                        valueStr=new String(valueStr.getBytes("iso8859-1"), payConfigStorage.getInputCharset());
+                    }
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+            }
             params.put(name, valueStr);
         }
 
@@ -244,6 +272,19 @@ public class AliPayService extends BasePayService {
     public PayOutMessage getPayOutMessage(String code, String message) {
         return PayOutMessage.TEXT().content(code.toLowerCase()).build();
     }
+
+    /**
+     * 获取成功输出消息，用户返回给支付端
+     * 主要用于拦截器中返回
+     * @param payMessage 支付回调消息
+     * @return 返回输出消息
+     */
+    @Override
+    public PayOutMessage successPayOutMessage(PayMessage payMessage) {
+        return PayOutMessage.TEXT().content("success").build();
+    }
+
+
     /**
      * 获取输出消息，用户返回给支付端, 针对于web端
      *
@@ -258,7 +299,7 @@ public class AliPayService extends BasePayService {
         StringBuffer formHtml = new StringBuffer();
 
         formHtml.append("<form id=\"_alipaysubmit_\" name=\"alipaysubmit\" action=\"" )
-                .append( httpsReqUrl)
+                .append( HTTPS_REQ_URL)
                 .append(  "?_input_charset=" )
                 .append( payConfigStorage.getInputCharset())
                 .append( "\" method=\"")
@@ -406,7 +447,7 @@ public class AliPayService extends BasePayService {
         parameters.put("biz_content", JSON.toJSONString(bizContent));
         //设置签名
         setSign(parameters);
-        return  callback.perform(requestTemplate.getForObject(queryReqUrl + "?" + UriVariables.getMapToParameters(parameters), JSONObject.class));
+        return  callback.perform(requestTemplate.getForObject(QUERY_REQ_URL + "?" + UriVariables.getMapToParameters(parameters), JSONObject.class));
     }
 
     /**
@@ -480,7 +521,7 @@ public class AliPayService extends BasePayService {
         parameters.put("biz_content", JSON.toJSONString(bizContent));
         //设置签名
         setSign(parameters);
-        return callback.perform(requestTemplate.getForObject(queryReqUrl + "?" + UriVariables.getMapToParameters(parameters), JSONObject.class));
+        return callback.perform(requestTemplate.getForObject(QUERY_REQ_URL + "?" + UriVariables.getMapToParameters(parameters), JSONObject.class));
     }
 
     /**
@@ -512,7 +553,7 @@ public class AliPayService extends BasePayService {
         parameters.put("biz_content", getContentToJson(tradeNoOrBillDate.toString(), outTradeNoBillType));
         //设置签名
         setSign(parameters);
-        return  callback.perform(requestTemplate.getForObject(queryReqUrl + "?" + UriVariables.getMapToParameters(parameters), JSONObject.class));
+        return  callback.perform(requestTemplate.getForObject(QUERY_REQ_URL + "?" + UriVariables.getMapToParameters(parameters), JSONObject.class));
 
     }
 

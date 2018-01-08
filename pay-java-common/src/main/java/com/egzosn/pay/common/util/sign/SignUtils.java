@@ -39,6 +39,7 @@ public enum SignUtils {
          * @param characterEncoding 编码格式
          * @return 签名结果
          */
+        @Override
         public boolean verify(String text, String sign, String key, String characterEncoding) {
             return com.egzosn.pay.common.util.sign.encrypt.MD5.verify(text, sign, key, characterEncoding);
         }
@@ -57,6 +58,39 @@ public enum SignUtils {
     },
 
     RSA2 {
+        @Override
+        public String createSign(String content, String key, String characterEncoding) {
+            return com.egzosn.pay.common.util.sign.encrypt.RSA2.sign(content, key, characterEncoding);
+        }
+
+        @Override
+        public boolean verify(String text, String sign, String publicKey, String characterEncoding) {
+            return com.egzosn.pay.common.util.sign.encrypt.RSA2.verify(text, sign, publicKey, characterEncoding);
+        }
+    },
+    SHA1 {
+        @Override
+        public String createSign(String content, String key, String characterEncoding) {
+            return com.egzosn.pay.common.util.sign.encrypt.SHA1.sign(content, key, characterEncoding);
+        }
+
+        @Override
+        public boolean verify(String text, String sign, String publicKey, String characterEncoding) {
+            return com.egzosn.pay.common.util.sign.encrypt.SHA1.verify(text, sign, publicKey, characterEncoding);
+        }
+    },
+    SHA256 {
+        @Override
+        public String createSign(String content, String key, String characterEncoding) {
+            return com.egzosn.pay.common.util.sign.encrypt.SHA256.sign(content, key, characterEncoding);
+        }
+
+        @Override
+        public boolean verify(String text, String sign, String publicKey, String characterEncoding) {
+            return com.egzosn.pay.common.util.sign.encrypt.SHA256.verify(text, sign, publicKey, characterEncoding);
+        }
+    },
+    SM3 {
         @Override
         public String createSign(String content, String key, String characterEncoding) {
             return com.egzosn.pay.common.util.sign.encrypt.RSA2.sign(content, key, characterEncoding);
@@ -87,7 +121,7 @@ public enum SignUtils {
      * @return 去掉空值与签名参数后的新签名，拼接后字符串
      */
     public static String parameterText(Map parameters, String separator) {
-        return parameterText(parameters, separator, "sign", "key", "appId", "sign_type");
+        return parameterText(parameters, separator, "signature", "sign", "key", "sign_type");
     }
 
     /**
@@ -166,15 +200,12 @@ public enum SignUtils {
             Set<String >  keys = (Set<String>) ((LinkedHashMap)parameters).keySet();
             for(String key : keys){
                 String val = ((LinkedHashMap)parameters).get(key).toString();
-                if(StringUtils.isNotBlank(val)){
-                    sb.append(val).append(separator);
-                }
+                sb.append(val).append(separator);
+
             }
         }else if(parameters instanceof List){
             for(BasicNameValuePair bnv :((List<BasicNameValuePair>)parameters) ){
-                if(StringUtils.isNotBlank(bnv.getValue())){
                     sb.append(bnv.getValue()).append(separator);
-                }
             }
         }
 

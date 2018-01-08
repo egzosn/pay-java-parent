@@ -32,9 +32,17 @@ import static com.egzosn.pay.common.http.UriVariables.getMapToParameters;
  *  </pre>
  */
 public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase implements  org.apache.http.client.ResponseHandler<T>{
-    //http请求
+
+    public static final ContentType APPLICATION_FORM_URLENCODED_UTF_8 = ContentType.create("application/x-www-form-urlencoded", Consts.UTF_8);;
+
+
+    /**
+     * http请求方式 get pos
+     */
     private MethodType method;
-    //响应类型
+    /**
+     *  响应类型
+     */
     private Class<T> responseType;
 
 
@@ -43,40 +51,80 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
         return this;
     }
 
+    /**
+     * 空构造
+     */
     public ClientHttpRequest() {
     }
 
+    /**
+     *  根据请求地址 请求方法，请求内容对象
+     * @param uri 请求地址
+     * @param method  请求方法
+     * @param request 请求内容
+     */
     public ClientHttpRequest(URI uri, MethodType method, Object request) {
-        this.setURI(uri);
-        this.method = method;
+       this(uri, method);
         setParameters(request);
     }
+    /**
+     * 根据请求地址 请求方法
+     * @param uri 请求地址
+     * @param method  请求方法
+     */
     public ClientHttpRequest(URI uri, MethodType method) {
         this.setURI(uri);
         this.method = method;
     }
+
+    /**
+     * 根据请求地址
+     * @param uri  请求地址
+     */
     public ClientHttpRequest(URI uri) {
         this.setURI(uri);
     }
-
+    /**
+     * 根据请求地址
+     * @param uri  请求地址
+     */
     public ClientHttpRequest(String uri) {
         this.setURI(URI.create(uri));
     }
+    /**
+     * 根据请求地址 请求方法
+     * @param uri 请求地址
+     * @param method  请求方法
+     */
     public ClientHttpRequest(String uri, MethodType method) {
         this.setURI(URI.create(uri));
         this.method = method;
     }
-
+    /**
+     *  根据请求地址 请求方法，请求内容对象
+     * @param uri 请求地址
+     * @param method  请求方法
+     * @param request 请求内容
+     */
     public ClientHttpRequest(String uri, MethodType method, Object request) {
-        this.setURI(URI.create(uri));
-        this.method = method;
+        this(uri, method);
         setParameters(request);
     }
 
+    /**
+     * 设置请求方式
+     *
+     * @param method 请求方式
+     * {@link com.egzosn.pay.common.bean.MethodType} 请求方式
+     */
     public void setMethod(MethodType method) {
         this.method = method;
     }
 
+    /**
+     * 获取请求方式
+     * @return 请求方式
+     */
     @Override
     public String getMethod() {
         return method.name();
@@ -106,11 +154,13 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
         if (null == request){
             return this;
         }
-        if (request instanceof Map) {
-            StringEntity entity = new StringEntity(getMapToParameters((Map) request), Consts.UTF_8);
+        if (request instanceof HttpEntity){
+            setEntity((HttpEntity)request);
+        } else if (request instanceof Map) {
+            StringEntity entity = new StringEntity(getMapToParameters((Map) request), APPLICATION_FORM_URLENCODED_UTF_8);
             setEntity(entity);
         } else if (request instanceof String) {
-            StringEntity entity = new StringEntity((String) request, Consts.UTF_8);
+            StringEntity entity = new StringEntity((String) request,  APPLICATION_FORM_URLENCODED_UTF_8);
             setEntity(entity);
         } else {
             StringEntity entity = new StringEntity(JSON.toJSONString(request), ContentType.APPLICATION_JSON);
@@ -120,6 +170,7 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
         return this;
 
     }
+
 
     @Override
     public T handleResponse(HttpResponse response) throws ClientProtocolException, IOException {
@@ -134,8 +185,12 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
             responseType = (Class<T>) String.class;
         }
 
-
-        String[] value = entity.getContentType().getValue().split(";");
+        String[] value = null;
+        if (null == entity.getContentType()){
+            value = new String[]{"application/x-www-form-urlencoded"};
+        }else {
+            value = entity.getContentType().getValue().split(";");
+        }
 
         if (ContentType.APPLICATION_OCTET_STREAM.getMimeType().equals(value[0])){
 
@@ -148,11 +203,11 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
                     entity.writeTo((OutputStream)t);
                     return t;
                 } catch (InstantiationException e) {
-                    e.printStackTrace();
+                    throw new PayErrorException(new PayException("InstantiationException", e.getMessage()));
                 } catch (IllegalAccessException e) {
-                    e.printStackTrace();
+                    throw new PayErrorException(new PayException("IllegalAccessException", e.getMessage()));
                 }
-                throw  new HttpResponseException(statusLine.getStatusCode(), responseType + " 无法进行类型转换");
+
             }
         }
         String charset = "UTF-8";
@@ -160,7 +215,6 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
             charset = value[1].substring(value[1].indexOf("=") + 1);
         }
         String result = EntityUtils.toString(entity, charset);
-
         if (responseType.isAssignableFrom(String.class)){
             return (T)result;
         }
@@ -170,7 +224,7 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
             try {
                 return JSON.parseObject(result, responseType);
             }catch (JSONException e){
-                throw new PayErrorException(new PayException("failure", "类型转化异常,contentType:" + entity.getContentType().getValue(), result));
+                throw new PayErrorException(new PayException("failure", String.format("类型转化异常,contentType: %s\n%s", entity.getContentType().getValue(), e.getMessage() ), result));
             }
         }
 

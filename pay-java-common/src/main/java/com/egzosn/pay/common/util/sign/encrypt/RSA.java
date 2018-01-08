@@ -5,6 +5,7 @@ import javax.crypto.Cipher;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -48,6 +49,30 @@ public class RSA{
 	}
 
 
+
+	/**
+	 * RSA签名
+	 * @param content 待签名数据
+	 * @param privateKey 私钥
+	 * @param signAlgorithms 签名算法
+	 * @param characterEncoding 编码格式
+	 * @return 签名值
+	 */
+	public static String sign(String content, PrivateKey privateKey, String signAlgorithms, String characterEncoding) {
+		try {
+			java.security.Signature signature = java.security.Signature.getInstance(signAlgorithms);
+			signature.initSign(privateKey);
+			signature.update(content.getBytes(characterEncoding));
+			byte[] signed = signature.sign();
+			return Base64.encode(signed);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+
+
 	/**
 	* RSA签名
 	* @param content 待签名数据
@@ -56,6 +81,17 @@ public class RSA{
 	* @return 签名值
 	*/
 	public static String sign(String content, String privateKey ,String characterEncoding){
+        return sign(content, privateKey, SIGN_ALGORITHMS, characterEncoding);
+    }
+
+	/**
+	* RSA签名
+	* @param content 待签名数据
+	* @param privateKey 私钥
+	* @param characterEncoding 编码格式
+	* @return 签名值
+	*/
+	public static String sign(String content, PrivateKey privateKey ,String characterEncoding){
         return sign(content, privateKey, SIGN_ALGORITHMS, characterEncoding);
     }
 
@@ -82,6 +118,27 @@ public class RSA{
 		}
 		return false;
 	}
+
+	/**
+	* RSA验签名检查
+	* @param content 待签名数据
+	* @param sign 签名值
+	* @param  publicKey 公钥
+	* @param signAlgorithms 签名算法
+	* @param characterEncoding 编码格式
+	* @return 布尔值
+	*/
+	public static boolean verify(String content, String sign, PublicKey publicKey, String signAlgorithms, String characterEncoding){
+		try {
+			java.security.Signature signature = java.security.Signature.getInstance(signAlgorithms);
+			signature.initVerify(publicKey);
+			signature.update( content.getBytes(characterEncoding) );
+			return signature.verify( Base64.decode(sign) );
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
 	/**
 	* RSA验签名检查
 	* @param content 待签名数据
@@ -94,7 +151,20 @@ public class RSA{
 
 		return verify(content, sign, publicKey, SIGN_ALGORITHMS, characterEncoding);
 	}
-	
+
+
+	/**
+	 * RSA验签名检查
+	 * @param content 待签名数据
+	 * @param sign 签名值
+	 * @param  publicKey 公钥
+	 * @param characterEncoding 编码格式
+	 * @return 布尔值
+	 */
+	public static boolean verify(String content, String sign, PublicKey publicKey, String characterEncoding){
+		return verify(content, sign, publicKey, SIGN_ALGORITHMS, characterEncoding);
+	}
+
 	/**
 	* 解密
 	* @param content 密文

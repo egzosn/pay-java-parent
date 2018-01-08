@@ -1,6 +1,9 @@
 package com.egzosn.pay.common.api;
 
 import com.egzosn.pay.common.bean.MsgType;
+import com.egzosn.pay.common.bean.result.PayException;
+import com.egzosn.pay.common.exception.PayErrorException;
+import com.egzosn.pay.common.util.sign.CertDescriptor;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -15,23 +18,44 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public abstract class BasePayConfigStorage implements PayConfigStorage{
 
+    /**
+     * 证书管理器
+     */
+    private volatile CertDescriptor certDescriptor;
 
-    // ali rsa_private 商户私钥，pkcs8格式
-    //wx api_key 商户密钥
-    private volatile  String keyPrivate ;
-    // 支付公钥
+    /**
+     *   应用私钥，rsa_private pkcs8格式 生成签名时使用
+     */
+    private volatile  String keyPrivate;
+    /**
+     *   应用私钥，rsa_private pkcs8格式 生成签名时使用
+     */
+    private volatile  String keyPrivateCertPwd;
+    /**
+     *  支付平台公钥(签名校验使用)
+     */
     private volatile  String keyPublic;
-    //异步回调地址
+    /**
+     * 异步回调地址
+     */
     private volatile  String notifyUrl;
-    //同步回调地址
-    private volatile  String returnUrl;;
-    //签名加密类型
+    /**
+     * 同步回调地址，支付完成后展示的页面
+     */
+    private volatile  String returnUrl;
+    /**
+     * 签名加密类型
+     */
     private volatile  String signType;
-    //字符类型
+    /**
+     * 字符类型
+     */
     private volatile  String inputCharset;
 
 
-    //支付类型 aliPay 支付宝， wxPay微信..等等，开发者自定义，唯一
+    /**
+     * 支付类型 aliPay 支付宝， wxPay微信..等等，扩展支付模块定义唯一。
+     */
     private volatile  String payType;
 
     /**
@@ -40,15 +64,38 @@ public abstract class BasePayConfigStorage implements PayConfigStorage{
     private volatile MsgType msgType;
 
 
-    // 访问令牌 每次请求其他方法都要传入的值
+    /**
+     *  访问令牌 每次请求其他方法都要传入的值
+     */
     private volatile String accessToken;
-    // access token 到期时间时间戳
+    /**
+     * access token 到期时间时间戳
+     */
     private volatile long expiresTime;
-    //授权码锁
+    /**
+     * 授权码锁
+     */
     private Lock accessTokenLock = new ReentrantLock();
-
+    /**
+     * 是否为沙箱环境，默认为正式环境
+     */
     private boolean isTest = false;
 
+    /**
+     * 是否为证书签名
+     */
+    private boolean isCertSign = false;
+
+    @Override
+    public CertDescriptor getCertDescriptor() {
+        if (!isCertSign){
+           throw new PayErrorException(new PayException("certDescriptor fail", "isCertSign is false"));
+        }
+        if(null == certDescriptor){
+            certDescriptor = new CertDescriptor();
+        }
+        return certDescriptor;
+    }
 
     @Override
     public String getKeyPrivate() {
@@ -57,6 +104,14 @@ public abstract class BasePayConfigStorage implements PayConfigStorage{
 
     public void setKeyPrivate(String keyPrivate) {
         this.keyPrivate = keyPrivate;
+    }
+    @Override
+    public String getKeyPrivateCertPwd() {
+        return keyPrivateCertPwd;
+    }
+
+    public void setKeyPrivateCertPwd(String keyPrivateCertPwd) {
+        this.keyPrivateCertPwd = keyPrivateCertPwd;
     }
 
     @Override
@@ -76,6 +131,7 @@ public abstract class BasePayConfigStorage implements PayConfigStorage{
     public void setNotifyUrl(String notifyUrl) {
         this.notifyUrl = notifyUrl;
     }
+
 
     @Override
     public String getReturnUrl() {
@@ -184,5 +240,16 @@ public abstract class BasePayConfigStorage implements PayConfigStorage{
 
     public void setTest(boolean test) {
         isTest = test;
+    }
+
+    public boolean isCertSign() {
+        return isCertSign;
+    }
+
+    public void setCertSign(boolean certSign) {
+        isCertSign = certSign;
+        if (certSign){
+            certDescriptor = new CertDescriptor();
+        }
     }
 }

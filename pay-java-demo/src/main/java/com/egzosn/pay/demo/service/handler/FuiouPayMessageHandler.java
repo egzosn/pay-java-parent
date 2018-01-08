@@ -26,9 +26,9 @@ public class FuiouPayMessageHandler extends BasePayMessageHandler {
         if ("0000".equals(payMessage.getPayMessage().get("order_pay_code"))){
             /////这里进行成功的处理
 
-            return PayOutMessage.JSON().content("order_pay_error","成功").build();
+            return PayOutMessage.JSON().content("success","成功").build();
         }
 
-        return PayOutMessage.JSON().content("order_pay_error",payMessage.getPayMessage().get("order_pay_error")).build();
+        return PayOutMessage.JSON().content("fail", "失败").build();
     }
 }
