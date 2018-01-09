@@ -1,6 +1,6 @@
 
 
-## 微信支付简单例子
+## 银联支付简单例子
 
 #### 支付配置
 
@@ -49,6 +49,8 @@
 ```java 
 
       UnionPayService service = new UnionPayService(unionPayConfigStorage);
+      
+      unionPayConfigStorage.setCertSign(true);//是否为证书签名
   
 ```
 
@@ -57,6 +59,19 @@
 ```java
       PayOrder payOrder = new PayOrder("订单title", "摘要",  new BigDecimal(0.01) , new SimpleDateFormat("yyyyMMddHHmmss").format(System.currentTimeMillis()));
 ``` 
+#### 网页支付
+```java
+//      手机网页支付（WAP支付）
+        payOrder.setTransactionType(UnionTransactionType.WAP);
+//      网关支付
+//      payOrder.setTransactionType(UnionTransactionType.WEB);
+//      企业网银支付（B2B支付）
+//      payOrder.setTransactionType(UnionTransactionType.B2B);
+        //获取支付所需的信息
+        Map directOrderInfo = service.orderInfo(payOrder);
+        //获取表单提交对应的字符串，将其序列化到页面即可,
+        String directHtml = service.buildRequest(directOrderInfo, MethodType.POST);
+```
 
 #### 主扫申请二维码交易
 
@@ -99,7 +114,7 @@
 #### 文件传输类接口：后台获取对账文件交易，只有同步应答
  
  ```java
-       String fileConten =   service.downloadbill(new Date(),"格式为MMDD");
+       String fileConten =   service.downloadbill("清算日期格式MMDD","文件类型，一般商户填写00即可"); 
 ``` 
 
        
