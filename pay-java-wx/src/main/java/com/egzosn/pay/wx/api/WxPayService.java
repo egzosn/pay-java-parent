@@ -9,13 +9,14 @@ import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.common.util.MatrixToImageWriter;
+import com.egzosn.pay.common.util.XML;
 import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.str.StringUtils;
 import com.egzosn.pay.wx.bean.WxPayError;
 import com.egzosn.pay.wx.bean.WxTransactionType;
-import com.egzosn.pay.common.util.XML;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
@@ -225,18 +226,20 @@ public class WxPayService extends BasePayService {
 
         SortedMap<String, Object> params = new TreeMap<String, Object>();
 
-        params.put("package", "prepay_id=" + result.get("prepay_id"));
+
         if (WxTransactionType.JSAPI == order.getTransactionType()) {
             params.put("signType", payConfigStorage.getSignType());
             params.put("appId", payConfigStorage.getAppid());
             params.put("timeStamp", System.currentTimeMillis() / 1000);
             params.put("nonceStr", result.get("nonce_str"));
+            params.put("package", "prepay_id=" + result.get("prepay_id"));
         } else if (WxTransactionType.APP == order.getTransactionType()) {
             params.put("partnerid", payConfigStorage.getPid());
             params.put("appid", payConfigStorage.getAppid());
             params.put("prepayid", result.get("prepay_id"));
             params.put("timestamp", System.currentTimeMillis() / 1000);
             params.put("noncestr", result.get("nonce_str"));
+            params.put("package", "Sign=WXPay");
         }
         String paySign = createSign(SignUtils.parameterText(params), payConfigStorage.getInputCharset());
         params.put("sign", paySign);
