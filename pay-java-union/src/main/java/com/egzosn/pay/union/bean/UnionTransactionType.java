@@ -1,6 +1,7 @@
 package com.egzosn.pay.union.bean;
 
 import com.egzosn.pay.common.bean.TransactionType;
+import com.egzosn.pay.common.util.str.StringUtils;
 
 import java.util.Map;
 
@@ -52,7 +53,7 @@ public enum UnionTransactionType implements TransactionType{
     //查询
     QUERY("00","00","000201",""),
     //对账文件下载
-    FILE_TRANSFER("00","00","000201","")
+    FILE_TRANSFER("76","01","000000","")
     ;
 
     /**
@@ -90,7 +91,9 @@ public enum UnionTransactionType implements TransactionType{
         //业务类型
         contentData.put(SDKConstants.param_bizType,this.getBizType());
         //渠道类型
-        contentData.put(SDKConstants.param_channelType,this.getChannelType());
+        if(StringUtils.isNotBlank(this.getChannelType())){
+            contentData.put(SDKConstants.param_channelType,this.getChannelType());
+        }
     }
 
 

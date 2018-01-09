@@ -83,14 +83,14 @@ public class ApyAccountRepository {
 
         ApyAccount apyAccount4 = new ApyAccount();
         apyAccount4.setPayId(4);
-        apyAccount4.setPartner("777290058110048");
+        apyAccount4.setPartner("700000000000001");
         //公钥，验签证书链格式： 中级证书路径;根证书路径
         apyAccount4.setPublicKey("D:/certs/acp_test_middle.cer;D:/certs/acp_test_root.cer");
         //私钥, 私钥证书格式： 私钥证书路径;私钥证书对应的密码
         apyAccount4.setPrivateKey("D:/certs/acp_test_sign.pfx;000000");
-        apyAccount4.setNotifyUrl("http://b1234780541.eicp.net/payBack4.json");
+        apyAccount4.setNotifyUrl("http://127.0.0.1/payBack4.json");
         // 无需同步回调可不填  app填这个就可以
-        apyAccount4.setReturnUrl("http://b1234780541.eicp.net/payBack4.json");
+        apyAccount4.setReturnUrl("http://127.0.0.1/payBack4.json");
         apyAccount4.setSeller("");
         apyAccount4.setInputCharset("UTF-8");
         apyAccount4.setSignType(SignUtils.RSA2.name());
