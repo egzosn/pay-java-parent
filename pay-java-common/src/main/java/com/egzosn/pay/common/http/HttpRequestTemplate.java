@@ -14,9 +14,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContexts;
 import javax.net.ssl.SSLContext;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.URI;
 import java.security.*;
 import java.util.Map;
@@ -72,7 +70,7 @@ public class HttpRequestTemplate {
         }
 
             //读取本机存放的PKCS12证书文件
-        try(FileInputStream instream = new FileInputStream(new File(configStorage.getKeystorePath()))){
+        try(InputStream instream = configStorage.isPath() ? new FileInputStream(new File(configStorage.getKeystore())) : new ByteArrayInputStream(configStorage.getKeystore().getBytes())){
                 //指定读取证书格式为PKCS12
                 KeyStore keyStore = KeyStore.getInstance("PKCS12");
 
