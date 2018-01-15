@@ -413,6 +413,16 @@ public class WxYouDianPayService extends BasePayService {
     }
 
     @Override
+    public Map<String, Object> refund(RefundOrder refundOrder) {
+        return null;
+    }
+
+    @Override
+    public <T> T refund(RefundOrder refundOrder, Callback<T> callback) {
+        return null;
+    }
+
+    @Override
     public Map<String, Object> refundquery(String tradeNo, String outTradeNo) {
         return null;
     }

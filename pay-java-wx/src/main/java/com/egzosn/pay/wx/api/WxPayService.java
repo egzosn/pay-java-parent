@@ -438,7 +438,9 @@ public class WxPayService extends BasePayService {
      * @param refundAmount  退款金额
      * @param totalAmount   总金额
      * @return 返回支付方申请退款后的结果
+     * @see #refund(RefundOrder, Callback)
      */
+    @Deprecated
     @Override
     public Map<String, Object> refund(String transactionId, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount) {
 
@@ -460,21 +462,51 @@ public class WxPayService extends BasePayService {
      * @param callback      处理器
      * @param <T>           返回类型
      * @return 处理过后的类型对象， 返回支付方申请退款后的结果
+     * @see #refund(RefundOrder, Callback)
      */
+    @Deprecated
     @Override
     public <T> T refund(String transactionId, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount, Callback<T> callback) {
 
+        return refund(new RefundOrder(transactionId, outTradeNo, refundAmount, totalAmount), callback);
+    }
+    /**
+     * 申请退款接口
+     *
+     * @param refundOrder   退款订单信息
+     * @return 返回支付方申请退款后的结果
+     */
+    @Override
+    public Map<String, Object> refund(RefundOrder refundOrder) {
+        return  refund(refundOrder, new Callback<Map<String, Object>>() {
+            @Override
+            public Map<String, Object> perform(Map<String, Object> map) {
+                return map;
+            }
+        });
+    }
+
+    /**
+     * 退款
+     *
+     * @param refundOrder   退款订单信息
+     * @param callback      处理器
+     * @param <T>           返回类型
+     * @return 处理过后的类型对象， 返回支付方申请退款后的结果
+     */
+    @Override
+    public <T> T refund(RefundOrder refundOrder, Callback<T> callback) {
+
         //获取公共参数
         Map<String, Object> parameters = getPublicParameters();
-        if (null != transactionId) {
-            parameters.put("transaction_id", transactionId);
-            parameters.put("out_refund_no", transactionId);
+        if (null != refundOrder.getTradeNo()) {
+            parameters.put("transaction_id", refundOrder.getTradeNo());
         } else {
-            parameters.put("out_trade_no", outTradeNo);
-            parameters.put("out_refund_no", outTradeNo);
+            parameters.put("out_trade_no", refundOrder.getOutTradeNo());
         }
-        parameters.put("total_fee", totalAmount.multiply(new BigDecimal(100)).setScale(0, BigDecimal.ROUND_HALF_UP).intValue());
-        parameters.put("refund_fee", refundAmount.multiply(new BigDecimal(100)).setScale(0, BigDecimal.ROUND_HALF_UP).intValue());
+            parameters.put("out_refund_no", refundOrder.getRefundNo());
+        parameters.put("total_fee", refundOrder.getTotalAmount().multiply(new BigDecimal(100)).setScale(0, BigDecimal.ROUND_HALF_UP).intValue());
+        parameters.put("refund_fee", refundOrder.getRefundAmount().multiply(new BigDecimal(100)).setScale(0, BigDecimal.ROUND_HALF_UP).intValue());
         parameters.put("op_user_id", payConfigStorage.getPid());
 
         //设置签名

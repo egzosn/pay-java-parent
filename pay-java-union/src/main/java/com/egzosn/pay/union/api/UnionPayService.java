@@ -477,17 +477,28 @@ public class UnionPayService extends BasePayService {
     /**
      *  消费撤销/退货接口
      * @param origQryId 原交易查询流水号.
-     * @param orderId 订单号
-     * @param totalAmount 金额
+     * @param orderId 退款单号
+     * @param refundAmount 退款金额
      * @param type UnionTransactionType.REFUND  或者UnionTransactionType.CONSUME_UNDO
      * @return 返回支付方申请退款后的结果
      */
-    public Map<String, Object> unionRefundOrConsumeUndo (String origQryId, String orderId, BigDecimal totalAmount,UnionTransactionType type) {
+    public Map<String, Object> unionRefundOrConsumeUndo (String origQryId, String orderId, BigDecimal refundAmount,UnionTransactionType type) {
+        return unionRefundOrConsumeUndo(new RefundOrder(orderId, origQryId,refundAmount ), type);
+
+    }
+
+    /**
+     *  消费撤销/退货接口
+     * @param refundOrder   退款订单信息
+     * @param type UnionTransactionType.REFUND  或者UnionTransactionType.CONSUME_UNDO
+     * @return 返回支付方申请退款后的结果
+     */
+    public Map<String, Object> unionRefundOrConsumeUndo (RefundOrder refundOrder,UnionTransactionType type) {
         Map<String ,Object> params = this.getCommonParam();
         type.convertMap(params);
-        params.put(SDKConstants.param_orderId,orderId);
-        params.put(SDKConstants.param_txnAmt, totalAmount);
-        params.put(SDKConstants.param_origQryId, origQryId);
+        params.put(SDKConstants.param_orderId, refundOrder.getRefundNo());
+        params.put(SDKConstants.param_txnAmt, refundOrder.getRefundAmount());
+        params.put(SDKConstants.param_origQryId, refundOrder.getTradeNo());
         this.setSign(params);
         String responseStr =  getHttpRequestTemplate().postForObject(this.getBackTransUrl(),params,String.class);
         JSONObject response =  UriVariables.getParametersToMap(responseStr);
@@ -500,10 +511,8 @@ public class UnionPayService extends BasePayService {
 
             }
                 throw new PayErrorException(new PayException(response.getString(SDKConstants.param_respCode), response.getString(SDKConstants.param_respMsg), response.toJSONString()));
-
         }
             throw new PayErrorException(new PayException("failure", "验证签名失败", response.toJSONString()));
-
     }
     /**
      * 交易关闭接口
@@ -538,10 +547,17 @@ public class UnionPayService extends BasePayService {
      * @param refundAmount 退款金额
      * @param totalAmount  总金额
      * @return 返回支付方申请退款后的结果
+     * @see #refund(RefundOrder)
      */
+    @Deprecated
     @Override
     public Map<String, Object> refund (String tradeNo, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount) {
-        return unionRefundOrConsumeUndo(tradeNo, outTradeNo, totalAmount, UnionTransactionType.REFUND);
+        return refund(tradeNo, outTradeNo, refundAmount, totalAmount, new Callback<Map<String, Object>>() {
+            @Override
+            public Map<String, Object> perform(Map<String, Object> map) {
+                return map;
+            }
+        });
     }
 
 
@@ -555,10 +571,28 @@ public class UnionPayService extends BasePayService {
      * @param totalAmount  总金额
      * @param callback     处理器
      * @return 返回支付方申请退款后的结果
+     * @see #refund(RefundOrder, Callback)
      */
+    @Deprecated
     @Override
     public <T> T refund (String tradeNo, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount, Callback<T> callback) {
-        return callback.perform(unionRefundOrConsumeUndo(tradeNo, outTradeNo, totalAmount, UnionTransactionType.REFUND));
+        return refund(new RefundOrder(tradeNo, outTradeNo, refundAmount, totalAmount), callback);
+    }
+
+    @Override
+    public Map<String, Object> refund(RefundOrder refundOrder) {
+        return refund(refundOrder, new Callback<Map<String, Object>>() {
+
+            @Override
+            public Map<String, Object> perform(Map<String, Object> map) {
+                return map;
+            }
+        });
+    }
+
+    @Override
+    public <T> T refund(RefundOrder refundOrder, Callback<T> callback) {
+        return callback.perform(unionRefundOrConsumeUndo(refundOrder, UnionTransactionType.REFUND));
     }
 
     /**

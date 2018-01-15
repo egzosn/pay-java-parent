@@ -69,7 +69,7 @@ public class PayTest {
         /*-----------消费(被扫场景)------------------------------*/
 
 //       /*-----------消费撤销------------------------------*/
-        params =   service.unionRefundOrConsumeUndo("原交易查询流水号", "订单号", new BigDecimal("退款金额" ),UnionTransactionType.CONSUME_UNDO);
+        params =   service.unionRefundOrConsumeUndo(new RefundOrder( "订单号", "原交易查询流水号", new BigDecimal("退款金额" )),UnionTransactionType.CONSUME_UNDO);
 //       /*-----------消费撤销------------------------------*/
 
         /*-----------交易状态查询交易：只有同步应答------------------------------*/

@@ -165,17 +165,21 @@
 
 #### 申请退款接口
   ```java
-
-          Map result = service.refund("支付宝单号", "我方系统单号", "退款金额", "订单总金额");
+          //过时方法
+         //Map result = service.refund("支付宝单号", "我方系统单号", "退款金额", "订单总金额");
+         //支付宝单号与我方系统单号二选一
+         RefundOrder order = new RefundOrder("支付宝单号", "我方系统单号", "退款金额", "订单总金额");
+         //非必填， 根据业务需求而定，可用于多次退款
+         order.setRefundNo("退款单号")
+         Map result = service.refund(order);
 
 ```
 
 
 #### 查询退款
   ```java
-
           Map result = service.refundquery("支付宝单号", "我方系统单号");
-
+            
 ```
 
 #### 下载对账单

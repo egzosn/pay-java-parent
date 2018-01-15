@@ -158,8 +158,13 @@
 
 #### 申请退款接口
   ```java
-
-          Map result = service.refund("微信单号", "我方系统单号", "退款金额", "订单总金额");
+        //过时方法
+         //Map result = service.refund("微信单号", "我方系统单号", "退款金额", "订单总金额");
+         //微信单号与我方系统单号二选一
+         RefundOrder order = new RefundOrder("微信单号", "我方系统单号", "退款金额", "订单总金额");
+         //可用于多次退款
+         order.setRefundNo("退款单号")
+         Map result = service.refund(order);
 
 ```
 
