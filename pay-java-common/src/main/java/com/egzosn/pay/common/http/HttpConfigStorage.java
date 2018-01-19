@@ -19,8 +19,13 @@ public class HttpConfigStorage {
     //代理密码
     protected String httpProxyPassword;
 
-    //https请求所需的证书（PKCS12）地址，请使用绝对路径
-    private String keystorePath;
+    /**
+     * @see #keystore 是否为https请求所需的证书（PKCS12）的地址,默认为地址，否则为证书信息串
+     */
+    private boolean isPath = true;
+
+    //https请求所需的证书（PKCS12）
+    private String keystore;
     //证书对应的密码
     private String storePassword;
 
@@ -76,13 +81,54 @@ public class HttpConfigStorage {
     /**
      * https请求所需的证书（PKCS12）地址，请使用绝对路径
      * @return 证书（PKCS12）地址
+     * @see #getKeystore()
      */
+    @Deprecated
     public String getKeystorePath() {
-        return keystorePath;
+        return keystore;
     }
 
+    /**
+     * 设置https请求所需的证书（PKCS12）地址，请使用绝对路径
+     * @param keystorePath 证书（PKCS12）地址
+     * @see #getKeystore()
+     */
+    @Deprecated
     public void setKeystorePath(String keystorePath) {
-        this.keystorePath = keystorePath;
+        this.keystore = keystorePath;
+    }
+
+
+    /**
+     * 获取是否为证书地址
+     * @return  是否为证书地址,配合 {@link #getKeystore()}使用
+     */
+    public boolean isPath() {
+        return isPath;
+    }
+
+    /**
+     * 设置是否为证书地址
+     * @param path 是否为证书地址
+     */
+    public void setPath(boolean path) {
+        isPath = path;
+    }
+
+    /**
+     * 获取证书信息
+     * @return 证书信息 根据 {@link #isPath()}进行区别地址与信息串
+     */
+    public String getKeystore() {
+        return keystore;
+    }
+
+    /**
+     * 设置证书
+     * @param keystore 证书信息
+     */
+    public void setKeystore(String keystore) {
+        this.keystore = keystore;
     }
 
     /**
