@@ -358,19 +358,12 @@ public class FuiouPayService extends BasePayService {
      */
     @Override
     public Map<String, Object> refund (String tradeNo, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount) {
-        Map<String ,Object> params = new HashMap<>();
-        params.put("mchnt_cd",payConfigStorage.getPid());//商户代码
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-        df.setTimeZone(TimeZone.getTimeZone("GMT+8"));
-        params.put("origin_order_date",df.format(new Date()));//原交易日期
-        params.put("origin_order_id",tradeNo);//原订单号
-        params.put("refund_amt",refundAmount.multiply(new BigDecimal(100)).setScale( 0, BigDecimal.ROUND_HALF_UP).intValue());//退款金额
-        params.put("rem","");//备注
-        params.put("md5",createSign(SignUtils.parameters2MD5Str(params,"|"),payConfigStorage.getInputCharset()));
-        JSONObject resultJson   = getHttpRequestTemplate().postForObject(getReqUrl() + URL_FuiouSmpRefundGate,params,JSONObject.class);
-        //5341标识退款成功
-        return resultJson;
-
+        return refund(tradeNo, outTradeNo, refundAmount, totalAmount, new Callback<Map<String, Object>>() {
+            @Override
+            public Map<String, Object> perform(Map<String, Object> map) {
+                return map;
+            }
+        });
     }
 
     /**
@@ -385,8 +378,50 @@ public class FuiouPayService extends BasePayService {
      */
     @Override
     public <T> T refund (String tradeNo, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount, Callback<T> callback) {
-        return null;
+        return refund(new RefundOrder(tradeNo, outTradeNo, refundAmount, totalAmount), callback);
     }
+
+
+    /**
+     * 申请退款接口
+     *
+     * @param refundOrder   退款订单信息
+     * @return 退款返回结果集
+     */
+    @Override
+    public Map<String, Object> refund (RefundOrder refundOrder) {
+        return refund(refundOrder, new Callback<Map<String, Object>>() {
+            @Override
+            public Map<String, Object> perform(Map<String, Object> map) {
+                return map;
+            }
+        });
+    }
+
+    /**
+     * 申请退款接口
+     *
+     * @param refundOrder   退款订单信息
+     * @param callback     处理器
+     * @return 空
+     */
+    @Override
+    public <T> T refund(RefundOrder refundOrder, Callback<T> callback) {
+        Map<String ,Object> params = new HashMap<>();
+        params.put("mchnt_cd",payConfigStorage.getPid());//商户代码
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        df.setTimeZone(TimeZone.getTimeZone("GMT+8"));
+        params.put("origin_order_date",refundOrder.getOrderDate());//原交易日期
+        params.put("origin_order_id",refundOrder.getTradeNo());//原订单号
+        params.put("refund_amt",refundOrder.getRefundAmount().multiply(new BigDecimal(100)).setScale( 0, BigDecimal.ROUND_HALF_UP).intValue());//退款金额
+        params.put("rem","");//备注
+        params.put("md5",createSign(SignUtils.parameters2MD5Str(params,"|"),payConfigStorage.getInputCharset()));
+        JSONObject resultJson   = getHttpRequestTemplate().postForObject(getReqUrl() + URL_FuiouSmpRefundGate,params,JSONObject.class);
+        //5341标识退款成功
+        return callback.perform(params);
+    }
+
+
 
     /**
      *  查询退款

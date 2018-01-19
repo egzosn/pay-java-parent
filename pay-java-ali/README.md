@@ -10,7 +10,7 @@
         AliPayConfigStorage aliPayConfigStorage = new AliPayConfigStorage();
         aliPayConfigStorage.setPid("合作者id");
         aliPayConfigStorage.setAppId("应用id");
-        aliPayConfigStorage.setPublicKey("支付宝公钥");
+        aliPayConfigStorage.setAliPublicKey("支付宝公钥");
         aliPayConfigStorage.setKeyPrivate("应用私钥");
         aliPayConfigStorage.setNotifyUrl("异步回调地址");
         aliPayConfigStorage.setReturnUrl("同步回调地址");
@@ -150,7 +150,7 @@
 
 ```java
         
-      Map result = service..query("支付宝单号", "我方系统单号");
+      Map result = service.query("支付宝单号", "我方系统单号");
 
 ```
 
@@ -158,24 +158,28 @@
 #### 交易关闭接口
   ```java
 
-          Map result = service..query("支付宝单号", "我方系统单号");
+          Map result = service.query("支付宝单号", "我方系统单号");
 
 ```
 
 
 #### 申请退款接口
   ```java
-
-          Map result = service.refund("支付宝单号", "我方系统单号", "退款金额", "订单总金额");
+          //过时方法
+         //Map result = service.refund("支付宝单号", "我方系统单号", "退款金额", "订单总金额");
+         //支付宝单号与我方系统单号二选一
+         RefundOrder order = new RefundOrder("支付宝单号", "我方系统单号", "退款金额", "订单总金额");
+         //非必填， 根据业务需求而定，可用于多次退款
+         order.setRefundNo("退款单号")
+         Map result = service.refund(order);
 
 ```
 
 
 #### 查询退款
   ```java
-
           Map result = service.refundquery("支付宝单号", "我方系统单号");
-
+            
 ```
 
 #### 下载对账单

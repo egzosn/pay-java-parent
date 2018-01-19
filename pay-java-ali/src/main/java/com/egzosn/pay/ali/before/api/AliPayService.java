@@ -12,6 +12,7 @@ import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.common.http.UriVariables;
 import com.egzosn.pay.common.util.sign.SignUtils;
+import com.egzosn.pay.common.util.str.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import java.awt.image.BufferedImage;
@@ -408,13 +409,15 @@ public class AliPayService extends BasePayService {
     }
     /**
      * 申请退款接口
-     *
+     * 废弃
      * @param tradeNo    支付平台订单号
      * @param outTradeNo 商户单号
      * @param refundAmount 退款金额
      * @param totalAmount 总金额
      * @return 返回支付方申请退款后的结果
+     * @see #refund(RefundOrder, Callback)
      */
+    @Deprecated
     @Override
     public Map<String, Object> refund(String tradeNo, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount) {
 
@@ -427,7 +430,7 @@ public class AliPayService extends BasePayService {
     }
     /**
      * 申请退款接口
-     *
+     * 废弃
      * @param tradeNo    支付平台订单号
      * @param outTradeNo 商户单号
      * @param refundAmount 退款金额
@@ -435,14 +438,49 @@ public class AliPayService extends BasePayService {
      * @param callback 处理器
      * @param <T> 返回类型
      * @return 返回支付方申请退款后的结果
+     * @see #refund(RefundOrder, Callback)
      */
+    @Deprecated
     @Override
     public <T> T refund(String tradeNo, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount, Callback<T> callback) {
+
+        return refund(new RefundOrder(tradeNo, outTradeNo, refundAmount, totalAmount), callback);
+    }
+
+    /**
+     * 申请退款接口
+     *
+     * @param refundOrder   退款订单信息
+     * @return 返回支付方申请退款后的结果
+     */
+    @Override
+    public Map<String, Object> refund(RefundOrder refundOrder) {
+        return  refund(refundOrder, new Callback<Map<String, Object>>() {
+            @Override
+            public Map<String, Object> perform(Map<String, Object> map) {
+                return map;
+            }
+        });
+    }
+    /**
+     * 申请退款接口
+     *
+     * @param refundOrder   退款订单信息
+     * @return 返回支付方申请退款后的结果
+     * @param callback 处理器
+     * @param <T> 返回类型
+     * @return 返回支付方申请退款后的结果
+     */
+    @Override
+    public <T> T refund(RefundOrder refundOrder, Callback<T> callback) {
         //获取公共参数
         Map<String, Object> parameters = getPublicParameters(AliTransactionType.REFUND);
 
-        Map<String, Object> bizContent = getBizContent(tradeNo, outTradeNo, null);
-        bizContent.put("refund_amount", refundAmount);
+        Map<String, Object> bizContent = getBizContent(refundOrder.getTradeNo(), refundOrder.getOutTradeNo(), null);
+        if (!StringUtils.isEmpty(refundOrder.getRefundNo())){
+            bizContent.put("out_request_no", refundOrder.getRefundNo());
+        }
+        bizContent.put("refund_amount", refundOrder.getRefundAmount());
         //设置请求参数的集合
         parameters.put("biz_content", JSON.toJSONString(bizContent));
         //设置签名
