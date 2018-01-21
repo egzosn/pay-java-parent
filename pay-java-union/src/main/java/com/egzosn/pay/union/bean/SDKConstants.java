@@ -16,9 +16,9 @@ package com.egzosn.pay.union.bean;
 
 /**
  *
- * @ClassName SDKConstants
- * @Description acpsdk常量类
- * @date 2016-7-22 下午4:05:54
+ *  acpsdk常量类
+ *
+ * date 2016-7-22 下午4:05:54
  *
  */
 public class SDKConstants {

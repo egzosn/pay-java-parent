@@ -7,7 +7,7 @@
     <groupId>com.egzosn</groupId>
     <artifactId>pay-java-parent</artifactId>
     <packaging>pom</packaging>
-    <version>2.0.6-SNAPSHOT</version>
+    <version>2.0.6</version>
 
     <name>Pay Java - Parent</name>
     <description>Pay Java Parent</description>
@@ -43,7 +43,6 @@
         <module>pay-java-wx</module>
         <module>pay-java-wx-youdian</module>
         <module>pay-java-fuiou</module>
-        <module>pay-java-demo</module>
         <module>pay-java-union</module>
     </modules>
 
@@ -125,7 +124,7 @@
                     <encoding>utf-8</encoding>
                 </configuration>
             </plugin>
-         <!--  <plugin>
+           <plugin>
                 <groupId>org.sonatype.plugins</groupId>
                 <artifactId>nexus-staging-maven-plugin</artifactId>
                 <version>1.6.3</version>
@@ -185,7 +184,7 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>-->
+            </plugin>
         </plugins>
     </build>
 </project>

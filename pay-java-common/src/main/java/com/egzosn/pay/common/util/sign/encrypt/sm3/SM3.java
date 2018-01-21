@@ -219,10 +219,9 @@ public class SM3
     /**
      * 对最后一个分组字节数据padding
      *
-     * @param in
-     * @param bLen
-     *            分组个数
-     * @return
+     * @param in 输入字节
+     * @param bLen     分组个数
+     * @return  分组好的字节
      */
     public static byte[] padding(byte[] in, int bLen)
     {
@@ -249,8 +248,8 @@ public class SM3
     /**
      * 字节数组逆序
      *
-     * @param in
-     * @return
+     * @param in 输入字节
+     * @return 排序好的字节
      */
     private static byte[] back(byte[] in)
     {

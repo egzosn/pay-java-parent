@@ -30,8 +30,10 @@ import java.util.*;
 
 /**
  * @author Actinia
- * @email hayesfu@qq.com
- * @create 2017 2017/11/5
+ * <pre>
+ * email hayesfu@qq.com
+ * create 2017 2017/11/5
+ * </pre>
  */
 public class UnionPayService extends BasePayService {
     private static final Log log = LogFactory.getLog(UnionPayService.class);
@@ -53,15 +55,12 @@ public class UnionPayService extends BasePayService {
     private static final String FILE_TRANS_URL= "https://filedownload.%s/";
     private static final String APP_TRANS_URL= "https://gateway.%s/gateway/api/appTransReq.do";
     private static final String CARD_TRANS_URL= "https://gateway.%s/gateway/api/cardTransReq.do";
-    /**
-     * 以下缴费产品使用，其余产品用不到
-     */
-//    private static final String JF_FRONT_TRANS_URL= "https://gateway.%s/jiaofei/api/frontTransReq.do";
-//    private static final String JF_BACK_TRANS_URL= "https://gateway.%s/jiaofei/api/backTransReq.do";
-//    private static final String JF_SINGLE_QUERY_URL= "https://gateway.%s/jiaofei/api/queryTrans.do";
-//    private static final String JF_APP_TRANS_URL= "https://gateway.%s/jiaofei/api/appTransReq.do";
-//    private static final String JF_CARD_TRANS_URL= "https://gateway.%s/jiaofei/api/cardTransReq.do";
 
+
+    /**
+     * 构造函数
+     * @param payConfigStorage 支付配置
+     */
     public UnionPayService (PayConfigStorage payConfigStorage) {
         super(payConfigStorage);
     }
@@ -348,8 +347,8 @@ public class UnionPayService extends BasePayService {
     /**
      * 将字符串转换为X509Certificate对象.
      *
-     * @param x509CertString
-     * @return
+     * @param x509CertString 证书串
+     * @return X509Certificate
      */
     public static X509Certificate genCertificateByStr(String x509CertString) {
         X509Certificate x509Cert = null;
@@ -391,7 +390,7 @@ public class UnionPayService extends BasePayService {
     /**
      * 获取输出消息，用户返回给支付端, 针对于web端
      *
-     * @param `      发起支付的订单信息
+     * @param orderInfo   发起支付的订单信息
      * @param method 请求方式  "post" "get",
      *
      * @return 获取输出消息，用户返回给支付端, 针对于web端
