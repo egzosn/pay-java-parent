@@ -127,7 +127,6 @@ public class UriVariables {
      *
      * @param str 需要解析的字符串
      * @return 解析的结果map
-     * @throws UnsupportedEncodingException
      */
     public static JSONObject getParametersToMap (String str) {
 

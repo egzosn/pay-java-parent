@@ -5,9 +5,10 @@ import com.egzosn.pay.common.api.BasePayConfigStorage;
 
 /**
  * @author Actinia
- * @email hayesfu@qq.com
+ *
  *  <pre>
-    create 2017 2017/11/4 0004
+ * email hayesfu@qq.com
+ *   create 2017 2017/11/4 0004
  * </pre>
  */
 public class UnionPayConfigStorage extends BasePayConfigStorage {

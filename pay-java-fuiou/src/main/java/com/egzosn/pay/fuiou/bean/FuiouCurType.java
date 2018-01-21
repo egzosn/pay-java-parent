@@ -5,8 +5,8 @@ import com.egzosn.pay.common.bean.CurType;
 /**
  * 货币类型
  * @author Actinia
- * @email hayesfu@qq.com
  *  <pre>
+ * email hayesfu@qq.com
  * create 2017 2017/1/16 0016
  * </pre>
  */
