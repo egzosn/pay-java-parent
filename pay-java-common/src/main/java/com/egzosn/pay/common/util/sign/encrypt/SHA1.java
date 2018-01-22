@@ -7,8 +7,11 @@ import org.apache.commons.codec.digest.DigestUtils;
 /**
  * SHA1签名工具
  * @author Actinia
- * @email hayesfu@qq.com
- * @create 2017 2017/11/27 0027
+ * <pre>
+ * email hayesfu@qq.com
+ *
+ * create 2017 2017/11/27 0027
+ * </pre>
  */
 public class SHA1 {
 

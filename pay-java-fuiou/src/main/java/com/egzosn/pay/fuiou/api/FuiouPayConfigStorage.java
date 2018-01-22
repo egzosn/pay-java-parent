@@ -3,8 +3,8 @@ import com.egzosn.pay.common.api.BasePayConfigStorage;
 
 /**
  * @author Actinia
- * @email hayesfu@qq.com
  *  <pre>
+ * email hayesfu@qq.com
  * create 2017 2017/1/16 0016
  * </pre>
  */
