@@ -4,19 +4,26 @@ import com.egzosn.pay.common.bean.MethodType;
 import com.egzosn.pay.common.util.str.StringUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.AuthCache;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.conn.ssl.DefaultHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContexts;
+
 import javax.net.ssl.SSLContext;
 import java.io.*;
 import java.net.URI;
-import java.security.*;
+import java.security.GeneralSecurityException;
+import java.security.KeyStore;
 import java.util.Map;
 
 /**
@@ -108,7 +115,7 @@ public class HttpRequestTemplate {
         //http代理地址设置
         httpProxy = new HttpHost(configStorage.getHttpProxyHost(), configStorage.getHttpProxyPort());
 
-        if (StringUtils.isNotBlank(configStorage.getHttpProxyHost())) {
+        if (StringUtils.isBlank(configStorage.getHttpProxyUsername())) {
             return null;
         }
 
@@ -163,6 +170,9 @@ public class HttpRequestTemplate {
 
     public <T> T postForObject(String uri, Object request, Class<T> responseType, Map<String, Object> uriVariables) {
         return doExecute(URI.create(UriVariables.getUri(uri, uriVariables)), request, responseType, MethodType.POST);
+    }
+    public <T> T postForObjectAndBasicAuth(String uri, Object request, Class<T> responseType, Object... uriVariables) {
+        return doExecuteAndBasicAuth(URI.create(UriVariables.getUri(uri, uriVariables)), request, responseType, MethodType.POST);
     }
 
     public <T> T postForObject(URI uri, Object request, Class<T> responseType){
@@ -242,10 +252,54 @@ public class HttpRequestTemplate {
      * @param <T> 响应类型
      * @return 类型对象
      */
+    public <T>T doExecuteAndBasicAuth(URI uri, Object request, Class<T> responseType, MethodType method){
+        ClientHttpRequest<T> httpRequest = new ClientHttpRequest(uri ,method, request);
+        httpRequest.setProxy(httpProxy).setResponseType(responseType);
+        try (CloseableHttpResponse response = httpClient.execute(httpRequest,createBasicAuthContext(uri,"Huodull6190","12BkDT8152Zj"))) {
+            return httpRequest.handleResponse(response);
+        }catch (  IOException e){
+            e.printStackTrace();
+        }finally {
+            httpRequest.releaseConnection();
+        }
+        return null;
+    }
+
+    /**
+     * http 请求执行
+     * @param uri 地址
+     * @param request 请求数据
+     * @param responseType 响应类型
+     * @param method 请求方法
+     * @param <T> 响应类型
+     * @return 类型对象
+     */
     public <T>T doExecute(String uri, Object request, Class<T> responseType, MethodType method){
        return doExecute(URI.create(uri), request, responseType, method);
     }
 
+    /**
+     * 创建Basic Auth
+     * @param uri
+     * @param username
+     * @param password
+     * @return
+     */
+    private HttpClientContext createBasicAuthContext(URI uri,String username, String password) {
+        CredentialsProvider credsProvider = new BasicCredentialsProvider();
+        Credentials defaultCreds = new UsernamePasswordCredentials(username, password);
+        credsProvider.setCredentials(new AuthScope(uri.getHost(), uri.getPort()), defaultCreds);
+
+        AuthCache authCache = new BasicAuthCache();
+        BasicScheme basicAuth = new BasicScheme();
+        HttpHost host = new HttpHost(uri.getHost(),uri.getPort(),"https");
+        authCache.put(host, basicAuth);
+
+        HttpClientContext context = HttpClientContext.create();
+        context.setCredentialsProvider(credsProvider);
+        context.setAuthCache(authCache);
+        return context;
+    }
 
 
 

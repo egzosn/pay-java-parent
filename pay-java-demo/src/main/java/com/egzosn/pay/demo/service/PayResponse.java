@@ -115,6 +115,11 @@ public class PayResponse {
                 .payType(PayType.unionPay.name())
                 .handler(autowire(new UnionPayMessageHandler(payId)))
                 .end()
+                .rule()
+                .msgType(MsgType.json.name())
+                .payType(PayType.payoneer.name())
+                .handler(autowire(new PayoneerMessageHandler(payId)))
+                .end()
         ;
     }
 

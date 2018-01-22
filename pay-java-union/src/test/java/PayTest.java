@@ -1,5 +1,6 @@
 import com.egzosn.pay.common.bean.MethodType;
 import com.egzosn.pay.common.bean.PayOrder;
+import com.egzosn.pay.common.bean.RefundOrder;
 import com.egzosn.pay.union.api.UnionPayConfigStorage;
 import com.egzosn.pay.union.api.UnionPayService;
 import com.egzosn.pay.union.bean.UnionTransactionType;

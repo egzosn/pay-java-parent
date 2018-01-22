@@ -1,0 +1,35 @@
+package com.egzosn.pay.payoneer.bean;
+
+import com.egzosn.pay.common.bean.TransactionType;
+
+/**
+ * 支付类型
+ * @author Actinia
+ * @email hayesfu@qq.com
+ *  <pre>
+ * create 2017 2017/1/16 0016
+ * </pre>
+ */
+public enum PayoneerTransactionType implements TransactionType {
+
+    charge("charge");
+    private String method;
+
+    PayoneerTransactionType(String method) {
+        this.method = method;
+    }
+
+    @Override
+    public String getType() {
+        return this.name();
+    }
+
+    /**
+     * 获取接口名称
+     * @return 接口名称
+     */
+    @Override
+    public String getMethod() {
+        return this.method;
+    }
+}

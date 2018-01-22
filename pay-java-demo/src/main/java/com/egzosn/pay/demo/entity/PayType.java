@@ -9,6 +9,9 @@ import com.egzosn.pay.common.bean.TransactionType;
 import com.egzosn.pay.fuiou.api.FuiouPayConfigStorage;
 import com.egzosn.pay.fuiou.api.FuiouPayService;
 import com.egzosn.pay.fuiou.bean.FuiouTransactionType;
+import com.egzosn.pay.payoneer.api.PayoneerConfigStorage;
+import com.egzosn.pay.payoneer.api.PayoneerPayService;
+import com.egzosn.pay.payoneer.bean.PayoneerTransactionType;
 import com.egzosn.pay.union.api.UnionPayConfigStorage;
 import com.egzosn.pay.union.api.UnionPayService;
 import com.egzosn.pay.union.bean.UnionTransactionType;
@@ -167,6 +170,31 @@ public enum PayType implements BasePayType {
         @Override
         public TransactionType getTransactionType(String transactionType) {
             return UnionTransactionType.valueOf(transactionType);
+        }
+
+
+    },payoneer{
+        @Override
+        public PayService getPayService(ApyAccount apyAccount) {
+            PayoneerConfigStorage payoneerConfigStorage = new PayoneerConfigStorage();
+            payoneerConfigStorage.setProgramId(apyAccount.getPartner());
+            payoneerConfigStorage.setApiUserName(apyAccount.getSeller());
+            payoneerConfigStorage.setApiPassword(apyAccount.getStorePassword());
+            payoneerConfigStorage.setKeyPublic(apyAccount.getPublicKey());
+            payoneerConfigStorage.setKeyPrivate(apyAccount.getPrivateKey());
+            payoneerConfigStorage.setNotifyUrl(apyAccount.getNotifyUrl());
+            payoneerConfigStorage.setReturnUrl(apyAccount.getReturnUrl());
+            payoneerConfigStorage.setSignType(apyAccount.getSignType());
+            payoneerConfigStorage.setPayType(apyAccount.getPayType().toString());
+            payoneerConfigStorage.setMsgType(apyAccount.getMsgType());
+            payoneerConfigStorage.setInputCharset(apyAccount.getInputCharset());
+            payoneerConfigStorage.setTest(apyAccount.isTest());
+            return new PayoneerPayService(payoneerConfigStorage);
+        }
+
+        @Override
+        public TransactionType getTransactionType(String transactionType) {
+            return PayoneerTransactionType.valueOf(transactionType);
         }
 
 
