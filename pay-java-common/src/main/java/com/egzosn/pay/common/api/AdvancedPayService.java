@@ -1,6 +1,9 @@
 package com.egzosn.pay.common.api;
 
 import com.egzosn.pay.common.bean.AuthPageType;
+import com.egzosn.pay.common.bean.PayOrder;
+
+import java.util.Map;
 
 /**
  * 高级支付接口
@@ -19,4 +22,11 @@ public interface AdvancedPayService extends PayService{
      */
     String getAuthorizationPage(String payeeId,AuthPageType authPageType);
 
+    /**
+     * 发起授权
+     * @param payeeId 收款id
+     * @param payOrder 订单信息
+     * @return 返回请求结果
+     */
+    Map<String ,Object> charge(String payeeId,PayOrder payOrder);
 }

@@ -6,9 +6,11 @@ import com.egzosn.pay.common.api.BasePayService;
 import com.egzosn.pay.common.api.Callback;
 import com.egzosn.pay.common.api.PayConfigStorage;
 import com.egzosn.pay.common.bean.*;
+import com.egzosn.pay.common.bean.outbuilder.PayTextOutMessage;
 import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpConfigStorage;
+import com.egzosn.pay.payoneer.bean.PayoneerRequestBean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -17,7 +19,6 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * @descrption payoneer业务逻辑
@@ -44,31 +45,31 @@ public class PayoneerPayService extends BasePayService implements AdvancedPaySer
      * 授权登录url
      * https://api.sandbox.payoneer.com/v2/programs/{Program_Id}/payees/login-link
      */
-    public String URL_LOGIN_LINK = payConfigStorage.getPid()+"/payees/login-link";
+    public String urlLoginLink = payConfigStorage.getPid()+"/payees/login-link";
 
     /**
      * 授权注册url
      * https://api.sandbox.payoneer.com/v2/programs/{Program_Id}/payees/registration-link
      */
-    public String URL_REGISTRATION_LINK = payConfigStorage.getPid()+"/payees/registration-link";
+    public String urlRegistrationLink = payConfigStorage.getPid()+"/payees/registration-link";
 
     /**
      * 收款url
      * https://api.sandbox.payoneer.com/v2/programs/{Program_Id}/charges
      */
-    public String URL_CHARGES_LINK = payConfigStorage.getPid()+"/charges";
+    public String urlChargesLink = payConfigStorage.getPid()+"/charges";
 
     /**
      * 取消收款url
      * https://api.sandbox.payoneer.com/v2/programs/{Program_Id}/charges/{client_reference_id}/cancel
      */
-    public String URL_CANCEL_CHARGES_LINK = payConfigStorage.getPid()+"/charges/%s/cancel";
+    public String urlCancelChargesLink = payConfigStorage.getPid()+"/charges/%s/cancel";
 
     /**
      * 查看收款状态
      * https://api.sandbox.payoneer.com/v2/programs/{Program_Id}/charges/{client_reference_id}/status
      */
-    public String URL_STATUS_LINK = payConfigStorage.getPid()+"/charges/%s/status";
+    public String urlStatusLink = payConfigStorage.getPid()+"/charges/%s/status";
 
 
     public PayoneerPayService(PayConfigStorage payConfigStorage) {
@@ -88,14 +89,30 @@ public class PayoneerPayService extends BasePayService implements AdvancedPaySer
      */
     @Override
     public String getAuthorizationPage(String payeeId, AuthPageType authPageType) {
-        Map<String ,Object> params  = new TreeMap<>();
-        params.put("payee_id", payeeId);
-        JSONObject response = getHttpRequestTemplate().postForObject("login".equals(authPageType.name())?URL_LOGIN_LINK:URL_REGISTRATION_LINK,params,JSONObject.class);
-        if("0".equals(response.getString("code"))){
+        PayoneerRequestBean params = new PayoneerRequestBean();
+        params.setPayeeId(payeeId);
+        JSONObject response = getHttpRequestTemplate().postForObject("login".equals(authPageType.name())?getUrlLoginLink():getUrlRegistrationLink(),params,JSONObject.class);
+        if(response != null && "0".equals(response.getString("code"))){
             return response.getString(authPageType.name()+"_link");
         }
 
-        throw new PayErrorException(new PayException("failure", "Payoneer获取授权页面失败,原因:"+response.getString("hint"), response.toJSONString()));
+        throw new PayErrorException(new PayException("fail", "Payoneer获取授权页面失败,原因:"+response.getString("hint"), response.toJSONString()));
+    }
+
+    /**
+     * 发起授权
+     * @param payeeId 授权id(收款id)
+     * @param payOrder 订单信息
+     * @return 返回请求结果
+     */
+    @Override
+    public Map<String ,Object> charge(String payeeId,PayOrder payOrder){
+        PayoneerRequestBean params = new PayoneerRequestBean(payeeId,payOrder.getPrice(),payOrder.getOutTradeNo(),payOrder.getCurType(),payOrder.getBody());
+        JSONObject response = getHttpRequestTemplate().postForObject(getUrlChargesLink(),params,JSONObject.class);
+        if(response != null && "0".equals(response.getString("code"))){
+            return response;
+        }
+        throw  new PayErrorException(new PayException("fail", "Payoneer申请收款失败,原因:"+response.getString("hint"), response.toJSONString()));
     }
 
     /**
@@ -142,9 +159,6 @@ public class PayoneerPayService extends BasePayService implements AdvancedPaySer
      */
     @Override
     public Map<String, Object> orderInfo(PayOrder order) {
-        //todo 发起收款
-
-
 
         return null;
     }
@@ -194,7 +208,7 @@ public class PayoneerPayService extends BasePayService implements AdvancedPaySer
      */
     @Override
     public PayOutMessage getPayOutMessage(String code, String message) {
-        return null;
+        return PayTextOutMessage.TEXT().content(code.toLowerCase()).build();
     }
 
     /**
@@ -206,7 +220,7 @@ public class PayoneerPayService extends BasePayService implements AdvancedPaySer
      */
     @Override
     public PayOutMessage successPayOutMessage(PayMessage payMessage) {
-        return null;
+        return getPayOutMessage("ok", null);
     }
 
     /**
@@ -412,5 +426,25 @@ public class PayoneerPayService extends BasePayService implements AdvancedPaySer
     @Override
     public <T> T secondaryInterface(Object tradeNoOrBillDate, String outTradeNoBillType, TransactionType transactionType, Callback<T> callback) {
         return null;
+    }
+
+    public String getUrlLoginLink() {
+        return payConfigStorage.isTest()?SANDBOX_DOMAIN+urlLoginLink:RELEASE_DOMAIN+urlLoginLink;
+    }
+
+    public String getUrlRegistrationLink() {
+        return payConfigStorage.isTest()?SANDBOX_DOMAIN+urlRegistrationLink:RELEASE_DOMAIN+urlRegistrationLink;
+    }
+
+    public String getUrlChargesLink() {
+        return payConfigStorage.isTest()?SANDBOX_DOMAIN+urlChargesLink:RELEASE_DOMAIN+urlChargesLink;
+    }
+
+    public String getUrlCancelChargesLink() {
+        return payConfigStorage.isTest()?SANDBOX_DOMAIN+urlCancelChargesLink:RELEASE_DOMAIN+urlCancelChargesLink;
+    }
+
+    public String getUrlStatusLink() {
+        return payConfigStorage.isTest()?SANDBOX_DOMAIN+urlStatusLink:RELEASE_DOMAIN+urlStatusLink;
     }
 }

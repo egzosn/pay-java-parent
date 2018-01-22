@@ -13,6 +13,7 @@ import com.egzosn.pay.demo.entity.PayType;
 import com.egzosn.pay.demo.request.QueryOrder;
 import com.egzosn.pay.demo.service.ApyAccountService;
 import com.egzosn.pay.demo.service.PayResponse;
+import com.egzosn.pay.payoneer.api.PayoneerPayService;
 import com.egzosn.pay.wx.bean.WxTransactionType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,6 +27,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -49,6 +51,38 @@ public class PayController {
     public ModelAndView index(){
         return new ModelAndView("/index.html");
     }
+
+    /**
+     * 获取授权页面
+     * @param payId
+     * @param payeeId
+     * @param authPageType
+     * @return
+     */
+    @RequestMapping("getAuthorizationPage.json")
+    public Map<String ,Object> getAuthorizationPage(Integer payId,String payeeId,AuthPageType authPageType ){
+        PayResponse payResponse = service.getPayResponse(payId);
+        PayoneerPayService  payoneerPayService = (PayoneerPayService) payResponse.getService();
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("code", 0);
+        data.put("url", payoneerPayService.getAuthorizationPage(payeeId,authPageType));
+        return data;
+    }
+
+    /**
+     * 发起收款申请
+     * @param payId 账户id
+     * @param payeeId 授权id(收款id)
+     * @param payOrder 订单信息
+     * @return 收款请求结果
+     */
+    @RequestMapping("charge")
+    public Map<String ,Object> charge(Integer payId,String payeeId,PayOrder payOrder){
+        PayResponse payResponse = service.getPayResponse(payId);
+        PayoneerPayService service = (PayoneerPayService) payResponse.getService();
+        return service.charge(payeeId,payOrder);
+    }
+
 
     /**
      * 这里模拟账户信息增加

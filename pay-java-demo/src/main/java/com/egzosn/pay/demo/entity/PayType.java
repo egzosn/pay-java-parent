@@ -6,6 +6,7 @@ import com.egzosn.pay.ali.bean.AliTransactionType;
 import com.egzosn.pay.common.api.PayService;
 import com.egzosn.pay.common.bean.BasePayType;
 import com.egzosn.pay.common.bean.TransactionType;
+import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.fuiou.api.FuiouPayConfigStorage;
 import com.egzosn.pay.fuiou.api.FuiouPayService;
 import com.egzosn.pay.fuiou.bean.FuiouTransactionType;
@@ -178,8 +179,6 @@ public enum PayType implements BasePayType {
         public PayService getPayService(ApyAccount apyAccount) {
             PayoneerConfigStorage payoneerConfigStorage = new PayoneerConfigStorage();
             payoneerConfigStorage.setProgramId(apyAccount.getPartner());
-            payoneerConfigStorage.setApiUserName(apyAccount.getSeller());
-            payoneerConfigStorage.setApiPassword(apyAccount.getStorePassword());
             payoneerConfigStorage.setKeyPublic(apyAccount.getPublicKey());
             payoneerConfigStorage.setKeyPrivate(apyAccount.getPrivateKey());
             payoneerConfigStorage.setNotifyUrl(apyAccount.getNotifyUrl());
@@ -189,7 +188,12 @@ public enum PayType implements BasePayType {
             payoneerConfigStorage.setMsgType(apyAccount.getMsgType());
             payoneerConfigStorage.setInputCharset(apyAccount.getInputCharset());
             payoneerConfigStorage.setTest(apyAccount.isTest());
-            return new PayoneerPayService(payoneerConfigStorage);
+
+            //Basic Auth
+            HttpConfigStorage httpConfigStorage = new  HttpConfigStorage();
+            httpConfigStorage.setHttpProxyUsername(apyAccount.getSeller());
+            httpConfigStorage.setHttpProxyPassword(apyAccount.getStorePassword());
+            return new PayoneerPayService(payoneerConfigStorage,httpConfigStorage);
         }
 
         @Override

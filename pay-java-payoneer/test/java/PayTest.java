@@ -1,3 +1,7 @@
+import com.alibaba.fastjson.JSON;
+import com.egzosn.pay.common.bean.CurType;
+import com.egzosn.pay.payoneer.bean.PayoneerRequestBean;
+
 /**
  *
  * 
@@ -8,10 +12,8 @@
  */
 public class PayTest {
 
-    public static void main(String[] args) {
-
+    public static void  main(String[] args) {
 
     }
-
 
 }

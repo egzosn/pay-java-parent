@@ -12,16 +12,6 @@ public class PayoneerConfigStorage extends BasePayConfigStorage {
      * 商户Id
      */
     public String programId;
-    /**
-     * Api用户名
-     */
-    public String apiUserName;
-    /**
-     * api密码
-     */
-    public String apiPassword;
-
-
 
     /**
      *  应用id
@@ -55,19 +45,4 @@ public class PayoneerConfigStorage extends BasePayConfigStorage {
         this.programId = programId;
     }
 
-    public String getApiUserName() {
-        return apiUserName;
-    }
-
-    public void setApiUserName(String apiUserName) {
-        this.apiUserName = apiUserName;
-    }
-
-    public String getApiPassword() {
-        return apiPassword;
-    }
-
-    public void setApiPassword(String apiPassword) {
-        this.apiPassword = apiPassword;
-    }
 }

@@ -23,15 +23,20 @@
         <!--支付-->
         <dependency>
             <groupId>com.egzosn</groupId>
+            <artifactId>pay-java-payoneer</artifactId>
+            <version>${pay.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.egzosn</groupId>
             <artifactId>pay-java-wx</artifactId>
             <version>${pay.version}</version>
         </dependency>
-
         <dependency>
             <groupId>com.egzosn</groupId>
             <artifactId>pay-java-ali</artifactId>
             <version>${pay.version}</version>
         </dependency>
+
         <dependency>
             <groupId>com.egzosn</groupId>
             <artifactId>pay-java-wx-youdian</artifactId>

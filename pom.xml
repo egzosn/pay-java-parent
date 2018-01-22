@@ -45,11 +45,12 @@
         <module>pay-java-fuiou</module>
         <module>pay-java-union</module>
         <module>pay-java-demo</module>
+        <module>pay-java-payoneer</module>
     </modules>
 
 
     <properties>
-        <pay.version>2.0.6-SNAPSHOT</pay.version>
+        <pay.version>2.0.7-SNAPSHOT</pay.version>
         <httpmime.version>4.5.4</httpmime.version>
         <log4j.version>1.2.17</log4j.version>
         <fastjson.version>1.2.41</fastjson.version>
