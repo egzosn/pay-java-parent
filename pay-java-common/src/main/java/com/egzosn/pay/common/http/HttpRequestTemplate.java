@@ -144,7 +144,7 @@ public class HttpRequestTemplate {
 
         httpClient = HttpClients
                 .custom()
-                //设置代理
+                //设置代理或网络提供者
                 .setDefaultCredentialsProvider(createProxy(configStorage))
                 //设置httpclient的SSLSocketFactory
                 .setSSLSocketFactory(createSSL(configStorage))

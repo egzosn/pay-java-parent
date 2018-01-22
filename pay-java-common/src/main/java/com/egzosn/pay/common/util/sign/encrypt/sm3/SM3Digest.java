@@ -1,7 +1,6 @@
 package com.egzosn.pay.common.util.sign.encrypt.sm3;
 
-public class SM3Digest
-{
+public class SM3Digest {
     /** SM3值的长度 */
     private static final int BYTE_LENGTH = 32;
 
@@ -25,8 +24,8 @@ public class SM3Digest
     public SM3Digest() {
     }
 
-    public SM3Digest(SM3Digest t)
-    {
+
+    public SM3Digest(SM3Digest t){
         System.arraycopy(t.xBuf, 0, this.xBuf, 0, t.xBuf.length);
         this.xBufOff = t.xBufOff;
         System.arraycopy(t.V, 0, this.V, 0, t.V.length);
@@ -37,7 +36,7 @@ public class SM3Digest
      *
      * @param out 保存SM3结构的缓冲区
      * @param outOff 缓冲区偏移量
-     * @return
+     * @return 字节长度
      */
     public int doFinal(byte[] out, int outOff)
     {
@@ -46,6 +45,9 @@ public class SM3Digest
         return BYTE_LENGTH;
     }
 
+    /**
+     * 重置
+     */
     public void reset()
     {
         xBufOff = 0;
@@ -56,12 +58,9 @@ public class SM3Digest
     /**
      * 明文输入
      *
-     * @param in
-     *            明文输入缓冲区
-     * @param inOff
-     *            缓冲区偏移量
-     * @param len
-     *            明文长度
+     * @param in  明文输入缓冲区
+     * @param inOff 缓冲区偏移量
+     * @param len  明文长度
      */
     public void update(byte[] in, int inOff, int len)
     {
@@ -87,6 +86,9 @@ public class SM3Digest
         xBufOff += inputLen;
     }
 
+    /**
+     * 更新
+     */
     private void doUpdate()
     {
         byte[] B = new byte[BLOCK_LENGTH];
@@ -98,6 +100,10 @@ public class SM3Digest
         xBufOff = 0;
     }
 
+    /**
+     * 转16进制
+     * @param B 字节数组
+     */
     private void doHash(byte[] B)
     {
         byte[] tmp = SM3.CF(V, B);
