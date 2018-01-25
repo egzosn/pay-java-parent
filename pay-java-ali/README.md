@@ -150,7 +150,7 @@
 
 ```java
         
-      Map result = service.query("支付宝单号", "我方系统单号");
+      Map result = service..query("支付宝单号", "我方系统单号");
 
 ```
 
