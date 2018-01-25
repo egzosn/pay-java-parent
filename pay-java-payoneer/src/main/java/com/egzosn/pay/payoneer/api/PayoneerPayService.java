@@ -106,8 +106,8 @@ public class PayoneerPayService extends BasePayService implements AdvancedPaySer
      * @return 返回请求结果
      */
     @Override
-    public Map<String ,Object> charge(String payeeId,PayOrder payOrder){
-        PayoneerRequestBean params = new PayoneerRequestBean(payeeId,payOrder.getPrice(),payOrder.getOutTradeNo(),payOrder.getCurType(),payOrder.getBody());
+    public Map<String ,Object> charges(String payeeId,PayOrder payOrder){
+        PayoneerRequestBean params = new PayoneerRequestBean(payeeId,payOrder.getPrice().toString(),payOrder.getOutTradeNo(),payOrder.getCurType(),payOrder.getBody());
         JSONObject response = getHttpRequestTemplate().postForObject(getUrlChargesLink(),params,JSONObject.class);
         if(response != null && "0".equals(response.getString("code"))){
             return response;
@@ -429,22 +429,22 @@ public class PayoneerPayService extends BasePayService implements AdvancedPaySer
     }
 
     public String getUrlLoginLink() {
-        return payConfigStorage.isTest()?SANDBOX_DOMAIN+urlLoginLink:RELEASE_DOMAIN+urlLoginLink;
+        return (payConfigStorage.isTest()?SANDBOX_DOMAIN:RELEASE_DOMAIN)+urlLoginLink;
     }
 
     public String getUrlRegistrationLink() {
-        return payConfigStorage.isTest()?SANDBOX_DOMAIN+urlRegistrationLink:RELEASE_DOMAIN+urlRegistrationLink;
+        return (payConfigStorage.isTest()?SANDBOX_DOMAIN:RELEASE_DOMAIN)+urlRegistrationLink;
     }
 
     public String getUrlChargesLink() {
-        return payConfigStorage.isTest()?SANDBOX_DOMAIN+urlChargesLink:RELEASE_DOMAIN+urlChargesLink;
+        return (payConfigStorage.isTest()?SANDBOX_DOMAIN:RELEASE_DOMAIN)+urlChargesLink;
     }
 
     public String getUrlCancelChargesLink() {
-        return payConfigStorage.isTest()?SANDBOX_DOMAIN+urlCancelChargesLink:RELEASE_DOMAIN+urlCancelChargesLink;
+        return (payConfigStorage.isTest()?SANDBOX_DOMAIN:RELEASE_DOMAIN)+urlCancelChargesLink;
     }
 
     public String getUrlStatusLink() {
-        return payConfigStorage.isTest()?SANDBOX_DOMAIN+urlStatusLink:RELEASE_DOMAIN+urlStatusLink;
+        return (payConfigStorage.isTest()?SANDBOX_DOMAIN:RELEASE_DOMAIN)+urlStatusLink;
     }
 }

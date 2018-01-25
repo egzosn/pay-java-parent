@@ -76,11 +76,11 @@ public class PayController {
      * @param payOrder 订单信息
      * @return 收款请求结果
      */
-    @RequestMapping("charge")
-    public Map<String ,Object> charge(Integer payId,String payeeId,PayOrder payOrder){
+    @RequestMapping("charges")
+    public Map<String ,Object> charges(Integer payId,String payeeId,PayOrder payOrder){
         PayResponse payResponse = service.getPayResponse(payId);
         PayoneerPayService service = (PayoneerPayService) payResponse.getService();
-        return service.charge(payeeId,payOrder);
+        return service.charges(payeeId,payOrder);
     }
 
 

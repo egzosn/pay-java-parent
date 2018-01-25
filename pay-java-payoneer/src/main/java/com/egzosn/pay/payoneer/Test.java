@@ -1,7 +1,8 @@
-package com.egzosn.pay.common.http;
+package com.egzosn.pay.payoneer;
 
 import com.alibaba.fastjson.JSON;
-import org.apache.http.HttpEntity;
+import com.egzosn.pay.common.bean.CurType;
+import com.egzosn.pay.payoneer.bean.PayoneerRequestBean;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -32,14 +33,19 @@ import java.net.URI;
 public class Test {
 
     public static void main(String[] args) throws Exception {
-        URI uri = URI.create("https://api.sandbox.payoneer.com/v2/programs/100086190/payees/login-link");
+//        URI uri = URI.create("https://api.sandbox.payoneer.com/v2/programs/100086190/payees/registration-link");
+        URI uri = URI.create("https://api.sandbox.payoneer.com/v2/programs/100086190/charges");
         HttpHost target = new HttpHost(uri.getHost(), uri.getPort(), uri.getScheme());
+        HttpPost httpPost = new HttpPost(uri.toString());
+
         CredentialsProvider credsProvider = new BasicCredentialsProvider();
         credsProvider.setCredentials(
-                new AuthScope(target.getHostName(), target.getPort()),
+                new AuthScope(uri.getHost(), uri.getPort()),
                 new UsernamePasswordCredentials("Huodull6190", "12BkDT8152Zj"));
+
         CloseableHttpClient httpclient = HttpClients.custom()
-                .setDefaultCredentialsProvider(credsProvider).build();
+                .setDefaultCredentialsProvider(credsProvider)
+                .build();
         try {
 
             // Create AuthCache instance
@@ -51,14 +57,20 @@ public class Test {
 
             // Add AuthCache to the execution context
             HttpClientContext localContext = HttpClientContext.create();
+//            localContext.setCredentialsProvider(credsProvider);
             localContext.setAuthCache(authCache);
 
-            HttpPost httpPost = new HttpPost("https://api.sandbox.payoneer.com/v2/programs/100086190/payees/login-link");
-            StringEntity entity = new StringEntity(JSON.toJSONString(Pay), ContentType.APPLICATION_JSON);
+//            BasicHttpContext localContext = new BasicHttpContext();
+//            localContext.setAttribute(ClientContext.AUTH_CACHE,authCache);
 
-            httpPost.setEntity();
+//            PayoneerRequestBean bean = new PayoneerRequestBean("666");
+            PayoneerRequestBean bean = new PayoneerRequestBean("6666","1","566002", CurType.USD,"66");
+            StringEntity entity = new StringEntity(JSON.toJSONString(bean), ContentType.APPLICATION_JSON);
+            httpPost.setEntity(entity);
+
+
             System.out.println("Executing request " + httpPost.getRequestLine() + " to target " + target);
-            for (int i = 0; i < 3; i++) {
+            for (int i = 0; i < 1; i++) {
                 CloseableHttpResponse response = httpclient.execute(target, httpPost, localContext);
                 try {
                     System.out.println("----------------------------------------");

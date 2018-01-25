@@ -28,5 +28,5 @@ public interface AdvancedPayService extends PayService{
      * @param payOrder 订单信息
      * @return 返回请求结果
      */
-    Map<String ,Object> charge(String payeeId,PayOrder payOrder);
+    Map<String ,Object> charges(String payeeId,PayOrder payOrder);
 }

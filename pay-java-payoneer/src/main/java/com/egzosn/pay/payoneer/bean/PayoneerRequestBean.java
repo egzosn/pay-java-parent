@@ -3,8 +3,6 @@ package com.egzosn.pay.payoneer.bean;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.egzosn.pay.common.bean.CurType;
 
-import java.math.BigDecimal;
-
 /**
  * @author Fuzx
  * @create 2018 2018/1/22 0022
@@ -14,7 +12,10 @@ public class PayoneerRequestBean {
 
     }
 
-    public PayoneerRequestBean(String payeeId, BigDecimal amount, String clientReferenceId, CurType currency, String description) {
+    public PayoneerRequestBean(String payeeId) {
+        this.payeeId = payeeId;
+    }
+    public PayoneerRequestBean(String payeeId, String amount, String clientReferenceId, CurType currency, String description) {
         this.payeeId = payeeId;
         this.amount = amount;
         this.clientReferenceId = clientReferenceId;
@@ -30,7 +31,7 @@ public class PayoneerRequestBean {
     /**
      * 收款金额
      */
-    private BigDecimal amount;
+    private String amount;
     /**
      * 订单id
      */
@@ -53,11 +54,11 @@ public class PayoneerRequestBean {
         this.payeeId = payeeId;
     }
 
-    public BigDecimal getAmount() {
+    public String getAmount() {
         return amount;
     }
 
-    public void setAmount(BigDecimal amount) {
+    public void setAmount(String amount) {
         this.amount = amount;
     }
 

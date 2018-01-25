@@ -107,6 +107,7 @@ public class ApyAccountRepository {
         apyAccount5.setInputCharset("UTF-8");
         apyAccount5.setPayType(PayType.payoneer);
         apyAccount5.setMsgType(MsgType.json);
+        apyAccount5.setTest(true);
         apyAccounts.put(apyAccount5.getPayId(), apyAccount5);
     }
     //_____________________________________________________________

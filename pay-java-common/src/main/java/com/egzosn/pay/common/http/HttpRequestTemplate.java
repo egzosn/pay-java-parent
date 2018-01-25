@@ -1,33 +1,26 @@
 package com.egzosn.pay.common.http;
 
-import com.alibaba.fastjson.JSON;
 import com.egzosn.pay.common.bean.MethodType;
 import com.egzosn.pay.common.util.str.StringUtils;
+import org.apache.http.Header;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.AuthCache;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.conn.ssl.DefaultHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.auth.BasicScheme;
-import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContexts;
-import org.apache.http.util.EntityUtils;
 
 import javax.net.ssl.SSLContext;
 import java.io.*;
 import java.net.URI;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -115,9 +108,9 @@ public class HttpRequestTemplate {
 
         if (StringUtils.isNotBlank(configStorage.getHttpProxyHost())) {
 
-            URI uri = URI.create(configStorage.getHttpProxyHost());
+//            URI uri = URI.create(configStorage.getHttpProxyHost());
             //http代理地址设置
-            httpProxy = new HttpHost(uri.getHost(), uri.getPort(), uri.getScheme());;
+            httpProxy = new HttpHost(configStorage.getHttpProxyHost(),configStorage.httpProxyPort);;
         }
 
 
@@ -128,7 +121,7 @@ public class HttpRequestTemplate {
         // 需要用户认证的代理服务器
         CredentialsProvider credsProvider = new BasicCredentialsProvider();
         credsProvider.setCredentials(
-                new AuthScope(httpProxy.getHostName(), httpProxy.getPort()),
+                 AuthScope.ANY,
                 new UsernamePasswordCredentials(configStorage.getHttpProxyUsername(), configStorage.getHttpProxyPassword()));
 
 
@@ -178,12 +171,13 @@ public class HttpRequestTemplate {
     public <T> T postForObject(String uri, Object request, Class<T> responseType, Map<String, Object> uriVariables) {
         return doExecute(URI.create(UriVariables.getUri(uri, uriVariables)), request, responseType, MethodType.POST);
     }
-    public <T> T postForObjectAndBasicAuth(String uri, Object request, Class<T> responseType, Object... uriVariables) {
-        return doExecuteAndBasicAuth(URI.create(UriVariables.getUri(uri, uriVariables)), request, responseType, MethodType.POST);
-    }
 
     public <T> T postForObject(URI uri, Object request, Class<T> responseType){
         return doExecute(uri, request, responseType, MethodType.POST);
+    }
+
+    public <T> T postForObject(String uri, Object request, List<Header> headeres, Class<T> responseType, Object... uriVariables){
+        return doExecute(URI.create(UriVariables.getUri(uri, uriVariables)), request,headeres, responseType, MethodType.POST);
     }
 
 
@@ -239,11 +233,28 @@ public class HttpRequestTemplate {
      */
     public <T>T doExecute(URI uri, Object request, Class<T> responseType, MethodType method){
         ClientHttpRequest<T> httpRequest = new ClientHttpRequest(uri ,method, request);
-        httpRequest.setProxy(httpProxy).setResponseType(responseType);
-
+        httpRequest.setResponseType(responseType);
         try (CloseableHttpResponse response = httpClient.execute(httpRequest)) {
           return httpRequest.handleResponse(response);
-        }catch (  IOException e){
+        }catch (IOException e){
+            e.printStackTrace();
+        }finally {
+            httpRequest.releaseConnection();
+        }
+        return null;
+    }
+
+    public <T>T doExecute(URI uri, Object request, List<Header> headers, Class<T> responseType, MethodType method){
+        ClientHttpRequest<T> httpRequest = new ClientHttpRequest(uri ,method, request);
+        httpRequest.setResponseType(responseType);
+        if(headers != null){
+            for(Header header :  headers){
+                httpRequest.addHeader(header);
+            }
+        }
+        try (CloseableHttpResponse response = httpClient.execute(httpRequest)) {
+            return httpRequest.handleResponse(response);
+        }catch (IOException e){
             e.printStackTrace();
         }finally {
             httpRequest.releaseConnection();
@@ -260,78 +271,7 @@ public class HttpRequestTemplate {
      * @param <T> 响应类型
      * @return 类型对象
      */
-    public <T>T doExecuteAndBasicAuth(URI uri, Object request, Class<T> responseType, MethodType method){
-        //todo 研究研究
-        CredentialsProvider credsProvider = new BasicCredentialsProvider();
-        credsProvider.setCredentials(
-                new AuthScope(uri.getHost(), uri.getPort()),
-                new UsernamePasswordCredentials("Huodull6190", "12BkDT8152Zj"));
-
-        CloseableHttpClient hc = HttpClients.custom()
-                .setDefaultCredentialsProvider(credsProvider).build();
-
-//        ClientHttpRequest<T> httpRequest = new ClientHttpRequest(uri ,method, request);
-//        httpRequest.setProxy(httpProxy).setResponseType(responseType);
-        AuthCache authCache = new BasicAuthCache();
-        BasicScheme basicAuth = new BasicScheme();
-        HttpHost host = new HttpHost(uri.getHost(),uri.getPort(),uri.getScheme());
-        authCache.put(host, basicAuth);
-
-        HttpClientContext context = HttpClientContext.create();
-//        context.setCredentialsProvider(credsProvider);
-        context.setAuthCache(authCache);
-
-        HttpPost httpPost = new HttpPost(uri.toString());
-        StringEntity entity = new StringEntity(JSON.toJSONString(request), ContentType.APPLICATION_JSON);
-        httpPost.setEntity(entity);
-
-        try (CloseableHttpResponse response = hc.execute(host,httpPost,context)) {
-
-            return (T)JSON.parseObject(EntityUtils.toString(response.getEntity()));
-        }catch (  IOException e){
-            e.printStackTrace();
-        }finally {
-            httpPost.releaseConnection();
-        }
-        return null;
-    }
-
-    /**
-     * http 请求执行
-     * @param uri 地址
-     * @param request 请求数据
-     * @param responseType 响应类型
-     * @param method 请求方法
-     * @param <T> 响应类型
-     * @return 类型对象
-     */
     public <T>T doExecute(String uri, Object request, Class<T> responseType, MethodType method){
        return doExecute(URI.create(uri), request, responseType, method);
     }
-
-    /**
-     * 创建Basic Auth
-     * @param uri
-//     * @param username
-//     * @param password
-     * @return
-     */
-    private HttpClientContext createBasicAuthContext(URI uri) {
-//        CredentialsProvider credsProvider = new BasicCredentialsProvider();
-//        Credentials defaultCreds = new UsernamePasswordCredentials(username, password);
-//        credsProvider.setCredentials(new AuthScope(uri.getHost(), uri.getPort()), defaultCreds);
-
-        AuthCache authCache = new BasicAuthCache();
-        BasicScheme basicAuth = new BasicScheme();
-        HttpHost host = new HttpHost(uri.getHost(),uri.getPort(),uri.getScheme());
-        authCache.put(host, basicAuth);
-
-        HttpClientContext context = HttpClientContext.create();
-//        context.setCredentialsProvider(credsProvider);
-        context.setAuthCache(authCache);
-        return context;
-    }
-
-
-
 }
