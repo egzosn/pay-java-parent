@@ -68,7 +68,7 @@ public class WxPayService extends BasePayService {
      * @param transactionType 交易类型
      * @return 请求url
      */
-    private String getUrl(TransactionType transactionType) {
+    private String getReqUrl(TransactionType transactionType) {
 
         return URI + transactionType.getMethod();
     }
@@ -196,7 +196,7 @@ public class WxPayService extends BasePayService {
         String requestXML = XML.getMap2Xml(parameters);
         LOG.debug("requestXML：" + requestXML);
         //调起支付的参数列表
-        JSONObject result = requestTemplate.postForObject(getUrl(order.getTransactionType()), requestXML, JSONObject.class);
+        JSONObject result = requestTemplate.postForObject(getReqUrl(order.getTransactionType()), requestXML, JSONObject.class);
 
         if (!"SUCCESS".equals(result.get("return_code"))) {
             throw new PayErrorException(new WxPayError(result.getString("return_code"), result.getString("return_msg"), result.toJSONString()));
@@ -511,7 +511,7 @@ public class WxPayService extends BasePayService {
 
         //设置签名
         setSign(parameters);
-        return callback.perform(requestTemplate.postForObject(getUrl(WxTransactionType.REFUND), XML.getMap2Xml(parameters), JSONObject.class));
+        return callback.perform(requestTemplate.postForObject(getReqUrl(WxTransactionType.REFUND), XML.getMap2Xml(parameters), JSONObject.class));
     }
 
     /**
@@ -586,7 +586,7 @@ public class WxPayService extends BasePayService {
 
         //设置签名
         setSign(parameters);
-        return callback.perform(requestTemplate.postForObject(getUrl(WxTransactionType.DOWNLOADBILL), XML.getMap2Xml(parameters), JSONObject.class));
+        return callback.perform(requestTemplate.postForObject(getReqUrl(WxTransactionType.DOWNLOADBILL), XML.getMap2Xml(parameters), JSONObject.class));
     }
 
     /**
@@ -625,7 +625,7 @@ public class WxPayService extends BasePayService {
         }
         //设置签名
         setSign(parameters);
-        return  callback.perform(requestTemplate.postForObject(getUrl(transactionType), XML.getMap2Xml(parameters) , JSONObject.class));
+        return  callback.perform(requestTemplate.postForObject(getReqUrl(transactionType), XML.getMap2Xml(parameters) , JSONObject.class));
     }
 
 
