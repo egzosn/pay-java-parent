@@ -56,32 +56,18 @@ public class PayController {
      * 获取授权页面
      * @param payId
      * @param payeeId
-     * @param authPageType
      * @return
      */
     @RequestMapping("getAuthorizationPage.json")
-    public Map<String ,Object> getAuthorizationPage(Integer payId,String payeeId,AuthPageType authPageType ){
+    public Map<String ,Object> getAuthorizationPage(Integer payId,String payeeId ){
         PayResponse payResponse = service.getPayResponse(payId);
         PayoneerPayService  payoneerPayService = (PayoneerPayService) payResponse.getService();
         Map<String, Object> data = new LinkedHashMap<>();
         data.put("code", 0);
-        data.put("url", payoneerPayService.getAuthorizationPage(payeeId,authPageType));
+        data.put("url", payoneerPayService.getAuthorizationPage(payeeId));
         return data;
     }
 
-    /**
-     * 发起收款申请
-     * @param payId 账户id
-     * @param payeeId 授权id(收款id)
-     * @param payOrder 订单信息
-     * @return 收款请求结果
-     */
-    @RequestMapping("charges")
-    public Map<String ,Object> charges(Integer payId,String payeeId,PayOrder payOrder){
-        PayResponse payResponse = service.getPayResponse(payId);
-        PayoneerPayService service = (PayoneerPayService) payResponse.getService();
-        return service.charges(payeeId,payOrder);
-    }
 
 
     /**
@@ -194,7 +180,7 @@ public class PayController {
         //获取对应的支付账户操作工具（可根据账户id）
         PayResponse payResponse = service.getPayResponse(payId);
 
-        PayOrder order = new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType));
+        PayOrder order = new PayOrder("huodull order", "huodull order", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType));
         //设置授权码，条码等
         order.setAuthCode(authCode);
         //支付结果
