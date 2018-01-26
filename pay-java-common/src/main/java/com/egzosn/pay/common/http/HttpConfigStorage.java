@@ -10,14 +10,22 @@ package com.egzosn.pay.common.http;
  *  </pre>
  */
 public class HttpConfigStorage {
-    //http代理地址
+    /**
+     * http代理地址
+     */
     protected String httpProxyHost;
-    //代理端口
+    /**
+     * 代理端口
+     */
     protected int httpProxyPort;
-    //代理用户名
-    protected String httpProxyUsername;
-    //代理密码
-    protected String httpProxyPassword;
+    /**
+     * 请求授权用户名
+     */
+    protected String authUsername;
+    /**
+     * 请求授权密码
+     */
+    protected String authPassword;
 
     /**
      * @see #keystore 是否为https请求所需的证书（PKCS12）的地址,默认为地址，否则为证书信息串
@@ -54,28 +62,68 @@ public class HttpConfigStorage {
     public void setHttpProxyPort(int httpProxyPort) {
         this.httpProxyPort = httpProxyPort;
     }
+
+    /**
+     * 请求授权用户名
+     * @return 用户名
+     */
+    public String getAuthUsername() {
+        return authUsername;
+    }
+
+    public void setAuthUsername(String authUsername) {
+        this.authUsername = authUsername;
+    }
+    /**
+     * 请求授权密码
+     * @return 密码
+     */
+    public String getAuthPassword() {
+        return authPassword;
+    }
+
+    public void setAuthPassword(String authPassword) {
+        this.authPassword = authPassword;
+    }
+
     /**
      * 代理用户名
      * @return 代理用户名
+     * @see #getAuthUsername()
      */
+    @Deprecated
     public String getHttpProxyUsername() {
-        return httpProxyUsername;
+        return authUsername;
     }
 
+    /**
+     * 设置代理用户名
+     * @param httpProxyUsername 代理用户名
+     *  @see #setAuthUsername(String)
+     */
+    @Deprecated
     public void setHttpProxyUsername(String httpProxyUsername) {
-        this.httpProxyUsername = httpProxyUsername;
+        this.authUsername = httpProxyUsername;
     }
 
     /**
      *  代理密码
      * @return 代理密码
+     * @see #getAuthPassword()
      */
+    @Deprecated
     public String getHttpProxyPassword() {
-        return httpProxyPassword;
+        return authPassword;
     }
 
+    /**
+     * 设置代理密码
+     * @param httpProxyPassword 代理密码
+     * @see #setAuthPassword(String)
+     */
+    @Deprecated
     public void setHttpProxyPassword(String httpProxyPassword) {
-        this.httpProxyPassword = httpProxyPassword;
+        this.authPassword = httpProxyPassword;
     }
 
     /**

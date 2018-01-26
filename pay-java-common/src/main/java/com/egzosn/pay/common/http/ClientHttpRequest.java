@@ -154,7 +154,15 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
         if (null == request){
             return this;
         }
-        if (request instanceof HttpEntity){
+        if (request instanceof HttpStringEntity){
+            HttpStringEntity entity = (HttpStringEntity)request;
+            setEntity(entity);
+            if (null != entity.getHeaders() ){
+                for (Header header : entity.getHeaders()){
+                    addHeader(header);
+                }
+            }
+        } else if (request instanceof HttpEntity){
             setEntity((HttpEntity)request);
         } else if (request instanceof Map) {
             StringEntity entity = new StringEntity(getMapToParameters((Map) request), APPLICATION_FORM_URLENCODED_UTF_8);

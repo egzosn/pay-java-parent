@@ -69,7 +69,7 @@ public class HttpRequestTemplate {
      */
     public SSLConnectionSocketFactory createSSL( HttpConfigStorage configStorage){
 
-        if (StringUtils.isEmpty(configStorage.getKeystorePath()) || StringUtils.isEmpty(configStorage.getKeystorePath())){
+        if (StringUtils.isEmpty(configStorage.getKeystore())){
             return null;
         }
 
@@ -100,21 +100,19 @@ public class HttpRequestTemplate {
     }
 
     /**
-     * 创建代理服务器
+     * 创建凭据提供程序
      * @param configStorage 请求配置
-     * @return 代理服务器配置
+     * @return 凭据提供程序
      */
-    public CredentialsProvider createProxy(HttpConfigStorage configStorage){
+    public CredentialsProvider createCredentialsProvider(HttpConfigStorage configStorage){
 
         if (StringUtils.isNotBlank(configStorage.getHttpProxyHost())) {
-
-//            URI uri = URI.create(configStorage.getHttpProxyHost());
             //http代理地址设置
             httpProxy = new HttpHost(configStorage.getHttpProxyHost(),configStorage.httpProxyPort);;
         }
 
 
-        if (StringUtils.isBlank(configStorage.getHttpProxyUsername())) {
+        if (StringUtils.isBlank(configStorage.getAuthUsername())) {
             return null;
         }
 
@@ -122,7 +120,7 @@ public class HttpRequestTemplate {
         CredentialsProvider credsProvider = new BasicCredentialsProvider();
         credsProvider.setCredentials(
                  AuthScope.ANY,
-                new UsernamePasswordCredentials(configStorage.getHttpProxyUsername(), configStorage.getHttpProxyPassword()));
+                new UsernamePasswordCredentials(configStorage.getAuthUsername(), configStorage.getAuthPassword()));
 
 
         return credsProvider;
@@ -144,8 +142,8 @@ public class HttpRequestTemplate {
 
         httpClient = HttpClients
                 .custom()
-                //设置代理或网络提供者
-                .setDefaultCredentialsProvider(createProxy(configStorage))
+                //网络提供者
+                .setDefaultCredentialsProvider(createCredentialsProvider(configStorage))
                 //设置httpclient的SSLSocketFactory
                 .setSSLSocketFactory(createSSL(configStorage))
                 .build();
@@ -176,9 +174,7 @@ public class HttpRequestTemplate {
         return doExecute(uri, request, responseType, MethodType.POST);
     }
 
-    public <T> T postForObject(String uri, Object request, List<Header> headeres, Class<T> responseType, Object... uriVariables){
-        return doExecute(URI.create(UriVariables.getUri(uri, uriVariables)), request,headeres, responseType, MethodType.POST);
-    }
+
 
 
 
@@ -233,6 +229,10 @@ public class HttpRequestTemplate {
      */
     public <T>T doExecute(URI uri, Object request, Class<T> responseType, MethodType method){
         ClientHttpRequest<T> httpRequest = new ClientHttpRequest(uri ,method, request);
+        //判断是否有代理设置
+        if (null == httpProxy){
+            httpRequest.setProxy(httpProxy);
+        }
         httpRequest.setResponseType(responseType);
         try (CloseableHttpResponse response = httpClient.execute(httpRequest)) {
           return httpRequest.handleResponse(response);
@@ -244,23 +244,6 @@ public class HttpRequestTemplate {
         return null;
     }
 
-    public <T>T doExecute(URI uri, Object request, List<Header> headers, Class<T> responseType, MethodType method){
-        ClientHttpRequest<T> httpRequest = new ClientHttpRequest(uri ,method, request);
-        httpRequest.setResponseType(responseType);
-        if(headers != null){
-            for(Header header :  headers){
-                httpRequest.addHeader(header);
-            }
-        }
-        try (CloseableHttpResponse response = httpClient.execute(httpRequest)) {
-            return httpRequest.handleResponse(response);
-        }catch (IOException e){
-            e.printStackTrace();
-        }finally {
-            httpRequest.releaseConnection();
-        }
-        return null;
-    }
 
     /**
      * http 请求执行
