@@ -227,8 +227,8 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
             return (T)result;
         }
 
-        String frist = result.substring(0, 1);
-        if ( ContentType.APPLICATION_JSON.getMimeType().equals( value[0]) || "{[".indexOf(frist) >= 0 ){
+        String first = result.substring(0, 1);
+        if ( ContentType.APPLICATION_JSON.getMimeType().equals( value[0]) || "{[".indexOf(first) >= 0 ){
             try {
                 return JSON.parseObject(result, responseType);
             }catch (JSONException e){
@@ -236,7 +236,7 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
             }
         }
 
-        if (ContentType.APPLICATION_XML.getMimeType().equals( value[0]) || "<".indexOf(frist) >= 0){
+        if (ContentType.APPLICATION_XML.getMimeType().equals( value[0]) || "<".indexOf(first) >= 0){
             return XML.toJSONObject(result).toJavaObject(responseType);
         }
 
