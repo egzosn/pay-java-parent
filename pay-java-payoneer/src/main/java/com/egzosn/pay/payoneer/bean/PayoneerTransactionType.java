@@ -12,7 +12,24 @@ import com.egzosn.pay.common.bean.TransactionType;
  */
 public enum PayoneerTransactionType implements TransactionType {
 
-    charge("charge");
+    /**
+     * 收款
+     */
+    registration("payees/registration-link"),
+    /**
+     * 收款
+     */
+    charge("charges"),
+    /**
+     * 取消收款(取消订单与退款)
+     */
+    chargeCancel("charges/{client_reference_id}/cancel"),
+    /**
+     * 查询收款订单与订单状态
+     */
+    chargeStatus("charges/{client_reference_id}/status")
+    ;
+
     private String method;
 
     PayoneerTransactionType(String method) {

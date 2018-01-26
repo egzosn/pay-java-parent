@@ -1,5 +1,3 @@
-package com.egzosn.pay.payoneer.bean;
-
 import com.alibaba.fastjson.annotation.JSONField;
 import com.egzosn.pay.common.bean.CurType;
 
@@ -19,7 +17,10 @@ public class PayoneerRequestBean {
         this.payeeId = payeeId;
         this.amount = amount;
         this.clientReferenceId = clientReferenceId;
-        this.currency = currency;
+        if (null == currency){
+            currency = CurType.USD;
+        }
+            this.currency = currency;
         this.description = description;
     }
 
