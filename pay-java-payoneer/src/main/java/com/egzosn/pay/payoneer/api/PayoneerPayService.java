@@ -40,7 +40,7 @@ public class PayoneerPayService extends BasePayService implements AdvancedPaySer
     /**
      * 响应状态码
      */
-    private final static String CODE = "code";
+    public final static String CODE = "code";
     /**
      * 响应状态码
      */
@@ -214,10 +214,10 @@ public class PayoneerPayService extends BasePayService implements AdvancedPaySer
     public Map<String, Object> microPay(PayOrder order) {
         HttpStringEntity entity = new HttpStringEntity(JSON.toJSONString(orderInfo(order)), ContentType.APPLICATION_JSON);
         JSONObject response = getHttpRequestTemplate().postForObject(getReqUrl(PayoneerTransactionType.charge), entity, JSONObject.class);
-        if (response != null && 0 == response.getIntValue(CODE)) {
+        if (response != null) {
             return response;
         }
-        throw new PayErrorException(new PayException("fail", "Payoneer申请收款失败,原因:" + response.getString("hint"), response.toJSONString()));
+        throw new PayErrorException(new PayException("fail", "Payoneer申请收款失败,原因:" + response.getString("description"), response.toJSONString()));
     }
 
     /**

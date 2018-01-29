@@ -4,6 +4,7 @@ import com.egzosn.pay.common.api.PayService;
 import com.egzosn.pay.common.bean.PayMessage;
 import com.egzosn.pay.common.bean.PayOutMessage;
 import com.egzosn.pay.common.exception.PayErrorException;
+import com.egzosn.pay.payoneer.api.PayoneerPayService;
 
 import java.util.Map;
 
@@ -23,7 +24,7 @@ public class PayoneerMessageHandler extends BasePayMessageHandler {
     @Override
     public PayOutMessage handle(PayMessage payMessage, Map<String, Object> context, PayService payService) throws PayErrorException {
         //交易状态
-        if ("0".equals(payMessage.getPayMessage().get("code"))) {
+        if ("0".equals(payMessage.getPayMessage().get(PayoneerPayService.CODE))) {
             /////这里进行成功的处理
 
             return payService.successPayOutMessage(payMessage);

@@ -185,14 +185,6 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
         final StatusLine statusLine = response.getStatusLine();
         final HttpEntity entity = response.getEntity();
 
-        if (statusLine.getStatusCode() >= 300 && statusLine.getStatusCode() != 304) {
-            EntityUtils.consume(entity);
-            throw new HttpResponseException(statusLine.getStatusCode(), statusLine.getReasonPhrase());
-        }
-        if (null == responseType){
-            responseType = (Class<T>) String.class;
-        }
-
         String[] value = null;
         if (null == entity.getContentType()){
             value = new String[]{"application/x-www-form-urlencoded"};
@@ -200,6 +192,24 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
             value = entity.getContentType().getValue().split(";");
         }
 
+        if (statusLine.getStatusCode() >= 300 && statusLine.getStatusCode() != 304) {
+            if (isJson(value[0], "") || isXml(value[0], "") ){
+                return toBean(entity, value);
+            }
+
+            EntityUtils.consume(entity);
+            throw new HttpResponseException(statusLine.getStatusCode(), statusLine.getReasonPhrase());
+        }
+        if (null == responseType){
+            responseType = (Class<T>) String.class;
+        }
+
+
+        return toBean(entity, value);
+
+    }
+
+    private T toBean(HttpEntity entity, String[] value) throws IOException {
         if (ContentType.APPLICATION_OCTET_STREAM.getMimeType().equals(value[0])){
 
             if (responseType.isAssignableFrom(InputStream.class)){
@@ -228,7 +238,7 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
         }
 
         String first = result.substring(0, 1);
-        if ( ContentType.APPLICATION_JSON.getMimeType().equals( value[0]) || "{[".indexOf(first) >= 0 ){
+        if ( isJson(value[0], first) ){
             try {
                 return JSON.parseObject(result, responseType);
             }catch (JSONException e){
@@ -236,11 +246,34 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
             }
         }
 
-        if (ContentType.APPLICATION_XML.getMimeType().equals( value[0]) || "<".indexOf(first) >= 0){
+        if (isXml(value[0], first)){
             return XML.toJSONObject(result).toJavaObject(responseType);
         }
 
         throw new PayErrorException(new PayException("failure", "类型转化异常,contentType:" + entity.getContentType().getValue(), result));
 
+
     }
+
+    /**
+     * 检测响应类型是否为json
+     * @param contentType 内容类型
+     * @param textFirst 文本第一个字符
+     * @return 布尔型， true为json内容类型
+     */
+    private boolean isJson(String contentType, String textFirst){
+        return( ContentType.APPLICATION_JSON.getMimeType().equals(contentType) || "{[".indexOf(textFirst) >= 0 );
+    }
+
+    /**
+     * 检测响应类型是否为xml
+     * @param contentType 内容类型
+     * @param textFirst 文本第一个字符
+     * @return 布尔型， true为xml内容类型
+     */
+    private boolean isXml(String contentType, String textFirst){
+        return( ContentType.APPLICATION_XML.getMimeType().equals(contentType) || "<".indexOf(textFirst) >= 0 );
+    }
+
+
 }
