@@ -438,7 +438,7 @@ public class AliPayService extends BasePayService {
         if (!StringUtils.isEmpty(refundOrder.getRefundNo())){
             bizContent.put("out_request_no", refundOrder.getRefundNo());
         }
-        bizContent.put("refund_amount", refundOrder.getRefundAmount());
+        bizContent.put("refund_amount", refundOrder.getRefundAmount().setScale(2, BigDecimal.ROUND_HALF_UP));
         //设置请求参数的集合
         parameters.put("biz_content", JSON.toJSONString(bizContent));
         //设置签名
