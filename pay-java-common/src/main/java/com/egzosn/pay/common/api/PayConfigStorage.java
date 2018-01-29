@@ -16,6 +16,11 @@ import java.util.concurrent.locks.Lock;
  public interface PayConfigStorage {
 
     /**
+     * 附加支付配置
+     * @return 附加信息
+     */
+     Object getAttach();
+    /**
      * 获取证书解释器
      * @return 证书解释器
      */
