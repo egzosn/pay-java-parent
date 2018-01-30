@@ -10,9 +10,13 @@ import com.egzosn.pay.common.bean.outbuilder.PayTextOutMessage;
 import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpConfigStorage;
+import com.egzosn.pay.common.http.HttpHeader;
 import com.egzosn.pay.common.http.HttpStringEntity;
 import com.egzosn.pay.payoneer.bean.PayoneerTransactionType;
 import org.apache.http.entity.ContentType;
+import org.apache.http.message.BasicHeader;
+import org.apache.http.protocol.HTTP;
+
 import java.awt.image.BufferedImage;
 import java.math.BigDecimal;
 import java.util.Date;
@@ -44,7 +48,7 @@ public class PayoneerPayService extends BasePayService implements AdvancedPaySer
     /**
      * 响应状态码
      */
-    private final static String OUT_TRADE_NO = "{client_reference_id}";
+    private final static String OUT_TRADE_NO = "client_reference_id";
 
 
     public PayoneerPayService(PayConfigStorage payConfigStorage) {
@@ -83,9 +87,11 @@ public class PayoneerPayService extends BasePayService implements AdvancedPaySer
     @Override
     public boolean verify(Map<String, Object> params) {
         if (params != null && 0 == Integer.parseInt(params.get(CODE).toString())) {
-            return true;
+            if (params.containsKey(OUT_TRADE_NO)){
+                return verifySource((String) params.get(OUT_TRADE_NO));
+            }
         }
-        return false;
+        return true;
     }
 
     /**
@@ -105,13 +111,14 @@ public class PayoneerPayService extends BasePayService implements AdvancedPaySer
      * 支付宝需要,微信是否也需要再次校验来源，进行订单查询
      * 校验数据来源
      *
-     * @param id 业务id, 数据的真实性.
+     * @param outTradeNo 业务id, 数据的真实性.
      *
      * @return true通过
      */
     @Override
-    public boolean verifySource(String id) {
-        return true;
+    public boolean verifySource(String outTradeNo) {
+        Map<String, Object> data = query(null, outTradeNo);
+        return "DONE".equals(data.get("status"));
     }
 
     /**
@@ -230,12 +237,10 @@ public class PayoneerPayService extends BasePayService implements AdvancedPaySer
      */
     @Override
     public Map<String, Object> query(String tradeNo, String outTradeNo) {
-
-        JSONObject result = getHttpRequestTemplate().postForObject(getReqUrl(PayoneerTransactionType.chargeStatus).replace(OUT_TRADE_NO, outTradeNo), new HttpStringEntity("", ContentType.APPLICATION_JSON), JSONObject.class);
-
-        if (0 != result.getIntValue(CODE)) {
+        JSONObject result = getHttpRequestTemplate().getForObject(getReqUrl(PayoneerTransactionType.chargeStatus), JSONObject.class, outTradeNo);
+   /*     if (0 != result.getIntValue(CODE)) {
             throw new PayErrorException(new PayException(result.getString(CODE), result.getString("description"), result.toJSONString()));
-        }
+        }*/
         return result;
     }
 
@@ -264,11 +269,11 @@ public class PayoneerPayService extends BasePayService implements AdvancedPaySer
     @Override
     public Map<String, Object> close(String tradeNo, String outTradeNo) {
 
-        JSONObject result = getHttpRequestTemplate().postForObject(getReqUrl(PayoneerTransactionType.chargeCancel).replace(OUT_TRADE_NO, outTradeNo), new HttpStringEntity("", ContentType.APPLICATION_JSON), JSONObject.class);
+        JSONObject result = getHttpRequestTemplate().getForObject(getReqUrl(PayoneerTransactionType.chargeCancel), JSONObject.class, outTradeNo);
 
-        if (0 != result.getIntValue(CODE)) {
+       /* if (0 != result.getIntValue(CODE)) {
             throw new PayErrorException(new PayException(result.getString(CODE), result.getString("description"), result.toJSONString()));
-        }
+        }*/
         return result;
     }
 

@@ -1,5 +1,6 @@
 import com.alibaba.fastjson.JSON;
 import com.egzosn.pay.common.bean.CurType;
+import com.egzosn.pay.common.util.sign.encrypt.Base64;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -32,6 +33,13 @@ import java.util.UUID;
 public class PayTest {
 
     public static void  main(String[] args) throws IOException {
+
+        if (1==1){
+
+            String auth = Base64.encode("Huodull6190:12BkDT8152Zj".getBytes());
+            System.out.println(auth);
+            return;
+        }
 //        URI uri = URI.create("https://api.sandbox.payoneer.com/v2/programs/100086190/payees/registration-link");
 //                                https://api.sandbox.payoneer.com/v2/programs/100086190/payees/registration-link
         URI uri = URI.create("https://api.sandbox.payoneer.com/v2/programs/100086190/charges");
@@ -64,7 +72,8 @@ public class PayTest {
 //            localContext.setAttribute(ClientContext.AUTH_CACHE,authCache);
 
 //            PayoneerRequestBean bean = new PayoneerRequestBean("666");
-            PayoneerRequestBean bean = new PayoneerRequestBean("asdfg11213","1.01", UUID.randomUUID().toString().replace("-", ""), CurType.USD,"huodull order");
+            String referenceId = UUID.randomUUID().toString().replace("-", "");
+            PayoneerRequestBean bean = new PayoneerRequestBean("8a2950f959043699015904453b330057","1.01", referenceId, CurType.USD,"huodull order");
 //            PayoneerRequestBean bean = JSON.parseObject("{\"amount\":\"1.00\",\"client_reference_id\":\""+ System.nanoTime()+"\",\"currency\":\"USD\",\"description\":\"aaabb\",\"payee_id\":\"asdfg13\"}", PayoneerRequestBean.class);
             System.out.println(JSON.toJSONString(bean));
             StringEntity entity = new StringEntity(JSON.toJSONString(bean), ContentType.APPLICATION_JSON);
