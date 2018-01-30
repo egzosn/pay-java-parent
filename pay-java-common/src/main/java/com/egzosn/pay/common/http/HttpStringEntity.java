@@ -26,6 +26,33 @@ public class HttpStringEntity extends StringEntity {
      * 请求头
      */
     private List<Header> headers;
+    /**
+     * 是否为空的请求实体
+     */
+    private boolean isEmpty = false;
+
+
+    public boolean isEmpty() {
+        return isEmpty;
+    }
+
+    public void setEmpty(boolean empty) {
+        isEmpty = empty;
+    }
+
+
+    public void requestIsEmpty(Map<String, Object> request) {
+        if (null == request || request.isEmpty()){
+            this.isEmpty = true;
+        }
+    }
+    public void requestIsEmpty(String request) {
+        if (null == request || request.isEmpty()){
+            this.isEmpty = true;
+        }
+
+    }
+
 
     /**
      * 构造器
@@ -37,6 +64,7 @@ public class HttpStringEntity extends StringEntity {
      */
     public HttpStringEntity(Map<String, Object> request, Header... headers) throws UnsupportedEncodingException {
         this(getMapToParameters(request), headers);
+        requestIsEmpty(request);
 
     }
 
@@ -50,6 +78,7 @@ public class HttpStringEntity extends StringEntity {
      */
     public HttpStringEntity(Map<String, Object> request, Map<String, String> headers) throws UnsupportedEncodingException {
         this(getMapToParameters(request), headers);
+        requestIsEmpty(request);
 
     }
 
@@ -61,6 +90,7 @@ public class HttpStringEntity extends StringEntity {
      */
     public HttpStringEntity(Map<String, Object> request, ContentType contentType) {
         super(getMapToParameters(request), contentType);
+        requestIsEmpty(request);
     }
 
     /**
@@ -71,6 +101,7 @@ public class HttpStringEntity extends StringEntity {
      */
     public HttpStringEntity(Map<String, Object> request, String charset) {
         super(getMapToParameters(request), charset);
+        requestIsEmpty(request);
     }
 
     /**
@@ -81,6 +112,7 @@ public class HttpStringEntity extends StringEntity {
      */
     public HttpStringEntity(Map<String, Object> request, Charset charset) {
         super(getMapToParameters(request), charset);
+        requestIsEmpty(request);
     }
 
     /**
@@ -92,6 +124,7 @@ public class HttpStringEntity extends StringEntity {
      */
     public HttpStringEntity(Map<String, Object> request) throws UnsupportedEncodingException {
         super(getMapToParameters(request));
+        requestIsEmpty(request);
     }
 
     /**
@@ -104,6 +137,7 @@ public class HttpStringEntity extends StringEntity {
      */
     public HttpStringEntity(String request, ContentType contentType) throws UnsupportedCharsetException {
         super(request, contentType);
+        requestIsEmpty(request);
     }
 
     /**
@@ -116,6 +150,7 @@ public class HttpStringEntity extends StringEntity {
      */
     public HttpStringEntity(String request, String charset) throws UnsupportedCharsetException {
         super(request, charset);
+        requestIsEmpty(request);
     }
 
     /**
@@ -126,6 +161,7 @@ public class HttpStringEntity extends StringEntity {
      */
     public HttpStringEntity(String request, Charset charset) {
         super(request, charset);
+        requestIsEmpty(request);
     }
 
     /**
@@ -138,6 +174,7 @@ public class HttpStringEntity extends StringEntity {
      */
     public HttpStringEntity(String request, Header... headers) throws UnsupportedEncodingException {
         super(request);
+        requestIsEmpty(request);
         if (null == headers) {
             this.headers = Arrays.asList(headers);
         }
@@ -153,6 +190,7 @@ public class HttpStringEntity extends StringEntity {
      */
     public HttpStringEntity(String request, Map<String, String> headers) throws UnsupportedEncodingException {
         super(request);
+        requestIsEmpty(request);
         this.headers = new ArrayList<>();
         for (String key : headers.keySet()) {
             this.headers.add(new BasicHeader(key, headers.get(key)));

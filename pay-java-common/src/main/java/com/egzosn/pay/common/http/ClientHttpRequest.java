@@ -154,9 +154,18 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
         if (null == request){
             return this;
         }
-        if (request instanceof HttpStringEntity){
+        if (request instanceof HttpHeader){
+            HttpHeader entity = (HttpHeader)request;
+            if (null != entity.getHeaders() ){
+                for (Header header : entity.getHeaders()){
+                    addHeader(header);
+                }
+            }
+        }else if (request instanceof HttpStringEntity){
             HttpStringEntity entity = (HttpStringEntity)request;
-            setEntity(entity);
+            if (!entity.isEmpty()){
+                setEntity(entity);
+            }
             if (null != entity.getHeaders() ){
                 for (Header header : entity.getHeaders()){
                     addHeader(header);

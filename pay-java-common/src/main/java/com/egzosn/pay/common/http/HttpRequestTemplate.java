@@ -175,19 +175,18 @@ public class HttpRequestTemplate {
     }
 
 
-
-
-
     /**
      * get 请求
-     * @param uri 请求地址
+     *
+     * @param uri          请求地址
      * @param responseType 响应类型
      * @param uriVariables 用于匹配表达式
-     * @param <T> 响应类型
-     * @return 类型对象
+     * @param <T>          响应类型
      *
+     * @return 类型对象
+     * <p>
      * <code>
-     *    getForObject(&quot;http://egan.in/pay/{id}/f/{type}&quot;, String.class, &quot;1&quot;, &quot;APP&quot;)
+     * getForObject(&quot;http://egan.in/pay/{id}/f/{type}&quot;, String.class, &quot;1&quot;, &quot;APP&quot;)
      * </code>
      */
     public <T> T getForObject(String uri, Class<T> responseType, Object... uriVariables){
@@ -215,6 +214,48 @@ public class HttpRequestTemplate {
      */
     public <T> T getForObject(String uri, Class<T> responseType, Map<String, ?> uriVariables){
         return doExecute(URI.create(UriVariables.getUri(uri, uriVariables)), null, responseType, MethodType.GET);
+    }
+
+
+    /**
+     * get 请求
+     * @param uri           请求地址
+     * @param header        请求头
+     * @param responseType 响应类型
+     * @param uriVariables 用于匹配表达式
+     * @param <T>            响应类型
+     * @return               类型对象
+     *
+     * <code>
+     *    getForObject(&quot;http://egan.in/pay/{id}/f/{type}&quot;, String.class, &quot;1&quot;, &quot;APP&quot;)
+     * </code>
+     */
+    public <T> T getForObject(String uri, HttpHeader header,Class<T> responseType, Object... uriVariables){
+
+        return doExecute(URI.create(UriVariables.getUri(uri, uriVariables)), header, responseType, MethodType.GET);
+    }
+
+    /**
+     * get 请求
+     *
+     * @param uri          请求地址
+     * @param header        请求头
+     * @param responseType 响应类型
+     * @param uriVariables 用于匹配表达式
+     * @param <T>           响应类型
+     * @return 类型对象
+     * <code>
+     * Map&lt;String, String&gt; uriVariables = new HashMap&lt;String, String&gt;();<br>
+     *
+     * uriVariables.put(&quot;id&quot;, &quot;1&quot;);<br>
+     *
+     * uriVariables.put(&quot;type&quot;, &quot;APP&quot;);<br>
+     *
+     * getForObject(&quot;http://egan.in/pay/{id}/f/{type}&quot;, String.class, uriVariables)<br>
+     * </code>
+     */
+    public <T> T getForObject(String uri, HttpHeader header, Class<T> responseType, Map<String, ?> uriVariables){
+        return doExecute(URI.create(UriVariables.getUri(uri, uriVariables)), header, responseType, MethodType.GET);
     }
 
 
