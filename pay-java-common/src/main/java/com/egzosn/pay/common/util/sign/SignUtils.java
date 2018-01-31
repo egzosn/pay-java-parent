@@ -1,9 +1,16 @@
 package com.egzosn.pay.common.util.sign;
 
 
+import com.egzosn.pay.common.bean.result.PayException;
+import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.util.str.StringUtils;
 import org.apache.http.message.BasicNameValuePair;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import java.io.UnsupportedEncodingException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 /**
@@ -42,6 +49,54 @@ public enum SignUtils {
         @Override
         public boolean verify(String text, String sign, String key, String characterEncoding) {
             return com.egzosn.pay.common.util.sign.encrypt.MD5.verify(text, sign, key, characterEncoding);
+        }
+    },HMACSHA256{
+        /**
+         * 签名
+         *
+         * @param content           需要签名的内容
+         * @param key               密钥
+         * @param characterEncoding 字符编码
+         *
+         * @return 签名值
+         */
+        @Override
+        public String createSign(String content, String key, String characterEncoding) {
+            Mac sha256_HMAC = null;
+            try {
+                sha256_HMAC = Mac.getInstance("HmacSHA256");
+                SecretKeySpec secret_key = new SecretKeySpec(key.getBytes(characterEncoding), "HmacSHA256");
+                sha256_HMAC.init(secret_key);
+                byte[] array = sha256_HMAC.doFinal(content.getBytes(characterEncoding));
+                StringBuilder sb = new StringBuilder();
+                for (byte item : array) {
+                    sb.append(Integer.toHexString((item & 0xFF) | 0x100).substring(1, 3));
+                }
+                return sb.toString().toUpperCase();
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            } catch (InvalidKeyException e) {
+                e.printStackTrace();
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+
+            throw new PayErrorException(new PayException("fail", "HMACSHA256 签名异常"));
+        }
+
+        /**
+         * 签名字符串
+         *
+         * @param text              需要签名的字符串
+         * @param sign              签名结果
+         * @param key               密钥
+         * @param characterEncoding 编码格式
+         *
+         * @return 签名结果
+         */
+        @Override
+        public boolean verify(String text, String sign, String key, String characterEncoding) {
+            return createSign(text, key, characterEncoding).equals(sign);
         }
     },
 

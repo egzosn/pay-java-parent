@@ -1,14 +1,17 @@
 package com.egzosn.pay.common.api;
 
+import com.egzosn.pay.common.bean.RefundOrder;
+import com.egzosn.pay.common.bean.TransactionType;
+import com.egzosn.pay.common.bean.TransferOrder;
+import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.common.http.HttpRequestTemplate;
 import com.egzosn.pay.common.util.sign.SignUtils;
 
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.TreeMap;
+import java.math.BigDecimal;
+import java.util.*;
 
 /**
  * 支付基础服务
@@ -123,4 +126,136 @@ public abstract class BasePayService implements PayService {
     }
 
 
+    /**
+     * 交易查询接口，带处理器
+     * @param tradeNo    支付平台订单号
+     * @param outTradeNo 商户单号
+     * @param callback 处理器
+     * @param <T> 返回类型
+     * @return  返回查询回来的结果集
+     */
+    @Override
+    public <T> T query(String tradeNo, String outTradeNo, Callback<T> callback) {
+
+        return callback.perform(query(tradeNo, outTradeNo));
+    }
+
+    /**
+     * 交易关闭接口
+     *
+     * @param tradeNo    支付平台订单号
+     * @param outTradeNo 商户单号
+     * @param callback 处理器
+     * @param <T> 返回类型
+     * @return 返回支付方交易关闭后的结果
+     */
+    @Override
+    public <T> T close(String tradeNo, String outTradeNo, Callback<T> callback) {
+        return  callback.perform(close(tradeNo, outTradeNo));
+    }
+
+    /**
+     * 退款
+     *
+     * @param tradeNo      支付平台订单号
+     * @param outTradeNo   商户单号
+     * @param refundAmount 退款金额
+     * @param totalAmount  总金额
+     * @param callback     处理器
+     * @param <T>          返回类型
+     *
+     * @return 处理过后的类型对象， 返回支付方申请退款后的结果
+     * @see #refund(RefundOrder, Callback)
+     */
+    @Deprecated
+    @Override
+    public <T> T refund(String tradeNo, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount, Callback<T> callback) {
+
+        return callback.perform(refund(new RefundOrder(tradeNo, outTradeNo, refundAmount, totalAmount)));
+    }
+
+    /**
+     * 申请退款接口
+     *
+     * @param refundOrder   退款订单信息
+     * @return 返回支付方申请退款后的结果
+     * @param callback 处理器
+     * @param <T> 返回类型
+     * @return 返回支付方申请退款后的结果
+     */
+    @Override
+    public <T> T refund(RefundOrder refundOrder, Callback<T> callback) {
+
+        return  callback.perform(refund(refundOrder));
+    }
+
+
+    /**
+     * 查询退款
+     *
+     * @param tradeNo    支付平台订单号
+     * @param outTradeNo 商户单号
+     * @param callback   处理器
+     * @param <T>        返回类型
+     *
+     * @return 处理过后的类型对象，返回支付方查询退款后的结果
+     */
+    @Override
+    public <T> T refundquery(String tradeNo, String outTradeNo, Callback<T> callback) {
+        return callback.perform(refundquery(tradeNo, outTradeNo));
+    }
+
+    /**
+     * 目前只支持日账单
+     *
+     * @param billDate 账单时间：具体请查看对应支付平台
+     * @param billType 账单类型，具体请查看对应支付平台
+     * @param callback 处理器
+     * @param <T>      返回类型
+     *
+     * @return 返回支付方下载对账单的结果
+     */
+    @Override
+    public <T> T downloadbill(Date billDate, String billType, Callback<T> callback) {
+        return callback.perform(downloadbill(billDate, billType));
+    }
+
+    /**
+     * @param tradeNoOrBillDate 支付平台订单号或者账单类型， 具体请 类型为{@link String }或者 {@link Date }，类型须强制限制，类型不对应则抛出异常{@link PayErrorException}
+     * @param outTradeNoBillType      商户单号或者 账单类型
+     * @param transactionType         交易类型
+     * @param callback                处理器
+     * @param <T>                     返回类型
+     * @return 返回支付方对应接口的结果
+     */
+    @Override
+    public <T>T secondaryInterface(Object tradeNoOrBillDate, String outTradeNoBillType, TransactionType transactionType, Callback<T> callback){
+        return callback.perform(secondaryInterface(tradeNoOrBillDate, outTradeNoBillType, transactionType));
+    }
+
+    /**
+     * 转账
+     *
+     * @param order    转账订单
+     * @param callback 处理器
+     *
+     * @return 对应的转账结果
+     */
+    @Override
+    public <T> T transfer(TransferOrder order, Callback<T> callback) {
+        return callback.perform(transfer(order));
+    }
+
+
+    /**
+     * 转账
+     *
+     * @param order 转账订单
+     *
+     * @return 对应的转账结果
+     */
+    @Override
+    public Map<String, Object> transfer(TransferOrder order) {
+        return new HashMap<>();
+    }
 }

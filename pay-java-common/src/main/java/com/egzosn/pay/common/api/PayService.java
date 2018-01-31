@@ -266,7 +266,7 @@ public interface PayService {
      * @param billType 账单类型，商户通过接口或商户经开放平台授权后其所属服务商通过接口可以获取以下账单类型：trade、signcustomer；trade指商户基于支付宝交易收单的业务账单；signcustomer是指基于商户支付宝余额收入及支出等资金变动的帐务账单；
      * @return 返回支付方下载对账单的结果
      */
-    Object downloadbill(Date billDate, String billType);
+    Map<String, Object> downloadbill(Date billDate, String billType);
 
     /**
      * 下载对账单
@@ -278,6 +278,17 @@ public interface PayService {
      * @return 返回支付方下载对账单的结果
      */
     <T>T downloadbill(Date billDate, String billType, Callback<T> callback);
+
+
+    /**
+     *
+     * @param tradeNoOrBillDate 支付平台订单号或者账单类型， 具体请
+     *                          类型为{@link String }或者 {@link Date }，类型须强制限制，类型不对应则抛出异常{@link PayErrorException}
+     * @param outTradeNoBillType  商户单号或者 账单类型
+     * @param transactionType 交易类型
+     * @return 返回支付方对应接口的结果
+     */
+    Map<String, Object> secondaryInterface(Object tradeNoOrBillDate, String outTradeNoBillType, TransactionType transactionType);
 
     /**
      * 通用查询接口
@@ -292,6 +303,21 @@ public interface PayService {
      */
     <T>T secondaryInterface(Object tradeNoOrBillDate, String outTradeNoBillType, TransactionType transactionType, Callback<T> callback);
 
+
+    /**
+     * 转账
+     * @param order 转账订单
+     * @return 对应的转账结果
+     */
+    Map<String, Object> transfer(TransferOrder order);
+    /**
+     * 转账
+     * @param order 转账订单
+     * @param callback 处理器
+     * @param <T> 返回类型
+     * @return 对应的转账结果
+     */
+    <T>T transfer(TransferOrder order, Callback<T> callback);
 
 
 
