@@ -42,8 +42,16 @@ public class WxPayService extends BasePayService {
      * 微信请求地址
      */
     public final static String URI = "https://api.mch.weixin.qq.com/";
-//    public final static String unifiedOrderUrl = "https://api.mch.weixin.qq.com/pay/unifiedorder";
-    //    public final static String orderqueryUrl = "https://api.mch.weixin.qq.com/pay/orderquery";
+    /**
+     * 沙箱
+     */
+    public final static String SANDBOXNEW = "sandboxnew/";
+
+    public final static String SUCCESS = "SUCCESS";
+    public final static String RETURN_CODE = "return_code";
+    public final static String SIGN = "sign";
+
+
 
 
     /**
@@ -66,11 +74,12 @@ public class WxPayService extends BasePayService {
      * 根据交易类型获取url
      *
      * @param transactionType 交易类型
+     *
      * @return 请求url
      */
     private String getUrl(TransactionType transactionType) {
 
-        return URI + transactionType.getMethod();
+        return URI + (payConfigStorage.isTest() ? SANDBOXNEW : "") + transactionType.getMethod();
     }
 
     /**
@@ -81,18 +90,19 @@ public class WxPayService extends BasePayService {
      */
     @Override
     public boolean verify(Map<String, Object> params) {
-        if (!"SUCCESS".equals(params.get("return_code"))){
-            LOG.debug(String.format("微信支付异常：return_code=%s,参数集=%s", params.get("return_code"), params));
+
+        if (!SUCCESS.equals(params.get(RETURN_CODE))){
+            LOG.debug(String.format("微信支付异常：return_code=%s,参数集=%s", params.get(RETURN_CODE), params));
             return false;
         }
 
-        if(null == params.get("sign")) {
+        if(null == params.get(SIGN)) {
             LOG.debug("微信支付异常：签名为空！out_trade_no=" + params.get("out_trade_no"));
             return false;
         }
 
         try {
-            return signVerify(params, (String) params.get("sign")) && verifySource((String) params.get("out_trade_no"));
+            return signVerify(params, (String) params.get(SIGN)) && verifySource((String) params.get("out_trade_no"));
         } catch (PayErrorException e) {
             LOG.error(e);
         }
@@ -121,7 +131,7 @@ public class WxPayService extends BasePayService {
      */
     @Override
     public boolean signVerify(Map<String, Object> params, String sign) {
-        return SignUtils.valueOf(payConfigStorage.getSignType()).verify(params, sign, "&key=" + payConfigStorage.getKeyPublic(), payConfigStorage.getInputCharset());
+        return SignUtils.valueOf(payConfigStorage.getSignType()).verify(params, sign, "&key=" + payConfigStorage.getKeyPrivate(), payConfigStorage.getInputCharset());
     }
 
     /**
@@ -155,51 +165,23 @@ public class WxPayService extends BasePayService {
         parameters.put("body", order.getSubject());// 购买支付信息
         parameters.put("out_trade_no", order.getOutTradeNo());// 订单号
         parameters.put("spbill_create_ip", StringUtils.isEmpty(order.getSpbillCreateIp()) ? "192.168.1.150" : order.getSpbillCreateIp() );
-        parameters.put("total_fee", order.getPrice().multiply(new BigDecimal(100)).setScale(0, BigDecimal.ROUND_HALF_UP).intValue());// 总金额单位为分
+        parameters.put("total_fee", conversion( order.getPrice()));// 总金额单位为分
 
         parameters.put("attach", order.getBody());
         parameters.put("notify_url", payConfigStorage.getNotifyUrl());
         parameters.put("trade_type", order.getTransactionType().getType());
-
-        switch ((WxTransactionType) order.getTransactionType()) {
-            //刷卡付
-            case MICROPAY:
-                parameters.put("auth_code", order.getAuthCode());
-                parameters.remove("notify_url");
-                parameters.remove("trade_type");
-                break;
-            // 公众号支付
-            case JSAPI:
-                parameters.put("openid", order.getOpenid());
-                break;
-            //二维码
-            case NATIVE:
-                parameters.put("product_id", order.getOutTradeNo());
-                break;
-            case MWEB:
-                //H5支付专用
-                LinkedHashMap value = new LinkedHashMap();
-                value.put("type", "Wap");
-                value.put("wap_url", order.getWapUrl());////WAP网站URL地址
-                value.put("wap_name", order.getWapName());//WAP 网站名
-                JSONObject sceneInfo = new JSONObject();
-                sceneInfo.put("h5_info", value);
-                parameters.put("scene_info", sceneInfo.toJSONString());
-                break;
-            default:
-        }
-
+        ((WxTransactionType) order.getTransactionType()).setAttribute(parameters, order);
 
         String sign = createSign(SignUtils.parameterText(parameters), payConfigStorage.getInputCharset());
-        parameters.put("sign", sign);
+        parameters.put(SIGN, sign);
 
         String requestXML = XML.getMap2Xml(parameters);
         LOG.debug("requestXML：" + requestXML);
         //调起支付的参数列表
         JSONObject result = requestTemplate.postForObject(getUrl(order.getTransactionType()), requestXML, JSONObject.class);
 
-        if (!"SUCCESS".equals(result.get("return_code"))) {
-            throw new PayErrorException(new WxPayError(result.getString("return_code"), result.getString("return_msg"), result.toJSONString()));
+        if (!SUCCESS.equals(result.get(RETURN_CODE))) {
+            throw new PayErrorException(new WxPayError(result.getString(RETURN_CODE), result.getString("return_msg"), result.toJSONString()));
         }
         return result;
     }
@@ -241,7 +223,7 @@ public class WxPayService extends BasePayService {
             params.put("package", "Sign=WXPay");
         }
         String paySign = createSign(SignUtils.parameterText(params), payConfigStorage.getInputCharset());
-        params.put("sign", paySign);
+        params.put(SIGN, paySign);
         return params;
 
 
@@ -255,8 +237,8 @@ public class WxPayService extends BasePayService {
      */
     private Map<String, Object> setSign(Map<String, Object> parameters) {
         parameters.put("sign_type", payConfigStorage.getSignType());
-        String sign = createSign(SignUtils.parameterText(parameters, "&", "sign", "appId"), payConfigStorage.getInputCharset());
-        parameters.put("sign", sign);
+        String sign = createSign(SignUtils.parameterText(parameters, "&", SIGN, "appId"), payConfigStorage.getInputCharset());
+        parameters.put(SIGN, sign);
         return parameters;
     }
 
@@ -326,8 +308,8 @@ public class WxPayService extends BasePayService {
      */
     @Override
     public String buildRequest(Map<String, Object> orderInfo, MethodType method) {
-        if (!"SUCCESS".equals(orderInfo.get("return_code"))) {
-            throw new PayErrorException(new WxPayError((String) orderInfo.get("return_code"), (String) orderInfo.get("return_msg")));
+        if (!SUCCESS.equals(orderInfo.get(RETURN_CODE))) {
+            throw new PayErrorException(new WxPayError((String) orderInfo.get(RETURN_CODE), (String) orderInfo.get("return_msg")));
         }
         if (WxTransactionType.MWEB.name().equals(orderInfo.get("trade_type"))) {
             return String.format("<script type=\"text/javascript\">location.href=\"%s%s\"</script>",orderInfo.get("mweb_url"), StringUtils.isEmpty(payConfigStorage.getReturnUrl()) ? "" : "&redirect_url=" + URLEncoder.encode(payConfigStorage.getReturnUrl()));
@@ -346,7 +328,7 @@ public class WxPayService extends BasePayService {
     public BufferedImage genQrPay(PayOrder order) {
         Map<String, Object> orderInfo = orderInfo(order);
         //获取对应的支付账户操作工具（可根据账户id）
-        if (!"SUCCESS".equals(orderInfo.get("result_code"))) {
+        if (!SUCCESS.equals(orderInfo.get("result_code"))) {
             throw new PayErrorException(new WxPayError("-1", (String) orderInfo.get("err_code")));
         }
 
@@ -376,27 +358,10 @@ public class WxPayService extends BasePayService {
      */
     @Override
     public Map<String, Object> query(String transactionId, String outTradeNo) {
-
-        return query(transactionId, outTradeNo, new Callback<Map<String, Object>>() {
-            @Override
-            public Map<String, Object> perform(Map<String, Object> map) {
-                return map;
-            }
-        });
+        return secondaryInterface(transactionId, outTradeNo, WxTransactionType.QUERY);
     }
 
-    /**
-     * @param transactionId 支付平台订单号
-     * @param outTradeNo    商户单号
-     * @param callback      处理器
-     * @param <T>           返回类型
-     * @return 处理过后的类型对象，返回查询回来的结果集，支付方原值返回
-     */
-    @Override
-    public <T> T query(String transactionId, String outTradeNo, Callback<T> callback) {
 
-        return secondaryInterface(transactionId, outTradeNo, WxTransactionType.QUERY, callback);
-    }
 
     /**
      * 交易关闭接口
@@ -408,27 +373,9 @@ public class WxPayService extends BasePayService {
     @Override
     public Map<String, Object> close(String transactionId, String outTradeNo) {
 
-        return close(transactionId, outTradeNo, new Callback<Map<String, Object>>() {
-            @Override
-            public Map<String, Object> perform(Map<String, Object> map) {
-                return map;
-            }
-        });
+        return secondaryInterface(transactionId, outTradeNo, WxTransactionType.CLOSE);
     }
 
-    /**
-     * 交易关闭接口
-     *
-     * @param transactionId 支付平台订单号
-     * @param outTradeNo    商户单号
-     * @param callback      处理器
-     * @param <T>           返回类型
-     * @return 处理过后的类型对象，返回支付方交易关闭后的结果
-     */
-    @Override
-    public <T> T close(String transactionId, String outTradeNo, Callback<T> callback) {
-        return secondaryInterface(transactionId, outTradeNo, WxTransactionType.CLOSE, callback);
-    }
 
     /**
      * 退款
@@ -444,32 +391,10 @@ public class WxPayService extends BasePayService {
     @Override
     public Map<String, Object> refund(String transactionId, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount) {
 
-        return refund(transactionId, outTradeNo, refundAmount, totalAmount, new Callback<Map<String, Object>>() {
-            @Override
-            public Map<String, Object> perform(Map<String, Object> map) {
-                return map;
-            }
-        });
+        return refund(new RefundOrder(transactionId, outTradeNo, refundAmount, totalAmount));
     }
 
-    /**
-     * 退款
-     *
-     * @param transactionId 微信订单号
-     * @param outTradeNo    商户单号
-     * @param refundAmount  退款金额
-     * @param totalAmount   总金额
-     * @param callback      处理器
-     * @param <T>           返回类型
-     * @return 处理过后的类型对象， 返回支付方申请退款后的结果
-     * @see #refund(RefundOrder, Callback)
-     */
-    @Deprecated
-    @Override
-    public <T> T refund(String transactionId, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount, Callback<T> callback) {
 
-        return refund(new RefundOrder(transactionId, outTradeNo, refundAmount, totalAmount), callback);
-    }
     /**
      * 申请退款接口
      *
@@ -478,25 +403,6 @@ public class WxPayService extends BasePayService {
      */
     @Override
     public Map<String, Object> refund(RefundOrder refundOrder) {
-        return  refund(refundOrder, new Callback<Map<String, Object>>() {
-            @Override
-            public Map<String, Object> perform(Map<String, Object> map) {
-                return map;
-            }
-        });
-    }
-
-    /**
-     * 退款
-     *
-     * @param refundOrder   退款订单信息
-     * @param callback      处理器
-     * @param <T>           返回类型
-     * @return 处理过后的类型对象， 返回支付方申请退款后的结果
-     */
-    @Override
-    public <T> T refund(RefundOrder refundOrder, Callback<T> callback) {
-
         //获取公共参数
         Map<String, Object> parameters = getPublicParameters();
         if (null != refundOrder.getTradeNo()) {
@@ -504,15 +410,17 @@ public class WxPayService extends BasePayService {
         } else {
             parameters.put("out_trade_no", refundOrder.getOutTradeNo());
         }
-            parameters.put("out_refund_no", refundOrder.getRefundNo());
-        parameters.put("total_fee", refundOrder.getTotalAmount().multiply(new BigDecimal(100)).setScale(0, BigDecimal.ROUND_HALF_UP).intValue());
-        parameters.put("refund_fee", refundOrder.getRefundAmount().multiply(new BigDecimal(100)).setScale(0, BigDecimal.ROUND_HALF_UP).intValue());
+        parameters.put("out_refund_no", refundOrder.getRefundNo());
+        parameters.put("total_fee", conversion(refundOrder.getTotalAmount()));
+        parameters.put("refund_fee", conversion(refundOrder.getRefundAmount()));
         parameters.put("op_user_id", payConfigStorage.getPid());
 
         //设置签名
         setSign(parameters);
-        return callback.perform(requestTemplate.postForObject(getUrl(WxTransactionType.REFUND), XML.getMap2Xml(parameters), JSONObject.class));
+        return requestTemplate.postForObject(getUrl(WxTransactionType.REFUND), XML.getMap2Xml(parameters), JSONObject.class);
     }
+
+
 
     /**
      * 查询退款
@@ -523,27 +431,10 @@ public class WxPayService extends BasePayService {
      */
     @Override
     public Map<String, Object> refundquery(String transactionId, String outTradeNo) {
-        return refundquery(transactionId, outTradeNo, new Callback<Map<String, Object>>() {
-            @Override
-            public Map<String, Object> perform(Map<String, Object> map) {
-                return map;
-            }
-        });
+        return secondaryInterface(transactionId, outTradeNo, WxTransactionType.REFUNDQUERY);
     }
 
-    /**
-     * 查询退款
-     *
-     * @param transactionId 支付平台订单号
-     * @param outTradeNo    商户单号
-     * @param callback      处理器
-     * @param <T>           返回类型
-     * @return 处理过后的类型对象，返回支付方查询退款后的结果
-     */
-    @Override
-    public <T> T refundquery(String transactionId, String outTradeNo, Callback<T> callback) {
-        return secondaryInterface(transactionId, outTradeNo, WxTransactionType.REFUNDQUERY, callback);
-    }
+
 
     /**
      * 目前只支持日账单
@@ -554,60 +445,48 @@ public class WxPayService extends BasePayService {
      */
     @Override
     public Map<String, Object> downloadbill(Date billDate, String billType) {
-        return downloadbill(billDate, billType, new Callback<Map<String, Object>>() {
-            @Override
-            public Map<String, Object> perform(Map<String, Object> map) {
-                return map;
-            }
-        });
-    }
-
-    /**
-     * 目前只支持日账单
-     *
-     * @param billDate 账单时间：具体请查看对应支付平台
-     * @param billType 账单类型，具体请查看对应支付平台
-     * @param callback 处理器
-     * @param <T>      返回类型
-     * @return 处理过后的类型对象，返回支付方下载对账单的结果
-     */
-    @Override
-    public <T> T downloadbill(Date billDate, String billType, Callback<T> callback) {
 
         //获取公共参数
         Map<String, Object> parameters = getPublicParameters();
 
-        Map<String, Object> bizContent = new TreeMap<>();
-        bizContent.put("bill_type", billType);
+        parameters.put("bill_type", billType);
         //目前只支持日账单
         DateFormat df = new SimpleDateFormat("yyyyMMdd");
         df.setTimeZone(TimeZone.getTimeZone("GMT+8"));
-        bizContent.put("bill_date", df.format(billDate));
+        parameters.put("bill_date", df.format(billDate));
 
         //设置签名
         setSign(parameters);
-        return callback.perform(requestTemplate.postForObject(getUrl(WxTransactionType.DOWNLOADBILL), XML.getMap2Xml(parameters), JSONObject.class));
+        String respStr = requestTemplate.postForObject(getUrl(WxTransactionType.DOWNLOADBILL), XML.getMap2Xml(parameters), String.class);
+        if (respStr.indexOf("<") == 0) {
+           return XML.toJSONObject(respStr);
+        }
+
+        Map<String,Object> ret = new HashMap<String, Object>();
+        ret.put(RETURN_CODE, SUCCESS);
+        ret.put("return_msg", "ok");
+        ret.put("data", respStr);
+        return ret;
     }
+
+
 
     /**
      * @param transactionIdOrBillDate 支付平台订单号或者账单类型， 具体请 类型为{@link String }或者 {@link Date }，类型须强制限制，类型不对应则抛出异常{@link PayErrorException}
      * @param outTradeNoBillType      商户单号或者 账单类型
      * @param transactionType         交易类型
-     * @param callback                处理器
-     * @param <T>                     返回类型
      * @return 返回支付方对应接口的结果
      */
     @Override
-    public  <T> T secondaryInterface(Object transactionIdOrBillDate, String outTradeNoBillType, TransactionType transactionType, Callback<T> callback) {
+    public Map<String, Object>  secondaryInterface(Object transactionIdOrBillDate, String outTradeNoBillType, TransactionType transactionType) {
 
         if (transactionType == WxTransactionType.REFUND) {
             throw new PayErrorException(new PayException("failure", "通用接口不支持:" + transactionType));
         }
 
-
         if (transactionType == WxTransactionType.DOWNLOADBILL){
             if (transactionIdOrBillDate instanceof  Date){
-                return downloadbill((Date) transactionIdOrBillDate, outTradeNoBillType, callback);
+                return downloadbill((Date) transactionIdOrBillDate, outTradeNoBillType);
             }
             throw new PayErrorException(new PayException("failure", "非法类型异常:" + transactionIdOrBillDate.getClass()));
         }
@@ -625,8 +504,36 @@ public class WxPayService extends BasePayService {
         }
         //设置签名
         setSign(parameters);
-        return  callback.perform(requestTemplate.postForObject(getUrl(transactionType), XML.getMap2Xml(parameters) , JSONObject.class));
+        return  requestTemplate.postForObject(getUrl(transactionType), XML.getMap2Xml(parameters) , JSONObject.class);
     }
 
+    /**
+     * 转账
+     *
+     * @param order 转账订单
+     *
+     * @return 对应的转账结果
+     */
+    @Override
+    public Map<String, Object> transfer(TransferOrder order) {
+        Map<String, Object> parameters = new TreeMap<String, Object>();
+        parameters.put("mch_id", payConfigStorage.getPid());
+        parameters.put("nonce_str", SignUtils.randomStr());
+        parameters.put("amount", conversion(order.getAmount()));
+        if (!StringUtils.isEmpty(order.getRemark())){
+            parameters.put("desc", order.getRemark());
+        }
+
+        return null;
+    }
+
+    /**
+     * 元转分
+     * @param amount 元的金额
+     * @return 分的金额
+     */
+    public int conversion(BigDecimal amount){
+        return amount.multiply(new BigDecimal(100)).setScale(0, BigDecimal.ROUND_HALF_UP).intValue();
+    }
 
 }

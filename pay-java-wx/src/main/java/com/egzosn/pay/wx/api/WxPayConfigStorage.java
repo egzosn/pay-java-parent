@@ -48,13 +48,6 @@ public class WxPayConfigStorage extends BasePayConfigStorage {
     }
 
 
-    /**
-     * 合作商唯一标识
-     */
-    public void setPid(String mchId) {
-         this.mchId = mchId;
-    }
-
 
 
     @Override
@@ -71,7 +64,15 @@ public class WxPayConfigStorage extends BasePayConfigStorage {
         this.mchId = mchId;
     }
 
+    /**
+     *  为商户平台设置的密钥key
+     * @return 微信密钥
+     */
+    public String getSecretKey() {
+        return getKeyPrivate();
+    }
 
-
-
+    public void setSecretKey(String secretKey) {
+         setKeyPrivate(secretKey);
+    }
 }
