@@ -286,14 +286,9 @@ public class FuiouPayService extends BasePayService {
 
         for (String key : param.keySet()) {
             Object o = param.get(key);
-
-
             formHtml.append("<input type=\"hidden\" value = '"+o+"' name=\""+key+"\"/>");
         }
 
-
-        //submit按钮控件请不要含有name属性
-//        formHtml.append("<input type=\"submit\" value=\"\" style=\"display:none;\">");
         formHtml.append("</form></body></html>");
 
         return formHtml.toString();
@@ -310,18 +305,7 @@ public class FuiouPayService extends BasePayService {
         return null;
     }
 
-    /**
-     * 交易查询接口
-     *
-     * @param tradeNo    支付平台订单号
-     * @param outTradeNo 商户单号
-     * @param callback   处理器
-     * @return 空
-     */
-    @Override
-    public <T> T query (String tradeNo, String outTradeNo, Callback<T> callback) {
-        return null;
-    }
+
 
     /**
      * 交易关闭接口
@@ -334,18 +318,7 @@ public class FuiouPayService extends BasePayService {
         return null;
     }
 
-    /**
-     * 交易关闭接口
-     *
-     * @param tradeNo    支付平台订单号
-     * @param outTradeNo 商户单号
-     * @param callback   处理器
-     * @return 空
-     */
-    @Override
-    public <T> T close (String tradeNo, String outTradeNo, Callback<T> callback) {
-        return null;
-    }
+
 
     /**
      * 申请退款接口
@@ -358,28 +331,10 @@ public class FuiouPayService extends BasePayService {
      */
     @Override
     public Map<String, Object> refund (String tradeNo, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount) {
-        return refund(tradeNo, outTradeNo, refundAmount, totalAmount, new Callback<Map<String, Object>>() {
-            @Override
-            public Map<String, Object> perform(Map<String, Object> map) {
-                return map;
-            }
-        });
+        return refund(new RefundOrder(tradeNo, outTradeNo, refundAmount, totalAmount));
     }
 
-    /**
-     * 申请退款接口
-     *
-     * @param tradeNo      支付平台订单号
-     * @param outTradeNo   商户单号
-     * @param refundAmount 退款金额
-     * @param totalAmount  总金额
-     * @param callback     处理器
-     * @return 空
-     */
-    @Override
-    public <T> T refund (String tradeNo, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount, Callback<T> callback) {
-        return refund(new RefundOrder(tradeNo, outTradeNo, refundAmount, totalAmount), callback);
-    }
+
 
 
     /**
@@ -390,23 +345,6 @@ public class FuiouPayService extends BasePayService {
      */
     @Override
     public Map<String, Object> refund (RefundOrder refundOrder) {
-        return refund(refundOrder, new Callback<Map<String, Object>>() {
-            @Override
-            public Map<String, Object> perform(Map<String, Object> map) {
-                return map;
-            }
-        });
-    }
-
-    /**
-     * 申请退款接口
-     *
-     * @param refundOrder   退款订单信息
-     * @param callback     处理器
-     * @return 空
-     */
-    @Override
-    public <T> T refund(RefundOrder refundOrder, Callback<T> callback) {
         Map<String ,Object> params = new HashMap<>();
         params.put("mchnt_cd",payConfigStorage.getPid());//商户代码
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
@@ -417,8 +355,7 @@ public class FuiouPayService extends BasePayService {
         params.put("rem","");//备注
         params.put("md5",createSign(SignUtils.parameters2MD5Str(params,"|"),payConfigStorage.getInputCharset()));
         JSONObject resultJson   = getHttpRequestTemplate().postForObject(getReqUrl() + URL_FuiouSmpRefundGate,params,JSONObject.class);
-        //5341标识退款成功
-        return callback.perform(params);
+        return resultJson;
     }
 
 
@@ -436,18 +373,6 @@ public class FuiouPayService extends BasePayService {
         return null;
     }
 
-    /**
-     * 查询退款
-     *
-     * @param tradeNo    支付平台订单号
-     * @param outTradeNo 商户单号
-     * @param callback   处理器
-     * @return　空
-     */
-    @Override
-    public <T> T refundquery (String tradeNo, String outTradeNo, Callback<T> callback) {
-        return null;
-    }
 
     /**
      * 下载对账单
@@ -456,36 +381,23 @@ public class FuiouPayService extends BasePayService {
      * @return 空
      */
     @Override
-    public Object downloadbill(Date billDate, String billType) {
+    public Map<String, Object> downloadbill(Date billDate, String billType) {
         return null;
     }
 
     /**
-     * 下载对账单
-     *
-     * @param billDate 账单时间：具体请查看对应支付平台
-     * @param billType 账单类型，具体请查看对应支付平台
-     * @param callback 处理器
-     * @return 空
-     */
-    @Override
-    public <T> T downloadbill (Date billDate, String billType, Callback<T> callback) {
-        return null;
-    }
-
-
-    /**
-     * 通用查询接口
-     *
-     * @param tradeNoOrBillDate  支付平台订单号或者账单日期， 具体请 类型为{@link String }或者 {@link Date }，类型须强制限制，类型不对应则抛出异常{@link PayErrorException}
+     * @param tradeNoOrBillDate  支付平台订单号或者账单类型， 具体请
+     *                           类型为{@link String }或者 {@link Date }，类型须强制限制，类型不对应则抛出异常{@link PayErrorException}
      * @param outTradeNoBillType 商户单号或者 账单类型
      * @param transactionType    交易类型
-     * @param callback           处理器
-     * @return 空
+     *
+     * @return 返回支付方对应接口的结果
      */
     @Override
-    public <T> T secondaryInterface (Object tradeNoOrBillDate, String outTradeNoBillType, TransactionType transactionType, Callback<T> callback) {
+    public Map<String, Object> secondaryInterface(Object tradeNoOrBillDate, String outTradeNoBillType, TransactionType transactionType) {
         return null;
     }
+
+
 
 }
