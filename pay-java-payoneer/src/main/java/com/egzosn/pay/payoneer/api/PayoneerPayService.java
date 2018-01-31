@@ -90,8 +90,9 @@ public class PayoneerPayService extends BasePayService implements AdvancedPaySer
             if (params.containsKey(OUT_TRADE_NO)){
                 return verifySource((String) params.get(OUT_TRADE_NO));
             }
+            return true;
         }
-        return true;
+        return false;
     }
 
     /**
