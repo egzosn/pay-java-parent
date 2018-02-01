@@ -458,7 +458,46 @@ public class AliPayService extends BasePayService {
      */
     @Override
     public Map<String, Object> transfer(TransferOrder order) {
-        return null;
+        //获取公共参数
+        Map<String, Object> parameters = getPublicParameters(AliTransactionType.TRANS);
+
+        Map<String, Object> bizContent = new TreeMap<String, Object>();
+        bizContent.put("out_biz_no", order.getOutNo());
+        bizContent.put("payee_type", "ALIPAY_LOGONID");
+        bizContent.put("payee_account", order.getPayeeAccount());
+        bizContent.put("amount", order.getAmount().setScale(2, BigDecimal.ROUND_HALF_UP));
+        bizContent.put("payer_show_name", order.getPayerName());
+        bizContent.put("payee_real_name", order.getPayeeName());
+        bizContent.put("remark", order.getRemark());
+        //设置请求参数的集合
+        parameters.put("biz_content", JSON.toJSONString(bizContent));
+        //设置签名
+        setSign(parameters);
+        return getHttpRequestTemplate().postForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(parameters), null, JSONObject.class);
+    }
+
+    /**
+     * 转账
+     *
+     * @param outNo   商户转账订单号
+     * @param tradeNo 支付平台转账订单号
+     *
+     * @return 对应的转账订单
+     */
+    @Override
+    public Map<String, Object> transferQuery(String outNo, String tradeNo) {
+        //获取公共参数
+        Map<String, Object> parameters = getPublicParameters(AliTransactionType.TRANS_QUERY);
+
+        Map<String, Object> bizContent = new TreeMap<String, Object>();
+        if (StringUtils.isEmpty(outNo)){
+            bizContent.put("order_id", tradeNo);
+        }else {
+            bizContent.put("out_biz_no", outNo);
+        }
+        //设置请求参数的集合
+        parameters.put("biz_content", JSON.toJSONString(bizContent));
+        return getHttpRequestTemplate().postForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(parameters), null, JSONObject.class);
     }
 
     /**

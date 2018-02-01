@@ -86,7 +86,15 @@ public enum  WxTransactionType implements TransactionType {
     /**
      * 下载对账单
      */
-    DOWNLOADBILL("pay/downloadbill")
+    DOWNLOADBILL("pay/downloadbill"),
+    /**
+     * 银行卡转账
+     */
+    BANK("mmpaysptrans/pay_bank"),
+    /**
+     *  转账查询
+     */
+    QUERY_BANK("mmpaysptrans/query_bank")
     ;
 
     WxTransactionType(String method) {

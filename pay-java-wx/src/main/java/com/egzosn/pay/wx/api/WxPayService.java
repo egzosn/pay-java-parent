@@ -518,13 +518,35 @@ public class WxPayService extends BasePayService {
     public Map<String, Object> transfer(TransferOrder order) {
         Map<String, Object> parameters = new TreeMap<String, Object>();
         parameters.put("mch_id", payConfigStorage.getPid());
+        parameters.put("partner_trade_no", order.getOutNo());
         parameters.put("nonce_str", SignUtils.randomStr());
+        parameters.put("enc_bank_no", keyPublic(order.getPayeeAccount()));
+        parameters.put("enc_true_name", keyPublic(order.getPayeeName()));
+        parameters.put("bank_code", order.getBank().getCode());
         parameters.put("amount", conversion(order.getAmount()));
         if (!StringUtils.isEmpty(order.getRemark())){
             parameters.put("desc", order.getRemark());
         }
+        parameters.put(SIGN, SignUtils.valueOf(payConfigStorage.getSignType()).sign(parameters, payConfigStorage.getKeyPrivate(), payConfigStorage.getInputCharset()));
+        return getHttpRequestTemplate().postForObject(getUrl(WxTransactionType.BANK), parameters, JSONObject.class);
+    }
 
-        return null;
+    /**
+     * 转账
+     *
+     * @param outNo 商户转账订单号
+     * @param tradeNo 支付平台转账订单号
+     *
+     * @return 对应的转账订单
+     */
+    @Override
+    public Map<String, Object> transferQuery(String outNo, String tradeNo) {
+        Map<String, Object> parameters = new TreeMap<String, Object>();
+        parameters.put("mch_id", payConfigStorage.getPid());
+        parameters.put("partner_trade_no", StringUtils.isEmpty(outNo) ? tradeNo : outNo);
+        parameters.put("nonce_str", SignUtils.randomStr());
+        parameters.put(SIGN, SignUtils.valueOf(payConfigStorage.getSignType()).sign(parameters, payConfigStorage.getKeyPrivate(), payConfigStorage.getInputCharset()));
+        return getHttpRequestTemplate().postForObject(getUrl(WxTransactionType.QUERY_BANK), parameters, JSONObject.class);
     }
 
     /**
@@ -536,4 +558,7 @@ public class WxPayService extends BasePayService {
         return amount.multiply(new BigDecimal(100)).setScale(0, BigDecimal.ROUND_HALF_UP).intValue();
     }
 
+    public String keyPublic(String content){
+        return SignUtils.RSA.createSign(content, payConfigStorage.getKeyPublic(), payConfigStorage.getInputCharset());
+    }
 }

@@ -256,6 +256,33 @@ public abstract class BasePayService implements PayService {
      */
     @Override
     public Map<String, Object> transfer(TransferOrder order) {
-        return new HashMap<>();
+        return new HashMap<>(0);
+    }
+
+    /**
+     * 转账
+     *
+     * @param outNo 商户转账订单号
+     * @param tradeNo 支付平台转账订单号
+     *
+     * @return 对应的转账订单
+     */
+    @Override
+    public Map<String, Object> transferQuery(String outNo, String tradeNo){
+        return new HashMap<>(0);
+    }
+
+    /**
+     * 转账
+     *
+     * @param outNo 商户转账订单号
+     * @param tradeNo 支付平台转账订单号
+     * @param callback 处理器
+     * @param <T> 返回类型
+     * @return 对应的转账订单
+     */
+    @Override
+    public <T>T transferQuery(String outNo, String tradeNo, Callback<T> callback){
+        return callback.perform(transferQuery(outNo, tradeNo));
     }
 }

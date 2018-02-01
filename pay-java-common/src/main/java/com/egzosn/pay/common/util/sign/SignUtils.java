@@ -338,4 +338,5 @@ public enum SignUtils {
      */
     public abstract boolean verify(String text, String sign, String key, String characterEncoding);
 
+
 }
