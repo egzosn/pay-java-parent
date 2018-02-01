@@ -627,26 +627,7 @@ public class UnionPayService extends BasePayService {
      * @return 返回fileContent 请自行将数据落地
      */
     @Override
-    public String downloadbill (Date billDate, String billType) {
-        return downloadbill(billDate, billType, new Callback<String>() {
-            @Override
-            public String perform(Map<String, Object> response) {
-                return response.get(SDKConstants.param_fileContent).toString();
-            }
-        });
-    }
-
-
-    /**
-     * 下载对账单
-     *
-     * @param billDate 账单时间：具体请查看对应支付平台
-     * @param billType 账单类型，具体请查看对应支付平台
-     * @param callback 处理器
-     * @return 返回支付方下载对账单的结果
-     */
-    @Override
-    public <T> T downloadbill (Date billDate, String billType, Callback<T> callback) {
+    public Map<String, Object> downloadbill (Date billDate, String billType) {
         Map<String ,Object > params = this.getCommonParam();
         UnionTransactionType.FILE_TRANSFER.convertMap(params);
         DateFormat df = new SimpleDateFormat("MMdd");
@@ -659,26 +640,26 @@ public class UnionPayService extends BasePayService {
         JSONObject response =  UriVariables.getParametersToMap(responseStr);
         if(this.verify(response)){
             if(SDKConstants.OK_RESP_CODE.equals(response.get(SDKConstants.param_respCode))){
-                return callback.perform(response);
+                return response;
 
             }
-                throw new PayErrorException(new PayException(response.get(SDKConstants.param_respCode).toString(), response.get(SDKConstants.param_respMsg).toString(), response.toString()));
+            throw new PayErrorException(new PayException(response.get(SDKConstants.param_respCode).toString(), response.get(SDKConstants.param_respMsg).toString(), response.toString()));
 
         }
-            throw new PayErrorException(new PayException("failure", "验证签名失败", response.toString()));
+        throw new PayErrorException(new PayException("failure", "验证签名失败", response.toString()));
     }
 
+
     /**
-     * 通用查询接口
-     *
-     * @param tradeNoOrBillDate  支付平台订单号或者账单日期， 具体请 类型为{@link String }或者 {@link Date }，类型须强制限制，类型不对应则抛出异常{@link PayErrorException}
+     * @param tradeNoOrBillDate  支付平台订单号或者账单类型， 具体请
+     *                           类型为{@link String }或者 {@link Date }，类型须强制限制，类型不对应则抛出异常{@link PayErrorException}
      * @param outTradeNoBillType 商户单号或者 账单类型
      * @param transactionType    交易类型
-     * @param callback           处理器
+     *
      * @return 返回支付方对应接口的结果
      */
     @Override
-    public <T> T secondaryInterface (Object tradeNoOrBillDate, String outTradeNoBillType, TransactionType transactionType, Callback<T> callback) {
+    public Map<String, Object> secondaryInterface(Object tradeNoOrBillDate, String outTradeNoBillType, TransactionType transactionType) {
         return null;
     }
 
