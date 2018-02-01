@@ -2,8 +2,7 @@ package com.egzosn.pay.common.util;
 
 import java.math.BigInteger;
 
-public class  Util
-{
+public class  Util{
     /**
      * 整形转换成网络传输的字节流（字节数组）型数据
      *
@@ -61,8 +60,8 @@ public class  Util
     /**
      * 大数字转换字节流（字节数组）型数据
      *
-     * @param n
-     * @return
+     * @param n 大整形
+     * @return 字节数组
      */
     public static byte[] byteConvert32Bytes(BigInteger n)
     {
@@ -96,8 +95,8 @@ public class  Util
     /**
      * 换字节流（字节数组）型数据转大数字
      *
-     * @param b
-     * @return
+     * @param b 字节数组
+     * @return 大整形
      */
     public static BigInteger byteConvertInteger(byte[] b)
     {
@@ -114,8 +113,8 @@ public class  Util
     /**
      * 根据字节数组获得值(十六进制数字)
      *
-     * @param bytes
-     * @return
+     * @param bytes 字节数组
+     * @return 16进制字符串
      */
     public static String getHexString(byte[] bytes)
     {
@@ -125,9 +124,9 @@ public class  Util
     /**
      * 根据字节数组获得值(十六进制数字)
      *
-     * @param bytes
-     * @param upperCase
-     * @return
+     * @param bytes 字节数组
+     * @param upperCase 是否大写
+     * @return 转换后的字符串
      */
     public static String getHexString(byte[] bytes, boolean upperCase)
     {
@@ -142,7 +141,7 @@ public class  Util
     /**
      * 打印十六进制字符串
      *
-     * @param bytes
+     * @param bytes 字节数组
      */
     public static void printHexString(byte[] bytes)
     {
@@ -187,8 +186,7 @@ public class  Util
     /**
      * Convert char to byte
      *
-     * @param c
-     *            char
+     * @param c  char
      * @return byte
      */
     public static byte charToByte(char c)
@@ -327,8 +325,7 @@ public class  Util
     /**
      * 数字字符串转ASCII码字符串
      *
-     * @param String
-     *            字符串
+     * @param content   字符串
      * @return ASCII字符串
      */
     public static String StringToAsciiString(String content) {
@@ -389,8 +386,7 @@ public class  Util
     /**
      * 十六转二进制
      *
-     * @param hex
-     *            十六进制字符串
+     * @param hex   十六进制字符串
      * @return 二进制字符串
      */
     public static String hexStringToBinary(String hex) {
@@ -456,8 +452,7 @@ public class  Util
     /**
      * ASCII码字符串转数字字符串
      *
-     * @param String
-     *            ASCII字符串
+     * @param content  ASCII字符串
      * @return 字符串
      */
     public static String AsciiStringToString(String content) {
@@ -532,8 +527,7 @@ public class  Util
     /**
      * 十进制转换为十六进制字符串
      *
-     * @param algorism
-     *            int 十进制的数字
+     * @param algorism 十进制的数字
      * @return String 对应的十六进制字符串
      */
     public static String algorismToHEXString(int algorism) {
@@ -609,7 +603,7 @@ public class  Util
 
     /**
      * 十六进制串转化为byte数组
-     *
+     *@param hex 16进制的字符
      * @return the array of byte
      */
     public static byte[] hexToByte(String hex)

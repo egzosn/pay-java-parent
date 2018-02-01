@@ -14,8 +14,10 @@ import static com.egzosn.pay.common.http.UriVariables.getMapToParameters;
  * 请求实体
  *
  * @author egan
- * @email egzosn@gmail.com
- * @date 2017/12/20
+ * <pre>
+ * email egzosn@gmail.com
+ * date 2017/12/20
+ * </pre>
  */
 public class HttpStringEntity extends StringEntity {
 
