@@ -260,7 +260,7 @@ public abstract class BasePayService implements PayService {
     }
 
     /**
-     * 转账
+     * 转账查询
      *
      * @param outNo 商户转账订单号
      * @param tradeNo 支付平台转账订单号
@@ -273,7 +273,7 @@ public abstract class BasePayService implements PayService {
     }
 
     /**
-     * 转账
+     * 转账查询
      *
      * @param outNo 商户转账订单号
      * @param tradeNo 支付平台转账订单号

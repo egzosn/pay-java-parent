@@ -379,14 +379,8 @@ public class AliPayService extends BasePayService {
      */
     @Override
     public Map<String, Object> refundquery(String tradeNo, String outTradeNo) {
-        return  refundquery(tradeNo, outTradeNo, new Callback<Map<String, Object>>() {
-            @Override
-            public Map<String, Object> perform(Map<String, Object> map) {
-                return map;
-            }
-        });
+        return secondaryInterface(tradeNo, outTradeNo, AliTransactionType.REFUNDQUERY);
     }
-
 
     /**
      * 目前只支持日账单
@@ -477,7 +471,7 @@ public class AliPayService extends BasePayService {
     }
 
     /**
-     * 转账
+     * 转账查询
      *
      * @param outNo   商户转账订单号
      * @param tradeNo 支付平台转账订单号

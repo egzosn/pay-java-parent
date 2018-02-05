@@ -5,6 +5,7 @@ import com.egzosn.pay.ali.api.AliPayService;
 import com.egzosn.pay.ali.bean.AliTransactionType;
 import com.egzosn.pay.common.api.PayService;
 import com.egzosn.pay.common.bean.BasePayType;
+import com.egzosn.pay.common.bean.MsgType;
 import com.egzosn.pay.common.bean.TransactionType;
 import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.fuiou.api.FuiouPayConfigStorage;
@@ -73,9 +74,10 @@ public enum PayType implements BasePayType {
         public PayService getPayService(ApyAccount apyAccount) {
             WxPayConfigStorage wxPayConfigStorage = new WxPayConfigStorage();
             wxPayConfigStorage.setMchId(apyAccount.getPartner());
-            wxPayConfigStorage.setKeyPublic(apyAccount.getPublicKey());
             wxPayConfigStorage.setAppid(apyAccount.getAppid());
-            wxPayConfigStorage.setKeyPrivate(apyAccount.getPrivateKey());
+            //转账公钥，转账时必填
+            wxPayConfigStorage.setKeyPublic(apyAccount.getPublicKey());
+            wxPayConfigStorage.setSecretKey(apyAccount.getPrivateKey());
             wxPayConfigStorage.setNotifyUrl(apyAccount.getNotifyUrl());
             wxPayConfigStorage.setReturnUrl(apyAccount.getReturnUrl());
             wxPayConfigStorage.setSignType(apyAccount.getSignType());
@@ -177,23 +179,17 @@ public enum PayType implements BasePayType {
     },payoneer{
         @Override
         public PayService getPayService(ApyAccount apyAccount) {
-            PayoneerConfigStorage payoneerConfigStorage = new PayoneerConfigStorage();
-            payoneerConfigStorage.setProgramId(apyAccount.getPartner());
-            payoneerConfigStorage.setKeyPublic(apyAccount.getPublicKey());
-            payoneerConfigStorage.setKeyPrivate(apyAccount.getPrivateKey());
-            payoneerConfigStorage.setNotifyUrl(apyAccount.getNotifyUrl());
-            payoneerConfigStorage.setReturnUrl(apyAccount.getReturnUrl());
-            payoneerConfigStorage.setSignType(apyAccount.getSignType());
-            payoneerConfigStorage.setPayType(apyAccount.getPayType().toString());
-            payoneerConfigStorage.setMsgType(apyAccount.getMsgType());
-            payoneerConfigStorage.setInputCharset(apyAccount.getInputCharset());
-            payoneerConfigStorage.setTest(apyAccount.isTest());
+            PayoneerConfigStorage configStorage = new PayoneerConfigStorage();
+            configStorage.setProgramId("商户id");
+            configStorage.setMsgType(MsgType.json);
+            configStorage.setInputCharset("utf-8");
+            configStorage.setTest(true);
 
             //Basic Auth
             HttpConfigStorage httpConfigStorage = new  HttpConfigStorage();
-            httpConfigStorage.setHttpProxyUsername(apyAccount.getSeller());
-            httpConfigStorage.setHttpProxyPassword(apyAccount.getStorePassword());
-            return new PayoneerPayService(payoneerConfigStorage,httpConfigStorage);
+            httpConfigStorage.setAuthUsername("PayoneerPay 用户名");
+            httpConfigStorage.setAuthPassword("PayoneerPay API password");
+            return new PayoneerPayService(configStorage, httpConfigStorage);
         }
 
         @Override

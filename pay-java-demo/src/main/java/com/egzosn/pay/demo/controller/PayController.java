@@ -5,6 +5,7 @@ package com.egzosn.pay.demo.controller;
 import com.egzosn.pay.ali.bean.AliTransactionType;
 import com.egzosn.pay.common.api.Callback;
 import com.egzosn.pay.common.api.PayConfigStorage;
+import com.egzosn.pay.common.api.PayService;
 import com.egzosn.pay.common.bean.*;
 import com.egzosn.pay.common.util.MatrixToImageWriter;
 import com.egzosn.pay.common.util.str.StringUtils;
@@ -52,21 +53,6 @@ public class PayController {
         return new ModelAndView("/index.html");
     }
 
-    /**
-     * 获取授权页面
-     * @param payId
-     * @param payeeId
-     * @return
-     */
-    @RequestMapping("getAuthorizationPage.json")
-    public Map<String ,Object> getAuthorizationPage(Integer payId,String payeeId ){
-        PayResponse payResponse = service.getPayResponse(payId);
-        PayoneerPayService  payoneerPayService = (PayoneerPayService) payResponse.getService();
-        Map<String, Object> data = new LinkedHashMap<>();
-        data.put("code", 0);
-        data.put("url", payoneerPayService.getAuthorizationPage(payeeId));
-        return data;
-    }
 
 
 
@@ -433,13 +419,35 @@ public class PayController {
     public Map<String, Object> secondaryInterface(QueryOrder order) {
         PayResponse payResponse = service.getPayResponse(order.getPayId());
         TransactionType type = PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(order.getTransactionType());
-        return payResponse.getService().secondaryInterface(order.getTradeNoOrBillDate(), order.getOutTradeNoBillType(), type, new Callback<Map<String, Object>>() {
-            @Override
-            public Map<String, Object> perform(Map<String, Object> map) {
-                return map;
-            }
-        });
+        return payResponse.getService().secondaryInterface(order.getTradeNoOrBillDate(), order.getOutTradeNoBillType(), type);
     }
 
+
+    /**
+     * 转账
+     *
+     * @param order 转账订单
+     *
+     * @return 对应的转账结果
+     */
+    @RequestMapping("transfer")
+    public Map<String, Object> transfer(int payId, TransferOrder order) {
+        PayService service = this.service.getPayResponse(payId).getService();
+        return service.transfer(order);
+    }
+
+    /**
+     * 转账查询
+     *
+     * @param outNo   商户转账订单号
+     * @param tradeNo 支付平台转账订单号
+     *
+     * @return 对应的转账订单
+     */
+    @RequestMapping("transferQuery")
+    public Map<String, Object> transferQuery(int payId, String outNo, String tradeNo) {
+        PayService service = this.service.getPayResponse(payId).getService();
+        return service.transferQuery(outNo, tradeNo);
+    }
 
 }

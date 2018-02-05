@@ -4,16 +4,14 @@ package com.egzosn.pay.demo.controller;
 
 import com.egzosn.pay.common.api.Callback;
 import com.egzosn.pay.common.api.PayService;
-import com.egzosn.pay.common.bean.MethodType;
-import com.egzosn.pay.common.bean.PayOrder;
-import com.egzosn.pay.common.bean.RefundOrder;
-import com.egzosn.pay.common.bean.TransactionType;
+import com.egzosn.pay.common.bean.*;
 import com.egzosn.pay.common.http.UriVariables;
 import com.egzosn.pay.demo.entity.PayType;
 import com.egzosn.pay.demo.request.QueryOrder;
 import com.egzosn.pay.demo.service.PayResponse;
 import com.egzosn.pay.wx.api.WxPayConfigStorage;
 import com.egzosn.pay.wx.api.WxPayService;
+import com.egzosn.pay.wx.bean.WxBank;
 import com.egzosn.pay.wx.bean.WxTransactionType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -46,8 +44,8 @@ public class WxPayController {
         WxPayConfigStorage wxPayConfigStorage = new WxPayConfigStorage();
         wxPayConfigStorage.setMchId("合作者id（商户号）");
         wxPayConfigStorage.setAppid("应用id");
-        wxPayConfigStorage.setKeyPublic("密钥");
-        wxPayConfigStorage.setKeyPrivate("密钥");
+        wxPayConfigStorage.setKeyPublic("转账公钥，转账时必填");
+        wxPayConfigStorage.setSecretKey("密钥");
         wxPayConfigStorage.setNotifyUrl("异步回调地址");
         wxPayConfigStorage.setReturnUrl("同步回调地址");
         wxPayConfigStorage.setSignType("签名方式");
@@ -255,11 +253,40 @@ public class WxPayController {
     @RequestMapping("secondaryInterface")
     public Map<String, Object> secondaryInterface(QueryOrder order) {
         TransactionType type = WxTransactionType.valueOf(order.getTransactionType());
-        return service.secondaryInterface(order.getTradeNoOrBillDate(), order.getOutTradeNoBillType(), type, new Callback<Map<String, Object>>() {
-            @Override
-            public Map<String, Object> perform(Map<String, Object> map) {
-                return map;
-            }
-        });
+        return service.secondaryInterface(order.getTradeNoOrBillDate(), order.getOutTradeNoBillType(), type);
+    }
+
+
+
+    /**
+     * 转账
+     *
+     * @param order 转账订单
+     *
+     * @return 对应的转账结果
+     */
+    @RequestMapping("transfer")
+    public Map<String, Object> transfer(TransferOrder order) {
+        order.setOutNo("partner_trade_no 商户转账订单号");
+        //采用标准RSA算法，公钥由微信侧提供,将公钥信息配置在PayConfigStorage#setKeyPublic(String)
+        order.setPayeeAccount("enc_bank_no 收款方银行卡号");
+        order.setPayeeName("收款方用户名");
+        order.setBank(WxBank.ABC);
+        order.setRemark("转账备注, 非必填");
+        order.setAmount(new BigDecimal(10));
+        return service.transfer(order);
+    }
+
+    /**
+     * 转账查询
+     *
+     * @param outNo   商户转账订单号
+     * @param tradeNo 支付平台转账订单号
+     *
+     * @return 对应的转账订单
+     */
+    @RequestMapping("transferQuery")
+    public Map<String, Object> transferQuery(String outNo, String tradeNo) {
+        return service.transferQuery(outNo, tradeNo);
     }
 }

@@ -248,11 +248,37 @@ public class AliPayController {
     @RequestMapping("secondaryInterface")
     public Map<String, Object> secondaryInterface(QueryOrder order) {
         TransactionType type = AliTransactionType.valueOf(order.getTransactionType());
-        return service.secondaryInterface(order.getTradeNoOrBillDate(), order.getOutTradeNoBillType(), type, new Callback<Map<String, Object>>() {
-            @Override
-            public Map<String, Object> perform(Map<String, Object> map) {
-                return map;
-            }
-        });
+        return service.secondaryInterface(order.getTradeNoOrBillDate(), order.getOutTradeNoBillType(), type);
+    }
+
+    /**
+     * 转账
+     *
+     * @param order 转账订单
+     *
+     * @return 对应的转账结果
+     */
+    @RequestMapping("transfer")
+    public Map<String, Object> transfer(TransferOrder order) {
+//        order.setOutNo("转账单号");
+//        order.setPayeeAccount("收款方账户,支付宝登录号，支持邮箱和手机号格式");
+//        order.setAmount(new BigDecimal(10));
+//        order.setPayerName("付款方姓名, 非必填");
+//        order.setPayeeName("收款方真实姓名, 非必填");
+//        order.setRemark("转账备注, 非必填");
+        return service.transfer(order);
+    }
+
+    /**
+     * 转账查询
+     *
+     * @param outNo   商户转账订单号
+     * @param tradeNo 支付平台转账订单号
+     *
+     * @return 对应的转账订单
+     */
+    @RequestMapping("transferQuery")
+    public Map<String, Object> transferQuery(String outNo, String tradeNo) {
+        return service.transferQuery(outNo, tradeNo);
     }
 }

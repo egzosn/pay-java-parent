@@ -158,7 +158,7 @@
 #### 交易关闭接口
   ```java
 
-          Map result = service.query("支付宝单号", "我方系统单号");
+          Map result = service.close("支付宝单号", "我方系统单号");
 
 ```
 
@@ -189,3 +189,19 @@
 
 ```
 
+#### 转账
+  ```java
+        TransferOrder order = new TransferOrder();
+        order.setOutNo("商户转账订单号");
+        order.setPayeeAccount("收款方账户,支付宝登录号，支持邮箱和手机号格式");
+        order.setAmount(new BigDecimal(10));
+        order.setPayerName("付款方姓名, 非必填");
+        order.setPayeeName("收款方真实姓名, 非必填");
+        order.setRemark("转账备注, 非必填");
+        Map result = service.transfer(order);
+
+```
+#### 转账查询
+  ```java
+       Map result = service.transferQuery("商户转账订单号", "支付平台转账订单号");
+```
