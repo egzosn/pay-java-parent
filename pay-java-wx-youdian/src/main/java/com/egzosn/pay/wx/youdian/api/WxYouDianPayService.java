@@ -387,65 +387,53 @@ public class WxYouDianPayService extends BasePayService {
         return null;
     }
 
-    @Override
-    public <T> T query(String tradeNo, String outTradeNo, Callback<T> callback) {
-        return null;
-    }
 
     @Override
     public Map<String, Object> close(String tradeNo, String outTradeNo) {
         return null;
     }
 
-    @Override
-    public <T> T close(String tradeNo, String outTradeNo, Callback<T> callback) {
-        return null;
-    }
 
     @Override
     public Map<String, Object> refund(String tradeNo, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount) {
         return null;
     }
 
-    @Override
-    public <T> T refund(String tradeNo, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount, Callback<T> callback) {
-        return null;
-    }
+
 
     @Override
     public Map<String, Object> refund(RefundOrder refundOrder) {
         return null;
     }
 
-    @Override
-    public <T> T refund(RefundOrder refundOrder, Callback<T> callback) {
-        return null;
-    }
 
     @Override
     public Map<String, Object> refundquery(String tradeNo, String outTradeNo) {
         return null;
     }
 
+
+
     @Override
-    public <T> T refundquery(String tradeNo, String outTradeNo, Callback<T> callback) {
+    public Map<String, Object>  downloadbill(Date billDate, String billType) {
         return null;
     }
 
+
+    /**
+     * @param tradeNoOrBillDate  支付平台订单号或者账单类型， 具体请
+     *                           类型为{@link String }或者 {@link Date }，类型须强制限制，类型不对应则抛出异常{@link PayErrorException}
+     * @param outTradeNoBillType 商户单号或者 账单类型
+     * @param transactionType    交易类型
+     *
+     * @return 返回支付方对应接口的结果
+     */
     @Override
-    public Object downloadbill(Date billDate, String billType) {
+    public Map<String, Object> secondaryInterface(Object tradeNoOrBillDate, String outTradeNoBillType, TransactionType transactionType) {
         return null;
     }
 
-    @Override
-    public <T> T downloadbill(Date billDate, String billType, Callback<T> callback) {
-        return null;
-    }
 
-    @Override
-    public <T> T secondaryInterface(Object tradeNoOrBillDate, String outTradeNoBillType, TransactionType transactionType, Callback<T> callback) {
-        return null;
-    }
 
     public WxYouDianPayService(PayConfigStorage payConfigStorage) {
         super(payConfigStorage);

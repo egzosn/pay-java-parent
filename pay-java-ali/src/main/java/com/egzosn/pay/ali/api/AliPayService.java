@@ -34,9 +34,13 @@ import java.util.*;
 public class AliPayService extends BasePayService {
     protected final Log log = LogFactory.getLog(AliPayService.class);
 
-      //正式测试环境
+    /**
+     * 正式测试环境
+     */
     private final static String httpsReqUrl = "https://openapi.alipay.com/gateway.do";
-    //沙箱测试环境账号
+    /**
+     * 沙箱测试环境账号
+     */
     private final static String devReqUrl = "https://openapi.alipaydev.com/gateway.do";
 
 
@@ -291,16 +295,13 @@ public class AliPayService extends BasePayService {
     @Override
     public Map<String, Object> microPay(PayOrder order) {
         Map<String, Object> orderInfo = orderInfo(order);
-
-//        Map<String, Object> content = new HashMap<>(1);
-//        content.put("biz_content", orderInfo.remove("biz_content"));
         //预订单
         JSONObject result = getHttpRequestTemplate().postForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(orderInfo), null, JSONObject.class);
         JSONObject response = result.getJSONObject("alipay_trade_pay_response");
-        if ("10000".equals(response.getString("code"))){
-            return result;
+        if (!"10000".equals(response.getString("code"))){
+           log.info("收款失败");
         }
-        throw new PayErrorException(new PayException(response.getString("code"), response.getString("msg"), result.toJSONString()));
+        return result;
     }
 
     /**
@@ -311,29 +312,11 @@ public class AliPayService extends BasePayService {
      */
     @Override
     public Map<String, Object> query(String tradeNo, String outTradeNo) {
+        return secondaryInterface(tradeNo, outTradeNo, AliTransactionType.QUERY);
 
-        return  query(tradeNo, outTradeNo, new Callback<Map<String, Object>>() {
-            @Override
-            public Map<String, Object> perform(Map<String, Object> map) {
-                return map;
-            }
-        });
     }
 
 
-    /**
-     * 交易查询接口，带处理器
-     * @param tradeNo    支付平台订单号
-     * @param outTradeNo 商户单号
-     * @param callback 处理器
-     * @param <T> 返回类型
-     * @return  返回查询回来的结果集
-     */
-    @Override
-    public <T> T query(String tradeNo, String outTradeNo, Callback<T> callback) {
-
-        return secondaryInterface(tradeNo, outTradeNo, AliTransactionType.QUERY, callback);
-    }
 
     /**
      * 交易关闭接口
@@ -344,27 +327,9 @@ public class AliPayService extends BasePayService {
      */
     @Override
     public Map<String, Object> close(String tradeNo, String outTradeNo) {
+        return  secondaryInterface(tradeNo, outTradeNo, AliTransactionType.CLOSE);
+    }
 
-        return  close(tradeNo, outTradeNo, new Callback<Map<String, Object>>() {
-            @Override
-            public Map<String, Object> perform(Map<String, Object> map) {
-                return map;
-            }
-        });
-    }
-    /**
-     * 交易关闭接口
-     *
-     * @param tradeNo    支付平台订单号
-     * @param outTradeNo 商户单号
-     * @param callback 处理器
-     * @param <T> 返回类型
-     * @return 返回支付方交易关闭后的结果
-     */
-    @Override
-    public <T> T close(String tradeNo, String outTradeNo, Callback<T> callback) {
-        return  secondaryInterface(tradeNo, outTradeNo, AliTransactionType.CLOSE, callback);
-    }
     /**
      * 申请退款接口
      * 废弃
@@ -378,32 +343,9 @@ public class AliPayService extends BasePayService {
     @Deprecated
     @Override
     public Map<String, Object> refund(String tradeNo, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount) {
-
-        return  refund(tradeNo, outTradeNo, refundAmount, totalAmount, new Callback<Map<String, Object>>() {
-            @Override
-            public Map<String, Object> perform(Map<String, Object> map) {
-                return map;
-            }
-        });
+        return refund(new RefundOrder(tradeNo, outTradeNo, refundAmount, totalAmount));
     }
-    /**
-     * 申请退款接口
-     * 废弃
-     * @param tradeNo    支付平台订单号
-     * @param outTradeNo 商户单号
-     * @param refundAmount 退款金额
-     * @param totalAmount 总金额
-     * @param callback 处理器
-     * @param <T> 返回类型
-     * @return 返回支付方申请退款后的结果
-     * @see #refund(RefundOrder, Callback)
-     */
-    @Deprecated
-    @Override
-    public <T> T refund(String tradeNo, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount, Callback<T> callback) {
 
-        return refund(new RefundOrder(tradeNo, outTradeNo, refundAmount, totalAmount), callback);
-    }
 
     /**
      * 申请退款接口
@@ -413,24 +355,6 @@ public class AliPayService extends BasePayService {
      */
     @Override
     public Map<String, Object> refund(RefundOrder refundOrder) {
-        return  refund(refundOrder, new Callback<Map<String, Object>>() {
-            @Override
-            public Map<String, Object> perform(Map<String, Object> map) {
-                return map;
-            }
-        });
-    }
-    /**
-     * 申请退款接口
-     *
-     * @param refundOrder   退款订单信息
-     * @return 返回支付方申请退款后的结果
-     * @param callback 处理器
-     * @param <T> 返回类型
-     * @return 返回支付方申请退款后的结果
-     */
-    @Override
-    public <T> T refund(RefundOrder refundOrder, Callback<T> callback) {
         //获取公共参数
         Map<String, Object> parameters = getPublicParameters(AliTransactionType.REFUND);
 
@@ -443,8 +367,9 @@ public class AliPayService extends BasePayService {
         parameters.put("biz_content", JSON.toJSONString(bizContent));
         //设置签名
         setSign(parameters);
-        return  callback.perform(requestTemplate.getForObject(getReqUrl()  + "?" + UriVariables.getMapToParameters(parameters), JSONObject.class));
+        return requestTemplate.getForObject(getReqUrl()  + "?" + UriVariables.getMapToParameters(parameters), JSONObject.class);
     }
+
     /**
      * 查询退款
      *
@@ -461,19 +386,7 @@ public class AliPayService extends BasePayService {
             }
         });
     }
-    /**
-     * 查询退款
-     *
-     * @param tradeNo    支付平台订单号
-     * @param outTradeNo 商户单号
-     * @param callback 处理器
-     * @param <T> 返回类型
-     * @return 返回支付方查询退款后的结果
-     */
-    @Override
-    public <T> T refundquery(String tradeNo, String outTradeNo, Callback<T> callback) {
-        return secondaryInterface(tradeNo, outTradeNo, AliTransactionType.REFUNDQUERY, callback);
-    }
+
 
     /**
      * 目前只支持日账单
@@ -483,25 +396,6 @@ public class AliPayService extends BasePayService {
      */
     @Override
     public Map<String, Object> downloadbill(Date billDate, String billType) {
-        return  downloadbill(billDate, billType, new Callback<Map<String, Object>>() {
-            @Override
-            public Map<String, Object> perform(Map<String, Object> map) {
-                return map;
-            }
-        });
-    }
-
-    /**
-     *  目前只支持日账单
-     * @param billDate 账单时间：具体请查看对应支付平台
-     * @param billType 账单类型，具体请查看对应支付平台
-     * @param callback 处理器
-     * @param <T> 返回类型
-     * @return 返回支付方下载对账单的结果
-     */
-    @Override
-    public <T> T downloadbill(Date billDate, String billType, Callback<T> callback) {
-
         //获取公共参数
         Map<String, Object> parameters = getPublicParameters(AliTransactionType.DOWNLOADBILL);
 
@@ -515,8 +409,10 @@ public class AliPayService extends BasePayService {
         parameters.put("biz_content", JSON.toJSONString(bizContent));
         //设置签名
         setSign(parameters);
-        return callback.perform(requestTemplate.getForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(parameters), JSONObject.class));
+        return requestTemplate.getForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(parameters), JSONObject.class);
     }
+
+
 
     /**
      *
@@ -524,12 +420,10 @@ public class AliPayService extends BasePayService {
      *                          类型为{@link String }或者 {@link Date }，类型须强制限制，类型不对应则抛出异常{@link PayErrorException}
      * @param outTradeNoBillType  商户单号或者 账单类型
      * @param transactionType 交易类型
-     * @param callback 处理器
-     * @param <T> 返回类型
      * @return 返回支付方对应接口的结果
      */
     @Override
-    public <T> T secondaryInterface(Object tradeNoOrBillDate, String outTradeNoBillType, TransactionType transactionType, Callback<T> callback) {
+   public Map<String, Object> secondaryInterface(Object tradeNoOrBillDate, String outTradeNoBillType, TransactionType transactionType){
 
         if (transactionType == AliTransactionType.REFUND){
             throw new PayErrorException(new PayException("failure", "通用接口不支持:" + transactionType));
@@ -537,7 +431,7 @@ public class AliPayService extends BasePayService {
 
         if (transactionType == AliTransactionType.DOWNLOADBILL){
             if (tradeNoOrBillDate instanceof  Date){
-                return downloadbill((Date) tradeNoOrBillDate, outTradeNoBillType, callback);
+                return downloadbill((Date) tradeNoOrBillDate, outTradeNoBillType);
             }
             throw new PayErrorException(new PayException("failure", "非法类型异常:" + tradeNoOrBillDate.getClass()));
         }
@@ -552,8 +446,58 @@ public class AliPayService extends BasePayService {
         parameters.put("biz_content", getContentToJson(tradeNoOrBillDate.toString(), outTradeNoBillType));
         //设置签名
         setSign(parameters);
-        return  callback.perform(requestTemplate.getForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(parameters), JSONObject.class));
+        return  requestTemplate.getForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(parameters), JSONObject.class);
+    }
 
+    /**
+     * 转账
+     *
+     * @param order 转账订单
+     *
+     * @return 对应的转账结果
+     */
+    @Override
+    public Map<String, Object> transfer(TransferOrder order) {
+        //获取公共参数
+        Map<String, Object> parameters = getPublicParameters(AliTransactionType.TRANS);
+
+        Map<String, Object> bizContent = new TreeMap<String, Object>();
+        bizContent.put("out_biz_no", order.getOutNo());
+        bizContent.put("payee_type", "ALIPAY_LOGONID");
+        bizContent.put("payee_account", order.getPayeeAccount());
+        bizContent.put("amount", order.getAmount().setScale(2, BigDecimal.ROUND_HALF_UP));
+        bizContent.put("payer_show_name", order.getPayerName());
+        bizContent.put("payee_real_name", order.getPayeeName());
+        bizContent.put("remark", order.getRemark());
+        //设置请求参数的集合
+        parameters.put("biz_content", JSON.toJSONString(bizContent));
+        //设置签名
+        setSign(parameters);
+        return getHttpRequestTemplate().postForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(parameters), null, JSONObject.class);
+    }
+
+    /**
+     * 转账
+     *
+     * @param outNo   商户转账订单号
+     * @param tradeNo 支付平台转账订单号
+     *
+     * @return 对应的转账订单
+     */
+    @Override
+    public Map<String, Object> transferQuery(String outNo, String tradeNo) {
+        //获取公共参数
+        Map<String, Object> parameters = getPublicParameters(AliTransactionType.TRANS_QUERY);
+
+        Map<String, Object> bizContent = new TreeMap<String, Object>();
+        if (StringUtils.isEmpty(outNo)){
+            bizContent.put("order_id", tradeNo);
+        }else {
+            bizContent.put("out_biz_no", outNo);
+        }
+        //设置请求参数的集合
+        parameters.put("biz_content", JSON.toJSONString(bizContent));
+        return getHttpRequestTemplate().postForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(parameters), null, JSONObject.class);
     }
 
     /**
