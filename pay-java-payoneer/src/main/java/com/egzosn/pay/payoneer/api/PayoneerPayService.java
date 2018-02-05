@@ -13,6 +13,7 @@ import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.common.http.HttpHeader;
 import com.egzosn.pay.common.http.HttpStringEntity;
 import com.egzosn.pay.payoneer.bean.PayoneerTransactionType;
+import org.apache.http.client.utils.DateUtils;
 import org.apache.http.entity.ContentType;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HTTP;
@@ -27,9 +28,11 @@ import java.util.Map;
  * payoneer业务逻辑
  *
  * @author Actinia
+ * @author egan
  *         <pre>
- *         email hayesfu@qq.com
- *         date 2018-01-19
+ * email: egzosn@gmail.com
+ * email: hayesfu@qq.com
+ * create 2018-01-19
  *         </pre>
  */
 public class PayoneerPayService extends BasePayService implements AdvancedPayService {
@@ -51,6 +54,7 @@ public class PayoneerPayService extends BasePayService implements AdvancedPaySer
     private final static String OUT_TRADE_NO = "client_reference_id";
 
 
+
     public PayoneerPayService(PayConfigStorage payConfigStorage) {
         super(payConfigStorage);
     }
@@ -70,7 +74,7 @@ public class PayoneerPayService extends BasePayService implements AdvancedPaySer
     public String getAuthorizationPage(String payeeId) {
 
         HttpStringEntity entity = new HttpStringEntity("{\"payee_id\":\"" + payeeId + "\"}", ContentType.APPLICATION_JSON);
-        JSONObject response = getHttpRequestTemplate().postForObject(getReqUrl(PayoneerTransactionType.registration), entity, JSONObject.class);
+        JSONObject response = getHttpRequestTemplate().postForObject(getReqUrl(PayoneerTransactionType.REGISTRATION), entity, JSONObject.class);
         if (response != null && 0 == response.getIntValue(CODE)) {
             return response.getString("registration_link");
         }
@@ -132,7 +136,7 @@ public class PayoneerPayService extends BasePayService implements AdvancedPaySer
      */
     @Override
     public Map<String, Object> orderInfo(PayOrder order) {
-        Map<String, Object> params = new HashMap<>(5);
+        Map<String, Object> params = new HashMap<>(7);
         params.put("payee_id", order.getAuthCode());
         params.put("amount", order.getPrice().setScale(2, BigDecimal.ROUND_HALF_UP));
         params.put("client_reference_id", order.getOutTradeNo());
@@ -155,7 +159,7 @@ public class PayoneerPayService extends BasePayService implements AdvancedPaySer
      */
     @Override
     public String createSign(String content, String characterEncoding) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
 
@@ -196,7 +200,7 @@ public class PayoneerPayService extends BasePayService implements AdvancedPaySer
      */
     @Override
     public String buildRequest(Map<String, Object> orderInfo, MethodType method) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -208,7 +212,7 @@ public class PayoneerPayService extends BasePayService implements AdvancedPaySer
      */
     @Override
     public BufferedImage genQrPay(PayOrder order) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -221,7 +225,7 @@ public class PayoneerPayService extends BasePayService implements AdvancedPaySer
     @Override
     public Map<String, Object> microPay(PayOrder order) {
         HttpStringEntity entity = new HttpStringEntity(JSON.toJSONString(orderInfo(order)), ContentType.APPLICATION_JSON);
-        JSONObject response = getHttpRequestTemplate().postForObject(getReqUrl(PayoneerTransactionType.charge), entity, JSONObject.class);
+        JSONObject response = getHttpRequestTemplate().postForObject(getReqUrl(PayoneerTransactionType.CHARGE), entity, JSONObject.class);
         if (response != null) {
             return response;
         }
@@ -238,26 +242,9 @@ public class PayoneerPayService extends BasePayService implements AdvancedPaySer
      */
     @Override
     public Map<String, Object> query(String tradeNo, String outTradeNo) {
-        JSONObject result = getHttpRequestTemplate().getForObject(getReqUrl(PayoneerTransactionType.chargeStatus), JSONObject.class, outTradeNo);
-   /*     if (0 != result.getIntValue(CODE)) {
-            throw new PayErrorException(new PayException(result.getString(CODE), result.getString("description"), result.toJSONString()));
-        }*/
-        return result;
+        return secondaryInterface(tradeNo, outTradeNo, PayoneerTransactionType.CHARGE_STATUS);
     }
 
-    /**
-     * 交易查询接口，带处理器
-     *
-     * @param tradeNo    支付平台订单号
-     * @param outTradeNo 商户单号
-     * @param callback   处理器
-     *
-     * @return 返回查询回来的结果集
-     */
-    @Override
-    public <T> T query(String tradeNo, String outTradeNo, Callback<T> callback) {
-        return callback.perform(query(tradeNo, outTradeNo));
-    }
 
     /**
      * 交易关闭接口
@@ -269,27 +256,7 @@ public class PayoneerPayService extends BasePayService implements AdvancedPaySer
      */
     @Override
     public Map<String, Object> close(String tradeNo, String outTradeNo) {
-
-        JSONObject result = getHttpRequestTemplate().getForObject(getReqUrl(PayoneerTransactionType.chargeCancel), JSONObject.class, outTradeNo);
-
-       /* if (0 != result.getIntValue(CODE)) {
-            throw new PayErrorException(new PayException(result.getString(CODE), result.getString("description"), result.toJSONString()));
-        }*/
-        return result;
-    }
-
-    /**
-     * 交易关闭接口
-     *
-     * @param tradeNo    支付平台订单号
-     * @param outTradeNo 商户单号
-     * @param callback   处理器
-     *
-     * @return 返回支付方交易关闭后的结果
-     */
-    @Override
-    public <T> T close(String tradeNo, String outTradeNo, Callback<T> callback) {
-        return callback.perform(close(tradeNo, outTradeNo));
+        return secondaryInterface(tradeNo, outTradeNo, PayoneerTransactionType.CHARGE_CANCEL);
     }
 
     /**
@@ -309,23 +276,7 @@ public class PayoneerPayService extends BasePayService implements AdvancedPaySer
         return close(tradeNo, outTradeNo);
     }
 
-    /**
-     * 申请退款接口
-     * 废弃
-     *
-     * @param tradeNo      支付平台订单号
-     * @param outTradeNo   商户单号
-     * @param refundAmount 退款金额
-     * @param totalAmount  总金额
-     * @param callback     处理器
-     *
-     * @return 返回支付方申请退款后的结果
-     * @see #refund(RefundOrder, Callback)
-     */
-    @Override
-    public <T> T refund(String tradeNo, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount, Callback<T> callback) {
-        return callback.perform(close(tradeNo, outTradeNo));
-    }
+
 
     /**
      * 申请退款接口
@@ -340,19 +291,6 @@ public class PayoneerPayService extends BasePayService implements AdvancedPaySer
     }
 
     /**
-     * 申请退款接口
-     *
-     * @param refundOrder 退款订单信息
-     * @param callback    处理器
-     *
-     * @return 返回支付方申请退款后的结果
-     */
-    @Override
-    public <T> T refund(RefundOrder refundOrder, Callback<T> callback) {
-        return close(refundOrder.getTradeNo(), refundOrder.getOutTradeNo(), callback);
-    }
-
-    /**
      * 查询退款
      *
      * @param tradeNo    支付平台订单号
@@ -362,21 +300,7 @@ public class PayoneerPayService extends BasePayService implements AdvancedPaySer
      */
     @Override
     public Map<String, Object> refundquery(String tradeNo, String outTradeNo) {
-        return null;
-    }
-
-    /**
-     * 查询退款
-     *
-     * @param tradeNo    支付平台订单号
-     * @param outTradeNo 商户单号
-     * @param callback   处理器
-     *
-     * @return 返回支付方查询退款后的结果
-     */
-    @Override
-    public <T> T refundquery(String tradeNo, String outTradeNo, Callback<T> callback) {
-        return null;
+        return new HashMap<>(0);
     }
 
     /**
@@ -388,38 +312,60 @@ public class PayoneerPayService extends BasePayService implements AdvancedPaySer
      * @return 返回支付方下载对账单的结果
      */
     @Override
-    public Object downloadbill(Date billDate, String billType) {
+    public Map<String, Object> downloadbill(Date billDate, String billType) {
 
-        return null;
+        return new HashMap<>(0);
     }
 
     /**
-     * 下载对账单
-     *
-     * @param billDate 账单时间：具体请查看对应支付平台
-     * @param billType 账单类型，具体请查看对应支付平台
-     * @param callback 处理器
-     *
-     * @return 返回支付方下载对账单的结果
-     */
-    @Override
-    public <T> T downloadbill(Date billDate, String billType, Callback<T> callback) {
-        return null;
-    }
-
-    /**
-     * 通用查询接口
-     *
-     * @param tradeNoOrBillDate  支付平台订单号或者账单日期， 具体请 类型为{@link String }或者 {@link Date }，类型须强制限制，类型不对应则抛出异常{@link PayErrorException}
+     * @param tradeNoOrBillDate  支付平台订单号或者账单类型， 具体请
+     *                           类型为{@link String }或者 {@link Date }，类型须强制限制，类型不对应则抛出异常{@link PayErrorException}
      * @param outTradeNoBillType 商户单号或者 账单类型
      * @param transactionType    交易类型
-     * @param callback           处理器
      *
      * @return 返回支付方对应接口的结果
      */
     @Override
-    public <T> T secondaryInterface(Object tradeNoOrBillDate, String outTradeNoBillType, TransactionType transactionType, Callback<T> callback) {
-        return null;
+    public Map<String, Object> secondaryInterface(Object tradeNoOrBillDate, String outTradeNoBillType, TransactionType transactionType) {
+        JSONObject result = getHttpRequestTemplate().getForObject(getReqUrl(transactionType), JSONObject.class, outTradeNoBillType);
+        return result;
+    }
+
+    /**
+     * 转账
+     *
+     * @param order 转账订单
+     *
+     * @return 对应的转账结果
+     */
+    @Override
+    public Map<String, Object> transfer(TransferOrder order) {
+        PayOrder payOrder = new PayOrder();
+        payOrder.setCurType(order.getCurType());
+        payOrder.setAuthCode(order.getPayeeAccount());
+        payOrder.setSubject(order.getRemark());
+        payOrder.setPrice(order.getAmount());
+        payOrder.setOutTradeNo(order.getOutNo());
+
+        Map<String, Object> info = orderInfo(payOrder);
+        info.put("payout_date", DateUtils.formatDate(new Date(), "yyyy-MM-dd"));
+        info.put("group_id", order.getPayerName());
+        HttpStringEntity entity = new HttpStringEntity(JSON.toJSONString(info), ContentType.APPLICATION_JSON);
+        JSONObject response = getHttpRequestTemplate().postForObject(getReqUrl(PayoneerTransactionType.PAYOUTS), entity, JSONObject.class);
+        return response;
+    }
+
+    /**
+     * 转账
+     *
+     * @param outNo   商户转账订单号
+     * @param tradeNo 支付平台转账订单号
+     *
+     * @return 对应的转账订单
+     */
+    @Override
+    public Map<String, Object> transferQuery(String outNo, String tradeNo) {
+        return secondaryInterface(tradeNo, outNo, PayoneerTransactionType.PAYOUT_STATUS);
     }
 
     /**

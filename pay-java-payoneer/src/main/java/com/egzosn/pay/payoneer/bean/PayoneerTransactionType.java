@@ -5,29 +5,40 @@ import com.egzosn.pay.common.bean.TransactionType;
 /**
  * 支付类型
  * @author Actinia
- * @email hayesfu@qq.com
+ * @author egan
+ *
  *  <pre>
- * create 2017 2017/1/16 0016
+ *  email: egzosn@gmail.com
+ * email: hayesfu@qq.com
+ * create  2017/1/16 0016
  * </pre>
  */
 public enum PayoneerTransactionType implements TransactionType {
 
     /**
-     * 收款
+     * 注册授权
      */
-    registration("payees/registration-link"),
+    REGISTRATION("payees/registration-link"),
     /**
      * 收款
      */
-    charge("charges"),
+    CHARGE("charges"),
     /**
      * 取消收款(取消订单与退款)
      */
-    chargeCancel("charges/{client_reference_id}/cancel"),
+    CHARGE_CANCEL("charges/{client_reference_id}/cancel"),
     /**
      * 查询收款订单与订单状态
      */
-    chargeStatus("charges/{client_reference_id}/status")
+    CHARGE_STATUS("charges/{client_reference_id}/status"),
+    /**
+     * 转账
+     */
+    PAYOUTS("payouts"),
+    /**
+     * 转账状态查询
+     */
+    PAYOUT_STATUS("payouts/{client_reference_id}")
     ;
 
     private String method;

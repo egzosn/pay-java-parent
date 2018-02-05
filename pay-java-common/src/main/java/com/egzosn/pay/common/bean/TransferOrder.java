@@ -46,6 +46,11 @@ public class TransferOrder {
       */
     private Bank bank;
 
+    /**
+     * 币种
+     */
+    private CurType curType;
+
     public String getOutNo() {
         return outNo;
     }
@@ -100,5 +105,13 @@ public class TransferOrder {
 
     public void setBank(Bank bank) {
         this.bank = bank;
+    }
+
+    public CurType getCurType() {
+        return curType;
+    }
+
+    public void setCurType(CurType curType) {
+        this.curType = curType;
     }
 }
