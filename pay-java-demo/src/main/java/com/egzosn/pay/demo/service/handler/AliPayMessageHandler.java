@@ -1,10 +1,12 @@
 package com.egzosn.pay.demo.service.handler;
 
+import com.egzosn.pay.common.api.PayMessageHandler;
 import com.egzosn.pay.common.api.PayService;
 import com.egzosn.pay.common.bean.PayMessage;
 import com.egzosn.pay.common.bean.PayOutMessage;
 import com.egzosn.pay.common.bean.outbuilder.TextBuilder;
 import com.egzosn.pay.common.exception.PayErrorException;
+import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.Map;
@@ -14,16 +16,17 @@ import java.util.Map;
  * Created by ZaoSheng on 2016/6/1.
  *
  */
-public class AliPayMessageHandler extends BasePayMessageHandler {
+@Component
+public class AliPayMessageHandler implements PayMessageHandler {
 
 
-    public AliPayMessageHandler(Integer payId) {
-        super(payId);
-    }
+
 
 
     @Override
     public PayOutMessage handle(PayMessage payMessage, Map<String, Object> context, PayService payService) throws PayErrorException {
+        //com.egzosn.pay.demo.entity.PayType.getPayService()#48
+        Object payId = payService.getPayConfigStorage().getAttach();
 
         Map<String, Object> message = payMessage.getPayMessage();
         //交易状态

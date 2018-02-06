@@ -44,20 +44,22 @@ public enum PayType implements BasePayType {
          */
         @Override
         public PayService getPayService(ApyAccount apyAccount) {
-            AliPayConfigStorage aliPayConfigStorage = new AliPayConfigStorage();
-            aliPayConfigStorage.setPid(apyAccount.getPartner());
-            aliPayConfigStorage.setAppId(apyAccount.getAppid());
-            aliPayConfigStorage.setKeyPublic(apyAccount.getPublicKey());
-            aliPayConfigStorage.setKeyPrivate(apyAccount.getPrivateKey());
-            aliPayConfigStorage.setNotifyUrl(apyAccount.getNotifyUrl());
-            aliPayConfigStorage.setReturnUrl(apyAccount.getReturnUrl());
-            aliPayConfigStorage.setSignType(apyAccount.getSignType());
-            aliPayConfigStorage.setSeller(apyAccount.getSeller());
-            aliPayConfigStorage.setPayType(apyAccount.getPayType().toString());
-            aliPayConfigStorage.setMsgType(apyAccount.getMsgType());
-            aliPayConfigStorage.setInputCharset(apyAccount.getInputCharset());
-            aliPayConfigStorage.setTest(apyAccount.isTest());
-            return new AliPayService(aliPayConfigStorage);
+            AliPayConfigStorage configStorage = new AliPayConfigStorage();
+            //配置的附加参数的使用
+            configStorage.setAttach(apyAccount.getPayId());
+            configStorage.setPid(apyAccount.getPartner());
+            configStorage.setAppId(apyAccount.getAppid());
+            configStorage.setKeyPublic(apyAccount.getPublicKey());
+            configStorage.setKeyPrivate(apyAccount.getPrivateKey());
+            configStorage.setNotifyUrl(apyAccount.getNotifyUrl());
+            configStorage.setReturnUrl(apyAccount.getReturnUrl());
+            configStorage.setSignType(apyAccount.getSignType());
+            configStorage.setSeller(apyAccount.getSeller());
+            configStorage.setPayType(apyAccount.getPayType().toString());
+            configStorage.setMsgType(apyAccount.getMsgType());
+            configStorage.setInputCharset(apyAccount.getInputCharset());
+            configStorage.setTest(apyAccount.isTest());
+            return new AliPayService(configStorage);
         }
 
         @Override

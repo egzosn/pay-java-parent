@@ -92,7 +92,7 @@ public class PayResponse {
                 //拦截器
                 .interceptor(new AliPayMessageInterceptor())
                 //处理器
-                .handler(autowire(new AliPayMessageHandler(payId)))
+                .handler(spring.getBean(AliPayMessageHandler.class))
                 .end()
                 .rule()
                 .msgType(MsgType.xml.name())
