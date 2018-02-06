@@ -82,7 +82,7 @@ public class PayController {
         //获取对应的支付账户操作工具（可根据账户id）
         PayResponse payResponse = service.getPayResponse(payId);
 
-        PayOrder order = new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, "22222222233", PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType));
+        PayOrder order = new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType));
         // ------  微信H5使用----
         order.setSpbillCreateIp(request.getHeader("X-Real-IP"));
         StringBuffer requestURL = request.getRequestURL();
