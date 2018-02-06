@@ -30,10 +30,10 @@ import java.util.Map;
  * @author Actinia
  * @author egan
  *         <pre>
- * email: egzosn@gmail.com
- * email: hayesfu@qq.com
- * create 2018-01-19
- *         </pre>
+ *         email: egzosn@gmail.com
+ *         email: hayesfu@qq.com
+ *         create 2018-01-19
+ *                 </pre>
  */
 public class PayoneerPayService extends BasePayService implements AdvancedPayService {
     /**
@@ -52,7 +52,6 @@ public class PayoneerPayService extends BasePayService implements AdvancedPaySer
      * 响应状态码
      */
     private final static String OUT_TRADE_NO = "client_reference_id";
-
 
 
     public PayoneerPayService(PayConfigStorage payConfigStorage) {
@@ -82,6 +81,19 @@ public class PayoneerPayService extends BasePayService implements AdvancedPaySer
     }
 
     /**
+     * 授权状态
+     *
+     * @param payeeId 用户id
+     *
+     * @return 返回是否认证 true 已认证
+     */
+    @Override
+    public boolean getAuthorizationStatus(String payeeId) {
+        JSONObject result = (JSONObject) secondaryInterface(null, payeeId, PayoneerTransactionType.PAYEES_STATUS);
+        return "0".equals(result.get(CODE).toString())/* && "ACTIVE".equals(result.getString("status"))*/;
+    }
+
+    /**
      * 回调校验
      *
      * @param params 回调回来的参数集
@@ -91,7 +103,7 @@ public class PayoneerPayService extends BasePayService implements AdvancedPaySer
     @Override
     public boolean verify(Map<String, Object> params) {
         if (params != null && 0 == Integer.parseInt(params.get(CODE).toString())) {
-            if (params.containsKey(OUT_TRADE_NO)){
+            if (params.containsKey(OUT_TRADE_NO)) {
                 return verifySource((String) params.get(OUT_TRADE_NO));
             }
             return true;
@@ -275,7 +287,6 @@ public class PayoneerPayService extends BasePayService implements AdvancedPaySer
     public Map<String, Object> refund(String tradeNo, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount) {
         return close(tradeNo, outTradeNo);
     }
-
 
 
     /**
