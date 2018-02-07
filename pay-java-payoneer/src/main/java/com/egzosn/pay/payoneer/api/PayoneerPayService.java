@@ -90,7 +90,7 @@ public class PayoneerPayService extends BasePayService implements AdvancedPaySer
     @Override
     public boolean getAuthorizationStatus(String payeeId) {
         JSONObject result = (JSONObject) secondaryInterface(null, payeeId, PayoneerTransactionType.PAYEES_STATUS);
-        return "0".equals(result.get(CODE).toString())/* && "ACTIVE".equals(result.getString("status"))*/;
+        return "0".equals(result.get(CODE).toString()) && "ACTIVE".equals(result.getString("status"));
     }
 
     /**
