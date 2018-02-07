@@ -88,9 +88,9 @@ public class PayoneerPayService extends BasePayService implements AdvancedPaySer
      * @return 返回是否认证 true 已认证
      */
     @Override
-    public boolean getAuthorizationStatus(String payeeId) {
+    public Map<String, Object> getAuthorizationStatus(String payeeId) {
         JSONObject result = (JSONObject) secondaryInterface(null, payeeId, PayoneerTransactionType.PAYEES_STATUS);
-        return "0".equals(result.get(CODE).toString()) && "ACTIVE".equals(result.getString("status"));
+        return result;
     }
 
     /**

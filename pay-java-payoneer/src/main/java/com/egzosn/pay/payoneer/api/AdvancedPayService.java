@@ -25,6 +25,6 @@ public interface AdvancedPayService extends PayService {
      * @param payeeId 用户id
      * @return 返回是否认证 true 已认证
      */
-    boolean getAuthorizationStatus(String payeeId);
+    Map<String, Object> getAuthorizationStatus(String payeeId);
 
 }
