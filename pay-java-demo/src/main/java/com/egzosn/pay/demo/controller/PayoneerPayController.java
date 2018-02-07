@@ -1,13 +1,8 @@
 package com.egzosn.pay.demo.controller;
 
-import com.egzosn.pay.ali.bean.AliTransactionType;
-import com.egzosn.pay.common.api.Callback;
-import com.egzosn.pay.common.api.PayConfigStorage;
-import com.egzosn.pay.common.api.PayService;
 import com.egzosn.pay.common.bean.*;
 import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.demo.request.QueryOrder;
-import com.egzosn.pay.demo.service.PayResponse;
 import com.egzosn.pay.payoneer.api.PayoneerConfigStorage;
 import com.egzosn.pay.payoneer.api.PayoneerPayService;
 import com.egzosn.pay.payoneer.bean.PayoneerTransactionType;
