@@ -69,21 +69,31 @@ public class UnionPayService extends BasePayService {
         super(payConfigStorage, configStorage);
 
     }
+
+    /**
+     * 根据是否为沙箱环境进行获取请求地址
+     *
+     * @return 请求地址
+     */
+    public String getReqUrl() {
+        return (payConfigStorage.isTest() ? TEST_BASE_DOMAIN : RELEASE_BASE_DOMAIN) ;
+    }
+
     public  String getFrontTransUrl () {
-        return  String.format(FRONT_TRANS_URL,payConfigStorage.isTest() ? TEST_BASE_DOMAIN : RELEASE_BASE_DOMAIN);
+        return  String.format(FRONT_TRANS_URL, getReqUrl());
     }
 
     public  String getBackTransUrl () {
-        return String.format(BACK_TRANS_URL, payConfigStorage.isTest() ?  TEST_BASE_DOMAIN : RELEASE_BASE_DOMAIN);
+        return String.format(BACK_TRANS_URL, getReqUrl());
     }
 
     public  String getSingleQueryUrl () {
-        return String.format(SINGLE_QUERY_URL, payConfigStorage.isTest() ?  TEST_BASE_DOMAIN : RELEASE_BASE_DOMAIN);
+        return String.format(SINGLE_QUERY_URL,getReqUrl());
     }
 
 
     public  String getFileTransUrl () {
-        return String.format(FILE_TRANS_URL, payConfigStorage.isTest() ?  TEST_BASE_DOMAIN : RELEASE_BASE_DOMAIN);
+        return String.format(FILE_TRANS_URL, getReqUrl());
     }
 
 

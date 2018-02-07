@@ -302,7 +302,15 @@ public class FuiouPayService extends BasePayService {
      */
     @Override
     public Map<String, Object> query(String tradeNo, String outTradeNo) {
-        return null;
+
+        LinkedHashMap<String, Object> params = new LinkedHashMap<>();
+        params.put("mchnt_cd", payConfigStorage.getPid());
+        params.put("order_id", outTradeNo);
+        params.put("md5", createSign(SignUtils.parameters2MD5Str(params, "|"), payConfigStorage.getInputCharset()));
+        JSONObject resultJson = getHttpRequestTemplate().postForObject(getReqUrl() + URL_FuiouSmpAQueryGate + "?" + UriVariables.getMapToParameters(params), null, JSONObject.class);
+
+
+        return resultJson;
     }
 
 

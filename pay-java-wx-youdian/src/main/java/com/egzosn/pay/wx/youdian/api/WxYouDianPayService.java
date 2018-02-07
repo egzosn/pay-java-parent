@@ -12,16 +12,15 @@ import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.common.util.MatrixToImageWriter;
 import com.egzosn.pay.common.util.sign.SignUtils;
+import com.egzosn.pay.common.util.str.StringUtils;
 import com.egzosn.pay.wx.youdian.bean.YdPayError;
+import com.egzosn.pay.wx.youdian.bean.YoudianTransactionType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 
 /**
@@ -33,22 +32,8 @@ import java.util.concurrent.locks.Lock;
  */
 public class WxYouDianPayService extends BasePayService {
     protected static final Log LOG = LogFactory.getLog(WxYouDianPayService.class);
-    /**
-     * 登录获取授权码
-     */
-    public final static String LOGIN_URL = "http://life.51youdian.com/Api/CheckoutCounter/login";
-    /**
-     * 刷新授权码
-     */
-    public final static String RESET_LOGIN_URL = "http://life.51youdian.com/Api/CheckoutCounter/resetLogin";
-    /**
-     * 查看付款订单状态
-     */
-    public final static String UNIFIEDORDER_STATUS_URL = "http://life.51youdian.com/Api/CheckoutCounter/unifiedorderStatus";
-    /**
-     * 预下单链接
-     */
-    public final static String UNIFIED_ORDER_URL = "http://life.51youdian.com/Api/CheckoutCounter/unifiedorder";
+
+    private final static String URL = "http://life.51youdian.com/Api/CheckoutCounter/";
 
 
     /**
@@ -87,7 +72,7 @@ public class WxYouDianPayService extends BasePayService {
                 StringBuilder param = new StringBuilder().append("access_token=").append(payConfigStorage.getAccessToken());
                 String sign = createSign(param.toString() + apbNonce, payConfigStorage.getInputCharset());
                 param.append("&apb_nonce=").append(apbNonce).append("&sign=").append(sign);
-                JSONObject json =  execute(RESET_LOGIN_URL + "?" +  param.toString(), MethodType.GET, null );
+                JSONObject json =  execute(getUrl(YoudianTransactionType.RESET_LOGIN) + "?" +  param.toString(), MethodType.GET, null );
                 int errorcode = json.getIntValue("errorcode");
                 if (0 == errorcode){
                     payConfigStorage.updateAccessToken(payConfigStorage.getAccessToken(), 7200);
@@ -119,20 +104,14 @@ public class WxYouDianPayService extends BasePayService {
          String sign = createSign(SignUtils.parameterText(data, "") + apbNonce, payConfigStorage.getInputCharset());
          String queryParam =  SignUtils.parameterText(data) +  "&apb_nonce=" + apbNonce + "&sign=" + sign;
 
-         JSONObject json = execute(LOGIN_URL + "?" + queryParam, MethodType.GET, null);
+         JSONObject json = execute(getUrl(YoudianTransactionType.LOGIN) + "?" + queryParam, MethodType.GET, null);
          payConfigStorage.updateAccessToken(json.getString("access_token"), json.getLongValue("viptime"));
          return json;
      }
 
 
 
-    /**
-     *  微信友店2支付状态校验
-     * @return 请求地址
-     */
-    public String getHttpsVerifyUrl() {
-        return UNIFIEDORDER_STATUS_URL;
-    }
+
     /**
      * 回调校验
      *
@@ -177,14 +156,9 @@ public class WxYouDianPayService extends BasePayService {
      */
     @Override
     public boolean verifySource(String id) {
-        String apbNonce = SignUtils.randomStr();
-        TreeMap<String, String> data = new TreeMap<>();
-        data.put("access_token",  payConfigStorage.getAccessToken());
-        data.put("order_sn", id);
-        String sign = createSign(SignUtils.parameterText(data, "") + apbNonce, payConfigStorage.getInputCharset());
-        String queryParam =  SignUtils.parameterText(data) +  "&apb_nonce=" + apbNonce + "&sign=" + sign;
+
         try {
-            JSONObject jsonObject = execute(getHttpsVerifyUrl() + "?"  +  queryParam, MethodType.GET, null);
+            JSONObject jsonObject = (JSONObject)query(id, null);
 
             return 0 == jsonObject.getIntValue("errorcode");
         }catch (PayErrorException e){
@@ -262,7 +236,7 @@ public class WxYouDianPayService extends BasePayService {
         data.put("PayMoney", data.remove("paymoney"));
         String params =  SignUtils.parameterText(data) +  "&apb_nonce=" + apbNonce + "&sign=" + sign;
         try {
-            JSONObject json = execute(UNIFIED_ORDER_URL+ "?" +  params, MethodType.GET, null);
+            JSONObject json = execute(getUrl(order.getTransactionType())+ "?" +  params, MethodType.GET, null);
             //友店比较特殊，需要在下完预订单后，自己存储 order_sn 对应 微信官方文档 out_trade_no
             order.setOutTradeNo(json.getString("order_sn"));
             return json;
@@ -307,8 +281,6 @@ public class WxYouDianPayService extends BasePayService {
                 valueStr = (i == values.length - 1) ? valueStr + values[i]
                         : valueStr + values[i] + ",";
             }
-            //乱码解决，这段代码在出现乱码时使用。如果mysign和sign不相等也可以使用这段代码转化
-            //valueStr = new String(valueStr.getBytes("ISO-8859-1"), "gbk");
             params.put(name, valueStr.trim());
         }
 
@@ -382,41 +354,75 @@ public class WxYouDianPayService extends BasePayService {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * 交易查询接口
+     *
+     * @param tradeNo    支付平台订单号
+     * @param outTradeNo 商户单号
+     * @return 返回查询回来的结果集，支付方原值返回
+     */
     @Override
     public Map<String, Object> query(String tradeNo, String outTradeNo) {
-        return null;
+        String apbNonce = SignUtils.randomStr();
+        TreeMap<String, String> data = new TreeMap<>();
+        data.put("access_token",  payConfigStorage.getAccessToken());
+
+        if (StringUtils.isEmpty(tradeNo)){
+            data.put("order_sn", outTradeNo);
+        }else {
+            data.put("order_sn", tradeNo);
+        }
+        String sign = createSign(SignUtils.parameterText(data, "") + apbNonce, payConfigStorage.getInputCharset());
+        String queryParam =  SignUtils.parameterText(data) +  "&apb_nonce=" + apbNonce + "&sign=" + sign;
+        JSONObject jsonObject = execute(getUrl(YoudianTransactionType.NATIVE_STATUS) + "?"  +  queryParam, MethodType.GET, null);
+        return jsonObject;
     }
 
 
     @Override
     public Map<String, Object> close(String tradeNo, String outTradeNo) {
-        return null;
+        return new HashMap<>(0);
     }
 
 
     @Override
     public Map<String, Object> refund(String tradeNo, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount) {
-        return null;
+        return refund(new RefundOrder(tradeNo, outTradeNo,refundAmount, totalAmount));
     }
 
 
 
     @Override
     public Map<String, Object> refund(RefundOrder refundOrder) {
-        return null;
+        String apbNonce = SignUtils.randomStr();
+        TreeMap<String, String> data = new TreeMap<>();
+        data.put("access_token",  payConfigStorage.getAccessToken());
+
+        if (StringUtils.isEmpty(refundOrder.getOutTradeNo())){
+            data.put("order_sn", refundOrder.getOutTradeNo());
+        }else {
+            data.put("order_sn", refundOrder.getTradeNo());
+        }
+        //支付类型刷卡为3扫码为4
+        data.put("type", "4");
+        data.put("refund_fee", refundOrder.getRefundAmount().setScale(2, BigDecimal.ROUND_HALF_UP).toString());
+        String sign = createSign(SignUtils.parameterText(data, "") + apbNonce, payConfigStorage.getInputCharset());
+        String queryParam =  SignUtils.parameterText(data) +  "&apb_nonce=" + apbNonce + "&sign=" + sign;
+        JSONObject jsonObject = execute(getUrl(YoudianTransactionType.NATIVE_STATUS) + "?"  +  queryParam, MethodType.GET, null);
+        return jsonObject;
     }
 
 
     @Override
     public Map<String, Object> refundquery(String tradeNo, String outTradeNo) {
-        return null;
+        return new HashMap<>(0);
     }
 
 
 
     @Override
     public Map<String, Object>  downloadbill(Date billDate, String billType) {
-        return null;
+        return new HashMap<>(0);
     }
 
 
@@ -430,7 +436,7 @@ public class WxYouDianPayService extends BasePayService {
      */
     @Override
     public Map<String, Object> secondaryInterface(Object tradeNoOrBillDate, String outTradeNoBillType, TransactionType transactionType) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
 
@@ -441,5 +447,15 @@ public class WxYouDianPayService extends BasePayService {
 
     public WxYouDianPayService(PayConfigStorage payConfigStorage, HttpConfigStorage configStorage) {
         super(payConfigStorage, configStorage);
+    }
+
+    /**
+     * 根据交易类型获取请求地址
+     * @param type 交易类型
+     * @return 请求地址
+     */
+    private String getUrl(TransactionType type){
+        return URL + type.getMethod();
+
     }
 }

@@ -151,7 +151,7 @@
 #### 交易关闭接口
   ```java
 
-          Map result = service..query("微信单号", "我方系统单号");
+          Map result = service..close("微信单号", "我方系统单号");
 
 ```
 
@@ -181,4 +181,22 @@
 
           Map result = service.downloadbill("账单时间：日账单格式为yyyy-MM-dd，月账单格式为yyyy-MM", "账单类型");
 
+```
+
+#### 转账
+  ```java
+    
+        order.setOutNo("partner_trade_no 商户转账订单号");
+        //采用标准RSA算法，公钥由微信侧提供,将公钥信息配置在PayConfigStorage#setKeyPublic(String)
+        order.setPayeeAccount("enc_bank_no 收款方银行卡号");
+        order.setPayeeName("收款方用户名");
+        order.setBank(WxBank.ABC);
+        order.setRemark("转账备注, 非必填");
+        order.setAmount(new BigDecimal(10));
+        Map result = service.transfer(order);
+
+```
+#### 转账查询
+  ```java
+       Map result = service.transferQuery("商户转账订单号", "支付平台转账订单号");
 ```

@@ -5,6 +5,7 @@ package com.egzosn.pay.demo.controller;
 import com.egzosn.pay.ali.bean.AliTransactionType;
 import com.egzosn.pay.common.api.Callback;
 import com.egzosn.pay.common.api.PayConfigStorage;
+import com.egzosn.pay.common.api.PayService;
 import com.egzosn.pay.common.bean.*;
 import com.egzosn.pay.common.util.MatrixToImageWriter;
 import com.egzosn.pay.common.util.str.StringUtils;
@@ -13,6 +14,7 @@ import com.egzosn.pay.demo.entity.PayType;
 import com.egzosn.pay.demo.request.QueryOrder;
 import com.egzosn.pay.demo.service.ApyAccountService;
 import com.egzosn.pay.demo.service.PayResponse;
+import com.egzosn.pay.payoneer.api.PayoneerPayService;
 import com.egzosn.pay.wx.bean.WxTransactionType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,6 +28,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -49,6 +52,9 @@ public class PayController {
     public ModelAndView index(){
         return new ModelAndView("/index.html");
     }
+
+
+
 
     /**
      * 这里模拟账户信息增加
@@ -160,7 +166,7 @@ public class PayController {
         //获取对应的支付账户操作工具（可根据账户id）
         PayResponse payResponse = service.getPayResponse(payId);
 
-        PayOrder order = new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType));
+        PayOrder order = new PayOrder("huodull order", "huodull order", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType));
         //设置授权码，条码等
         order.setAuthCode(authCode);
         //支付结果
@@ -234,26 +240,25 @@ public class PayController {
     public String toWxAliPay(Integer wxPayId,Integer aliPayId, BigDecimal price, HttpServletRequest request) throws IOException {
         StringBuilder html = new StringBuilder();
 
-        //这里为WAP支付的地址，根据需求自行修改
-        StringBuffer url = request.getRequestURL();
-        url = new StringBuffer(url.substring(0, url.lastIndexOf(request.getRequestURI())));
-        url .append("/toPay.html");
+        //订单
+        PayOrder payOrder = new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, System.currentTimeMillis() + "");
 
         html.append("<html><head></head><body><script type=\"text/javascript\"> ");
-//        html.append("\nalert('111');\n");
-
         if (null != wxPayId){
             html.append("if(isWxPay()){\n");
             html.append("window.location='");
-            //这里使用H5支付，公众号支付是否可以？请开发者自行尝试
-            html.append(url.toString()).append("?payId=").append(wxPayId).append("&transactionType=").append(WxTransactionType.MWEB.getType()).append("&price=").append(price);
+            payOrder.setTransactionType(WxTransactionType.NATIVE);
+            PayService service = this.service.getPayResponse(wxPayId).getService();
+            html.append(service.orderInfo(payOrder).get("code_url"));
             html.append("';\n }else\n");
         }
 
         if (null != aliPayId) {
             html.append("if(isAliPay()){\n");
             html.append("window.location='");
-            html.append(url).append("?payId=").append(aliPayId).append("&transactionType=").append(AliTransactionType.WAP.getType()).append("&price=").append(price);
+            payOrder.setTransactionType(AliTransactionType.SWEEPPAY);
+            PayService service = this.service.getPayResponse(aliPayId).getService();
+            html.append(service.orderInfo(payOrder).get("qr_code"));
             html.append("';\n } else");
         }
         html.append("{\n alert('请使用微信或者支付宝App扫码'+window.navigator.userAgent.toLowerCase());\n }");
@@ -413,13 +418,35 @@ public class PayController {
     public Map<String, Object> secondaryInterface(QueryOrder order) {
         PayResponse payResponse = service.getPayResponse(order.getPayId());
         TransactionType type = PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(order.getTransactionType());
-        return payResponse.getService().secondaryInterface(order.getTradeNoOrBillDate(), order.getOutTradeNoBillType(), type, new Callback<Map<String, Object>>() {
-            @Override
-            public Map<String, Object> perform(Map<String, Object> map) {
-                return map;
-            }
-        });
+        return payResponse.getService().secondaryInterface(order.getTradeNoOrBillDate(), order.getOutTradeNoBillType(), type);
     }
 
+
+    /**
+     * 转账
+     *
+     * @param order 转账订单
+     *
+     * @return 对应的转账结果
+     */
+    @RequestMapping("transfer")
+    public Map<String, Object> transfer(int payId, TransferOrder order) {
+        PayService service = this.service.getPayResponse(payId).getService();
+        return service.transfer(order);
+    }
+
+    /**
+     * 转账查询
+     *
+     * @param outNo   商户转账订单号
+     * @param tradeNo 支付平台转账订单号
+     *
+     * @return 对应的转账订单
+     */
+    @RequestMapping("transferQuery")
+    public Map<String, Object> transferQuery(int payId, String outNo, String tradeNo) {
+        PayService service = this.service.getPayResponse(payId).getService();
+        return service.transferQuery(outNo, tradeNo);
+    }
 
 }

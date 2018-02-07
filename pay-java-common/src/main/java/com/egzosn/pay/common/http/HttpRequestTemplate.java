@@ -2,6 +2,7 @@ package com.egzosn.pay.common.http;
 
 import com.egzosn.pay.common.bean.MethodType;
 import com.egzosn.pay.common.util.str.StringUtils;
+import org.apache.http.Header;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -13,10 +14,13 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContexts;
+
 import javax.net.ssl.SSLContext;
 import java.io.*;
 import java.net.URI;
-import java.security.*;
+import java.security.GeneralSecurityException;
+import java.security.KeyStore;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -65,7 +69,7 @@ public class HttpRequestTemplate {
      */
     public SSLConnectionSocketFactory createSSL( HttpConfigStorage configStorage){
 
-        if (StringUtils.isEmpty(configStorage.getKeystorePath()) || StringUtils.isEmpty(configStorage.getKeystorePath())){
+        if (StringUtils.isEmpty(configStorage.getKeystore())){
             return null;
         }
 
@@ -96,31 +100,32 @@ public class HttpRequestTemplate {
     }
 
     /**
-     * 创建代理服务器
+     * 创建凭据提供程序
      * @param configStorage 请求配置
-     * @return 代理服务器配置
+     * @return 凭据提供程序
      */
-    public CredentialsProvider createProxy(HttpConfigStorage configStorage){
+    public CredentialsProvider createCredentialsProvider(HttpConfigStorage configStorage){
 
-        if (StringUtils.isBlank(configStorage.getHttpProxyHost())) {
-            return null;
+        if (StringUtils.isNotBlank(configStorage.getHttpProxyHost())) {
+            //http代理地址设置
+            httpProxy = new HttpHost(configStorage.getHttpProxyHost(),configStorage.httpProxyPort);;
         }
-        //http代理地址设置
-        httpProxy = new HttpHost(configStorage.getHttpProxyHost(), configStorage.getHttpProxyPort());
 
-        if (StringUtils.isBlank(configStorage.getHttpProxyUsername())) {
+
+        if (StringUtils.isBlank(configStorage.getAuthUsername())) {
             return null;
         }
 
         // 需要用户认证的代理服务器
         CredentialsProvider credsProvider = new BasicCredentialsProvider();
         credsProvider.setCredentials(
-                new AuthScope(configStorage.getHttpProxyHost(), configStorage.getHttpProxyPort()),
-                new UsernamePasswordCredentials(configStorage.getHttpProxyUsername(), configStorage.getHttpProxyPassword()));
+                 AuthScope.ANY,
+                new UsernamePasswordCredentials(configStorage.getAuthUsername(), configStorage.getAuthPassword()));
 
 
         return credsProvider;
     }
+
 
     /**
      * 设置HTTP请求的配置
@@ -137,8 +142,8 @@ public class HttpRequestTemplate {
 
         httpClient = HttpClients
                 .custom()
-                //设置代理或网络提供者
-                .setDefaultCredentialsProvider(createProxy(configStorage))
+                //网络提供者
+                .setDefaultCredentialsProvider(createCredentialsProvider(configStorage))
                 //设置httpclient的SSLSocketFactory
                 .setSSLSocketFactory(createSSL(configStorage))
                 .build();
@@ -170,17 +175,18 @@ public class HttpRequestTemplate {
     }
 
 
-
     /**
      * get 请求
-     * @param uri 请求地址
+     *
+     * @param uri          请求地址
      * @param responseType 响应类型
      * @param uriVariables 用于匹配表达式
-     * @param <T> 响应类型
-     * @return 类型对象
+     * @param <T>          响应类型
      *
+     * @return 类型对象
+     * <p>
      * <code>
-     *    getForObject(&quot;http://egan.in/pay/{id}/f/{type}&quot;, String.class, &quot;1&quot;, &quot;APP&quot;)
+     * getForObject(&quot;http://egan.in/pay/{id}/f/{type}&quot;, String.class, &quot;1&quot;, &quot;APP&quot;)
      * </code>
      */
     public <T> T getForObject(String uri, Class<T> responseType, Object... uriVariables){
@@ -212,6 +218,48 @@ public class HttpRequestTemplate {
 
 
     /**
+     * get 请求
+     * @param uri           请求地址
+     * @param header        请求头
+     * @param responseType 响应类型
+     * @param uriVariables 用于匹配表达式
+     * @param <T>            响应类型
+     * @return               类型对象
+     *
+     * <code>
+     *    getForObject(&quot;http://egan.in/pay/{id}/f/{type}&quot;, String.class, &quot;1&quot;, &quot;APP&quot;)
+     * </code>
+     */
+    public <T> T getForObject(String uri, HttpHeader header,Class<T> responseType, Object... uriVariables){
+
+        return doExecute(URI.create(UriVariables.getUri(uri, uriVariables)), header, responseType, MethodType.GET);
+    }
+
+    /**
+     * get 请求
+     *
+     * @param uri          请求地址
+     * @param header        请求头
+     * @param responseType 响应类型
+     * @param uriVariables 用于匹配表达式
+     * @param <T>           响应类型
+     * @return 类型对象
+     * <code>
+     * Map&lt;String, String&gt; uriVariables = new HashMap&lt;String, String&gt;();<br>
+     *
+     * uriVariables.put(&quot;id&quot;, &quot;1&quot;);<br>
+     *
+     * uriVariables.put(&quot;type&quot;, &quot;APP&quot;);<br>
+     *
+     * getForObject(&quot;http://egan.in/pay/{id}/f/{type}&quot;, String.class, uriVariables)<br>
+     * </code>
+     */
+    public <T> T getForObject(String uri, HttpHeader header, Class<T> responseType, Map<String, ?> uriVariables){
+        return doExecute(URI.create(UriVariables.getUri(uri, uriVariables)), header, responseType, MethodType.GET);
+    }
+
+
+    /**
      * http 请求执行
      * @param uri 地址
      * @param request 请求数据
@@ -222,16 +270,21 @@ public class HttpRequestTemplate {
      */
     public <T>T doExecute(URI uri, Object request, Class<T> responseType, MethodType method){
         ClientHttpRequest<T> httpRequest = new ClientHttpRequest(uri ,method, request);
-        httpRequest.setProxy(httpProxy).setResponseType(responseType);
+        //判断是否有代理设置
+        if (null == httpProxy){
+            httpRequest.setProxy(httpProxy);
+        }
+        httpRequest.setResponseType(responseType);
         try (CloseableHttpResponse response = httpClient.execute(httpRequest)) {
           return httpRequest.handleResponse(response);
-        }catch (  IOException e){
+        }catch (IOException e){
             e.printStackTrace();
         }finally {
             httpRequest.releaseConnection();
         }
         return null;
     }
+
 
     /**
      * http 请求执行
@@ -245,8 +298,4 @@ public class HttpRequestTemplate {
     public <T>T doExecute(String uri, Object request, Class<T> responseType, MethodType method){
        return doExecute(URI.create(uri), request, responseType, method);
     }
-
-
-
-
 }

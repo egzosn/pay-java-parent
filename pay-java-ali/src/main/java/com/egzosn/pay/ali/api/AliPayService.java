@@ -362,7 +362,7 @@ public class AliPayService extends BasePayService {
         if (!StringUtils.isEmpty(refundOrder.getRefundNo())){
             bizContent.put("out_request_no", refundOrder.getRefundNo());
         }
-        bizContent.put("refund_amount", refundOrder.getRefundAmount());
+        bizContent.put("refund_amount", refundOrder.getRefundAmount().setScale(2, BigDecimal.ROUND_HALF_UP));
         //设置请求参数的集合
         parameters.put("biz_content", JSON.toJSONString(bizContent));
         //设置签名
@@ -379,14 +379,8 @@ public class AliPayService extends BasePayService {
      */
     @Override
     public Map<String, Object> refundquery(String tradeNo, String outTradeNo) {
-        return  refundquery(tradeNo, outTradeNo, new Callback<Map<String, Object>>() {
-            @Override
-            public Map<String, Object> perform(Map<String, Object> map) {
-                return map;
-            }
-        });
+        return secondaryInterface(tradeNo, outTradeNo, AliTransactionType.REFUNDQUERY);
     }
-
 
     /**
      * 目前只支持日账单
@@ -477,7 +471,7 @@ public class AliPayService extends BasePayService {
     }
 
     /**
-     * 转账
+     * 转账查询
      *
      * @param outNo   商户转账订单号
      * @param tradeNo 支付平台转账订单号

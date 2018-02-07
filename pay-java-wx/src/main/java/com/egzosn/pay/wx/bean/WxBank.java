@@ -10,7 +10,7 @@ import com.egzosn.pay.common.bean.Bank;
  * date 2018/1/31
  * </pre>
  */
-public enum  BankWx implements Bank{
+public enum WxBank implements Bank{
     ICBC("工商银行","1002"),
     ABC("农业银行","1005"),
     BOC("中国银行","1026"),
@@ -33,7 +33,7 @@ public enum  BankWx implements Bank{
 
     private String code;
 
-    BankWx(String name, String code) {
+    WxBank(String name, String code) {
         this.name = name;
         this.code = code;
     }

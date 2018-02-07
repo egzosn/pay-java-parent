@@ -18,6 +18,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public abstract class BasePayConfigStorage implements PayConfigStorage{
 
+    private volatile Object attach;
     /**
      * 证书管理器
      */
@@ -85,6 +86,15 @@ public abstract class BasePayConfigStorage implements PayConfigStorage{
      * 是否为证书签名
      */
     private boolean isCertSign = false;
+
+    @Override
+    public Object getAttach() {
+        return attach;
+    }
+
+    public void setAttach(Object attach) {
+        this.attach = attach;
+    }
 
     @Override
     public CertDescriptor getCertDescriptor() {

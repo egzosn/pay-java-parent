@@ -517,6 +517,8 @@ public class WxPayService extends BasePayService {
     @Override
     public Map<String, Object> transfer(TransferOrder order) {
         Map<String, Object> parameters = new TreeMap<String, Object>();
+        //转账到余额
+//        parameters.put("mch_appid", payConfigStorage.getAppid());
         parameters.put("mch_id", payConfigStorage.getPid());
         parameters.put("partner_trade_no", order.getOutNo());
         parameters.put("nonce_str", SignUtils.randomStr());
