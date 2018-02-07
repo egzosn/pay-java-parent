@@ -240,26 +240,25 @@ public class PayController {
     public String toWxAliPay(Integer wxPayId,Integer aliPayId, BigDecimal price, HttpServletRequest request) throws IOException {
         StringBuilder html = new StringBuilder();
 
-        //这里为WAP支付的地址，根据需求自行修改
-        StringBuffer url = request.getRequestURL();
-        url = new StringBuffer(url.substring(0, url.lastIndexOf(request.getRequestURI())));
-        url .append("/toPay.html");
+        //订单
+        PayOrder payOrder = new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, System.currentTimeMillis() + "");
 
         html.append("<html><head></head><body><script type=\"text/javascript\"> ");
-//        html.append("\nalert('111');\n");
-
         if (null != wxPayId){
             html.append("if(isWxPay()){\n");
             html.append("window.location='");
-            //这里使用H5支付，公众号支付是否可以？请开发者自行尝试
-            html.append(url.toString()).append("?payId=").append(wxPayId).append("&transactionType=").append(WxTransactionType.MWEB.getType()).append("&price=").append(price);
+            payOrder.setTransactionType(WxTransactionType.NATIVE);
+            PayService service = this.service.getPayResponse(wxPayId).getService();
+            html.append(service.orderInfo(payOrder).get("code_url"));
             html.append("';\n }else\n");
         }
 
         if (null != aliPayId) {
             html.append("if(isAliPay()){\n");
             html.append("window.location='");
-            html.append(url).append("?payId=").append(aliPayId).append("&transactionType=").append(AliTransactionType.WAP.getType()).append("&price=").append(price);
+            payOrder.setTransactionType(AliTransactionType.SWEEPPAY);
+            PayService service = this.service.getPayResponse(aliPayId).getService();
+            html.append(service.orderInfo(payOrder).get("qr_code"));
             html.append("';\n } else");
         }
         html.append("{\n alert('请使用微信或者支付宝App扫码'+window.navigator.userAgent.toLowerCase());\n }");
