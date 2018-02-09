@@ -87,7 +87,13 @@ public enum PayType implements BasePayType {
             wxPayConfigStorage.setMsgType(apyAccount.getMsgType());
             wxPayConfigStorage.setInputCharset(apyAccount.getInputCharset());
             wxPayConfigStorage.setTest(apyAccount.isTest());
-            return  new WxPayService(wxPayConfigStorage);
+            //https证书设置 方式一
+            HttpConfigStorage httpConfigStorage = new HttpConfigStorage();
+            httpConfigStorage.setKeystore("证书信息串");
+            httpConfigStorage.setStorePassword("证书密码");
+            //是否为证书地址
+            httpConfigStorage.setPath(false);
+            return  new WxPayService(wxPayConfigStorage, httpConfigStorage);
         }
 
         /**
