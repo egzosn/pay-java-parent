@@ -133,7 +133,7 @@ public class HttpStringEntity extends StringEntity {
      * @param request     请求体
      * @param contentType 内容类型
      *
-     * @throws UnsupportedEncodingException 不支持默认的HTTP字符集
+     * @throws UnsupportedCharsetException 不支持默认的HTTP字符集
      */
     public HttpStringEntity(String request, ContentType contentType) throws UnsupportedCharsetException {
         super(request, contentType);
@@ -146,7 +146,7 @@ public class HttpStringEntity extends StringEntity {
      * @param request 请求体
      * @param charset 字符类型
      *
-     * @throws UnsupportedEncodingException 不支持默认的HTTP字符集
+     * @throws UnsupportedCharsetException 不支持默认的HTTP字符集
      */
     public HttpStringEntity(String request, String charset) throws UnsupportedCharsetException {
         super(request, charset);

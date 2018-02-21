@@ -74,10 +74,11 @@ public class CertDescriptor {
 		}
 		return encryptCertTemp;
 	}
-	
+
 	/**
 	 * 通过keyStore 获取私钥签名证书PrivateKey对象
-	 * 
+	 *
+	 * @param pwd 证书对应密码
 	 * @return PrivateKey 私钥
 	 */
 	public  PrivateKey getSignCertPrivateKey(String pwd) {
