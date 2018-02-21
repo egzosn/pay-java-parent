@@ -99,6 +99,16 @@ public class ApyAccountRepository {
         apyAccount4.setTest(true);
         apyAccounts.put(apyAccount4.getPayId(), apyAccount4);
 
+        ApyAccount apyAccount5 = new ApyAccount();
+        apyAccount5.setPayId(5);
+        apyAccount5.setPartner("100086190");//Program ID
+        apyAccount5.setSeller("Huodull6190");//Username
+        apyAccount5.setStorePassword("12BkDT8152Zj");//API password
+        apyAccount5.setInputCharset("UTF-8");
+        apyAccount5.setPayType(PayType.payoneer);
+        apyAccount5.setMsgType(MsgType.json);
+        apyAccount5.setTest(true);
+        apyAccounts.put(apyAccount5.getPayId(), apyAccount5);
     }
     //_____________________________________________________________
 

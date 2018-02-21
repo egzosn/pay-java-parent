@@ -5,7 +5,7 @@
     <parent>
         <artifactId>pay-java-parent</artifactId>
         <groupId>com.egzosn</groupId>
-        <version>2.0.6-RELEASE</version>
+        <version>2.0.7-RELEASE</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <packaging>war</packaging>
@@ -23,15 +23,20 @@
         <!--支付-->
         <dependency>
             <groupId>com.egzosn</groupId>
+            <artifactId>pay-java-payoneer</artifactId>
+            <version>${pay.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.egzosn</groupId>
             <artifactId>pay-java-wx</artifactId>
             <version>${pay.version}</version>
         </dependency>
-
         <dependency>
             <groupId>com.egzosn</groupId>
             <artifactId>pay-java-ali</artifactId>
             <version>${pay.version}</version>
         </dependency>
+
         <dependency>
             <groupId>com.egzosn</groupId>
             <artifactId>pay-java-wx-youdian</artifactId>

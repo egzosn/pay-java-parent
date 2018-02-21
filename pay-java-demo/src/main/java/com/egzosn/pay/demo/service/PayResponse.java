@@ -67,9 +67,7 @@ public class PayResponse {
 //        httpConfigStorage.setHttpProxyUsername("user");
 //        //代理密码
 //        httpConfigStorage.setHttpProxyPassword("password");
-
-
-        //设置ssl证书路径
+        //设置ssl证书路径 https证书设置 方式二
         httpConfigStorage.setKeystorePath(apyAccount.getKeystorePath());
         //设置ssl证书对应的密码
         httpConfigStorage.setStorePassword(apyAccount.getStorePassword());
@@ -92,7 +90,7 @@ public class PayResponse {
                 //拦截器
                 .interceptor(new AliPayMessageInterceptor())
                 //处理器
-                .handler(autowire(new AliPayMessageHandler(payId)))
+                .handler(spring.getBean(AliPayMessageHandler.class))
                 .end()
                 .rule()
                 .msgType(MsgType.xml.name())
@@ -114,6 +112,11 @@ public class PayResponse {
                 .msgType(MsgType.json.name())
                 .payType(PayType.unionPay.name())
                 .handler(autowire(new UnionPayMessageHandler(payId)))
+                .end()
+                .rule()
+                .msgType(MsgType.json.name())
+                .payType(PayType.payoneer.name())
+                .handler(autowire(new PayoneerMessageHandler(payId)))
                 .end()
         ;
     }
