@@ -7,8 +7,11 @@ import java.util.Map;
 /**
  * 高级支付接口
  * @author Actinia
- * @email hayesfu@qq.com
- * @date 2018/1/18
+ * @author  egan
+ * <pre>
+ * email hayesfu@qq.com
+ * date 2018/1/18
+ * </pre>
  * 
  */
 

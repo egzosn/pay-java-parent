@@ -2,10 +2,13 @@ package com.egzosn.pay.payoneer.api;
 import com.egzosn.pay.common.api.BasePayConfigStorage;
 
 /**
- * @descrption
+ * Payoneer P卡 支付 配置
  * @author Actinia
- * @email hayesfu@qq.com
- * @date 2018-01-19
+ * @author  egan
+ * <pre>
+ * email hayesfu@qq.com
+ * date 2018-01-19
+ * </pre>
  */
 public class PayoneerConfigStorage extends BasePayConfigStorage {
     /**
