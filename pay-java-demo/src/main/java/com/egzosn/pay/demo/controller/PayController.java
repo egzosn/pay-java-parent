@@ -16,10 +16,14 @@ import com.egzosn.pay.demo.service.ApyAccountService;
 import com.egzosn.pay.demo.service.PayResponse;
 import com.egzosn.pay.payoneer.api.PayoneerPayService;
 import com.egzosn.pay.wx.bean.WxTransactionType;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.view.RedirectView;
+import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 
 import javax.annotation.Resource;
 import javax.imageio.ImageIO;
@@ -237,48 +241,26 @@ public class PayController {
      * @return 支付宝与微信平台的判断
      */
     @RequestMapping(value = "toWxAliPay.html", produces = "text/html;charset=UTF-8")
-    public String toWxAliPay(Integer wxPayId,Integer aliPayId, BigDecimal price, HttpServletRequest request) throws IOException {
+    public ModelAndView toWxAliPay(Integer wxPayId,Integer aliPayId, BigDecimal price, HttpServletRequest request) throws IOException {
         StringBuilder html = new StringBuilder();
 
         //订单
         PayOrder payOrder = new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, System.currentTimeMillis() + "");
-
-        html.append("<html><head></head><body><script type=\"text/javascript\"> ");
-        if (null != wxPayId){
-            html.append("if(isWxPay()){\n");
-            html.append("window.location='");
+        String ua = request.getHeader("user-agent");
+        if(ua.contains("MicroMessenger")){
             payOrder.setTransactionType(WxTransactionType.NATIVE);
             PayService service = this.service.getPayResponse(wxPayId).getService();
-            html.append(service.orderInfo(payOrder).get("code_url"));
-            html.append("';\n }else\n");
+            return new ModelAndView(new RedirectView((String) service.orderInfo(payOrder).get("code_url")));
         }
-
-        if (null != aliPayId) {
-            html.append("if(isAliPay()){\n");
-            html.append("window.location='");
+        if(ua.contains("AlipayClient")){
             payOrder.setTransactionType(AliTransactionType.SWEEPPAY);
             PayService service = this.service.getPayResponse(aliPayId).getService();
-            html.append(service.orderInfo(payOrder).get("qr_code"));
-            html.append("';\n } else");
+            return new ModelAndView(new RedirectView((String) service.orderInfo(payOrder).get("qr_code")));
         }
-        html.append("{\n alert('请使用微信或者支付宝App扫码'+window.navigator.userAgent.toLowerCase());\n }");
-        //判断是否为微信
-        html.append("function isWxPay(){ \n" +
-                " var ua = window.navigator.userAgent.toLowerCase();\n" +
-                " if(ua.match(/MicroMessenger/i) == 'micromessenger'){\n" +
-                " return true;\n" +
-                " }\n" +
-                " return false;\n" +
-                "} \n");
-        //判断是否为支付宝
-        html.append("function isAliPay(){\n" +
-                " var ua = window.navigator.userAgent.toLowerCase();\n" +
-                " if(ua.match(/AlipayClient/i) =='alipayclient'){\n" +
-                "  return true;\n" +
-                " }\n" +
-                "  return false;\n" +
-                "}</script> <body></html>");
-        return html.toString();
+
+        return new ModelAndView("<script type=\"text/javascript\">alert(\"请使用微信或者支付宝App扫码" + ua + "\");window.close();</script>");
+
+
     }
 
 
