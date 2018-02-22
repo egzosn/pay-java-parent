@@ -2,11 +2,14 @@
 package com.egzosn.pay.demo.controller;
 
 
+import com.alibaba.fastjson.JSONObject;
+import com.egzosn.pay.ali.api.AliPayService;
 import com.egzosn.pay.ali.bean.AliTransactionType;
 import com.egzosn.pay.common.api.Callback;
 import com.egzosn.pay.common.api.PayConfigStorage;
 import com.egzosn.pay.common.api.PayService;
 import com.egzosn.pay.common.bean.*;
+import com.egzosn.pay.common.http.UriVariables;
 import com.egzosn.pay.common.util.MatrixToImageWriter;
 import com.egzosn.pay.common.util.str.StringUtils;
 import com.egzosn.pay.demo.entity.ApyAccount;
@@ -31,6 +34,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -241,7 +245,7 @@ public class PayController {
      * @return 支付宝与微信平台的判断
      */
     @RequestMapping(value = "toWxAliPay.html", produces = "text/html;charset=UTF-8")
-    public ModelAndView toWxAliPay(Integer wxPayId,Integer aliPayId, BigDecimal price, HttpServletRequest request) throws IOException {
+    public String toWxAliPay(Integer wxPayId,Integer aliPayId, BigDecimal price, HttpServletRequest request) throws IOException {
         StringBuilder html = new StringBuilder();
 
         //订单
@@ -250,15 +254,17 @@ public class PayController {
         if(ua.contains("MicroMessenger")){
             payOrder.setTransactionType(WxTransactionType.NATIVE);
             PayService service = this.service.getPayResponse(wxPayId).getService();
-            return new ModelAndView(new RedirectView((String) service.orderInfo(payOrder).get("code_url")));
+            return String.format("<script type=\"text/javascript\">location.href=\"%s\"</script>",(String) service.orderInfo(payOrder).get("code_url"));
         }
         if(ua.contains("AlipayClient")){
             payOrder.setTransactionType(AliTransactionType.SWEEPPAY);
-            PayService service = this.service.getPayResponse(aliPayId).getService();
-            return new ModelAndView(new RedirectView((String) service.orderInfo(payOrder).get("qr_code")));
+            AliPayService service = (AliPayService)this.service.getPayResponse(aliPayId).getService();
+            JSONObject result = service.getHttpRequestTemplate().postForObject(service.getReqUrl() + "?" + UriVariables.getMapToParameters(service.orderInfo(payOrder)), null, JSONObject.class);
+             result = result.getJSONObject("alipay_trade_precreate_response");
+            return String.format("<script type=\"text/javascript\">location.href=\"%s\"</script>", result.getString("qr_code"));
         }
 
-        return new ModelAndView("<script type=\"text/javascript\">alert(\"请使用微信或者支付宝App扫码" + ua + "\");window.close();</script>");
+        return  String.format("<script type=\"text/javascript\">alert(\"请使用微信或者支付宝App扫码%s\");window.close();</script>", ua);
 
 
     }
