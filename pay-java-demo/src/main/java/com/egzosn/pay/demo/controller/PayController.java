@@ -2,11 +2,13 @@
 package com.egzosn.pay.demo.controller;
 
 
+import com.alibaba.fastjson.JSONObject;
+import com.egzosn.pay.ali.api.AliPayService;
 import com.egzosn.pay.ali.bean.AliTransactionType;
-import com.egzosn.pay.common.api.Callback;
 import com.egzosn.pay.common.api.PayConfigStorage;
 import com.egzosn.pay.common.api.PayService;
 import com.egzosn.pay.common.bean.*;
+import com.egzosn.pay.common.http.UriVariables;
 import com.egzosn.pay.common.util.MatrixToImageWriter;
 import com.egzosn.pay.common.util.str.StringUtils;
 import com.egzosn.pay.demo.entity.ApyAccount;
@@ -14,7 +16,6 @@ import com.egzosn.pay.demo.entity.PayType;
 import com.egzosn.pay.demo.request.QueryOrder;
 import com.egzosn.pay.demo.service.ApyAccountService;
 import com.egzosn.pay.demo.service.PayResponse;
-import com.egzosn.pay.payoneer.api.PayoneerPayService;
 import com.egzosn.pay.wx.bean.WxTransactionType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,7 +29,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -242,43 +242,23 @@ public class PayController {
 
         //订单
         PayOrder payOrder = new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, System.currentTimeMillis() + "");
-
-        html.append("<html><head></head><body><script type=\"text/javascript\"> ");
-        if (null != wxPayId){
-            html.append("if(isWxPay()){\n");
-            html.append("window.location='");
+        String ua = request.getHeader("user-agent");
+        if(ua.contains("MicroMessenger")){
             payOrder.setTransactionType(WxTransactionType.NATIVE);
             PayService service = this.service.getPayResponse(wxPayId).getService();
-            html.append(service.orderInfo(payOrder).get("code_url"));
-            html.append("';\n }else\n");
+            return String.format("<script type=\"text/javascript\">location.href=\"%s\"</script>",(String) service.orderInfo(payOrder).get("code_url"));
+        }
+        if(ua.contains("AlipayClient")){
+            payOrder.setTransactionType(AliTransactionType.SWEEPPAY);
+            AliPayService service = (AliPayService)this.service.getPayResponse(aliPayId).getService();
+            JSONObject result = service.getHttpRequestTemplate().postForObject(service.getReqUrl() + "?" + UriVariables.getMapToParameters(service.orderInfo(payOrder)), null, JSONObject.class);
+             result = result.getJSONObject("alipay_trade_precreate_response");
+            return String.format("<script type=\"text/javascript\">location.href=\"%s\"</script>", result.getString("qr_code"));
         }
 
-        if (null != aliPayId) {
-            html.append("if(isAliPay()){\n");
-            html.append("window.location='");
-            payOrder.setTransactionType(AliTransactionType.SWEEPPAY);
-            PayService service = this.service.getPayResponse(aliPayId).getService();
-            html.append(service.orderInfo(payOrder).get("qr_code"));
-            html.append("';\n } else");
-        }
-        html.append("{\n alert('请使用微信或者支付宝App扫码'+window.navigator.userAgent.toLowerCase());\n }");
-        //判断是否为微信
-        html.append("function isWxPay(){ \n" +
-                " var ua = window.navigator.userAgent.toLowerCase();\n" +
-                " if(ua.match(/MicroMessenger/i) == 'micromessenger'){\n" +
-                " return true;\n" +
-                " }\n" +
-                " return false;\n" +
-                "} \n");
-        //判断是否为支付宝
-        html.append("function isAliPay(){\n" +
-                " var ua = window.navigator.userAgent.toLowerCase();\n" +
-                " if(ua.match(/AlipayClient/i) =='alipayclient'){\n" +
-                "  return true;\n" +
-                " }\n" +
-                "  return false;\n" +
-                "}</script> <body></html>");
-        return html.toString();
+        return  String.format("<script type=\"text/javascript\">alert(\"请使用微信或者支付宝App扫码%s\");window.close();</script>", ua);
+
+
     }
 
 
