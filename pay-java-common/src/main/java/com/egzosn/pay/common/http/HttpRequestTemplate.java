@@ -2,6 +2,7 @@ package com.egzosn.pay.common.http;
 
 import com.egzosn.pay.common.bean.MethodType;
 import com.egzosn.pay.common.util.str.StringUtils;
+import org.apache.http.Header;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -13,11 +14,13 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContexts;
+
 import javax.net.ssl.SSLContext;
 import java.io.*;
 import java.net.URI;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
+import java.util.List;
 import java.util.Map;
 
 /**
