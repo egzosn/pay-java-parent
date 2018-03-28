@@ -62,6 +62,20 @@ public class PayoneerPayController {
         return data;
     }
 
+     /**
+     * 获取授权用户信息，包含用户状态，注册时间，联系人信息，地址信息等等
+     * @param payeeId 用户id
+     * @return
+     */
+    @RequestMapping("getAuthorizationUser.json")
+    public Map<String ,Object> getAuthorizationUser( String payeeId ){
+
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("code", 0);
+        data.put("url", service.getAuthorizationUser(payeeId));
+        return data;
+    }
+
 
     /**
      * 主动收款
