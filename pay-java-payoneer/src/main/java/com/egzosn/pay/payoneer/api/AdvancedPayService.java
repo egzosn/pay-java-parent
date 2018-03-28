@@ -27,4 +27,11 @@ public interface AdvancedPayService extends PayService {
      */
     Map<String, Object> getAuthorizationStatus(String payeeId);
 
+    /**
+     *  获取授权用户信息
+     * @param payeeId 用户id
+     * @return 获取授权用户信息，包含用户状态，注册时间，联系人信息，地址信息等等
+     */
+    Map<String, Object> getAuthorizationUser(String payeeId);
+
 }
