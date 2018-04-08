@@ -46,6 +46,7 @@
         <module>pay-java-union</module>
         <module>pay-java-payoneer</module>
         <module>pay-java-demo</module>
+        <module>pay-java-paypal</module>
     </modules>
 
 
