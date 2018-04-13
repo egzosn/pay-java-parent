@@ -338,7 +338,13 @@ public class PayoneerPayService extends BasePayService implements AdvancedPaySer
      */
     @Override
     public Map<String, Object> secondaryInterface(Object tradeNoOrBillDate, String outTradeNoBillType, TransactionType transactionType) {
-        JSONObject result = getHttpRequestTemplate().postForObject(getReqUrl(transactionType), null, JSONObject.class, outTradeNoBillType);
+        JSONObject result;
+        if (transactionType == PayoneerTransactionType.CHARGE_CANCEL) { // 退款
+            result = getHttpRequestTemplate().postForObject(getReqUrl(transactionType), null,JSONObject.class, outTradeNoBillType);
+
+        } else {
+            result = getHttpRequestTemplate().getForObject(getReqUrl(transactionType), JSONObject.class, outTradeNoBillType);
+        }
         return result;
     }
 
