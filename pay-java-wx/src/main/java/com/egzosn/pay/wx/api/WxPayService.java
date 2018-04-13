@@ -183,9 +183,27 @@ public class WxPayService extends BasePayService {
         if (!SUCCESS.equals(result.get(RETURN_CODE))) {
             throw new PayErrorException(new WxPayError(result.getString(RETURN_CODE), result.getString("return_msg"), result.toJSONString()));
         }
-        return result;
+
+        // 对微信返回的数据进行校验
+        if (isResponseSignatureValid(result)) {
+            return result;
+        }
+        throw new PayErrorException(new WxPayError(result.getString(RETURN_CODE), result.getString("return_msg"), "Invalid sign value"));
     }
 
+    // 判断xml数据的sign是否有效，必须包含sign字段，否则返回false。
+    private boolean isResponseSignatureValid(Map<String, Object> result) {
+        // 返回数据的签名方式和请求中给定的签名方式是一致的
+        return isSignatureValid(result, payConfigStorage.getInputCharset());
+    }
+
+    private boolean isSignatureValid(Map<String, Object> result, String signType) {
+        if (!result.containsKey(SIGN) ) {
+            return false;
+        }
+        String sign = (String) result.get(SIGN);
+        return createSign(SignUtils.parameterText(result), signType).equals(sign);
+    }
 
     /**
      * 返回创建的订单信息
@@ -222,8 +240,8 @@ public class WxPayService extends BasePayService {
             params.put("noncestr", result.get("nonce_str"));
             params.put("package", "Sign=WXPay");
         }
-        String paySign = createSign(SignUtils.parameterText(params), payConfigStorage.getInputCharset());
-        params.put(SIGN, paySign);
+//        String paySign = createSign(SignUtils.parameterText(params), payConfigStorage.getInputCharset());
+        params.put(SIGN, result.get("sgin"));
         return params;
 
 
