@@ -25,10 +25,7 @@
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.jdom</groupId>
-            <artifactId>jdom</artifactId>
-        </dependency>
+
         <!-- log4j  -->
         <dependency>
             <groupId>log4j</groupId>
