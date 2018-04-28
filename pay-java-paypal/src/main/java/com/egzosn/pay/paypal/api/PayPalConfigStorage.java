@@ -44,5 +44,25 @@ public class PayPalConfigStorage extends BasePayConfigStorage {
        setKeyPrivate(clientSecret);
     }
 
+    @Override
+    public boolean isAccessTokenExpired() {
+        if (getExpiresTime() == 0){
+            return true;
+        }
+        return (getExpiresTime() - System.currentTimeMillis() / 1000) <= 0;
+    }
 
+    /**
+     * 设置取消页面的url
+     * @param cancelUrl 取消页面的url
+     */
+    public void setCancelUrl(String cancelUrl){
+        setNotifyUrl(cancelUrl);
+    }
+    /**
+     * 获取取消页面的url
+     */
+    public String getCancelUrl(){
+      return getNotifyUrl();
+    }
 }
