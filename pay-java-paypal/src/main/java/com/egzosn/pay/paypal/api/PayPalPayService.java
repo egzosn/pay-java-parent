@@ -265,13 +265,21 @@ public class PayPalPayService extends BasePayService{
      */
     @Override
     public Map<String, Object> refund(RefundOrder refundOrder) {
-        JSONObject resp = getHttpRequestTemplate().getForObject(String.format(getReqUrl(PayPalTransactionType.REFUND), refundOrder.getTradeNo()), authHeader(), JSONObject.class);
-        return resp;
+//        JSONObject resp = getHttpRequestTemplate().getForObject(String.format(getReqUrl(PayPalTransactionType.REFUND), refundOrder.getTradeNo()), authHeader(), JSONObject.class);
+//        return resp;
+        return null;
     }
-
+    /**
+     * 查询退款
+     *
+     * @param tradeNo    支付平台订单号
+     * @param outTradeNo 商户单号
+     * @return 返回支付方查询退款后的结果
+     */
     @Override
     public Map<String, Object> refundquery(String tradeNo, String outTradeNo) {
-        return null;
+        JSONObject resp = getHttpRequestTemplate().getForObject(String.format(getReqUrl(PayPalTransactionType.REFUND_QUERY), tradeNo), authHeader(), JSONObject.class);
+        return resp;
     }
 
     @Override

@@ -25,7 +25,8 @@ public enum PayPalTransactionType implements TransactionType {
      * 付款 网页支付
      */
     sale("payments/payment"),
-    REFUND("payments/refund/{refundId}"),
+    REFUND("payments/sale/{0}/refund"),
+    REFUND_QUERY("payments/refund/{refundId}"),
     PAYOUT("payments/payouts/{payoutBatchId}"),
     ORDERS("payments/orders/{orderId}"),
 
