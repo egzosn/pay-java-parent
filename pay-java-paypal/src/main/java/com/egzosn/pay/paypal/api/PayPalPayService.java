@@ -128,17 +128,22 @@ public class PayPalPayService extends BasePayService{
 
     @Override
     public boolean verify(Map<String, Object> params) {
-        return false;
+
+        HttpStringEntity httpEntity = new HttpStringEntity("{\"payer_id\":\""+(String)params.get("PayerID")+"\"}", ContentType.APPLICATION_JSON);
+        httpEntity.setHeaders(authHeader());
+        JSONObject resp = getHttpRequestTemplate().postForObject(String.format(getReqUrl(PayPalTransactionType.EXECUTE), (String) params.get("paymentId")), httpEntity, JSONObject.class);
+        return  "approved".equals(resp.getString("state"));
+
     }
 
     @Override
     public boolean signVerify(Map<String, Object> params, String sign) {
-        return false;
+        return true;
     }
 
     @Override
     public boolean verifySource(String id) {
-        return false;
+        return true;
     }
 
     /**
@@ -265,9 +270,22 @@ public class PayPalPayService extends BasePayService{
      */
     @Override
     public Map<String, Object> refund(RefundOrder refundOrder) {
-//        JSONObject resp = getHttpRequestTemplate().getForObject(String.format(getReqUrl(PayPalTransactionType.REFUND), refundOrder.getTradeNo()), authHeader(), JSONObject.class);
-//        return resp;
-        return null;
+        JSONObject request =  new JSONObject();
+
+        if (null != refundOrder.getRefundAmount() && BigDecimal.ZERO.compareTo( refundOrder.getRefundAmount()) > 0){
+            Amount amount = new Amount();
+            amount.setCurrency(refundOrder.getCurType().name());
+            amount.setTotal(refundOrder.getRefundAmount().toString());
+            request.put("amount", amount);
+            request.put("description", refundOrder.getDescription());
+        }
+
+        HttpStringEntity httpEntity = new HttpStringEntity(request, ContentType.APPLICATION_JSON);
+        httpEntity.setHeaders(authHeader());
+        JSONObject resp = getHttpRequestTemplate().postForObject(String.format(getReqUrl(PayPalTransactionType.REFUND), refundOrder.getTradeNo()), httpEntity, JSONObject.class);
+        return resp;
+//
+//        return null;
     }
     /**
      * 查询退款
