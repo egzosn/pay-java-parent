@@ -36,13 +36,17 @@ public class PayoneerPayController {
         configStorage.setProgramId("商户id");
         configStorage.setMsgType(MsgType.json);
         configStorage.setInputCharset("utf-8");
+        configStorage.setUserName("PayoneerPay 用户名");
+        configStorage.setApiPassword("PayoneerPay API password");
         configStorage.setTest(true);
+        service = new PayoneerPayService(configStorage);
 
+        //以下不建议进行使用，会引起两次请求的问题
         //Basic Auth
-        HttpConfigStorage httpConfigStorage = new  HttpConfigStorage();
+       /* HttpConfigStorage httpConfigStorage = new  HttpConfigStorage();
         httpConfigStorage.setAuthUsername("PayoneerPay 用户名");
         httpConfigStorage.setAuthPassword("PayoneerPay API password");
-        service = new PayoneerPayService(configStorage, httpConfigStorage);
+        service = new PayoneerPayService(configStorage, httpConfigStorage);*/
 
 
     }
