@@ -38,6 +38,15 @@ public class RefundOrder {
      */
     private Date orderDate;
 
+    /**
+     * 货币
+     */
+    private CurType curType;
+    /**
+     * 退款说明
+     */
+    private String description;
+
     public String getRefundNo() {
         return refundNo;
     }
@@ -86,6 +95,22 @@ public class RefundOrder {
         this.orderDate = orderDate;
     }
 
+    public CurType getCurType() {
+        return curType;
+    }
+
+    public void setCurType(CurType curType) {
+        this.curType = curType;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     public RefundOrder() {
     }
 
@@ -109,4 +134,6 @@ public class RefundOrder {
         this.refundAmount = refundAmount;
         this.totalAmount = totalAmount;
     }
+
+
 }

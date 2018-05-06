@@ -36,13 +36,17 @@ public class PayoneerPayController {
         configStorage.setProgramId("商户id");
         configStorage.setMsgType(MsgType.json);
         configStorage.setInputCharset("utf-8");
+        configStorage.setUserName("PayoneerPay 用户名");
+        configStorage.setApiPassword("PayoneerPay API password");
         configStorage.setTest(true);
+        service = new PayoneerPayService(configStorage);
 
+        //以下不建议进行使用，会引起两次请求的问题
         //Basic Auth
-        HttpConfigStorage httpConfigStorage = new  HttpConfigStorage();
+       /* HttpConfigStorage httpConfigStorage = new  HttpConfigStorage();
         httpConfigStorage.setAuthUsername("PayoneerPay 用户名");
         httpConfigStorage.setAuthPassword("PayoneerPay API password");
-        service = new PayoneerPayService(configStorage, httpConfigStorage);
+        service = new PayoneerPayService(configStorage, httpConfigStorage);*/
 
 
     }
@@ -59,6 +63,20 @@ public class PayoneerPayController {
         Map<String, Object> data = new LinkedHashMap<>();
         data.put("code", 0);
         data.put("url", service.getAuthorizationPage(payeeId));
+        return data;
+    }
+
+     /**
+     * 获取授权用户信息，包含用户状态，注册时间，联系人信息，地址信息等等
+     * @param payeeId 用户id
+     * @return
+     */
+    @RequestMapping("getAuthorizationUser.json")
+    public Map<String ,Object> getAuthorizationUser( String payeeId ){
+
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("code", 0);
+        data.put("url", service.getAuthorizationUser(payeeId));
         return data;
     }
 

@@ -75,6 +75,7 @@ public interface PayService {
      * @param id 业务id, 数据的真实性.
      * @return true通过
      */
+    @Deprecated
     boolean verifySource(String id);
 
 

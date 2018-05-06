@@ -15,6 +15,10 @@ public class PayoneerConfigStorage extends BasePayConfigStorage {
      * 商户Id
      */
     public String programId;
+    /**
+     *  PayoneerPay 用户名
+     */
+    public String userName;
 
     /**
      *  应用id
@@ -24,6 +28,7 @@ public class PayoneerConfigStorage extends BasePayConfigStorage {
     public String getAppid() {
         return null;
     }
+
 
 
     /**
@@ -37,15 +42,48 @@ public class PayoneerConfigStorage extends BasePayConfigStorage {
 
     @Override
     public String getSeller() {
-        return null;
+        return userName;
     }
 
+    /**
+     *  获取商户Id
+     * @return 商户Id
+     */
     public String getProgramId() {
         return programId;
     }
 
+    /**
+     *  设置商户Id
+     * @param programId 商户Id
+     */
     public void setProgramId(String programId) {
         this.programId = programId;
     }
 
+    /**
+     *  PayoneerPay 用户名
+     * @param userName 用户名
+     */
+    public void setUserName(String userName){
+        this.userName = userName;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    /**
+     *  设置PayoneerPay API password
+     * @param apiPassword api密钥
+     */
+    public void setApiPassword(String apiPassword){
+        setKeyPrivate(apiPassword);
+    }
+    /**
+     *  获取 PayoneerPay API password
+     */
+    public String getApiPassword(){
+       return getKeyPrivate();
+    }
 }

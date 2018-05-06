@@ -8,10 +8,11 @@
         <version>2.0.8-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>pay-java-wx</artifactId>
+
+    <artifactId>pay-java-paypal</artifactId>
+
 
     <dependencies>
-
 
         <!-- pay-java  -->
         <dependency>
@@ -20,10 +21,5 @@
         </dependency>
         <!-- /pay-java  -->
 
-
-
-
     </dependencies>
-
-
 </project>

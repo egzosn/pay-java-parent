@@ -237,6 +237,15 @@ public class HttpStringEntity extends StringEntity {
             addHeader(new BasicHeader(key, headers.get(key)));
         }
     }
+    /**
+     * 设置请求头
+     *
+     * @param header 请求头
+     * @see com.egzosn.pay.common.http.HttpHeader
+     */
+    public void setHeaders(HttpHeader header) {
+        this.headers = header.getHeaders();
+    }
 
 
 }
