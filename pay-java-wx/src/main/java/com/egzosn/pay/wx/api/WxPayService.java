@@ -200,32 +200,34 @@ public class WxPayService extends BasePayService {
         ////统一下单
         JSONObject result = unifiedOrder(order);
 
-        //如果是扫码支付或者刷卡付无需处理，直接返回
-        if (WxTransactionType.NATIVE == order.getTransactionType() || WxTransactionType.MICROPAY == order.getTransactionType() || WxTransactionType.MWEB == order.getTransactionType()) {
-            return result;
+        // 对微信返回的数据进行校验
+        if (verify(result)) {
+            //如果是扫码支付或者刷卡付无需处理，直接返回
+            if (WxTransactionType.NATIVE == order.getTransactionType() || WxTransactionType.MICROPAY == order.getTransactionType() || WxTransactionType.MWEB == order.getTransactionType()) {
+                return result;
+            }
+
+            SortedMap<String, Object> params = new TreeMap<String, Object>();
+
+            if (WxTransactionType.JSAPI == order.getTransactionType()) {
+                params.put("signType", payConfigStorage.getSignType());
+                params.put("appId", payConfigStorage.getAppid());
+                params.put("timeStamp", System.currentTimeMillis() / 1000);
+                params.put("nonceStr", result.get("nonce_str"));
+                params.put("package", "prepay_id=" + result.get("prepay_id"));
+            } else if (WxTransactionType.APP == order.getTransactionType()) {
+                params.put("partnerid", payConfigStorage.getPid());
+                params.put("appid", payConfigStorage.getAppid());
+                params.put("prepayid", result.get("prepay_id"));
+                params.put("timestamp", System.currentTimeMillis() / 1000);
+                params.put("noncestr", result.get("nonce_str"));
+                params.put("package", "Sign=WXPay");
+            }
+            //        String paySign = createSign(SignUtils.parameterText(params), payConfigStorage.getInputCharset());
+            params.put(SIGN, result.get(SIGN));
+            return params;
         }
-
-        SortedMap<String, Object> params = new TreeMap<String, Object>();
-
-
-        if (WxTransactionType.JSAPI == order.getTransactionType()) {
-            params.put("signType", payConfigStorage.getSignType());
-            params.put("appId", payConfigStorage.getAppid());
-            params.put("timeStamp", System.currentTimeMillis() / 1000);
-            params.put("nonceStr", result.get("nonce_str"));
-            params.put("package", "prepay_id=" + result.get("prepay_id"));
-        } else if (WxTransactionType.APP == order.getTransactionType()) {
-            params.put("partnerid", payConfigStorage.getPid());
-            params.put("appid", payConfigStorage.getAppid());
-            params.put("prepayid", result.get("prepay_id"));
-            params.put("timestamp", System.currentTimeMillis() / 1000);
-            params.put("noncestr", result.get("nonce_str"));
-            params.put("package", "Sign=WXPay");
-        }
-        String paySign = createSign(SignUtils.parameterText(params), payConfigStorage.getInputCharset());
-        params.put(SIGN, paySign);
-        return params;
-
+        throw new PayErrorException(new WxPayError(result.getString(RETURN_CODE), result.getString("return_msg"), "Invalid sign value"));
 
     }
 
@@ -267,7 +269,7 @@ public class WxPayService extends BasePayService {
         try {
             return XML.inputStream2Map(is, map);
         } catch (IOException e) {
-           throw new PayErrorException(new PayException("IOException", e.getMessage()));
+            throw new PayErrorException(new PayException("IOException", e.getMessage()));
         }
 
     }
