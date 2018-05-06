@@ -69,6 +69,25 @@ public abstract class BasePayService implements PayService {
         setPayConfigStorage(payConfigStorage);
         setRequestTemplateConfigStorage(configStorage);
     }
+
+
+    /**
+     *  Generate a Base64 encoded String from  user  & password
+     * @param user 用户名
+     * @param password 密码
+     * @return authorizationString
+     */
+    protected String authorizationString(String user, String password) {
+        String base64ClientID = null;
+        try {
+            base64ClientID = com.egzosn.pay.common.util.sign.encrypt.Base64.encode(String.format("%s:%s", user , password).getBytes("UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+        return base64ClientID;
+    }
+
     /**
      * 创建签名
      *
