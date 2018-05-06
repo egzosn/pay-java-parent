@@ -9,17 +9,18 @@ import com.egzosn.pay.common.bean.outbuilder.PayTextOutMessage;
 import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpConfigStorage;
+import com.egzosn.pay.common.http.HttpHeader;
 import com.egzosn.pay.common.http.HttpStringEntity;
 import com.egzosn.pay.common.http.UriVariables;
 import com.egzosn.pay.payoneer.bean.PayoneerTransactionType;
+import org.apache.http.Header;
 import org.apache.http.client.utils.DateUtils;
 import org.apache.http.entity.ContentType;
+import org.apache.http.message.BasicHeader;
 
 import java.awt.image.BufferedImage;
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * payoneer业务逻辑
@@ -60,6 +61,17 @@ public class PayoneerPayService extends BasePayService implements AdvancedPaySer
     }
 
     /**
+     * 获取授权请求头
+     * @return 授权请求头
+     */
+    private HttpHeader authHeader(){
+
+        List<Header> headers = new ArrayList<>();
+        headers.add(new BasicHeader("Authorization",  "Basic " + authorizationString(getPayConfigStorage().getSeller(), getPayConfigStorage().getKeyPrivate())));
+
+        return new HttpHeader(headers);
+    }
+    /**
      * 获取授权页面
      *
      * @param payeeId 收款id
@@ -70,6 +82,8 @@ public class PayoneerPayService extends BasePayService implements AdvancedPaySer
     public String getAuthorizationPage(String payeeId) {
 
         HttpStringEntity entity = new HttpStringEntity("{\"payee_id\":\"" + payeeId + "\"}", ContentType.APPLICATION_JSON);
+        //设置 base atuh
+        entity.setHeaders(authHeader());
         JSONObject response = getHttpRequestTemplate().postForObject(getReqUrl(PayoneerTransactionType.REGISTRATION), entity, JSONObject.class);
         if (response != null && 0 == response.getIntValue(CODE)) {
             return response.getString("registration_link");
@@ -247,6 +261,8 @@ public class PayoneerPayService extends BasePayService implements AdvancedPaySer
     @Override
     public Map<String, Object> microPay(PayOrder order) {
         HttpStringEntity entity = new HttpStringEntity(JSON.toJSONString(orderInfo(order)), ContentType.APPLICATION_JSON);
+        //设置 base atuh
+        entity.setHeaders(authHeader());
         JSONObject response = getHttpRequestTemplate().postForObject(getReqUrl(PayoneerTransactionType.CHARGE), entity, JSONObject.class);
         if (response != null) {
             return response;
@@ -354,7 +370,7 @@ public class PayoneerPayService extends BasePayService implements AdvancedPaySer
         }else {
             methodType = MethodType.GET;
         }
-        JSONObject result = getHttpRequestTemplate().doExecute(UriVariables.getUri(getReqUrl(transactionType), outTradeNoBillType), null,JSONObject.class, methodType);
+        JSONObject result = getHttpRequestTemplate().doExecute(UriVariables.getUri(getReqUrl(transactionType), outTradeNoBillType),   authHeader() ,JSONObject.class, methodType);
         return result;
     }
 
@@ -378,6 +394,7 @@ public class PayoneerPayService extends BasePayService implements AdvancedPaySer
         info.put("payout_date", DateUtils.formatDate(new Date(), "yyyy-MM-dd"));
         info.put("group_id", order.getPayerName());
         HttpStringEntity entity = new HttpStringEntity(JSON.toJSONString(info), ContentType.APPLICATION_JSON);
+        entity.setHeaders(authHeader());
         JSONObject response = getHttpRequestTemplate().postForObject(getReqUrl(PayoneerTransactionType.PAYOUTS), entity, JSONObject.class);
         return response;
     }
