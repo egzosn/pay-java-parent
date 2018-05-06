@@ -118,6 +118,11 @@ public class PayResponse {
                 .payType(PayType.payoneer.name())
                 .handler(autowire(new PayoneerMessageHandler(payId)))
                 .end()
+                .rule()
+                .msgType(MsgType.text.name())
+                .payType(PayType.payPal.name())
+                .handler(spring.getBean(AliPayMessageHandler.class))
+                .end()
         ;
     }
 

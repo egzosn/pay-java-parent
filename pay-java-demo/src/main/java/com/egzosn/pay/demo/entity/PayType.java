@@ -222,6 +222,8 @@ public enum PayType implements BasePayType {
         @Override
         public PayService getPayService(ApyAccount apyAccount) {
             PayPalConfigStorage storage = new PayPalConfigStorage();
+            //配置的附加参数的使用
+            storage.setAttach(apyAccount.getPayId());
             storage.setClientID(apyAccount.getAppid());
             storage.setClientSecret(apyAccount.getPrivateKey());
             storage.setTest(true);
