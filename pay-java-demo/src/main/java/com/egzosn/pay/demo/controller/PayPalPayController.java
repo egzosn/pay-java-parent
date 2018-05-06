@@ -39,8 +39,8 @@ public class PayPalPayController {
     @PostConstruct
     public void init() {
         PayPalConfigStorage storage = new PayPalConfigStorage();
-        storage.setClientID("AUWunqrIzeSLQTQqRp_gQwkt1vLRcVa5kJIO4mp0ZvQnTreLmxaji9bqOFpqz-0h8mdeQpYxix6g_PRD");
-        storage.setClientSecret("EJFAZoD_ZG7PoRutRhX93TmeWs-DQ-PjdBkgr0j4GZA6lqAgmS2Z7yKQWqnTP5O74KqBaYOZnUEcq3Ug");
+        storage.setClientID("商户id");
+        storage.setClientSecret("商户密钥");
         storage.setTest(true);
         //发起付款后的页面转跳地址
         storage.setReturnUrl("http://127.0.0.1:8088/pay/success");

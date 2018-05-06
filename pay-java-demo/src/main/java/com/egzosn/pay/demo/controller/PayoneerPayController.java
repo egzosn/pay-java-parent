@@ -38,6 +38,7 @@ public class PayoneerPayController {
         configStorage.setInputCharset("utf-8");
         configStorage.setUserName("PayoneerPay 用户名");
         configStorage.setApiPassword("PayoneerPay API password");
+        // 是否为测试账号，沙箱环境
         configStorage.setTest(true);
         service = new PayoneerPayService(configStorage);
 

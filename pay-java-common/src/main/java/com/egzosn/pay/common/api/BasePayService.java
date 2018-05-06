@@ -72,7 +72,7 @@ public abstract class BasePayService implements PayService {
 
 
     /**
-     *  Generate a Base64 encoded String from  user  & password
+     *  Generate a Base64 encoded String from  user , password
      * @param user 用户名
      * @param password 密码
      * @return authorizationString

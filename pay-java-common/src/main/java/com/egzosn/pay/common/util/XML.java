@@ -78,6 +78,7 @@ public class XML {
      * 解析xml并转化为Json值
      *
      * @param content json字符串
+     * @param clazz 需要转化的类
      * @return Json值
      */
     public static <T> T toBean(String content, Class<T> clazz) {
