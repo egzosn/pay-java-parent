@@ -6,20 +6,18 @@
 
 ```java
 
-        WxPayConfigStorage wxPayConfigStorage = new WxPayConfigStorage();
-        wxPayConfigStorage.setMchId("合作者id（商户号）");
-        wxPayConfigStorage.setAppid("应用id");
-        wxPayConfigStorage.setKeyPublic("密钥");
-        wxPayConfigStorage.setKeyPrivate("密钥");
-        wxPayConfigStorage.setNotifyUrl("异步回调地址");
-        wxPayConfigStorage.setReturnUrl("同步回调地址");
-        wxPayConfigStorage.setSignType("签名方式");
-        wxPayConfigStorage.setInputCharset("utf-8");
-        //是否为测试账号，沙箱环境 此处暂未实现
-        wxPayConfigStorage.setTest(true);
+              WxPayConfigStorage wxPayConfigStorage = new WxPayConfigStorage();
+              wxPayConfigStorage.setMchId("合作者id（商户号）");
+              wxPayConfigStorage.setAppid("应用id");
+              wxPayConfigStorage.setKeyPublic("转账公钥，转账时必填");
+              wxPayConfigStorage.setSecretKey("密钥");
+              wxPayConfigStorage.setNotifyUrl("异步回调地址");
+              wxPayConfigStorage.setReturnUrl("同步回调地址");
+              wxPayConfigStorage.setSignType("签名方式");
+              wxPayConfigStorage.setInputCharset("utf-8");
         
 ```
-
+k
 #### 网络请求配置
 
 ```java
@@ -36,6 +34,7 @@
         httpConfigStorage.setHttpProxyPassword("password");
         /* /网路代理配置 根据需求进行设置**/
     
+        //退款使用
          /* 网络请求ssl证书 根据需求进行设置**/
         //设置ssl证书路径
         httpConfigStorage.setKeystorePath("证书绝对路径");
