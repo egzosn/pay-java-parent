@@ -3,20 +3,17 @@ package com.egzosn.pay.payoneer.api;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.api.BasePayService;
-import com.egzosn.pay.common.api.Callback;
 import com.egzosn.pay.common.api.PayConfigStorage;
 import com.egzosn.pay.common.bean.*;
 import com.egzosn.pay.common.bean.outbuilder.PayTextOutMessage;
 import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpConfigStorage;
-import com.egzosn.pay.common.http.HttpHeader;
 import com.egzosn.pay.common.http.HttpStringEntity;
+import com.egzosn.pay.common.http.UriVariables;
 import com.egzosn.pay.payoneer.bean.PayoneerTransactionType;
 import org.apache.http.client.utils.DateUtils;
 import org.apache.http.entity.ContentType;
-import org.apache.http.message.BasicHeader;
-import org.apache.http.protocol.HTTP;
 
 import java.awt.image.BufferedImage;
 import java.math.BigDecimal;
@@ -90,6 +87,19 @@ public class PayoneerPayService extends BasePayService implements AdvancedPaySer
     @Override
     public Map<String, Object> getAuthorizationStatus(String payeeId) {
         JSONObject result = (JSONObject) secondaryInterface(null, payeeId, PayoneerTransactionType.PAYEES_STATUS);
+        return result;
+    }
+
+    /**
+     * 获取授权用户信息
+     *
+     * @param payeeId 用户id
+     *
+     * @return 获取授权用户信息，包含用户状态，注册时间，联系人信息，地址信息等等
+     */
+    @Override
+    public Map<String, Object> getAuthorizationUser(String payeeId) {
+        JSONObject result = (JSONObject) secondaryInterface(null, payeeId, PayoneerTransactionType.PAYEES_DETAILS);
         return result;
     }
 
@@ -338,13 +348,13 @@ public class PayoneerPayService extends BasePayService implements AdvancedPaySer
      */
     @Override
     public Map<String, Object> secondaryInterface(Object tradeNoOrBillDate, String outTradeNoBillType, TransactionType transactionType) {
-        JSONObject result;
+        MethodType methodType = null;
         if (transactionType == PayoneerTransactionType.CHARGE_CANCEL) { // 退款
-            result = getHttpRequestTemplate().postForObject(getReqUrl(transactionType), null,JSONObject.class, outTradeNoBillType);
-
-        } else {
-            result = getHttpRequestTemplate().getForObject(getReqUrl(transactionType), JSONObject.class, outTradeNoBillType);
+            methodType = MethodType.POST;
+        }else {
+            methodType = MethodType.GET;
         }
+        JSONObject result = getHttpRequestTemplate().doExecute(UriVariables.getUri(getReqUrl(transactionType), outTradeNoBillType), null,JSONObject.class, methodType);
         return result;
     }
 

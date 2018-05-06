@@ -24,6 +24,10 @@ public enum PayoneerTransactionType implements TransactionType {
      */
     PAYEES_STATUS("payees/{payee_id}/status"),
     /**
+     * 用户信息
+     */
+    PAYEES_DETAILS("payees/{payee_id}/details"),
+    /**
      * 收款
      */
     CHARGE("charges"),
