@@ -9,6 +9,13 @@ public class Transaction  extends  CartBase{
 	 */
 	private List<RelatedResources> relatedResources;
 
+	public List<RelatedResources> getRelatedResources() {
+		return relatedResources;
+	}
+
+	public void setRelatedResources(List<RelatedResources> relatedResources) {
+		this.relatedResources = relatedResources;
+	}
 
 	/**
 	 * Default Constructor
