@@ -13,14 +13,12 @@ import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpHeader;
 import com.egzosn.pay.common.http.HttpStringEntity;
-import com.egzosn.pay.common.util.sign.encrypt.Base64;
 import com.egzosn.pay.common.util.str.StringUtils;
 import com.egzosn.pay.paypal.bean.PayPalTransactionType;
 import com.egzosn.pay.paypal.bean.order.*;
 import org.apache.http.Header;
 import org.apache.http.entity.ContentType;
 import org.apache.http.message.BasicHeader;
-
 import java.awt.image.BufferedImage;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
@@ -59,21 +57,6 @@ public class PayPalPayService extends BasePayService{
     }
 
 
-    /*
-     * Generate a Base64 encoded String from clientID & clientSecret
-     */
-    private String basicAuthorizationString() {
-        String base64ClientID = null;
-        try {
-            base64ClientID = Base64.encode(String.format("%s:%s",getPayConfigStorage().getAppid() , getPayConfigStorage().getKeyPrivate()).getBytes("UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-
-        return base64ClientID;
-    }
-
-
 
     /**
      * 获取请求token
@@ -105,7 +88,7 @@ public class PayPalPayService extends BasePayService{
             if (payConfigStorage.isAccessTokenExpired()) {
                 if (null == payConfigStorage.getAccessToken()){
                     Map<String, String> header = new HashMap<>();
-                    header.put("Authorization", "Basic " + basicAuthorizationString());
+                    header.put("Authorization", "Basic " + authorizationString(getPayConfigStorage().getAppid(), getPayConfigStorage().getKeyPrivate()));
                     header.put("Accept", "application/json");
                     header.put("Content-Type", "application/x-www-form-urlencoded");
                     try {
@@ -158,7 +141,13 @@ public class PayPalPayService extends BasePayService{
 
         return new HttpHeader(headers);
     }
-
+    /**
+     * 返回创建的订单信息
+     *
+     * @param order 支付订单
+     * @return 订单信息
+     * @see PayOrder 支付订单信息
+     */
     @Override
     public Map<String, Object> orderInfo(PayOrder order) {
         Amount amount = new Amount();
@@ -187,7 +176,9 @@ public class PayPalPayService extends BasePayService{
         payment.setPayer(payer);
         payment.setTransactions(transactions);
         RedirectUrls redirectUrls = new RedirectUrls();
+        //取消按钮转跳地址
         redirectUrls.setCancelUrl(payConfigStorage.getNotifyUrl());
+        //发起付款后的页面转跳地址
         redirectUrls.setReturnUrl(payConfigStorage.getReturnUrl());
         payment.setRedirectUrls(redirectUrls);
         HttpStringEntity entity = new HttpStringEntity(JSON.toJSONString(payment),  ContentType.APPLICATION_JSON);
@@ -198,12 +189,12 @@ public class PayPalPayService extends BasePayService{
 
     @Override
     public PayOutMessage getPayOutMessage(String code, String message) {
-        return null;
+        return PayOutMessage.TEXT().content(code).build();
     }
 
     @Override
     public PayOutMessage successPayOutMessage(PayMessage payMessage) {
-        return null;
+        return PayOutMessage.TEXT().content("success").build();
     }
 
     @Override
