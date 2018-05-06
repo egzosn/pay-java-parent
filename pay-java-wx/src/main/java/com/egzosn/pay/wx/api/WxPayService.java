@@ -183,9 +183,9 @@ public class WxPayService extends BasePayService {
         if (!SUCCESS.equals(result.get(RETURN_CODE))) {
             throw new PayErrorException(new WxPayError(result.getString(RETURN_CODE), result.getString("return_msg"), result.toJSONString()));
         }
-
         return result;
     }
+
 
     /**
      * 返回创建的订单信息
@@ -223,7 +223,7 @@ public class WxPayService extends BasePayService {
                 params.put("noncestr", result.get("nonce_str"));
                 params.put("package", "Sign=WXPay");
             }
-    //        String paySign = createSign(SignUtils.parameterText(params), payConfigStorage.getInputCharset());
+            //        String paySign = createSign(SignUtils.parameterText(params), payConfigStorage.getInputCharset());
             params.put(SIGN, result.get(SIGN));
             return params;
         }
@@ -269,7 +269,7 @@ public class WxPayService extends BasePayService {
         try {
             return XML.inputStream2Map(is, map);
         } catch (IOException e) {
-           throw new PayErrorException(new PayException("IOException", e.getMessage()));
+            throw new PayErrorException(new PayException("IOException", e.getMessage()));
         }
 
     }
