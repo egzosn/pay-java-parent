@@ -200,7 +200,7 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
         }else {
             value = entity.getContentType().getValue().split(";");
         }
-
+        //这里进行特殊处理，如果状态码非正常状态，但内容类型匹配至对应的结果也进行对应的响应类型转换
         if (statusLine.getStatusCode() >= 300 && statusLine.getStatusCode() != 304) {
             if (isJson(value[0], "") || isXml(value[0], "") ){
                 return toBean(entity, value);
@@ -218,50 +218,59 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
 
     }
 
-    private T toBean(HttpEntity entity, String[] value) throws IOException {
-        if (ContentType.APPLICATION_OCTET_STREAM.getMimeType().equals(value[0])){
-
-            if (responseType.isAssignableFrom(InputStream.class)){
-                return (T)entity.getContent();
+    /**
+     * 对请求进行转化至对应的可转化类型
+     * @param entity 响应实体
+     * @param contentType 内容类型编码数组，第一个值为内容类型，第二个值为编码类型
+     * @return 对应的响应对象
+     * @throws IOException 响应类型文本转换时抛出异常
+     */
+    private T toBean(HttpEntity entity, String[] contentType) throws IOException {
+        //判断内容类型是否为文本类型
+        if (isText(contentType[0])) {
+            String charset = "UTF-8";
+            if (null != contentType && 2 == charset.length()) {
+                charset = contentType[1].substring(contentType[1].indexOf("=") + 1);
             }
-            if (responseType.isAssignableFrom(OutputStream.class)){
+            //获取响应的文本内容
+            String result = EntityUtils.toString(entity, charset);
+            if (responseType.isAssignableFrom(String.class)) {
+                return (T) result;
+            }
+
+            String first = result.substring(0, 1);
+            //json类型
+            if (isJson(contentType[0], first)) {
                 try {
-                    T t = responseType.newInstance();
-                    entity.writeTo((OutputStream)t);
-                    return t;
-                } catch (InstantiationException e) {
-                    throw new PayErrorException(new PayException("InstantiationException", e.getMessage()));
-                } catch (IllegalAccessException e) {
-                    throw new PayErrorException(new PayException("IllegalAccessException", e.getMessage()));
+                    return JSON.parseObject(result, responseType);
+                } catch (JSONException e) {
+                    throw new PayErrorException(new PayException("failure", String.format("类型转化异常,contentType: %s\n%s", entity.getContentType().getValue(), e.getMessage()), result));
                 }
-
             }
-        }
-        String charset = "UTF-8";
-        if (null != value && 2 == charset.length()) {
-            charset = value[1].substring(value[1].indexOf("=") + 1);
-        }
-        String result = EntityUtils.toString(entity, charset);
-        if (responseType.isAssignableFrom(String.class)){
-            return (T)result;
+            //xml类型
+            if (isXml(contentType[0], first)) {
+                return XML.toJSONObject(result).toJavaObject(responseType);
+            }
+            throw new PayErrorException(new PayException("failure", "类型转化异常,contentType:" + entity.getContentType().getValue(), result));
         }
 
-        String first = result.substring(0, 1);
-        if ( isJson(value[0], first) ){
+        //是否为 输入流
+        if (InputStream.class.isAssignableFrom(responseType)) {
+            return (T) entity.getContent();
+        }
+        //输出流
+        if (OutputStream.class.isAssignableFrom(responseType)) {
             try {
-                return JSON.parseObject(result, responseType);
-            }catch (JSONException e){
-                throw new PayErrorException(new PayException("failure", String.format("类型转化异常,contentType: %s\n%s", entity.getContentType().getValue(), e.getMessage() ), result));
+                T t = responseType.newInstance();
+                entity.writeTo((OutputStream) t);
+                return t;
+            } catch (InstantiationException e) {
+                throw new PayErrorException(new PayException("InstantiationException", e.getMessage()));
+            } catch (IllegalAccessException e) {
+                throw new PayErrorException(new PayException("IllegalAccessException", e.getMessage()));
             }
         }
-
-        if (isXml(value[0], first)){
-            return XML.toJSONObject(result).toJavaObject(responseType);
-        }
-
-        throw new PayErrorException(new PayException("failure", "类型转化异常,contentType:" + entity.getContentType().getValue(), result));
-
-
+        throw new PayErrorException(new PayException("failure", "类型转化异常,contentType:" + entity.getContentType().getValue()));
     }
 
     /**
@@ -272,6 +281,14 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
      */
     private boolean isJson(String contentType, String textFirst){
         return( ContentType.APPLICATION_JSON.getMimeType().equals(contentType) || "{[".indexOf(textFirst) >= 0 );
+    }
+    /**
+     * 检测响应类型是否为文本类型
+     * @param contentType 内容类型
+     * @return 布尔型， true为文本内容类型
+     */
+    private boolean isText(String contentType){
+        return contentType.contains("xml") || contentType.contains("json") || contentType.contains("text") || contentType.contains("form-data")|| contentType.contains("x-www-form-urlencoded");
     }
 
     /**
