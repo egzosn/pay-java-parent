@@ -187,20 +187,6 @@ public class WxPayService extends BasePayService {
         return result;
     }
 
-    // 判断xml数据的sign是否有效，必须包含sign字段，否则返回false。
-    private boolean isResponseSignatureValid(Map<String, Object> result) {
-        // 返回数据的签名方式和请求中给定的签名方式是一致的
-        return isSignatureValid(result, payConfigStorage.getInputCharset());
-    }
-
-    private boolean isSignatureValid(Map<String, Object> result, String signType) {
-        if (!result.containsKey(SIGN) ) {
-            return false;
-        }
-        String sign = (String) result.get(SIGN);
-        return createSign(SignUtils.parameterText(result), signType).equals(sign);
-    }
-
     /**
      * 返回创建的订单信息
      *
@@ -215,7 +201,7 @@ public class WxPayService extends BasePayService {
         JSONObject result = unifiedOrder(order);
 
         // 对微信返回的数据进行校验
-        if (isResponseSignatureValid(result)) {
+        if (verify(result)) {
             //如果是扫码支付或者刷卡付无需处理，直接返回
             if (WxTransactionType.NATIVE == order.getTransactionType() || WxTransactionType.MICROPAY == order.getTransactionType() || WxTransactionType.MWEB == order.getTransactionType()) {
                 return result;
