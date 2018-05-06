@@ -14,6 +14,9 @@ import com.egzosn.pay.fuiou.bean.FuiouTransactionType;
 import com.egzosn.pay.payoneer.api.PayoneerConfigStorage;
 import com.egzosn.pay.payoneer.api.PayoneerPayService;
 import com.egzosn.pay.payoneer.bean.PayoneerTransactionType;
+import com.egzosn.pay.paypal.api.PayPalConfigStorage;
+import com.egzosn.pay.paypal.api.PayPalPayService;
+import com.egzosn.pay.paypal.bean.PayPalTransactionType;
 import com.egzosn.pay.union.api.UnionPayConfigStorage;
 import com.egzosn.pay.union.api.UnionPayService;
 import com.egzosn.pay.union.bean.UnionTransactionType;
@@ -188,21 +191,49 @@ public enum PayType implements BasePayType {
         @Override
         public PayService getPayService(ApyAccount apyAccount) {
             PayoneerConfigStorage configStorage = new PayoneerConfigStorage();
-            configStorage.setProgramId("商户id");
+            //设置商户Id
+            configStorage.setProgramId(apyAccount.getPartner());
             configStorage.setMsgType(MsgType.json);
             configStorage.setInputCharset("utf-8");
+            //"PayoneerPay 用户名"
+            configStorage.setUserName(apyAccount.getSeller());
+            //PayoneerPay API password
+            configStorage.setApiPassword(apyAccount.getPrivateKey());
+            //是否为沙箱
             configStorage.setTest(true);
+            return new PayoneerPayService(configStorage);
 
+            //以下不建议进行使用，会引起两次请求的问题
             //Basic Auth
-            HttpConfigStorage httpConfigStorage = new  HttpConfigStorage();
+           /* HttpConfigStorage httpConfigStorage = new  HttpConfigStorage();
             httpConfigStorage.setAuthUsername("PayoneerPay 用户名");
             httpConfigStorage.setAuthPassword("PayoneerPay API password");
-            return new PayoneerPayService(configStorage, httpConfigStorage);
+            return new PayoneerPayService(configStorage, httpConfigStorage);*/
         }
 
         @Override
         public TransactionType getTransactionType(String transactionType) {
             return PayoneerTransactionType.valueOf(transactionType);
+        }
+
+
+    },payPal{
+        @Override
+        public PayService getPayService(ApyAccount apyAccount) {
+            PayPalConfigStorage storage = new PayPalConfigStorage();
+            storage.setClientID(apyAccount.getAppid());
+            storage.setClientSecret(apyAccount.getPrivateKey());
+            storage.setTest(true);
+            //发起付款后的页面转跳地址
+            storage.setReturnUrl(apyAccount.getReturnUrl());
+            //取消按钮转跳地址,这里兼容的做法
+            storage.setNotifyUrl(apyAccount.getNotifyUrl());
+            return new PayPalPayService(storage);
+        }
+
+        @Override
+        public TransactionType getTransactionType(String transactionType) {
+            return PayPalTransactionType.valueOf(transactionType);
         }
 
 
