@@ -5,13 +5,13 @@
     <parent>
         <artifactId>pay-java-parent</artifactId>
         <groupId>com.egzosn</groupId>
-        <version>2.0.8-RELEASE</version>
+        <version>2.0.9-RELEASE</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <packaging>jar</packaging>
     <groupId>com.egzosn</groupId>
     <artifactId>pay-java-common</artifactId>
-
+    <version>2.0.9-RELEASE</version>
 
     <dependencies>
         <!--httpcomponents-->
