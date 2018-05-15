@@ -223,8 +223,8 @@ public class WxPayService extends BasePayService {
                 params.put("noncestr", result.get("nonce_str"));
                 params.put("package", "Sign=WXPay");
             }
-            //        String paySign = createSign(SignUtils.parameterText(params), payConfigStorage.getInputCharset());
-            params.put(SIGN, result.get(SIGN));
+            String paySign = createSign(SignUtils.parameterText(params), payConfigStorage.getInputCharset());
+            params.put(SIGN, paySign);
             return params;
         }
         throw new PayErrorException(new WxPayError(result.getString(RETURN_CODE), result.getString("return_msg"), "Invalid sign value"));
