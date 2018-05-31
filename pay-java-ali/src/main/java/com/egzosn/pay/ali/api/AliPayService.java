@@ -16,9 +16,8 @@ import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.str.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import java.awt.image.BufferedImage;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -491,6 +490,8 @@ public class AliPayService extends BasePayService {
         }
         //设置请求参数的集合
         parameters.put("biz_content", JSON.toJSONString(bizContent));
+        //设置签名
+        setSign(parameters);
         return getHttpRequestTemplate().postForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(parameters), null, JSONObject.class);
     }
 
