@@ -32,11 +32,22 @@ public class HttpConfigStorage {
      */
     private boolean isPath = true;
 
-    //https请求所需的证书（PKCS12）
+    /**
+     * https请求所需的证书（PKCS12）
+     */
     private String keystore;
-    //证书对应的密码
+    /**
+     * 证书对应的密码
+     */
     private String storePassword;
-
+    /**
+     * 最大连接数
+     */
+    private int maxTotal = 0;
+    /**
+     * 默认的每个路由的最大连接数
+     */
+    private int defaultMaxPerRoute = 0;
 
     /**
      * http代理地址
@@ -189,5 +200,21 @@ public class HttpConfigStorage {
 
     public void setStorePassword(String storePassword) {
         this.storePassword = storePassword;
+    }
+
+    public int getMaxTotal() {
+        return maxTotal;
+    }
+
+    public void setMaxTotal(int maxTotal) {
+        this.maxTotal = maxTotal;
+    }
+
+    public int getDefaultMaxPerRoute() {
+        return defaultMaxPerRoute;
+    }
+
+    public void setDefaultMaxPerRoute(int defaultMaxPerRoute) {
+        this.defaultMaxPerRoute = defaultMaxPerRoute;
     }
 }

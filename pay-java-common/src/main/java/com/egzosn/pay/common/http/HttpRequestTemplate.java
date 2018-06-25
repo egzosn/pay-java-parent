@@ -8,11 +8,16 @@ import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.DefaultHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.ssl.SSLContexts;
 
 import javax.net.ssl.SSLContext;
@@ -35,8 +40,11 @@ public class HttpRequestTemplate {
 
     protected CloseableHttpClient httpClient;
 
+    protected PoolingHttpClientConnectionManager connectionManager;
+
     protected HttpHost httpProxy;
 
+    HttpConfigStorage configStorage;
     /**
      *  获取代理带代理地址的 HttpHost
      * @return 获取代理带代理地址的 HttpHost
@@ -46,7 +54,27 @@ public class HttpRequestTemplate {
     }
 
     public CloseableHttpClient getHttpClient() {
+        if (null != httpClient) {
+            return httpClient;
+        }
+        if (null == configStorage) {
+            return httpClient = HttpClients.createDefault();
+        }
+
+        CloseableHttpClient httpClient = HttpClients
+                .custom()
+                //网络提供者
+                .setDefaultCredentialsProvider(createCredentialsProvider(configStorage))
+                //设置httpclient的SSLSocketFactory
+                .setSSLSocketFactory(createSSL(configStorage))
+                .setConnectionManager(connectionManager(configStorage))
+                .build();
+        if (null == connectionManager) {
+            return this.httpClient = httpClient;
+        }
+
         return httpClient;
+
     }
 
     /**
@@ -126,6 +154,28 @@ public class HttpRequestTemplate {
         return credsProvider;
     }
 
+    /**
+     * 初始化连接池
+     * @param configStorage 配置
+     * @return 连接池对象
+     */
+    public PoolingHttpClientConnectionManager connectionManager(HttpConfigStorage configStorage){
+        if (null != connectionManager){
+            return connectionManager;
+        }
+        if (0 == configStorage.getMaxTotal() || 0 == configStorage.getDefaultMaxPerRoute()){
+            return null;
+        }
+        Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory> create()
+                .register("https", createSSL(configStorage))
+                .register("http", new PlainConnectionSocketFactory())
+                .build();
+        connectionManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
+        connectionManager.setMaxTotal(configStorage.getMaxTotal());
+        connectionManager.setDefaultMaxPerRoute(configStorage.getDefaultMaxPerRoute());
+
+        return connectionManager;
+    }
 
     /**
      * 设置HTTP请求的配置
@@ -134,22 +184,11 @@ public class HttpRequestTemplate {
      * @return 当前HTTP请求的客户端模板
      */
     public HttpRequestTemplate setHttpConfigStorage(HttpConfigStorage configStorage) {
-
-        if (null == configStorage) {
-            httpClient = HttpClients.createDefault();
-            return this;
-        }
-
-        httpClient = HttpClients
-                .custom()
-                //网络提供者
-                .setDefaultCredentialsProvider(createCredentialsProvider(configStorage))
-                //设置httpclient的SSLSocketFactory
-                .setSSLSocketFactory(createSSL(configStorage))
-                .build();
-
+        this.configStorage = configStorage;
         return this;
     }
+
+
 
 
     /**
@@ -275,7 +314,7 @@ public class HttpRequestTemplate {
             httpRequest.setProxy(httpProxy);
         }
         httpRequest.setResponseType(responseType);
-        try (CloseableHttpResponse response = httpClient.execute(httpRequest)) {
+        try (CloseableHttpResponse response = getHttpClient().execute(httpRequest)) {
           return httpRequest.handleResponse(response);
         }catch (IOException e){
             e.printStackTrace();
