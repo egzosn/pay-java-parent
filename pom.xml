@@ -121,7 +121,7 @@
                     <encoding>utf-8</encoding>
                 </configuration>
             </plugin>
-           <plugin>
+       <!--    <plugin>
                 <groupId>org.sonatype.plugins</groupId>
                 <artifactId>nexus-staging-maven-plugin</artifactId>
                 <version>1.6.3</version>
@@ -181,7 +181,7 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
+            </plugin>-->
         </plugins>
     </build>
 </project>

@@ -134,11 +134,6 @@ public class HttpRequestTemplate {
      */
     public CredentialsProvider createCredentialsProvider(HttpConfigStorage configStorage){
 
-        if (StringUtils.isNotBlank(configStorage.getHttpProxyHost())) {
-            //http代理地址设置
-            httpProxy = new HttpHost(configStorage.getHttpProxyHost(),configStorage.httpProxyPort);;
-        }
-
 
         if (StringUtils.isBlank(configStorage.getAuthUsername())) {
             return null;
@@ -185,6 +180,12 @@ public class HttpRequestTemplate {
      */
     public HttpRequestTemplate setHttpConfigStorage(HttpConfigStorage configStorage) {
         this.configStorage = configStorage;
+
+        if (StringUtils.isNotBlank(configStorage.getHttpProxyHost())) {
+            //http代理地址设置
+            httpProxy = new HttpHost(configStorage.getHttpProxyHost(),configStorage.httpProxyPort);;
+        }
+
         return this;
     }
 
