@@ -27,6 +27,7 @@ import java.io.*;
 import java.net.URI;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
+import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 
 /**
@@ -101,7 +102,11 @@ public class HttpRequestTemplate {
     public SSLConnectionSocketFactory createSSL( HttpConfigStorage configStorage){
 
         if (StringUtils.isEmpty(configStorage.getKeystore())){
-            return null;
+            try {
+                return new SSLConnectionSocketFactory(SSLContext.getDefault());
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            }
         }
 
             //读取本机存放的PKCS12证书文件

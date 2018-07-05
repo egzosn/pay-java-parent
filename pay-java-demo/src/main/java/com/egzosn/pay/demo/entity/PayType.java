@@ -62,8 +62,9 @@ public enum PayType implements BasePayType {
             configStorage.setMsgType(apyAccount.getMsgType());
             configStorage.setInputCharset(apyAccount.getInputCharset());
             configStorage.setTest(apyAccount.isTest());
+            //
             HttpConfigStorage httpConfigStorage = new HttpConfigStorage();
-            httpConfigStorage.setMaxTotal(10);
+            httpConfigStorage.setMaxTotal(20);
             httpConfigStorage.setDefaultMaxPerRoute(10);
             return new AliPayService(configStorage, httpConfigStorage);
         }
