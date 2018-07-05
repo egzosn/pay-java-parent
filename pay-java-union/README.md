@@ -1,9 +1,159 @@
 
 
-## Payoneer简单例子
+## 银联简单例子
 
 #### 支付配置
 
+```java
+
+    UnionPayConfigStorage unionPayConfigStorage = new UnionPayConfigStorage();
+    unionPayConfigStorage.setMerId("700000000000001");
+    //设置CertSign必须在设置证书前
+    unionPayConfigStorage.setCertSign(true);
+     //公钥，验签证书链格式： 中级证书路径;根证书路径
+    unionPayConfigStorage.setKeyPublic("D:/certs/acp_test_middle.cer;D:/certs/acp_test_root.cer");
+    //私钥, 私钥证书格式： 私钥证书路径;私钥证书对应的密码
+    unionPayConfigStorage.setKeyPrivate("D:/certs/acp_test_sign.pfx;000000");
+    unionPayConfigStorage.setNotifyUrl("http://www.pay.egzosn.com/payBack.json");
+      // 无需同步回调可不填  app填这个就可以
+    unionPayConfigStorage.setReturnUrl("http://www.pay.egzosn.com/payBack.json");
+    unionPayConfigStorage.setSignType(SignUtils.RSA2.name());
+    //单一支付可不填
+    unionPayConfigStorage.setPayType("unionPay");
+    unionPayConfigStorage.setInputCharset("UTF-8");
+    //是否为测试账号，沙箱环境
+    unionPayConfigStorage.setTest(true);
+
+```
 
 
+#### 创建支付服务
+
+
+```java
+    //支付服务
+     PayService service = new UnionPayService(unionPayConfigStorage);
+
+     //设置网络请求配置根据需求进行设置
+     //service.setRequestTemplateConfigStorage(httpConfigStorage)
+
+```
+
+
+#### 创建支付订单信息
+
+```java
+
+        //支付订单基础信息
+        PayOrder payOrder = new PayOrder("订单title", "摘要",  new BigDecimal(0.01) , UUID.randomUUID().toString().replace("-", ""));
+  
+``` 
+
+
+#### 扫码付
+
+```java
+
+ 
+        /*-----------扫码付-------------------*/
+        payOrder.setTransactionType(UnionTransactionType.APPLY_QR_CODE);
+        //获取扫码付的二维码
+        BufferedImage image = service.genQrPay(payOrder);
+        /*-----------/扫码付-------------------*/
+
+``` 
+
+
+#### APP支付， 苹果付
+
+```java
+
+        /*-----------APP-------------------*/
+        //App支付
+        order.setTransactionType(UnionTransactionType.APP);
+        
+        //APPLE支付 苹果付
+//        order.setTransactionType(UnionTransactionType.APPLE);
+
+        //获取APP支付所需的信息组，直接给app端就可使用
+        Map appOrderInfo = service.orderInfo(payOrder);
+        /*-----------/APP-------------------*/
+
+``` 
        
+       
+       
+#### 即时到帐 WAP 网页支付 企业网银支付（B2B支付）
+
+```java
+
+        /*-----------即时到帐 WAP 网页支付-------------------*/
+//        payOrder.setTransactionType(UnionTransactionType.WAP); //WAP支付
+
+//        payOrder.setTransactionType(UnionTransactionType.B2B); //企业网银支付（B2B支付）
+
+        payOrder.setTransactionType(UnionTransactionType.WEB); // PC网页支付
+        //获取支付所需的信息
+        Map directOrderInfo = service.orderInfo(payOrder);
+        
+        //获取表单提交对应的字符串，将其序列化到页面即可,
+        String directHtml = service.buildRequest(directOrderInfo, MethodType.POST);
+        /*-----------/即时到帐 WAP 网页支付-------------------*/
+
+``` 
+
+
+#### 条码付 声波付
+
+```java
+
+        /*-----------条码付 -------------------*/
+
+        payOrder.setTransactionType(UnionTransactionType.CONSUME);//条码付
+
+        payOrder.setAuthCode("条码信息或者声波信息");
+        // 支付结果
+        Map params = service.microPay(payOrder);
+        /*-----------/条码付 声波付-------------------*/
+
+``` 
+
+
+
+#### 回调处理
+
+```java
+
+        /*-----------回调处理-------------------*/
+           //HttpServletRequest request;
+         Map<String, Object> params = service.getParameter2Map(request.getParameterMap(), request.getInputStream());
+        if (service.verify(params)){
+            System.out.println("支付成功");
+            return;
+        }
+        System.out.println("支付失败");
+
+
+        /*-----------回调处理-------------------*/
+
+```
+
+
+
+#### 支付订单查询
+
+```java
+        
+      Map result = service..query(null, "我方系统单号");
+
+```
+
+
+#### 申请退款接口
+  ```java
+    
+         RefundOrder order = new RefundOrder(null, "原交易查询流水号", "退款金额", "订单总金额");
+         order.setRefundNo("退款单号")
+         Map result = service.refund(order);
+
+```

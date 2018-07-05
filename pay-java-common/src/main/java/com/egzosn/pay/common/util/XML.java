@@ -193,7 +193,7 @@ public class XML {
             m = new JSONObject();
         }
         try {
-            DocumentBuilder documentBuilder = newDocumentBuilder();;
+            DocumentBuilder documentBuilder = newDocumentBuilder();
             org.w3c.dom.Document doc = documentBuilder.parse(in);
             doc.getDocumentElement().normalize();
             NodeList children = doc.getDocumentElement().getChildNodes();
