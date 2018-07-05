@@ -2,7 +2,8 @@ package com.egzosn.pay.common.http;
 
 import com.egzosn.pay.common.bean.MethodType;
 import com.egzosn.pay.common.util.str.StringUtils;
-import org.apache.http.Header;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -20,12 +21,12 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.ssl.SSLContexts;
 
+import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import java.io.*;
 import java.net.URI;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -37,6 +38,8 @@ import java.util.Map;
  *  </code>
  */
 public class HttpRequestTemplate {
+
+    protected final Log log = LogFactory.getLog(HttpRequestTemplate.class);
 
     protected CloseableHttpClient httpClient;
 
@@ -109,6 +112,10 @@ public class HttpRequestTemplate {
                 char[] password = configStorage.getStorePassword().toCharArray();
                 //指定PKCS12的密码
                 keyStore.load(instream, password);
+                // 实例化密钥库 & 初始化密钥工厂
+                KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+                kmf.init(keyStore, password);
+                // 创建 SSLContext
                 SSLContext sslcontext = SSLContexts.custom()
                         .loadKeyMaterial(keyStore, password).build();
 
@@ -161,6 +168,7 @@ public class HttpRequestTemplate {
         if (0 == configStorage.getMaxTotal() || 0 == configStorage.getDefaultMaxPerRoute()){
             return null;
         }
+        log.info(String.format("Initialize the PoolingHttpClientConnectionManager -- maxTotal:%s, defaultMaxPerRoute:%s", configStorage.getMaxTotal(), configStorage.getDefaultMaxPerRoute()));
         Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory> create()
                 .register("https", createSSL(configStorage))
                 .register("http", new PlainConnectionSocketFactory())
@@ -309,6 +317,7 @@ public class HttpRequestTemplate {
      * @return 类型对象
      */
     public <T>T doExecute(URI uri, Object request, Class<T> responseType, MethodType method){
+        log.debug(String.format("uri:%s, httpMethod:%s ", uri));
         ClientHttpRequest<T> httpRequest = new ClientHttpRequest(uri ,method, request);
         //判断是否有代理设置
         if (null == httpProxy){
