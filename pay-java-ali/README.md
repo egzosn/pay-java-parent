@@ -46,6 +46,12 @@
         httpConfigStorage.setStorePassword("证书对应的密码");
         /* /网络请求ssl证书**/
         
+      /* /网络请求连接池**/
+        //最大连接数
+        httpConfigStorage.setMaxTotal(20);
+        //默认的每个路由的最大连接数
+        httpConfigStorage.setDefaultMaxPerRoute(10);
+        
 ```
 
 

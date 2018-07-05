@@ -27,6 +27,30 @@
 ```
 
 
+#### 网络请求配置
+
+```java
+
+        HttpConfigStorage httpConfigStorage = new HttpConfigStorage();
+        /* 网路代理配置 根据需求进行设置**/
+        //http代理地址
+        httpConfigStorage.setHttpProxyHost("192.168.1.69");
+        //代理端口
+        httpConfigStorage.setHttpProxyPort(3308);
+        //代理用户名
+        httpConfigStorage.setHttpProxyUsername("user");
+        //代理密码
+        httpConfigStorage.setHttpProxyPassword("password");
+        /* /网路代理配置 根据需求进行设置**/
+
+      /* /网络请求连接池**/
+        //最大连接数
+        httpConfigStorage.setMaxTotal(20);
+        //默认的每个路由的最大连接数
+        httpConfigStorage.setDefaultMaxPerRoute(10);
+```
+
+
 #### 创建支付服务
 
 

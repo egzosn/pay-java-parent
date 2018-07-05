@@ -20,6 +20,23 @@
 
 
 
+#### 网络请求配置
+
+```java
+
+        HttpConfigStorage httpConfigStorage = new HttpConfigStorage();
+        
+      /* /网络请求连接池**/
+        //最大连接数
+        httpConfigStorage.setMaxTotal(20);
+        //默认的每个路由的最大连接数
+        httpConfigStorage.setDefaultMaxPerRoute(10);
+        
+```
+
+
+
+
 #### 创建支付服务
 
 
@@ -27,6 +44,9 @@
     //支付服务
      PayService service = new PayPalPayService(configStorage);
 
+     //设置网络请求配置根据需求进行设置
+     //service.setRequestTemplateConfigStorage(httpConfigStorage)
+     
 ```
 
 
