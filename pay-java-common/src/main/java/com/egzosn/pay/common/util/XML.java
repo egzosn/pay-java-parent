@@ -6,9 +6,11 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
+import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -137,6 +139,23 @@ public class XML {
         return json;
     }
 
+    public static DocumentBuilder newDocumentBuilder() throws ParserConfigurationException {
+        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+        documentBuilderFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+        documentBuilderFactory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+        documentBuilderFactory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+        documentBuilderFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+        documentBuilderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        documentBuilderFactory.setXIncludeAware(false);
+        documentBuilderFactory.setExpandEntityReferences(false);
+
+        return documentBuilderFactory.newDocumentBuilder();
+    }
+
+    public static Document newDocument() throws ParserConfigurationException {
+        return newDocumentBuilder().newDocument();
+    }
+
     /***
      *  xml 解析成对应的对象
      * @param in 输入流
@@ -147,8 +166,8 @@ public class XML {
      */
     public static <T> T inputStream2Bean(InputStream in, Class<T> clazz) throws IOException {
         try {
-            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+
+            DocumentBuilder documentBuilder = newDocumentBuilder();
             org.w3c.dom.Document doc = documentBuilder.parse(in);
             doc.getDocumentElement().normalize();
             NodeList children = doc.getDocumentElement().getChildNodes();
@@ -174,8 +193,7 @@ public class XML {
             m = new JSONObject();
         }
         try {
-            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+            DocumentBuilder documentBuilder = newDocumentBuilder();;
             org.w3c.dom.Document doc = documentBuilder.parse(in);
             doc.getDocumentElement().normalize();
             NodeList children = doc.getDocumentElement().getChildNodes();
@@ -206,14 +224,14 @@ public class XML {
      * @return XML格式的字符串
      */
     public static String getMap2Xml(Map<String, Object> data) {
-        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder documentBuilder = null;
+
+
+        Document document = null;
         try {
-            documentBuilder = documentBuilderFactory.newDocumentBuilder();
+            document = newDocument();
         } catch (ParserConfigurationException e) {
             e.printStackTrace();
         }
-        org.w3c.dom.Document document = documentBuilder.newDocument();
         org.w3c.dom.Element root = document.createElement("xml");
         document.appendChild(root);
         for (String key : data.keySet()) {
