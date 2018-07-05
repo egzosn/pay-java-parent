@@ -189,7 +189,7 @@ public class HttpRequestTemplate {
     public HttpRequestTemplate setHttpConfigStorage(HttpConfigStorage configStorage) {
         this.configStorage = configStorage;
 
-        if (StringUtils.isNotBlank(configStorage.getHttpProxyHost())) {
+        if (null != configStorage && StringUtils.isNotBlank(configStorage.getHttpProxyHost())) {
             //http代理地址设置
             httpProxy = new HttpHost(configStorage.getHttpProxyHost(),configStorage.httpProxyPort);;
         }
