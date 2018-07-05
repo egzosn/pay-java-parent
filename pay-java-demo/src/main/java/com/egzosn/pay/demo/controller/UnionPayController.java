@@ -4,6 +4,7 @@ package com.egzosn.pay.demo.controller;
 
 import com.egzosn.pay.common.api.PayService;
 import com.egzosn.pay.common.bean.*;
+import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.demo.request.QueryOrder;
 import com.egzosn.pay.union.api.UnionPayConfigStorage;
@@ -58,6 +59,13 @@ public class UnionPayController {
         unionPayConfigStorage.setTest(true);
         service = new UnionPayService(unionPayConfigStorage);
 
+        //请求连接池配置
+        HttpConfigStorage httpConfigStorage = new HttpConfigStorage();
+        //最大连接数
+        httpConfigStorage.setMaxTotal(20);
+        //默认的每个路由的最大连接数
+        httpConfigStorage.setDefaultMaxPerRoute(10);
+        service.setRequestTemplateConfigStorage(httpConfigStorage);
 
     }
 
