@@ -317,7 +317,7 @@ public class HttpRequestTemplate {
      * @return 类型对象
      */
     public <T>T doExecute(URI uri, Object request, Class<T> responseType, MethodType method){
-        log.debug(String.format("uri:%s, httpMethod:%s ", uri));
+        log.debug(String.format("uri:%s, httpMethod:%s ", uri, method.name()));
         ClientHttpRequest<T> httpRequest = new ClientHttpRequest(uri ,method, request);
         //判断是否有代理设置
         if (null == httpProxy){
