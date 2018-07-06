@@ -1,6 +1,8 @@
 package com.egzosn.pay.common.http;
 
 import com.egzosn.pay.common.bean.MethodType;
+import com.egzosn.pay.common.bean.result.PayException;
+import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.util.str.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -332,11 +334,11 @@ public class HttpRequestTemplate {
         try (CloseableHttpResponse response = getHttpClient().execute(httpRequest)) {
           return httpRequest.handleResponse(response);
         }catch (IOException e){
-            e.printStackTrace();
+           throw new PayErrorException(new PayException("IOException", e.getLocalizedMessage()));
         }finally {
             httpRequest.releaseConnection();
         }
-        return null;
+
     }
 
 

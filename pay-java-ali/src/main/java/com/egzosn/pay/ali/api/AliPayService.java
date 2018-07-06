@@ -491,6 +491,8 @@ public class AliPayService extends BasePayService {
         }
         //设置请求参数的集合
         parameters.put("biz_content", JSON.toJSONString(bizContent));
+        //设置签名
+        setSign(parameters);
         return getHttpRequestTemplate().postForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(parameters), null, JSONObject.class);
     }
 
