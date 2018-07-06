@@ -61,7 +61,7 @@
 
 ###### 单一支付教程 
 
- * [基础模块支付宝微信讲解](wikis/Home)
+ * [基础模块支付宝微信讲解](https://gitee.com/egzosn/pay-java-parent/wikis/Home)
  * [银联](pay-java-union?dir=1&filepath=pay-java-union)
  * [payoneer](pay-java-payoneer?dir=1&filepath=pay-java-payoneer)
  * [paypal](pay-java-paypal?dir=1&filepath=pay-java-paypal)
