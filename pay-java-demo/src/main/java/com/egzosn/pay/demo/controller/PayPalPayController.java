@@ -7,6 +7,7 @@ import com.egzosn.pay.common.bean.CurType;
 import com.egzosn.pay.common.bean.MethodType;
 import com.egzosn.pay.common.bean.PayOrder;
 import com.egzosn.pay.common.bean.RefundOrder;
+import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.paypal.api.PayPalConfigStorage;
 import com.egzosn.pay.paypal.api.PayPalPayService;
 import com.egzosn.pay.paypal.bean.PayPalTransactionType;
@@ -47,6 +48,14 @@ public class PayPalPayController {
         //取消按钮转跳地址,这里用异步通知地址的兼容的做法
         storage.setNotifyUrl("http://127.0.0.1:8088/pay/cancel");
         service = new PayPalPayService(storage);
+
+        //请求连接池配置
+        HttpConfigStorage httpConfigStorage = new HttpConfigStorage();
+        //最大连接数
+        httpConfigStorage.setMaxTotal(20);
+        //默认的每个路由的最大连接数
+        httpConfigStorage.setDefaultMaxPerRoute(10);
+        service.setRequestTemplateConfigStorage(httpConfigStorage);
     }
 
 

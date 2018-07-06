@@ -42,6 +42,14 @@ public class PayoneerPayController {
         configStorage.setTest(true);
         service = new PayoneerPayService(configStorage);
 
+        //请求连接池配置
+        HttpConfigStorage httpConfigStorage = new HttpConfigStorage();
+        //最大连接数
+        httpConfigStorage.setMaxTotal(20);
+        //默认的每个路由的最大连接数
+        httpConfigStorage.setDefaultMaxPerRoute(10);
+        service.setRequestTemplateConfigStorage(httpConfigStorage);
+
         //以下不建议进行使用，会引起两次请求的问题
         //Basic Auth
        /* HttpConfigStorage httpConfigStorage = new  HttpConfigStorage();

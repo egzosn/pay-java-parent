@@ -5,39 +5,24 @@ package com.egzosn.pay.demo.controller;
 import com.egzosn.pay.ali.api.AliPayConfigStorage;
 import com.egzosn.pay.ali.api.AliPayService;
 import com.egzosn.pay.ali.bean.AliTransactionType;
-import com.egzosn.pay.common.api.Callback;
-import com.egzosn.pay.common.api.PayConfigStorage;
 import com.egzosn.pay.common.api.PayService;
 import com.egzosn.pay.common.bean.*;
+import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.common.http.UriVariables;
-import com.egzosn.pay.common.util.MatrixToImageWriter;
 import com.egzosn.pay.common.util.sign.SignUtils;
-import com.egzosn.pay.common.util.str.StringUtils;
-import com.egzosn.pay.demo.entity.ApyAccount;
-import com.egzosn.pay.demo.entity.PayType;
 import com.egzosn.pay.demo.request.QueryOrder;
-import com.egzosn.pay.demo.service.ApyAccountService;
-import com.egzosn.pay.demo.service.PayResponse;
-import com.egzosn.pay.payoneer.api.PayoneerPayService;
-import com.egzosn.pay.wx.bean.WxTransactionType;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.ModelAndView;
-
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import static com.egzosn.pay.demo.dao.ApyAccountRepository.apyAccounts;
 
 /**
  * 发起支付入口
@@ -67,7 +52,13 @@ public class AliPayController {
         //是否为测试账号，沙箱环境
         aliPayConfigStorage.setTest(true);
 
-        service = new AliPayService(aliPayConfigStorage);
+        //请求连接池配置
+        HttpConfigStorage httpConfigStorage = new HttpConfigStorage();
+        //最大连接数
+        httpConfigStorage.setMaxTotal(20);
+        //默认的每个路由的最大连接数
+        httpConfigStorage.setDefaultMaxPerRoute(10);
+        service =  new AliPayService(aliPayConfigStorage, httpConfigStorage);
 
 
     }

@@ -5,6 +5,7 @@ package com.egzosn.pay.demo.controller;
 import com.egzosn.pay.common.api.Callback;
 import com.egzosn.pay.common.api.PayService;
 import com.egzosn.pay.common.bean.*;
+import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.common.http.UriVariables;
 import com.egzosn.pay.demo.entity.PayType;
 import com.egzosn.pay.demo.request.QueryOrder;
@@ -39,6 +40,10 @@ public class WxPayController {
 
     private PayService service = null;
 
+    //ssl 退款证书相关 不使用可注释
+    private static String KEYSTORE = "ssl 退款证书";
+    private static String STORE_PASSWORD = "ssl 证书对应的密码， 默认为商户号";
+
     @PostConstruct
     public void init() {
         WxPayConfigStorage wxPayConfigStorage = new WxPayConfigStorage();
@@ -54,7 +59,22 @@ public class WxPayController {
 
         service = new WxPayService(wxPayConfigStorage);
 
+        HttpConfigStorage httpConfigStorage = new HttpConfigStorage();
 
+        //ssl 退款证书相关 不使用可注释
+        if(!"ssl 退款证书".equals(KEYSTORE)){
+            httpConfigStorage.setKeystore(KEYSTORE);
+            httpConfigStorage.setStorePassword(STORE_PASSWORD);
+            httpConfigStorage.setPath(true);
+        }
+
+
+        //请求连接池配置
+        //最大连接数
+        httpConfigStorage.setMaxTotal(20);
+        //默认的每个路由的最大连接数
+        httpConfigStorage.setDefaultMaxPerRoute(10);
+        service.setRequestTemplateConfigStorage(httpConfigStorage);
     }
 
 
@@ -218,6 +238,9 @@ public class WxPayController {
      */
     @RequestMapping("refund")
     public Map<String, Object> refund(RefundOrder order) {
+        if("ssl 退款证书".equals(KEYSTORE)){
+           throw new RuntimeException("请设置好SSL退款证书");
+        }
         return service.refund(order);
     }
 
