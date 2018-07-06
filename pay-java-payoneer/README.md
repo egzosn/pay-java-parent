@@ -6,18 +6,30 @@
 
 ```java
 
-     PayoneerConfigStorage configStorage = new PayoneerConfigStorage();
-          configStorage.setProgramId("商户id");
-          configStorage.setMsgType(MsgType.json);
-          configStorage.setInputCharset("utf-8");
-          configStorage.setUserName("PayoneerPay 用户名");
-          configStorage.setApiPassword("PayoneerPay API password");
-          configStorage.setTest(true);
+        PayoneerConfigStorage configStorage = new PayoneerConfigStorage();
+        configStorage.setProgramId("商户id");
+        configStorage.setMsgType(MsgType.json);
+        configStorage.setInputCharset("utf-8");
+        configStorage.setUserName("PayoneerPay 用户名");
+        configStorage.setApiPassword("PayoneerPay API password");
+        configStorage.setTest(true);
         //是否为测试账号，沙箱环境
         configStorage.setTest(true);
 
 
         
+```
+
+#### 网络请求配置
+
+```java
+
+        HttpConfigStorage httpConfigStorage = new HttpConfigStorage();
+      /* /网络请求连接池**/
+        //最大连接数
+        httpConfigStorage.setMaxTotal(20);
+        //默认的每个路由的最大连接数
+        httpConfigStorage.setDefaultMaxPerRoute(10);
 ```
 
 
@@ -26,7 +38,9 @@
 
 ```java
     //支付服务
-     PayoneerPayService service = new PayoneerPayService(configStorage, httpConfigStorage);
+     PayoneerPayService service = new PayoneerPayService(configStorage);
+    //设置网络请求配置根据需求进行设置
+     //service.setRequestTemplateConfigStorage(httpConfigStorage)
 
 ```
 
