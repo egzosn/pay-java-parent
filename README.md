@@ -57,7 +57,6 @@
 ### 使用
 这里不多说直接上代码 
 
-测试链接 ： http://pay.egzosn.com/index.html
 
 ###### 单一支付教程 
 
