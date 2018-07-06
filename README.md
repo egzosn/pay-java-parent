@@ -7,7 +7,7 @@
 
 开发版 https://git.oschina.net/egzosn/pay-java-parent/tree/develop
 
-##### 详细文档请看 [wiki](https://gitee.com/egzosn/pay-java-parent/wikis/Home)。
+##### 详细文档请看 [wiki](https://github.com/egzosn/pay-java-parent/wiki)。
 
 ### 特性
 
@@ -33,7 +33,7 @@
 <dependency>
     <groupId>com.egzosn</groupId>
     <artifactId>pay-java-common</artifactId>
-    <version>2.0.9-RELEASE</version>
+    <version>2.10.1</version>
 </dependency>
 
 ```
@@ -45,7 +45,7 @@
 <dependency>
     <groupId>com.egzosn</groupId>
     <artifactId>{module-name}</artifactId>
-    <version>2.0.9-RELEASE</version>
+    <version>2.10.1</version>
 </dependency>
 
 ```
@@ -57,16 +57,16 @@
 ### 使用
 这里不多说直接上代码 
 
-测试链接 ： http://pay.egzosn.com/index.html
 
 ###### 单一支付教程 
 
- * [基础模块支付宝微信讲解](https://gitee.com/egzosn/pay-java-parent/wikis/Home)
- * [友店微信](pay-java-wx-youdian?dir=1&filepath=pay-java-youdian)
- * [富友](pay-java-fuiou?dir=1&filepath=pay-java-fuiou)
+ * [基础模块支付宝微信讲解](https://github.com/egzosn/pay-java-parent/wiki)
  * [银联](pay-java-union?dir=1&filepath=pay-java-union)
  * [payoneer](pay-java-payoneer?dir=1&filepath=pay-java-payoneer)
  * [paypal](pay-java-paypal?dir=1&filepath=pay-java-paypal)
+ * [友店微信](pay-java-wx-youdian?dir=1&filepath=pay-java-youdian)
+ * [富友](pay-java-fuiou?dir=1&filepath=pay-java-fuiou)
+
 
 支付整合》服务端+网页端详细使用与简单教程请看 [pay-java-demo](pay-java-demo?dir=1&filepath=pay-java-demo)
 
