@@ -4,8 +4,10 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.egzosn.pay.common.bean.MethodType;
 import com.egzosn.pay.common.bean.result.PayException;
-import com.egzosn.pay.common.util.XML;
 import com.egzosn.pay.common.exception.PayErrorException;
+import com.egzosn.pay.common.util.XML;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.*;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpResponseException;
@@ -14,13 +16,11 @@ import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.util.Map;
-
 import static com.egzosn.pay.common.http.UriVariables.getMapToParameters;
 
 /**
@@ -32,7 +32,7 @@ import static com.egzosn.pay.common.http.UriVariables.getMapToParameters;
  *  </pre>
  */
 public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase implements  org.apache.http.client.ResponseHandler<T>{
-
+    protected final Log log = LogFactory.getLog(ClientHttpRequest.class);
     public static final ContentType APPLICATION_FORM_URLENCODED_UTF_8 = ContentType.create("application/x-www-form-urlencoded", Consts.UTF_8);;
 
 
@@ -157,6 +157,7 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
         if (request instanceof HttpHeader){
             HttpHeader entity = (HttpHeader)request;
             if (null != entity.getHeaders() ){
+                log.debug("header : " + JSON.toJSONString(entity.getHeaders()));
                 for (Header header : entity.getHeaders()){
                     addHeader(header);
                 }
@@ -167,6 +168,7 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
                 setEntity(entity);
             }
             if (null != entity.getHeaders() ){
+                log.debug("header : " + JSON.toJSONString(entity.getHeaders()));
                 for (Header header : entity.getHeaders()){
                     addHeader(header);
                 }
@@ -174,13 +176,18 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
         } else if (request instanceof HttpEntity){
             setEntity((HttpEntity)request);
         } else if (request instanceof Map) {
-            StringEntity entity = new StringEntity(getMapToParameters((Map) request), APPLICATION_FORM_URLENCODED_UTF_8);
+            String parameters = getMapToParameters((Map) request);
+            log.debug("Parameter : " + parameters);
+            StringEntity entity = new StringEntity(parameters, APPLICATION_FORM_URLENCODED_UTF_8);
             setEntity(entity);
         } else if (request instanceof String) {
+            log.debug("Parameter : " + request);
             StringEntity entity = new StringEntity((String) request,  APPLICATION_FORM_URLENCODED_UTF_8);
             setEntity(entity);
         } else {
-            StringEntity entity = new StringEntity(JSON.toJSONString(request), ContentType.APPLICATION_JSON);
+            String body = JSON.toJSONString(request);
+            log.debug("body : " + request);
+            StringEntity entity = new StringEntity(body, ContentType.APPLICATION_JSON);
             setEntity(entity);
         }
 

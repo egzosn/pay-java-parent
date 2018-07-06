@@ -1,26 +1,35 @@
 package com.egzosn.pay.common.http;
 
 import com.egzosn.pay.common.bean.MethodType;
+import com.egzosn.pay.common.bean.result.PayException;
+import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.util.str.StringUtils;
-import org.apache.http.Header;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.DefaultHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.ssl.SSLContexts;
 
+import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import java.io.*;
 import java.net.URI;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
-import java.util.List;
+import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 
 /**
@@ -33,10 +42,15 @@ import java.util.Map;
  */
 public class HttpRequestTemplate {
 
+    protected final Log log = LogFactory.getLog(HttpRequestTemplate.class);
+
     protected CloseableHttpClient httpClient;
+
+    protected PoolingHttpClientConnectionManager connectionManager;
 
     protected HttpHost httpProxy;
 
+    HttpConfigStorage configStorage;
     /**
      *  获取代理带代理地址的 HttpHost
      * @return 获取代理带代理地址的 HttpHost
@@ -46,7 +60,27 @@ public class HttpRequestTemplate {
     }
 
     public CloseableHttpClient getHttpClient() {
+        if (null != httpClient) {
+            return httpClient;
+        }
+        if (null == configStorage) {
+            return httpClient = HttpClients.createDefault();
+        }
+
+        CloseableHttpClient httpClient = HttpClients
+                .custom()
+                //网络提供者
+                .setDefaultCredentialsProvider(createCredentialsProvider(configStorage))
+                //设置httpclient的SSLSocketFactory
+                .setSSLSocketFactory(createSSL(configStorage))
+                .setConnectionManager(connectionManager(configStorage))
+                .build();
+        if (null == connectionManager) {
+            return this.httpClient = httpClient;
+        }
+
         return httpClient;
+
     }
 
     /**
@@ -70,7 +104,11 @@ public class HttpRequestTemplate {
     public SSLConnectionSocketFactory createSSL( HttpConfigStorage configStorage){
 
         if (StringUtils.isEmpty(configStorage.getKeystore())){
-            return null;
+            try {
+                return new SSLConnectionSocketFactory(SSLContext.getDefault());
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            }
         }
 
             //读取本机存放的PKCS12证书文件
@@ -81,6 +119,10 @@ public class HttpRequestTemplate {
                 char[] password = configStorage.getStorePassword().toCharArray();
                 //指定PKCS12的密码
                 keyStore.load(instream, password);
+                // 实例化密钥库 & 初始化密钥工厂
+                KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+                kmf.init(keyStore, password);
+                // 创建 SSLContext
                 SSLContext sslcontext = SSLContexts.custom()
                         .loadKeyMaterial(keyStore, password).build();
 
@@ -106,11 +148,6 @@ public class HttpRequestTemplate {
      */
     public CredentialsProvider createCredentialsProvider(HttpConfigStorage configStorage){
 
-        if (StringUtils.isNotBlank(configStorage.getHttpProxyHost())) {
-            //http代理地址设置
-            httpProxy = new HttpHost(configStorage.getHttpProxyHost(),configStorage.httpProxyPort);;
-        }
-
 
         if (StringUtils.isBlank(configStorage.getAuthUsername())) {
             return null;
@@ -126,6 +163,29 @@ public class HttpRequestTemplate {
         return credsProvider;
     }
 
+    /**
+     * 初始化连接池
+     * @param configStorage 配置
+     * @return 连接池对象
+     */
+    public PoolingHttpClientConnectionManager connectionManager(HttpConfigStorage configStorage){
+        if (null != connectionManager){
+            return connectionManager;
+        }
+        if (0 == configStorage.getMaxTotal() || 0 == configStorage.getDefaultMaxPerRoute()){
+            return null;
+        }
+        log.info(String.format("Initialize the PoolingHttpClientConnectionManager -- maxTotal:%s, defaultMaxPerRoute:%s", configStorage.getMaxTotal(), configStorage.getDefaultMaxPerRoute()));
+        Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory> create()
+                .register("https", createSSL(configStorage))
+                .register("http", new PlainConnectionSocketFactory())
+                .build();
+        connectionManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
+        connectionManager.setMaxTotal(configStorage.getMaxTotal());
+        connectionManager.setDefaultMaxPerRoute(configStorage.getDefaultMaxPerRoute());
+
+        return connectionManager;
+    }
 
     /**
      * 设置HTTP请求的配置
@@ -134,22 +194,17 @@ public class HttpRequestTemplate {
      * @return 当前HTTP请求的客户端模板
      */
     public HttpRequestTemplate setHttpConfigStorage(HttpConfigStorage configStorage) {
+        this.configStorage = configStorage;
 
-        if (null == configStorage) {
-            httpClient = HttpClients.createDefault();
-            return this;
+        if (null != configStorage && StringUtils.isNotBlank(configStorage.getHttpProxyHost())) {
+            //http代理地址设置
+            httpProxy = new HttpHost(configStorage.getHttpProxyHost(),configStorage.httpProxyPort);;
         }
-
-        httpClient = HttpClients
-                .custom()
-                //网络提供者
-                .setDefaultCredentialsProvider(createCredentialsProvider(configStorage))
-                //设置httpclient的SSLSocketFactory
-                .setSSLSocketFactory(createSSL(configStorage))
-                .build();
 
         return this;
     }
+
+
 
 
     /**
@@ -269,20 +324,21 @@ public class HttpRequestTemplate {
      * @return 类型对象
      */
     public <T>T doExecute(URI uri, Object request, Class<T> responseType, MethodType method){
+        log.debug(String.format("uri:%s, httpMethod:%s ", uri, method.name()));
         ClientHttpRequest<T> httpRequest = new ClientHttpRequest(uri ,method, request);
         //判断是否有代理设置
         if (null == httpProxy){
             httpRequest.setProxy(httpProxy);
         }
         httpRequest.setResponseType(responseType);
-        try (CloseableHttpResponse response = httpClient.execute(httpRequest)) {
+        try (CloseableHttpResponse response = getHttpClient().execute(httpRequest)) {
           return httpRequest.handleResponse(response);
         }catch (IOException e){
-            e.printStackTrace();
+           throw new PayErrorException(new PayException("IOException", e.getLocalizedMessage()));
         }finally {
             httpRequest.releaseConnection();
         }
-        return null;
+
     }
 
 
