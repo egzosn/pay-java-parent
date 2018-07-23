@@ -6,6 +6,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -15,6 +16,7 @@ import java.security.spec.X509EncodedKeySpec;
 public class RSA{
 
 	private static final String ALGORITHM = "RSA";
+
 
 	private static final String SIGN_ALGORITHMS = "SHA1WithRSA";
 
@@ -106,9 +108,7 @@ public class RSA{
 	*/
 	public static boolean verify(String content, String sign, String publicKey, String signAlgorithms, String characterEncoding){
 		try {
-			KeyFactory keyFactory 	= KeyFactory.getInstance(ALGORITHM);
-	        byte[] encodedKey 		= Base64.decode(publicKey);
-	        PublicKey pubKey 		= keyFactory.generatePublic(new X509EncodedKeySpec(encodedKey));
+	        PublicKey pubKey 		= getPublicKey(publicKey, ALGORITHM);
 			java.security.Signature signature = java.security.Signature.getInstance(signAlgorithms);
 			signature.initVerify(pubKey);
 			signature.update( content.getBytes(characterEncoding) );
@@ -177,26 +177,28 @@ public class RSA{
         PrivateKey prikey 	= getPrivateKey(privateKey);
         Cipher cipher 		= Cipher.getInstance(ALGORITHM);
         cipher.init(Cipher.DECRYPT_MODE, prikey);
-        InputStream ins 	= new ByteArrayInputStream(Base64.decode(content));
-        ByteArrayOutputStream writer = new ByteArrayOutputStream();
-        //rsa解密的字节大小最多是128，将需要解密的内容，按128位拆开解密
-        byte[] buf = new byte[128];
-        int bufl;
-        while ((bufl = ins.read(buf)) != -1) {
-            byte[] block = null;
+       try(InputStream ins 	= new ByteArrayInputStream(Base64.decode(content));   ByteArrayOutputStream writer = new ByteArrayOutputStream();) {
 
-            if (buf.length == bufl) {
-                block = buf;
-            } else {
-                block = new byte[bufl];
-                for (int i = 0; i < bufl; i++) {
-                    block[i] = buf[i];
-                }
-            }
-            writer.write(cipher.doFinal(block));
-        }
+		   //rsa解密的字节大小最多是128，将需要解密的内容，按128位拆开解密
+		   byte[] buf = new byte[128];
+		   int bufl;
+		   while ((bufl = ins.read(buf)) != -1) {
+			   byte[] block = null;
 
-        return new String(writer.toByteArray(), characterEncoding);
+			   if (buf.length == bufl) {
+				   block = buf;
+			   } else {
+				   block = new byte[bufl];
+
+				   for (int i = 0; i < bufl; i++) {
+					   block[i] = buf[i];
+				   }
+			   }
+			   writer.write(cipher.doFinal(block));
+		   }
+
+		   return new String(writer.toByteArray(), characterEncoding);
+	   }
     }
 
 	
@@ -215,4 +217,61 @@ public class RSA{
 		PrivateKey privateKey = keyFactory.generatePrivate(keySpec);
 		return privateKey;
 	}
+
+	/**
+	* 得到公钥
+	* @param key 密钥字符串（经过base64编码）
+	 * @throws Exception 加密异常
+	 * @return 公钥
+	*/
+	public static PublicKey getPublicKey(String key, String signAlgorithms) throws Exception {
+		KeyFactory keyFactory 	= KeyFactory.getInstance(signAlgorithms);
+		byte[] encodedKey 		= Base64.decode(key);
+		PublicKey pubKey 		= keyFactory.generatePublic(new X509EncodedKeySpec(encodedKey));
+		return pubKey;
+	}
+
+
+	/**
+	* 得到公钥
+	* @param key 密钥字符串（经过base64编码）
+	 * @throws Exception 加密异常
+	 * @return 公钥
+	*/
+	public static PublicKey getPublicKey(String key) throws Exception {
+
+		return getPublicKey(key, ALGORITHM);
+	}
+
+
+
+	public static byte[] encrypt(byte[] plainBytes, PublicKey publicKey, int keyLength, int reserveSize, String cipherAlgorithm) throws Exception {
+		int keyByteSize = keyLength / 8;
+		int encryptBlockSize = keyByteSize - reserveSize;
+		int length = plainBytes.length;
+		int nBlock = length / encryptBlockSize;
+		if ((length % encryptBlockSize) != 0) {
+			nBlock += 1;
+		}
+		Cipher cipher = Cipher.getInstance(cipherAlgorithm);
+		cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+		try (ByteArrayOutputStream outbuf = new ByteArrayOutputStream(nBlock * keyByteSize)) {
+
+			for (int offset = 0; offset <length; offset += encryptBlockSize) {
+				int inputLen = length - offset;
+				if (inputLen > encryptBlockSize) {
+					inputLen = encryptBlockSize;
+				}
+				byte[] encryptedBlock = cipher.doFinal(plainBytes, offset, inputLen);
+				outbuf.write(encryptedBlock);
+			}
+			outbuf.flush();
+			return outbuf.toByteArray();
+		}
+	}
+
+	public static String encrypt(String content, String publicKey, String cipherAlgorithm, String characterEncoding ) throws Exception {
+		return new String(RSA.encrypt(content.getBytes(Charset.forName(characterEncoding)), RSA.getPublicKey(publicKey), 1024, 11, cipherAlgorithm), characterEncoding);
+	}
+
 }
