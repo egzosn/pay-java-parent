@@ -10,6 +10,7 @@ import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.common.util.MatrixToImageWriter;
 import com.egzosn.pay.common.util.sign.SignUtils;
+import com.egzosn.pay.common.util.sign.encrypt.RSA2;
 import com.egzosn.pay.common.util.str.StringUtils;
 import com.egzosn.pay.wx.bean.WxPayError;
 import com.egzosn.pay.wx.bean.WxTransactionType;
@@ -21,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -50,6 +52,8 @@ public class WxPayService extends BasePayService {
     public final static String SUCCESS = "SUCCESS";
     public final static String RETURN_CODE = "return_code";
     public final static String SIGN = "sign";
+    public final static String CIPHER_ALGORITHM = "RSA/ECB/OAEPWITHSHA-1ANDMGF1PADDING";
+    public final static String FAILURE = "failure";
 
 
 
@@ -483,18 +487,18 @@ public class WxPayService extends BasePayService {
     public Map<String, Object>  secondaryInterface(Object transactionIdOrBillDate, String outTradeNoBillType, TransactionType transactionType) {
 
         if (transactionType == WxTransactionType.REFUND) {
-            throw new PayErrorException(new PayException("failure", "通用接口不支持:" + transactionType));
+            throw new PayErrorException(new PayException(FAILURE, "通用接口不支持:" + transactionType));
         }
 
         if (transactionType == WxTransactionType.DOWNLOADBILL){
             if (transactionIdOrBillDate instanceof  Date){
                 return downloadbill((Date) transactionIdOrBillDate, outTradeNoBillType);
             }
-            throw new PayErrorException(new PayException("failure", "非法类型异常:" + transactionIdOrBillDate.getClass()));
+            throw new PayErrorException(new PayException(FAILURE, "非法类型异常:" + transactionIdOrBillDate.getClass()));
         }
 
         if (!(null == transactionIdOrBillDate || transactionIdOrBillDate instanceof  String)){
-            throw new PayErrorException(new PayException("failure", "非法类型异常:" + transactionIdOrBillDate.getClass()));
+            throw new PayErrorException(new PayException(FAILURE, "非法类型异常:" + transactionIdOrBillDate.getClass()));
         }
 
         //获取公共参数
@@ -563,6 +567,10 @@ public class WxPayService extends BasePayService {
     }
 
     public String keyPublic(String content){
-        return SignUtils.RSA.createSign(content, payConfigStorage.getKeyPublic(), payConfigStorage.getInputCharset());
+        try {
+            return RSA2.encrypt(content, payConfigStorage.getKeyPublic(),  CIPHER_ALGORITHM, payConfigStorage.getInputCharset());
+        } catch (Exception e) {
+           throw new PayErrorException(new WxPayError(FAILURE, e.getLocalizedMessage()));
+        }
     }
 }

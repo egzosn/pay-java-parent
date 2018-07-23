@@ -1,6 +1,7 @@
 
 package com.egzosn.pay.common.util.sign.encrypt;
 
+import java.nio.charset.Charset;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 
@@ -76,5 +77,10 @@ public class RSA2 {
 	*/
 	public static PrivateKey getPrivateKey(String key) throws Exception {
 		return RSA.getPrivateKey(key);
+	}
+
+
+	public static String encrypt(String content, String publicKey, String cipherAlgorithm, String characterEncoding ) throws Exception {
+		return new String(RSA.encrypt(content.getBytes(Charset.forName(characterEncoding)), RSA.getPublicKey(publicKey), 2048, 11, cipherAlgorithm), characterEncoding);
 	}
 }
