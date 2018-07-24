@@ -535,7 +535,7 @@ public class WxPayService extends BasePayService {
         if (!StringUtils.isEmpty(order.getRemark())){
             parameters.put("desc", order.getRemark());
         }
-        parameters.put(SIGN, SignUtils.valueOf(payConfigStorage.getSignType()).sign(parameters, payConfigStorage.getKeyPrivate(), payConfigStorage.getInputCharset()));
+        parameters.put(SIGN, createSign(parameters, payConfigStorage.getInputCharset()));
         return getHttpRequestTemplate().postForObject(getUrl(WxTransactionType.BANK),  XML.getMap2Xml(parameters), JSONObject.class);
     }
 
@@ -553,7 +553,7 @@ public class WxPayService extends BasePayService {
         parameters.put("mch_id", payConfigStorage.getPid());
         parameters.put("partner_trade_no", StringUtils.isEmpty(outNo) ? tradeNo : outNo);
         parameters.put("nonce_str", SignUtils.randomStr());
-        parameters.put(SIGN, SignUtils.valueOf(payConfigStorage.getSignType()).sign(parameters, payConfigStorage.getKeyPrivate(), payConfigStorage.getInputCharset()));
+        parameters.put(SIGN, createSign(parameters, payConfigStorage.getInputCharset()));
         return getHttpRequestTemplate().postForObject(getUrl(WxTransactionType.QUERY_BANK),  XML.getMap2Xml(parameters), JSONObject.class);
     }
 
@@ -573,4 +573,7 @@ public class WxPayService extends BasePayService {
            throw new PayErrorException(new WxPayError(FAILURE, e.getLocalizedMessage()));
         }
     }
+
+
+
 }

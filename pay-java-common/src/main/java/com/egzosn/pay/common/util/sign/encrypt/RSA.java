@@ -2,11 +2,7 @@
 package com.egzosn.pay.common.util.sign.encrypt;
 
 import javax.crypto.Cipher;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
+import java.io.*;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -225,10 +221,7 @@ public class RSA{
 	 * @return 公钥
 	*/
 	public static PublicKey getPublicKey(String key, String signAlgorithms) throws Exception {
-		KeyFactory keyFactory 	= KeyFactory.getInstance(signAlgorithms);
-		byte[] encodedKey 		= Base64.decode(key);
-		PublicKey pubKey 		= keyFactory.generatePublic(new X509EncodedKeySpec(encodedKey));
-		return pubKey;
+		return getPublicKey(new ByteArrayInputStream(key.getBytes()), signAlgorithms);
 	}
 
 
@@ -243,32 +236,48 @@ public class RSA{
 		return getPublicKey(key, ALGORITHM);
 	}
 
-
-
-	public static String encrypt(byte[] plainBytes, PublicKey publicKey, String cipherAlgorithm, String characterEncoding ) throws Exception {
-		Cipher cipher 		= Cipher.getInstance(cipherAlgorithm);
-		cipher.init(Cipher.DECRYPT_MODE, publicKey);
-		try(InputStream ins = new ByteArrayInputStream(plainBytes);   ByteArrayOutputStream writer = new ByteArrayOutputStream();) {
-			byte[] buf = new byte[128];
-			int bufl;
-			while ((bufl = ins.read(buf)) != -1) {
-				byte[] block = null;
-				if (buf.length == bufl) {
-					block = buf;
-				} else {
-					block = new byte[bufl];
-					for (int i = 0; i < bufl; i++) {
-						block[i] = buf[i];
-					}
+	public static PublicKey getPublicKey(InputStream inputStream, String keyAlgorithm) throws Exception {
+		try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));) {
+			StringBuilder sb = new StringBuilder();
+			String readLine = null;
+			while ((readLine = br.readLine()) != null) {
+				if (readLine.charAt(0) == '-') {
+					continue;
 				}
-				writer.write(cipher.doFinal(block));
+				sb.append(readLine);
+				sb.append('\r');
 			}
-			return new String(writer.toByteArray(), characterEncoding);
+			X509EncodedKeySpec pubX509 = new X509EncodedKeySpec(Base64.decode(sb.toString()));
+			KeyFactory keyFactory = KeyFactory.getInstance(keyAlgorithm);
+			PublicKey publicKey = keyFactory.generatePublic(pubX509);
+			return publicKey;
 		}
 	}
 
+	public static byte[] encrypt(byte[] plainBytes, PublicKey publicKey, int keyLength, int reserveSize, String cipherAlgorithm) throws Exception {
+		int keyByteSize = keyLength / 8;
+		int encryptBlockSize = keyByteSize - reserveSize;
+		int nBlock = plainBytes.length / encryptBlockSize;
+		if ((plainBytes.length % encryptBlockSize) != 0) {
+			nBlock += 1;
+		}
+		try (ByteArrayOutputStream outbuf = new ByteArrayOutputStream(nBlock * keyByteSize);) {
+			Cipher cipher = Cipher.getInstance(cipherAlgorithm);
+			cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+			for (int offset = 0; offset < plainBytes.length; offset += encryptBlockSize) {
+				int inputLen = plainBytes.length - offset;
+				if (inputLen > encryptBlockSize) {
+					inputLen = encryptBlockSize;
+				}
+				byte[] encryptedBlock = cipher.doFinal(plainBytes, offset, inputLen);
+				outbuf.write(encryptedBlock);
+			}
+			outbuf.flush();
+			return outbuf.toByteArray();
+		}
+	}
 	public static String encrypt(String content, String publicKey, String cipherAlgorithm, String characterEncoding ) throws Exception {
-		return RSA.encrypt(Base64.decode(content), RSA.getPublicKey(publicKey), cipherAlgorithm, characterEncoding);
+		return Base64.encode(RSA.encrypt(content.getBytes(characterEncoding), RSA.getPublicKey(publicKey),1024, 11, cipherAlgorithm));
 	}
 
 }

@@ -81,6 +81,6 @@ public class RSA2 {
 
 
 	public static String encrypt(String content, String publicKey, String cipherAlgorithm, String characterEncoding ) throws Exception {
-		return RSA.encrypt(content.getBytes(Charset.forName(characterEncoding)), RSA.getPublicKey(publicKey),cipherAlgorithm, characterEncoding);
+		return Base64.encode(RSA.encrypt(content.getBytes(characterEncoding), RSA.getPublicKey(publicKey),2048, 11, cipherAlgorithm));
 	}
 }
