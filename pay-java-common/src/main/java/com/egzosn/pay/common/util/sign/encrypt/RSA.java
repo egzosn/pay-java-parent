@@ -245,33 +245,30 @@ public class RSA{
 
 
 
-	public static byte[] encrypt(byte[] plainBytes, PublicKey publicKey, int keyLength, int reserveSize, String cipherAlgorithm) throws Exception {
-		int keyByteSize = keyLength / 8;
-		int encryptBlockSize = keyByteSize - reserveSize;
-		int length = plainBytes.length;
-		int nBlock = length / encryptBlockSize;
-		if ((length % encryptBlockSize) != 0) {
-			nBlock += 1;
-		}
-		Cipher cipher = Cipher.getInstance(cipherAlgorithm);
-		cipher.init(Cipher.ENCRYPT_MODE, publicKey);
-		try (ByteArrayOutputStream outbuf = new ByteArrayOutputStream(nBlock * keyByteSize)) {
-
-			for (int offset = 0; offset <length; offset += encryptBlockSize) {
-				int inputLen = length - offset;
-				if (inputLen > encryptBlockSize) {
-					inputLen = encryptBlockSize;
+	public static String encrypt(byte[] plainBytes, PublicKey publicKey, String cipherAlgorithm, String characterEncoding ) throws Exception {
+		Cipher cipher 		= Cipher.getInstance(cipherAlgorithm);
+		cipher.init(Cipher.DECRYPT_MODE, publicKey);
+		try(InputStream ins = new ByteArrayInputStream(plainBytes);   ByteArrayOutputStream writer = new ByteArrayOutputStream();) {
+			byte[] buf = new byte[128];
+			int bufl;
+			while ((bufl = ins.read(buf)) != -1) {
+				byte[] block = null;
+				if (buf.length == bufl) {
+					block = buf;
+				} else {
+					block = new byte[bufl];
+					for (int i = 0; i < bufl; i++) {
+						block[i] = buf[i];
+					}
 				}
-				byte[] encryptedBlock = cipher.doFinal(plainBytes, offset, inputLen);
-				outbuf.write(encryptedBlock);
+				writer.write(cipher.doFinal(block));
 			}
-			outbuf.flush();
-			return outbuf.toByteArray();
+			return new String(writer.toByteArray(), characterEncoding);
 		}
 	}
 
 	public static String encrypt(String content, String publicKey, String cipherAlgorithm, String characterEncoding ) throws Exception {
-		return new String(RSA.encrypt(content.getBytes(Charset.forName(characterEncoding)), RSA.getPublicKey(publicKey), 1024, 11, cipherAlgorithm), characterEncoding);
+		return RSA.encrypt(Base64.decode(content), RSA.getPublicKey(publicKey), cipherAlgorithm, characterEncoding);
 	}
 
 }
