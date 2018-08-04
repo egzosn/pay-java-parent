@@ -225,6 +225,19 @@ public abstract class BasePayService implements PayService {
     }
 
     /**
+     * 查询退款
+     *
+     * @param refundOrder   退款订单信息
+     * @param callback 处理器
+     * @param <T> 返回类型
+     * @return 返回支付方查询退款后的结果
+     */
+    @Override
+    public <T>T refundquery(RefundOrder refundOrder, Callback<T> callback){
+        return callback.perform(refundquery(refundOrder));
+    }
+
+    /**
      * 目前只支持日账单
      *
      * @param billDate 账单时间：具体请查看对应支付平台

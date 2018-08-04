@@ -1,6 +1,7 @@
 package com.egzosn.pay.common.bean;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 /**
  * 支付订单信息
@@ -38,6 +39,10 @@ public class PayOrder {
     private TransactionType transactionType;
     //支付币种
     private CurType curType;
+    //订单过期时间
+    private Date expirationTime;
+
+
 
 
     public CurType getCurType() {
@@ -189,6 +194,14 @@ public class PayOrder {
 
     public void setOpenid(String openid) {
         this.openid = openid;
+    }
+
+    public Date getExpirationTime() {
+        return expirationTime;
+    }
+
+    public void setExpirationTime(Date expirationTime) {
+        this.expirationTime = expirationTime;
     }
 
     @Override

@@ -16,7 +16,6 @@ import com.egzosn.pay.common.util.str.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import java.awt.image.BufferedImage;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
@@ -39,7 +38,10 @@ public class AliPayService extends BasePayService {
 
     private static final String HTTPS_REQ_URL = "https://mapi.alipay.com/gateway.do";
     private static final String QUERY_REQ_URL = "https://openapi.alipay.com/gateway.do";
-
+    DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+    {
+        df.setTimeZone(TimeZone.getTimeZone("GMT+8"));
+    }
     public AliPayService(PayConfigStorage payConfigStorage) {
         super(payConfigStorage);
     }
@@ -389,7 +391,30 @@ public class AliPayService extends BasePayService {
     public Map<String, Object> refundquery(String tradeNo, String outTradeNo) {
         return secondaryInterface(tradeNo, outTradeNo, AliTransactionType.REFUNDQUERY);
     }
+    /**
+     * 查询退款
+     *
+     * @param refundOrder   退款订单单号信息
+     * @return 返回支付方查询退款后的结果
+     */
+    @Override
+    public Map<String, Object> refundquery(RefundOrder refundOrder){
 
+        //获取公共参数
+        Map<String, Object> parameters = getPublicParameters(AliTransactionType.REFUNDQUERY);
+
+        Map<String, Object> bizContent = getBizContent(refundOrder.getTradeNo(), refundOrder.getOutTradeNo(), null);
+        if (!StringUtils.isEmpty(refundOrder.getRefundNo())){
+            bizContent.put("out_request_no", refundOrder.getRefundNo());
+        }
+        //设置请求参数的集合
+        parameters.put("biz_content",  JSON.toJSONString(bizContent));
+
+        //设置签名
+        setSign(parameters);
+        return  requestTemplate.getForObject(QUERY_REQ_URL + "?"  + UriVariables.getMapToParameters(parameters), JSONObject.class);
+
+    }
 
 
     /**
@@ -406,8 +431,7 @@ public class AliPayService extends BasePayService {
         Map<String, Object> bizContent = new TreeMap<>();
         bizContent.put("bill_type", billType);
         //目前只支持日账单
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-        df.setTimeZone(TimeZone.getTimeZone("GMT+8"));
+
         bizContent.put("bill_date", df.format(billDate));
         //设置请求参数的集合
         parameters.put("biz_content", JSON.toJSONString(bizContent));
