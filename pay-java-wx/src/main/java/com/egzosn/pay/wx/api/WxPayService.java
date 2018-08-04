@@ -54,7 +54,15 @@ public class WxPayService extends BasePayService {
     public final static String SIGN = "sign";
     public final static String CIPHER_ALGORITHM = "RSA/ECB/OAEPWITHSHA-1ANDMGF1PADDING";
     public final static String FAILURE = "failure";
+    public final static String APPID = "appid";
+    private final static DateFormat downloadbillDf = new SimpleDateFormat("yyyyMMdd");
+    public final static DateFormat df = new SimpleDateFormat("yyyyMMddHHmms");
 
+    {
+        TimeZone timeZone = TimeZone.getTimeZone("GMT+8");
+        downloadbillDf.setTimeZone(timeZone);
+        df.setTimeZone(timeZone);
+    }
 
 
 
@@ -146,7 +154,7 @@ public class WxPayService extends BasePayService {
     private Map<String, Object> getPublicParameters() {
 
         Map<String, Object> parameters = new TreeMap<String, Object>();
-        parameters.put("appid", payConfigStorage.getAppid());
+        parameters.put(APPID, payConfigStorage.getAppid());
         parameters.put("mch_id", payConfigStorage.getPid());
         parameters.put("nonce_str", SignUtils.randomStr());
         return parameters;
@@ -174,6 +182,10 @@ public class WxPayService extends BasePayService {
         parameters.put("attach", order.getBody());
         parameters.put("notify_url", payConfigStorage.getNotifyUrl());
         parameters.put("trade_type", order.getTransactionType().getType());
+        if (null != order.getExpirationTime()){
+            parameters.put("time_start", df.format(new Date()));
+            parameters.put("time_expire", df.format(order.getExpirationTime()));
+        }
         ((WxTransactionType) order.getTransactionType()).setAttribute(parameters, order);
 
         String sign = createSign(SignUtils.parameterText(parameters), payConfigStorage.getInputCharset());
@@ -221,7 +233,7 @@ public class WxPayService extends BasePayService {
                 params.put("package", "prepay_id=" + result.get("prepay_id"));
             } else if (WxTransactionType.APP == order.getTransactionType()) {
                 params.put("partnerid", payConfigStorage.getPid());
-                params.put("appid", payConfigStorage.getAppid());
+                params.put(APPID, payConfigStorage.getAppid());
                 params.put("prepayid", result.get("prepay_id"));
                 params.put("timestamp", System.currentTimeMillis() / 1000);
                 params.put("noncestr", result.get("nonce_str"));
@@ -401,6 +413,13 @@ public class WxPayService extends BasePayService {
     }
 
 
+    private Map<String, Object> setParameters(Map<String, Object> parameters, String key, String value){
+        if (!StringUtils.isEmpty(value)){
+            parameters.put(key, value);
+        }
+        return parameters;
+    }
+
     /**
      * 申请退款接口
      *
@@ -411,12 +430,10 @@ public class WxPayService extends BasePayService {
     public Map<String, Object> refund(RefundOrder refundOrder) {
         //获取公共参数
         Map<String, Object> parameters = getPublicParameters();
-        if (null != refundOrder.getTradeNo()) {
-            parameters.put("transaction_id", refundOrder.getTradeNo());
-        } else {
-            parameters.put("out_trade_no", refundOrder.getOutTradeNo());
-        }
-        parameters.put("out_refund_no", refundOrder.getRefundNo());
+
+        setParameters(parameters, "transaction_id", refundOrder.getTradeNo());
+        setParameters(parameters, "out_trade_no", refundOrder.getOutTradeNo());
+        setParameters(parameters, "out_refund_no", refundOrder.getRefundNo());
         parameters.put("total_fee", conversion(refundOrder.getTotalAmount()));
         parameters.put("refund_fee", conversion(refundOrder.getRefundAmount()));
         parameters.put("op_user_id", payConfigStorage.getPid());
@@ -425,6 +442,8 @@ public class WxPayService extends BasePayService {
         setSign(parameters);
         return requestTemplate.postForObject(getUrl(WxTransactionType.REFUND), XML.getMap2Xml(parameters), JSONObject.class);
     }
+
+
 
 
 
@@ -440,6 +459,24 @@ public class WxPayService extends BasePayService {
         return secondaryInterface(transactionId, outTradeNo, WxTransactionType.REFUNDQUERY);
     }
 
+    /**
+     * 查询退款
+     *
+     * @param refundOrder 退款订单单号信息
+     * @return 返回支付方查询退款后的结果
+     */
+    @Override
+    public Map<String, Object> refundquery(RefundOrder refundOrder) {
+
+        //获取公共参数
+        Map<String, Object> parameters = getPublicParameters();
+        setParameters(parameters, "transaction_id", refundOrder.getTradeNo());
+        setParameters(parameters, "out_trade_no", refundOrder.getOutTradeNo());
+        setParameters(parameters, "out_refund_no", refundOrder.getRefundNo());
+        //设置签名
+        setSign(parameters);
+        return  requestTemplate.postForObject(getUrl( WxTransactionType.REFUNDQUERY), XML.getMap2Xml(parameters) , JSONObject.class);
+    }
 
 
     /**
@@ -457,9 +494,8 @@ public class WxPayService extends BasePayService {
 
         parameters.put("bill_type", billType);
         //目前只支持日账单
-        DateFormat df = new SimpleDateFormat("yyyyMMdd");
-        df.setTimeZone(TimeZone.getTimeZone("GMT+8"));
-        parameters.put("bill_date", df.format(billDate));
+
+        parameters.put("bill_date", downloadbillDf.format(billDate));
 
         //设置签名
         setSign(parameters);

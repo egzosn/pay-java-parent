@@ -16,7 +16,6 @@ import com.egzosn.pay.common.util.str.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import java.awt.image.BufferedImage;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
@@ -389,7 +388,30 @@ public class AliPayService extends BasePayService {
     public Map<String, Object> refundquery(String tradeNo, String outTradeNo) {
         return secondaryInterface(tradeNo, outTradeNo, AliTransactionType.REFUNDQUERY);
     }
+    /**
+     * 查询退款
+     *
+     * @param refundOrder   退款订单单号信息
+     * @return 返回支付方查询退款后的结果
+     */
+    @Override
+    public Map<String, Object> refundquery(RefundOrder refundOrder){
 
+        //获取公共参数
+        Map<String, Object> parameters = getPublicParameters(AliTransactionType.REFUNDQUERY);
+
+        Map<String, Object> bizContent = getBizContent(refundOrder.getTradeNo(), refundOrder.getOutTradeNo(), null);
+        if (!StringUtils.isEmpty(refundOrder.getRefundNo())){
+            bizContent.put("out_request_no", refundOrder.getRefundNo());
+        }
+        //设置请求参数的集合
+        parameters.put("biz_content",  JSON.toJSONString(bizContent));
+
+        //设置签名
+        setSign(parameters);
+        return  requestTemplate.getForObject(QUERY_REQ_URL + "?"  + UriVariables.getMapToParameters(parameters), JSONObject.class);
+
+    }
 
 
     /**

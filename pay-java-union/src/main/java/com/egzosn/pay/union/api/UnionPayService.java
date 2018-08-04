@@ -431,17 +431,17 @@ public class UnionPayService extends BasePayService {
     }
 
 
+
     /**
-     * 交易查询接口，带处理器
+     * 交易查询接口
      *
      * @param tradeNo    支付平台订单号
      * @param outTradeNo 商户单号
-     * @param callback   处理器
      *
-     * @return 返回查询回来的结果集
+     * @return 返回查询回来的结果集，支付方原值返回
      */
     @Override
-    public <T> T query(String tradeNo, String outTradeNo, Callback<T> callback) {
+    public Map<String, Object> query(String tradeNo, String outTradeNo) {
         Map<String ,Object > params = this.getCommonParam();
         UnionTransactionType.QUERY.convertMap(params);
         params.put(SDKConstants.param_orderId,outTradeNo);
@@ -454,32 +454,13 @@ public class UnionPayService extends BasePayService {
                 if ((SDKConstants.OK_RESP_CODE).equals(origRespCode)) {
                     //交易成功，更新商户订单状态
                     //TODO
-                    return callback.perform(response);
+                    return response;
                 }
             }
             throw new PayErrorException(new PayException(response.getString(SDKConstants.param_respCode), response.getString(SDKConstants.param_respMsg), response.toJSONString()));
         }
         throw new PayErrorException(new PayException("failure", "验证签名失败", response.toJSONString()));
 
-    }
-
-    /**
-     * 交易查询接口
-     *
-     * @param tradeNo    支付平台订单号
-     * @param outTradeNo 商户单号
-     *
-     * @return 返回查询回来的结果集，支付方原值返回
-     */
-    @Override
-    public Map<String, Object> query(String tradeNo, String outTradeNo) {
-
-    return query(tradeNo, outTradeNo, new Callback<Map<String, Object>>() {
-        @Override
-        public Map<String, Object> perform(Map<String, Object> map) {
-            return map;
-        }
-    });
     }
 
 
@@ -519,9 +500,9 @@ public class UnionPayService extends BasePayService {
                 return response;
 
             }
-                throw new PayErrorException(new PayException(response.getString(SDKConstants.param_respCode), response.getString(SDKConstants.param_respMsg), response.toJSONString()));
+            throw new PayErrorException(new PayException(response.getString(SDKConstants.param_respCode), response.getString(SDKConstants.param_respMsg), response.toJSONString()));
         }
-            throw new PayErrorException(new PayException("failure", "验证签名失败", response.toJSONString()));
+        throw new PayErrorException(new PayException("failure", "验证签名失败", response.toJSONString()));
     }
     /**
      * 交易关闭接口
@@ -532,20 +513,7 @@ public class UnionPayService extends BasePayService {
      */
     @Override
     public Map<String, Object> close (String tradeNo, String outTradeNo) {
-        return null;
-    }
-
-    /**
-     * 交易关闭接口
-     *
-     * @param tradeNo    支付平台订单号
-     * @param outTradeNo 商户单号
-     * @param callback   处理器
-     * @return 返回支付方交易关闭后的结果
-     */
-    @Override
-    public <T> T close (String tradeNo, String outTradeNo, Callback<T> callback) {
-        return null;
+            return Collections.emptyMap();
     }
 
     /**
@@ -561,47 +529,15 @@ public class UnionPayService extends BasePayService {
     @Deprecated
     @Override
     public Map<String, Object> refund (String tradeNo, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount) {
-        return refund(tradeNo, outTradeNo, refundAmount, totalAmount, new Callback<Map<String, Object>>() {
-            @Override
-            public Map<String, Object> perform(Map<String, Object> map) {
-                return map;
-            }
-        });
+        return refund(new RefundOrder(tradeNo, outTradeNo, refundAmount, totalAmount));
     }
 
 
 
-    /**
-     * 申请退款接口
-     *
-     * @param tradeNo      支付平台订单号
-     * @param outTradeNo   商户单号
-     * @param refundAmount 退款金额
-     * @param totalAmount  总金额
-     * @param callback     处理器
-     * @return 返回支付方申请退款后的结果
-     * @see #refund(RefundOrder, Callback)
-     */
-    @Deprecated
-    @Override
-    public <T> T refund (String tradeNo, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount, Callback<T> callback) {
-        return refund(new RefundOrder(tradeNo, outTradeNo, refundAmount, totalAmount), callback);
-    }
 
     @Override
     public Map<String, Object> refund(RefundOrder refundOrder) {
-        return refund(refundOrder, new Callback<Map<String, Object>>() {
-
-            @Override
-            public Map<String, Object> perform(Map<String, Object> map) {
-                return map;
-            }
-        });
-    }
-
-    @Override
-    public <T> T refund(RefundOrder refundOrder, Callback<T> callback) {
-        return callback.perform(unionRefundOrConsumeUndo(refundOrder, UnionTransactionType.REFUND));
+        return unionRefundOrConsumeUndo(refundOrder, UnionTransactionType.REFUND);
     }
 
     /**
@@ -613,20 +549,20 @@ public class UnionPayService extends BasePayService {
      */
     @Override
     public Map<String, Object> refundquery (String tradeNo, String outTradeNo) {
-        return null;
+            return Collections.emptyMap();
     }
+
+
 
     /**
      * 查询退款
      *
-     * @param tradeNo    支付平台订单号
-     * @param outTradeNo 商户单号
-     * @param callback   处理器
+     * @param refundOrder 退款订单单号信息
      * @return 返回支付方查询退款后的结果
      */
     @Override
-    public <T> T refundquery (String tradeNo, String outTradeNo, Callback<T> callback) {
-        return null;
+    public Map<String, Object> refundquery(RefundOrder refundOrder) {
+        return Collections.emptyMap();
     }
 
     /**
@@ -670,7 +606,7 @@ public class UnionPayService extends BasePayService {
      */
     @Override
     public Map<String, Object> secondaryInterface(Object tradeNoOrBillDate, String outTradeNoBillType, TransactionType transactionType) {
-        return null;
+            return Collections.emptyMap();
     }
 
 

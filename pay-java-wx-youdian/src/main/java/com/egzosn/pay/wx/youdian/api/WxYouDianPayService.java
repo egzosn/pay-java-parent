@@ -381,7 +381,7 @@ public class WxYouDianPayService extends BasePayService {
 
     @Override
     public Map<String, Object> close(String tradeNo, String outTradeNo) {
-        return new HashMap<>(0);
+        return Collections.emptyMap();
     }
 
 
@@ -415,14 +415,24 @@ public class WxYouDianPayService extends BasePayService {
 
     @Override
     public Map<String, Object> refundquery(String tradeNo, String outTradeNo) {
-        return new HashMap<>(0);
+        return Collections.emptyMap();
     }
 
+    /**
+     * 查询退款
+     *
+     * @param refundOrder 退款订单单号信息
+     * @return 返回支付方查询退款后的结果
+     */
+    @Override
+    public Map<String, Object> refundquery(RefundOrder refundOrder) {
+        return Collections.emptyMap();
+    }
 
 
     @Override
     public Map<String, Object>  downloadbill(Date billDate, String billType) {
-        return new HashMap<>(0);
+        return Collections.emptyMap();
     }
 
 
@@ -436,7 +446,7 @@ public class WxYouDianPayService extends BasePayService {
      */
     @Override
     public Map<String, Object> secondaryInterface(Object tradeNoOrBillDate, String outTradeNoBillType, TransactionType transactionType) {
-        throw new UnsupportedOperationException();
+        return Collections.emptyMap();
     }
 
 

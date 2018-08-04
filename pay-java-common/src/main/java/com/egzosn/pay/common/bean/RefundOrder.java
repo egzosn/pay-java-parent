@@ -34,7 +34,7 @@ public class RefundOrder {
     private BigDecimal totalAmount;
 
     /**
-     * 交易日期
+     * 退款交易日期
      */
     private Date orderDate;
 

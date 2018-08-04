@@ -200,7 +200,8 @@ public class AliPayService extends BasePayService {
                     bizContent.put("product_code", "QUICK_MSECURITY_PAY");
                 }
         }
-
+        //TODO 过期时间
+//        bizContent.put("timeout_express", )
         orderInfo.put("biz_content", JSON.toJSONString(bizContent));
         return orderInfo;
     }
@@ -383,6 +384,31 @@ public class AliPayService extends BasePayService {
     }
 
     /**
+     * 查询退款
+     *
+     * @param refundOrder   退款订单单号信息
+     * @return 返回支付方查询退款后的结果
+     */
+    @Override
+    public Map<String, Object> refundquery(RefundOrder refundOrder){
+
+        //获取公共参数
+        Map<String, Object> parameters = getPublicParameters(AliTransactionType.REFUNDQUERY);
+
+        Map<String, Object> bizContent = getBizContent(refundOrder.getTradeNo(), refundOrder.getOutTradeNo(), null);
+        if (!StringUtils.isEmpty(refundOrder.getRefundNo())){
+            bizContent.put("out_request_no", refundOrder.getRefundNo());
+        }
+        //设置请求参数的集合
+        parameters.put("biz_content",  JSON.toJSONString(bizContent));
+
+        //设置签名
+        setSign(parameters);
+        return  requestTemplate.getForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(parameters), JSONObject.class);
+
+    }
+
+    /**
      * 目前只支持日账单
      * @param billDate 账单类型，商户通过接口或商户经开放平台授权后其所属服务商通过接口可以获取以下账单类型：trade、signcustomer；trade指商户基于支付宝交易收单的业务账单；signcustomer是指基于商户支付宝余额收入及支出等资金变动的帐务账单；
      * @param billType 账单时间：日账单格式为yyyy-MM-dd，月账单格式为yyyy-MM。
@@ -507,10 +533,10 @@ public class AliPayService extends BasePayService {
         if (null == bizContent){
            bizContent = new TreeMap<>();
         }
-        if (null != outTradeNo){
+        if (!StringUtils.isEmpty(outTradeNo)){
             bizContent.put("out_trade_no", outTradeNo);
         }
-        if (null != tradeNo){
+        if (!StringUtils.isEmpty(tradeNo)){
             bizContent.put("trade_no", tradeNo);
         }
         return bizContent;

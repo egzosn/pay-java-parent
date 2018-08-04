@@ -291,13 +291,24 @@ public class PayPalPayService extends BasePayService{
         return resp;
     }
 
+    /**
+     * 查询退款
+     *
+     * @param refundOrder 退款订单单号信息
+     * @return 返回支付方查询退款后的结果
+     */
+    @Override
+    public Map<String, Object> refundquery(RefundOrder refundOrder) {
+        return refundquery(refundOrder.getTradeNo(), refundOrder.getOutTradeNo());
+    }
+
     @Override
     public Map<String, Object> downloadbill(Date billDate, String billType) {
-        return null;
+        return Collections.emptyMap();
     }
 
     @Override
     public Map<String, Object> secondaryInterface(Object tradeNoOrBillDate, String outTradeNoBillType, TransactionType transactionType) {
-        return null;
+        return Collections.emptyMap();
     }
 }

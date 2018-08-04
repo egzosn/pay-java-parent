@@ -248,6 +248,7 @@ public interface PayService {
      * @param outTradeNo 商户单号
      * @return 返回支付方查询退款后的结果
      */
+    @Deprecated
     Map<String, Object> refundquery(String tradeNo, String outTradeNo);
     /**
      * 查询退款
@@ -258,7 +259,24 @@ public interface PayService {
      * @param <T> 返回类型
      * @return 返回支付方查询退款后的结果
      */
+    @Deprecated
     <T>T refundquery(String tradeNo, String outTradeNo, Callback<T> callback);
+    /**
+     * 查询退款
+     *
+     * @param refundOrder   退款订单单号信息
+     * @return 返回支付方查询退款后的结果
+     */
+    Map<String, Object> refundquery(RefundOrder refundOrder);
+    /**
+     * 查询退款
+     *
+     * @param refundOrder   退款订单信息
+     * @param callback 处理器
+     * @param <T> 返回类型
+     * @return 返回支付方查询退款后的结果
+     */
+    <T>T refundquery(RefundOrder refundOrder, Callback<T> callback);
 
     /**
      * 下载对账单
