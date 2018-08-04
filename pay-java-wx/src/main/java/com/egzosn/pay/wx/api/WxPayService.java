@@ -56,7 +56,7 @@ public class WxPayService extends BasePayService {
     public final static String FAILURE = "failure";
     public final static String APPID = "appid";
     private final static DateFormat downloadbillDf = new SimpleDateFormat("yyyyMMdd");
-    public final static DateFormat df = new SimpleDateFormat("yyyyMMddHHmms");
+    private final static DateFormat df = new SimpleDateFormat("yyyyMMddHHmms");
 
     {
         TimeZone timeZone = TimeZone.getTimeZone("GMT+8");

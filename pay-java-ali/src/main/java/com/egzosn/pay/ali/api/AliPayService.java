@@ -200,8 +200,9 @@ public class AliPayService extends BasePayService {
                     bizContent.put("product_code", "QUICK_MSECURITY_PAY");
                 }
         }
-        //TODO 过期时间
-//        bizContent.put("timeout_express", )
+        if (null != order.getExpirationTime()){
+            bizContent.put("timeout_express", ((order.getExpirationTime().getTime() - System.currentTimeMillis())/1000/60 + "m"));
+        }
         orderInfo.put("biz_content", JSON.toJSONString(bizContent));
         return orderInfo;
     }

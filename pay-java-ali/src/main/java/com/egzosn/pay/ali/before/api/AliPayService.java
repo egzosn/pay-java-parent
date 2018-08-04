@@ -38,7 +38,10 @@ public class AliPayService extends BasePayService {
 
     private static final String HTTPS_REQ_URL = "https://mapi.alipay.com/gateway.do";
     private static final String QUERY_REQ_URL = "https://openapi.alipay.com/gateway.do";
-
+    DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+    {
+        df.setTimeZone(TimeZone.getTimeZone("GMT+8"));
+    }
     public AliPayService(PayConfigStorage payConfigStorage) {
         super(payConfigStorage);
     }
@@ -428,8 +431,7 @@ public class AliPayService extends BasePayService {
         Map<String, Object> bizContent = new TreeMap<>();
         bizContent.put("bill_type", billType);
         //目前只支持日账单
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-        df.setTimeZone(TimeZone.getTimeZone("GMT+8"));
+
         bizContent.put("bill_date", df.format(billDate));
         //设置请求参数的集合
         parameters.put("biz_content", JSON.toJSONString(bizContent));

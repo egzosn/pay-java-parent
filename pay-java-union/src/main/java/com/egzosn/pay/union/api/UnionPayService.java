@@ -55,7 +55,10 @@ public class UnionPayService extends BasePayService {
     private static final String FILE_TRANS_URL= "https://filedownload.%s/";
     private static final String APP_TRANS_URL= "https://gateway.%s/gateway/api/appTransReq.do";
     private static final String CARD_TRANS_URL= "https://gateway.%s/gateway/api/cardTransReq.do";
-
+    public final static DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
+    {
+        df.setTimeZone(TimeZone.getTimeZone("GMT+8"));
+    }
 
     /**
      * 构造函数
@@ -207,12 +210,15 @@ public class UnionPayService extends BasePayService {
             case B2B:
                 params.put(SDKConstants.param_txnAmt, order.getPrice().multiply(new BigDecimal(100)));
                 params.put("orderDesc", order.getSubject());
-                DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
                 // 订单超时时间。
                 // 超过此时间后，除网银交易外，其他交易银联系统会拒绝受理，提示超时。 跳转银行网银交易如果超时后交易成功，会自动退款，大约5个工作日金额返还到持卡人账户。
                 // 此时间建议取支付时的北京时间加15分钟。
                 // 超过超时时间调查询接口应答origRespCode不是A6或者00的就可以判断为失败。
-                params.put(SDKConstants.param_payTimeout, df.format(System.currentTimeMillis() + 30 * 60 * 1000));
+                if (null != order.getExpirationTime()){
+                    params.put(SDKConstants.param_payTimeout, order.getExpirationTime());
+                }else {
+                    params.put(SDKConstants.param_payTimeout, df.format(System.currentTimeMillis() + 30 * 60 * 1000));
+                }
                 params.put(SDKConstants.param_frontUrl, payConfigStorage.getReturnUrl());
                 break;
             case CONSUME:
