@@ -154,7 +154,12 @@ public class FuiouPayService extends BasePayService {
         parameters.put("order_pay_type", order.getTransactionType());//支付类型
         parameters.put("page_notify_url", payConfigStorage.getReturnUrl());//商户接受支付结果通知地址
         parameters.put("back_notify_url", StringUtils.isBlank(payConfigStorage.getNotifyUrl()) ? "" : payConfigStorage.getNotifyUrl());//商户接受的支付结果后台通知地址 //非必填
-        parameters.put("order_valid_time", "30m");//超时时间 1m-15天，m：分钟、h：小时、d天、1c当天有效，
+
+        if (null != order.getExpirationTime()){
+            parameters.put("order_valid_time", ((order.getExpirationTime().getTime() - System.currentTimeMillis())/1000/60 + "m"));
+        }else {
+            parameters.put("order_valid_time", "30m");//超时时间 1m-15天，m：分钟、h：小时、d天、1c当天有效，
+        }
         parameters.put("iss_ins_cd", order.getBankType());//银行代码
         parameters.put("goods_name", order.getSubject());
         parameters.put("goods_display_url", "");//商品展示网址 //非必填
