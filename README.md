@@ -33,7 +33,7 @@
 <dependency>
     <groupId>com.egzosn</groupId>
     <artifactId>pay-java-common</artifactId>
-    <version>2.10.2-SNAPSHOT</version>
+    <version>2.10.2</version>
 </dependency>
 
 ```
@@ -45,7 +45,7 @@
 <dependency>
     <groupId>com.egzosn</groupId>
     <artifactId>{module-name}</artifactId>
-    <version>2.10.2-SNAPSHOT</version>
+    <version>2.10.2</version>
 </dependency>
 
 ```
