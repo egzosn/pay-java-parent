@@ -16,9 +16,8 @@ import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.str.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import java.awt.image.BufferedImage;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -454,10 +453,6 @@ public class AliPayService extends BasePayService {
             if (tradeNoOrBillDate instanceof  Date){
                 return downloadbill((Date) tradeNoOrBillDate, outTradeNoBillType);
             }
-            throw new PayErrorException(new PayException("failure", "非法类型异常:" + tradeNoOrBillDate.getClass()));
-        }
-
-        if (!(tradeNoOrBillDate instanceof  String)){
             throw new PayErrorException(new PayException("failure", "非法类型异常:" + tradeNoOrBillDate.getClass()));
         }
 
