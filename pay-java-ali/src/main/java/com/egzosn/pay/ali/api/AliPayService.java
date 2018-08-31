@@ -457,10 +457,6 @@ public class AliPayService extends BasePayService {
             throw new PayErrorException(new PayException("failure", "非法类型异常:" + tradeNoOrBillDate.getClass()));
         }
 
-        if (!(tradeNoOrBillDate instanceof  String)){
-            throw new PayErrorException(new PayException("failure", "非法类型异常:" + tradeNoOrBillDate.getClass()));
-        }
-
         //获取公共参数
         Map<String, Object> parameters = getPublicParameters(transactionType);
         //设置请求参数的集合
