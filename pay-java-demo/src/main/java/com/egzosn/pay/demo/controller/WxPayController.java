@@ -14,6 +14,7 @@ import com.egzosn.pay.wx.api.WxPayConfigStorage;
 import com.egzosn.pay.wx.api.WxPayService;
 import com.egzosn.pay.wx.bean.WxBank;
 import com.egzosn.pay.wx.bean.WxTransactionType;
+import com.egzosn.pay.wx.bean.WxTransferType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -297,6 +298,10 @@ public class WxPayController {
         order.setBank(WxBank.ABC);
         order.setRemark("转账备注, 非必填");
         order.setAmount(new BigDecimal(10));
+
+        //转账到余额，这里默认值是转账到银行卡
+        order.setTransferType(WxTransferType.TRANSFERS);
+
         return service.transfer(order);
     }
 
@@ -304,12 +309,20 @@ public class WxPayController {
      * 转账查询
      *
      * @param outNo   商户转账订单号
-     * @param tradeNo 支付平台转账订单号
+     * @param wxTransferType 微信转账类型，
+     *                       .....这里没办法了只能这样写(┬＿┬)，请见谅
+     *                       {@link com.egzosn.pay.wx.bean.WxTransferType#QUERY_BANK}
+     *                       {@link com.egzosn.pay.wx.bean.WxTransferType#GETTRANSFERINFO}
      *
+     * <br/>
+     *  <a href="https://pay.weixin.qq.com/wiki/doc/api/tools/mch_pay.php?chapter=14_3">企业付款到零钱</a>
+     *  <a href="https://pay.weixin.qq.com/wiki/doc/api/tools/mch_pay.php?chapter=24_3">商户企业付款到银行卡</a>
+     * <br/>
      * @return 对应的转账订单
      */
     @RequestMapping("transferQuery")
-    public Map<String, Object> transferQuery(String outNo, String tradeNo) {
-        return service.transferQuery(outNo, tradeNo);
+    public Map<String, Object> transferQuery(String outNo, String wxTransferType) {
+       //默认查询银行卡的记录 com.egzosn.pay.wx.bean.WxTransferType#QUERY_BANK
+        return service.transferQuery(outNo, wxTransferType);
     }
 }
