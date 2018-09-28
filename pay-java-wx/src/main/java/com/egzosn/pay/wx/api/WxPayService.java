@@ -15,6 +15,7 @@ import com.egzosn.pay.common.util.str.StringUtils;
 import com.egzosn.pay.wx.bean.WxPayError;
 import com.egzosn.pay.wx.bean.WxTransactionType;
 import com.egzosn.pay.common.util.XML;
+import com.egzosn.pay.wx.bean.WxTransferType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import java.awt.image.BufferedImage;
@@ -22,10 +23,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+
+import static com.egzosn.pay.wx.bean.WxTransferType.*;
 
 /**
  * 微信支付服务
@@ -553,45 +555,107 @@ public class WxPayService extends BasePayService {
      * 转账
      *
      * @param order 转账订单
+     *<pre>
+     *
+     * 注意事项：
+     * ◆ 当返回错误码为“SYSTEMERROR”时，请不要更换商户订单号，一定要使用原商户订单号重试，否则可能造成重复支付等资金风险。
+     * ◆ XML具有可扩展性，因此返回参数可能会有新增，而且顺序可能不完全遵循此文档规范，如果在解析回包的时候发生错误，请商户务必不要换单重试，请商户联系客服确认付款情况。如果有新回包字段，会更新到此API文档中。
+     * ◆ 因为错误代码字段err_code的值后续可能会增加，所以商户如果遇到回包返回新的错误码，请商户务必不要换单重试，请商户联系客服确认付款情况。如果有新的错误码，会更新到此API文档中。
+     * ◆ 错误代码描述字段err_code_des只供人工定位问题时做参考，系统实现时请不要依赖这个字段来做自动化处理。
+     *
+     *</pre>
      *
      * @return 对应的转账结果
      */
     @Override
     public Map<String, Object> transfer(TransferOrder order) {
         Map<String, Object> parameters = new TreeMap<String, Object>();
-        //转账到余额
-//        parameters.put("mch_appid", payConfigStorage.getAppid());
+
         parameters.put("mch_id", payConfigStorage.getPid());
         parameters.put("partner_trade_no", order.getOutNo());
-        parameters.put("nonce_str", SignUtils.randomStr());
-        parameters.put("enc_bank_no", keyPublic(order.getPayeeAccount()));
-        parameters.put("enc_true_name", keyPublic(order.getPayeeName()));
-        parameters.put("bank_code", order.getBank().getCode());
         parameters.put("amount", conversion(order.getAmount()));
         if (!StringUtils.isEmpty(order.getRemark())){
             parameters.put("desc", order.getRemark());
         }
+        parameters.put("nonce_str", SignUtils.randomStr());
+        if (null !=  order.getTransferType() && TRANSFERS ==  order.getTransferType()){
+            transfers(parameters, order);
+        }else {
+            order.setTransferType(WxTransferType.PAY_BANK);
+            payBank(parameters, order);
+        }
         parameters.put(SIGN, createSign(SignUtils.parameterText(parameters, "&", SIGN), payConfigStorage.getInputCharset()));
 
-        return getHttpRequestTemplate().postForObject(getUrl(WxTransactionType.BANK),  XML.getMap2Xml(parameters), JSONObject.class);
+        return getHttpRequestTemplate().postForObject(getUrl(order.getTransferType()),  XML.getMap2Xml(parameters), JSONObject.class);
     }
 
     /**
-     * 转账
+     * 转账到余额所需要参数
+     * @param parameters 参数信息
+     * @param order 转账订单
+     * @return 包装后参数信息
+     * <br/>
+     *  <a href="https://pay.weixin.qq.com/wiki/doc/api/tools/mch_pay.php?chapter=14_2">企业付款到零钱</a>
+     *  <a href="https://pay.weixin.qq.com/wiki/doc/api/tools/mch_pay.php?chapter=24_2">商户企业付款到银行卡</a>
+     * <br/>
+     */
+    public Map<String, Object> transfers(Map<String, Object> parameters, TransferOrder order){
+        //转账到余额, 申请商户号的appid或商户号绑定的appid
+        parameters.put("mch_appid", payConfigStorage.getAppid());
+        parameters.put("openid", order.getPayeeAccount());
+        //默认不校验真实姓名
+        parameters.put("check_name", "NO_CHECK");
+        //当存在时候 校验收款用户真实姓名
+        if (!StringUtils.isEmpty(order.getPayeeName())){
+            parameters.put("check_name", "FORCE_CHECK");
+            parameters.put("re_user_name", order.getPayeeName());
+        }
+        return parameters;
+    }
+
+    /**
+     * 转账到银行卡所需要参数
+     * @param parameters 参数信息
+     * @param order 转账订单
+     * @return 包装后参数信息
+     */
+    public Map<String, Object> payBank(Map<String, Object> parameters, TransferOrder order){
+
+        parameters.put("enc_bank_no", keyPublic(order.getPayeeAccount()));
+        parameters.put("enc_true_name", keyPublic(order.getPayeeName()));
+        parameters.put("bank_code", order.getBank().getCode());
+        return parameters;
+    }
+
+
+    /**
+     * 转账查询
      *
      * @param outNo 商户转账订单号
-     * @param tradeNo 支付平台转账订单号
+     * @param wxTransferType 微信转账类型，.....这里没办法了只能这样写(┬＿┬)，请见谅 {@link com.egzosn.pay.wx.bean.WxTransferType}
      *
+     * <br/>
+     *  <a href="https://pay.weixin.qq.com/wiki/doc/api/tools/mch_pay.php?chapter=14_3">企业付款到零钱</a>
+     *  <a href="https://pay.weixin.qq.com/wiki/doc/api/tools/mch_pay.php?chapter=24_3">商户企业付款到银行卡</a>
+     * <br/>
      * @return 对应的转账订单
      */
     @Override
-    public Map<String, Object> transferQuery(String outNo, String tradeNo) {
+    public Map<String, Object> transferQuery(String outNo, String wxTransferType) {
         Map<String, Object> parameters = new TreeMap<String, Object>();
         parameters.put("mch_id", payConfigStorage.getPid());
-        parameters.put("partner_trade_no", StringUtils.isEmpty(outNo) ? tradeNo : outNo);
+        parameters.put("partner_trade_no", outNo);
         parameters.put("nonce_str", SignUtils.randomStr());
         parameters.put(SIGN, createSign(SignUtils.parameterText(parameters, "&", SIGN), payConfigStorage.getInputCharset()));
-        return getHttpRequestTemplate().postForObject(getUrl(WxTransactionType.QUERY_BANK),  XML.getMap2Xml(parameters), JSONObject.class);
+        if (StringUtils.isEmpty(wxTransferType)){
+            throw new PayErrorException(new WxPayError(FAILURE, "微信转账类型 #transferQuery(String outNo, String wxTransferType) 必填，详情com.egzosn.pay.wx.bean.WxTransferType"));
+        }
+        //如果类型为余额方式
+        if (TRANSFERS.getType().equals(wxTransferType) || GETTRANSFERINFO.getType().equals(wxTransferType)){
+            return getHttpRequestTemplate().postForObject(getUrl(GETTRANSFERINFO),  XML.getMap2Xml(parameters), JSONObject.class);
+        }
+        //默认查询银行卡的记录
+        return getHttpRequestTemplate().postForObject(getUrl(QUERY_BANK),  XML.getMap2Xml(parameters), JSONObject.class);
     }
 
     /**
