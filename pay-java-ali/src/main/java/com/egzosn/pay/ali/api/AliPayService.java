@@ -16,8 +16,9 @@ import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.str.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import java.awt.image.BufferedImage;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -479,7 +480,11 @@ public class AliPayService extends BasePayService {
 
         Map<String, Object> bizContent = new TreeMap<String, Object>();
         bizContent.put("out_biz_no", order.getOutNo());
+        //默认 支付宝登录号，支持邮箱和手机号格式。
         bizContent.put("payee_type", "ALIPAY_LOGONID");
+        if (null != order.getTransferType()){
+            bizContent.put("payee_type", order.getTransferType().getType());
+        }
         bizContent.put("payee_account", order.getPayeeAccount());
         bizContent.put("amount", order.getAmount().setScale(2, BigDecimal.ROUND_HALF_UP));
         bizContent.put("payer_show_name", order.getPayerName());
