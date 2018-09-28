@@ -204,6 +204,8 @@
         order.setPayerName("付款方姓名, 非必填");
         order.setPayeeName("收款方真实姓名, 非必填");
         order.setRemark("转账备注, 非必填");
+        //收款方账户类型 ,默认值 ALIPAY_LOGONID：支付宝登录号，支持邮箱和手机号格式。
+        order.setTransferType(AliTransferType.ALIPAY_LOGONID);
         Map result = service.transfer(order);
 
 ```
