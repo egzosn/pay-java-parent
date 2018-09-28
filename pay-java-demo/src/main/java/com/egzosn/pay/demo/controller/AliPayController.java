@@ -5,6 +5,7 @@ package com.egzosn.pay.demo.controller;
 import com.egzosn.pay.ali.api.AliPayConfigStorage;
 import com.egzosn.pay.ali.api.AliPayService;
 import com.egzosn.pay.ali.bean.AliTransactionType;
+import com.egzosn.pay.ali.bean.AliTransferType;
 import com.egzosn.pay.common.api.PayService;
 import com.egzosn.pay.common.bean.*;
 import com.egzosn.pay.common.http.HttpConfigStorage;
@@ -257,6 +258,8 @@ public class AliPayController {
 //        order.setPayerName("付款方姓名, 非必填");
 //        order.setPayeeName("收款方真实姓名, 非必填");
 //        order.setRemark("转账备注, 非必填");
+        //收款方账户类型 ,默认值 ALIPAY_LOGONID：支付宝登录号，支持邮箱和手机号格式。
+        order.setTransferType(AliTransferType.ALIPAY_LOGONID);
         return service.transfer(order);
     }
 
