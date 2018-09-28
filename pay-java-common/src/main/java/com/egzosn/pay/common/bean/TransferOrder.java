@@ -18,7 +18,7 @@ public class TransferOrder {
     private String outNo;
 
     /**
-     * 收款方账户
+     * 收款方账户, 用户openid
      */
     private String  payeeAccount ;
 
@@ -50,6 +50,10 @@ public class TransferOrder {
      * 币种
      */
     private CurType curType;
+    /**
+     * 转账类型，收款方账户类型，比如支付宝账户或者银行卡
+     */
+    private TransferType transferType;
 
     public String getOutNo() {
         return outNo;
@@ -113,5 +117,13 @@ public class TransferOrder {
 
     public void setCurType(CurType curType) {
         this.curType = curType;
+    }
+
+    public TransferType getTransferType() {
+        return transferType;
+    }
+
+    public void setTransferType(TransferType transferType) {
+        this.transferType = transferType;
     }
 }
