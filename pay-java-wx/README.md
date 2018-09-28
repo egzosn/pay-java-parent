@@ -187,6 +187,7 @@
 ```
 
 #### 转账
+>1. 转账到银行卡
   ```java
     
         order.setOutNo("partner_trade_no 商户转账订单号");
@@ -196,10 +197,33 @@
         order.setBank(WxBank.ABC);
         order.setRemark("转账备注, 非必填");
         order.setAmount(new BigDecimal(10));
+        
+        //转账到银行卡，这里默认值是转账到银行卡
+         order.setTransferType(WxTransferType.PAY_BANK);
         Map result = service.transfer(order);
 
 ```
+>2. 转账到余额
+  ```java
+    
+        order.setOutNo("partner_trade_no 商户转账订单号");
+        order.setPayeeAccount("用户openid");
+        order.setPayeeName("收款用户姓名， 非必填，如果填写将强制验证收款人姓名");
+        order.setRemark("转账备注, 非必填");
+        order.setAmount(new BigDecimal(10));
+        
+        //转账到余额，这里默认值是转账到银行卡
+        order.setTransferType(WxTransferType.TRANSFERS);
+        Map result = service.transfer(order);
+
+```
+
 #### 转账查询
   ```java
-       Map result = service.transferQuery("商户转账订单号", "支付平台转账订单号");
+       /**
+       * wxTransferType 微信转账类型
+       *                       {@link com.egzosn.pay.wx.bean.WxTransferType#QUERY_BANK}
+       *                       {@link com.egzosn.pay.wx.bean.WxTransferType#GETTRANSFERINFO}
+       */
+       Map result = service.transferQuery("商户转账订单号", "wxTransferType  微信转账类型");
 ```
