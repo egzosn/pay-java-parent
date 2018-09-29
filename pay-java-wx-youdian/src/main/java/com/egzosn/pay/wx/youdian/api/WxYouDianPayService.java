@@ -3,10 +3,7 @@ package com.egzosn.pay.wx.youdian.api;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.api.BasePayService;
-import com.egzosn.pay.common.api.Callback;
-import com.egzosn.pay.common.api.PayConfigStorage;
 import com.egzosn.pay.common.bean.*;
-import com.egzosn.pay.common.bean.outbuilder.JsonBuilder;
 import com.egzosn.pay.common.bean.result.PayError;
 import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpConfigStorage;
@@ -30,7 +27,7 @@ import java.util.concurrent.locks.Lock;
  * email egzosn@gmail.com
  * date 2017/01/12 22:58
  */
-public class WxYouDianPayService extends BasePayService {
+public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorage> {
     protected static final Log LOG = LogFactory.getLog(WxYouDianPayService.class);
 
     private final static String URL = "http://life.51youdian.com/Api/CheckoutCounter/";
@@ -351,7 +348,8 @@ public class WxYouDianPayService extends BasePayService {
      */
     @Override
     public Map<String, Object> microPay(PayOrder order) {
-        throw new UnsupportedOperationException();
+        JSONObject orderInfo = orderInfo(order);
+        return orderInfo;
     }
 
     /**
@@ -451,11 +449,11 @@ public class WxYouDianPayService extends BasePayService {
 
 
 
-    public WxYouDianPayService(PayConfigStorage payConfigStorage) {
+    public WxYouDianPayService(WxYouDianPayConfigStorage payConfigStorage) {
         super(payConfigStorage);
     }
 
-    public WxYouDianPayService(PayConfigStorage payConfigStorage, HttpConfigStorage configStorage) {
+    public WxYouDianPayService(WxYouDianPayConfigStorage payConfigStorage, HttpConfigStorage configStorage) {
         super(payConfigStorage, configStorage);
     }
 
