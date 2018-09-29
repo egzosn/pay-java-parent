@@ -2,8 +2,6 @@ package com.egzosn.pay.union.api;
 
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.api.BasePayService;
-import com.egzosn.pay.common.api.Callback;
-import com.egzosn.pay.common.api.PayConfigStorage;
 import com.egzosn.pay.common.bean.*;
 import com.egzosn.pay.common.bean.outbuilder.PayTextOutMessage;
 import com.egzosn.pay.common.bean.result.PayException;
@@ -11,6 +9,7 @@ import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.common.http.UriVariables;
 import com.egzosn.pay.common.util.MatrixToImageWriter;
+import com.egzosn.pay.common.util.sign.CertDescriptor;
 import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.sign.encrypt.RSA;
 import com.egzosn.pay.common.util.sign.encrypt.RSA2;
@@ -35,7 +34,7 @@ import java.util.*;
  * create 2017 2017/11/5
  * </pre>
  */
-public class UnionPayService extends BasePayService {
+public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
     private static final Log log = LogFactory.getLog(UnionPayService.class);
     /**
      * 测试域名
@@ -64,15 +63,35 @@ public class UnionPayService extends BasePayService {
      * 构造函数
      * @param payConfigStorage 支付配置
      */
-    public UnionPayService (PayConfigStorage payConfigStorage) {
+    public UnionPayService (UnionPayConfigStorage payConfigStorage) {
         super(payConfigStorage);
     }
 
-    public UnionPayService (PayConfigStorage payConfigStorage, HttpConfigStorage configStorage) {
+    public UnionPayService (UnionPayConfigStorage payConfigStorage, HttpConfigStorage configStorage) {
         super(payConfigStorage, configStorage);
 
     }
+    /**
+     * 设置支付配置
+     * @param payConfigStorage 支付配置
+     */
+    @Override
+    public UnionPayService setPayConfigStorage(UnionPayConfigStorage payConfigStorage) {
+        super.setPayConfigStorage(payConfigStorage);
+        if (!payConfigStorage.isCertSign()){
+            return this;
+        }
+        CertDescriptor certDescriptor = payConfigStorage.getCertDescriptor();
+        if (!payConfigStorage.isKeyPrivateInit()){
+            certDescriptor.initPrivateSignCert(payConfigStorage.getKeyPrivate(), payConfigStorage.getKeyPrivateCertPwd(), "PKCS12");
+        }
+        if (!payConfigStorage.isKeyPublicInit()){
+            certDescriptor.initPublicCert(payConfigStorage.getAcpMiddleCert());
+            certDescriptor.initRootCert(payConfigStorage.getAcpRootCert());
+        }
 
+        return this;
+    }
     /**
      * 根据是否为沙箱环境进行获取请求地址
      *
@@ -182,7 +201,7 @@ public class UnionPayService extends BasePayService {
      * @return true通过
      */
     @Override
-    public boolean verifySource (String id) {
+    public boolean verifySource(String id) {
         return false;
     }
 
@@ -194,7 +213,7 @@ public class UnionPayService extends BasePayService {
      * @see PayOrder 支付订单信息
      */
     @Override
-    public Map<String, Object>  orderInfo (PayOrder order) {
+    public Map<String, Object>  orderInfo(PayOrder order) {
         Map<String, Object> params = this.getCommonParam();
 
         UnionTransactionType type =  (UnionTransactionType)order.getTransactionType();
