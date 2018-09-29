@@ -20,7 +20,7 @@ import java.util.Map;
  * date 2016-5-18 14:09:01
  *</pre>
  */
-public interface PayService {
+public interface PayService<PC extends PayConfigStorage> {
 
 
 
@@ -29,14 +29,14 @@ public interface PayService {
      * @param payConfigStorage 支付配置
      * @return 支付服务
      */
-    PayService setPayConfigStorage(PayConfigStorage payConfigStorage);
+    PayService setPayConfigStorage(PC payConfigStorage);
 
     /**
      * 获取支付配置
      *
      * @return 支付配置
      */
-    PayConfigStorage getPayConfigStorage();
+    PC getPayConfigStorage();
     /**
      * 获取http请求工具
      *

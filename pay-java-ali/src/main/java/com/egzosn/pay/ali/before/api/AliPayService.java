@@ -2,10 +2,10 @@ package com.egzosn.pay.ali.before.api;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.egzosn.pay.ali.api.AliPayConfigStorage;
 import com.egzosn.pay.ali.before.bean.AliTransactionType;
 import com.egzosn.pay.common.api.BasePayService;
 import com.egzosn.pay.common.api.Callback;
-import com.egzosn.pay.common.api.PayConfigStorage;
 import com.egzosn.pay.common.bean.*;
 import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
@@ -32,7 +32,7 @@ import java.util.*;
  *
  * @see com.egzosn.pay.ali.api.AliPayService
  */
-public class AliPayService extends BasePayService {
+public class AliPayService extends BasePayService<AliPayConfigStorage> {
     protected final Log LOG = LogFactory.getLog(AliPayService.class);
 
 
@@ -42,11 +42,11 @@ public class AliPayService extends BasePayService {
     {
         df.setTimeZone(TimeZone.getTimeZone("GMT+8"));
     }
-    public AliPayService(PayConfigStorage payConfigStorage) {
+    public AliPayService(AliPayConfigStorage payConfigStorage) {
         super(payConfigStorage);
     }
 
-    public AliPayService(PayConfigStorage payConfigStorage, HttpConfigStorage configStorage) {
+    public AliPayService(AliPayConfigStorage payConfigStorage, HttpConfigStorage configStorage) {
         super(payConfigStorage, configStorage);
     }
 

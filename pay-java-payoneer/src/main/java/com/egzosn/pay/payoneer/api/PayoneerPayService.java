@@ -3,7 +3,6 @@ package com.egzosn.pay.payoneer.api;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.api.BasePayService;
-import com.egzosn.pay.common.api.PayConfigStorage;
 import com.egzosn.pay.common.bean.*;
 import com.egzosn.pay.common.bean.outbuilder.PayTextOutMessage;
 import com.egzosn.pay.common.bean.result.PayException;
@@ -33,7 +32,7 @@ import java.util.*;
  *         create 2018-01-19
  *                 </pre>
  */
-public class PayoneerPayService extends BasePayService implements AdvancedPayService {
+public class PayoneerPayService extends BasePayService<PayoneerConfigStorage> implements AdvancedPayService {
     /**
      * 测试地址
      */
@@ -52,11 +51,11 @@ public class PayoneerPayService extends BasePayService implements AdvancedPaySer
     private final static String OUT_TRADE_NO = "client_reference_id";
 
 
-    public PayoneerPayService(PayConfigStorage payConfigStorage) {
+    public PayoneerPayService(PayoneerConfigStorage payConfigStorage) {
         super(payConfigStorage);
     }
 
-    public PayoneerPayService(PayConfigStorage payConfigStorage, HttpConfigStorage configStorage) {
+    public PayoneerPayService(PayoneerConfigStorage payConfigStorage, HttpConfigStorage configStorage) {
         super(payConfigStorage, configStorage);
     }
 

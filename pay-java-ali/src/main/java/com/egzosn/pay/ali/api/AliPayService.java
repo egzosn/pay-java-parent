@@ -5,7 +5,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.ali.bean.AliTransactionType;
 import com.egzosn.pay.common.api.BasePayService;
 import com.egzosn.pay.common.api.Callback;
-import com.egzosn.pay.common.api.PayConfigStorage;
 import com.egzosn.pay.common.bean.*;
 import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
@@ -17,8 +16,6 @@ import com.egzosn.pay.common.util.str.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import java.awt.image.BufferedImage;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -31,7 +28,7 @@ import java.util.*;
  * email egzosn@gmail.com
  * date 2017-2-22 20:09
  */
-public class AliPayService extends BasePayService {
+public class AliPayService extends BasePayService<AliPayConfigStorage> {
     protected final Log log = LogFactory.getLog(AliPayService.class);
 
     /**
@@ -53,11 +50,11 @@ public class AliPayService extends BasePayService {
     }
 
 
-    public AliPayService(PayConfigStorage payConfigStorage, HttpConfigStorage configStorage) {
+    public AliPayService(AliPayConfigStorage payConfigStorage, HttpConfigStorage configStorage) {
         super(payConfigStorage, configStorage);
     }
 
-    public AliPayService(PayConfigStorage payConfigStorage) {
+    public AliPayService(AliPayConfigStorage payConfigStorage) {
         super(payConfigStorage);
     }
 

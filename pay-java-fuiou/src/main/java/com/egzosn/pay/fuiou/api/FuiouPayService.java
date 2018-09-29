@@ -1,8 +1,6 @@
 package com.egzosn.pay.fuiou.api;
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.api.BasePayService;
-import com.egzosn.pay.common.api.Callback;
-import com.egzosn.pay.common.api.PayConfigStorage;
 import com.egzosn.pay.common.bean.*;
 import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpConfigStorage;
@@ -26,7 +24,7 @@ import java.util.*;
  * create 2017 2017/1/16 0016
  * </pre>
  */
-public class FuiouPayService extends BasePayService {
+public class FuiouPayService extends BasePayService<FuiouPayConfigStorage> {
     //日志
     protected final Log log = LogFactory.getLog(FuiouPayService.class);
     //正式域名
@@ -60,14 +58,14 @@ public class FuiouPayService extends BasePayService {
      * @param payConfigStorage 支付账户配置信息
      * @param configStorage 网络代理配置
      */
-    public FuiouPayService (PayConfigStorage payConfigStorage, HttpConfigStorage configStorage) {
+    public FuiouPayService (FuiouPayConfigStorage payConfigStorage, HttpConfigStorage configStorage) {
         super(payConfigStorage, configStorage);
     }
     /**
      * 构造函数，初始化时候使用
      * @param payConfigStorage 支付账户配置信息
      */
-    public FuiouPayService (PayConfigStorage payConfigStorage) {
+    public FuiouPayService (FuiouPayConfigStorage payConfigStorage) {
         super(payConfigStorage);
     }
 
