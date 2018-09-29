@@ -1,13 +1,9 @@
 package com.egzosn.pay.paypal.api;
 
-/**
- * Created by egzosn on 2018/4/8.
- */
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.api.BasePayService;
-import com.egzosn.pay.common.api.PayConfigStorage;
 import com.egzosn.pay.common.bean.*;
 import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
@@ -32,7 +28,7 @@ import java.util.concurrent.locks.Lock;
  * email egzosn@gmail.com
  * date 2018-4-8 ‏‎22:15:09
  */
-public class PayPalPayService extends BasePayService{
+public class PayPalPayService extends BasePayService<PayPalConfigStorage>{
 
     /**
      * 沙箱环境
@@ -52,7 +48,7 @@ public class PayPalPayService extends BasePayService{
     }
 
 
-    public PayPalPayService(PayConfigStorage payConfigStorage) {
+    public PayPalPayService(PayPalConfigStorage payConfigStorage) {
         super(payConfigStorage);
     }
 
