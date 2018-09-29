@@ -15,13 +15,21 @@ public class WxPayConfigStorage extends BasePayConfigStorage {
 
 
     /**
-     * 应用id
+     * 微信分配的公众账号ID
      */
-    private   String appid ;
+    private String appid ;
     /**
-     *  商户号 合作者id
+     * 微信分配的子商户公众账号ID
      */
-    private  String mchId;
+    private String subAppid ;
+    /**
+     *  微信支付分配的商户号 合作者id
+     */
+    private String mchId;
+    /**
+     *  微信支付分配的子商户号，开发者模式下必填 合作者id
+     */
+    private String subMchId;
 
 
 
@@ -74,5 +82,21 @@ public class WxPayConfigStorage extends BasePayConfigStorage {
 
     public void setSecretKey(String secretKey) {
          setKeyPrivate(secretKey);
+    }
+
+    public String getSubAppid() {
+        return subAppid;
+    }
+
+    public void setSubAppid(String subAppid) {
+        this.subAppid = subAppid;
+    }
+
+    public String getSubMchId() {
+        return subMchId;
+    }
+
+    public void setSubMchId(String subMchId) {
+        this.subMchId = subMchId;
     }
 }

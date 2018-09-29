@@ -3,7 +3,6 @@ package com.egzosn.pay.wx.api;
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.api.BasePayService;
 import com.egzosn.pay.common.api.Callback;
-import com.egzosn.pay.common.api.PayConfigStorage;
 import com.egzosn.pay.common.bean.*;
 import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
@@ -38,7 +37,7 @@ import static com.egzosn.pay.wx.bean.WxTransferType.*;
  *         date 2016-5-18 14:09:01
  *         </pre>
  */
-public class WxPayService extends BasePayService {
+public class WxPayService extends BasePayService<WxPayConfigStorage> {
     protected final Log LOG = LogFactory.getLog(WxPayService.class);
 
 
@@ -72,7 +71,7 @@ public class WxPayService extends BasePayService {
      * 创建支付服务
      * @param payConfigStorage 微信对应的支付配置
      */
-    public WxPayService(PayConfigStorage payConfigStorage) {
+    public WxPayService(WxPayConfigStorage payConfigStorage) {
         super(payConfigStorage);
     }
     /**
@@ -80,7 +79,7 @@ public class WxPayService extends BasePayService {
      * @param payConfigStorage 微信对应的支付配置
      * @param configStorage 微信对应的网络配置，包含代理配置、ssl证书配置
      */
-    public WxPayService(PayConfigStorage payConfigStorage, HttpConfigStorage configStorage) {
+    public WxPayService(WxPayConfigStorage payConfigStorage, HttpConfigStorage configStorage) {
         super(payConfigStorage, configStorage);
     }
 
@@ -157,7 +156,12 @@ public class WxPayService extends BasePayService {
 
         Map<String, Object> parameters = new TreeMap<String, Object>();
         parameters.put(APPID, payConfigStorage.getAppid());
-        parameters.put("mch_id", payConfigStorage.getPid());
+        parameters.put("mch_id", payConfigStorage.getMchId());
+        //判断如果是服务商模式信息则加入
+        if (StringUtils.isEmpty(payConfigStorage.getSubAppid()) && StringUtils.isEmpty(payConfigStorage.getSubMchId())){
+            parameters.put("sub_appid", payConfigStorage.getSubAppid());
+            parameters.put("sub_mch_id", payConfigStorage.getSubMchId());
+        }
         parameters.put("nonce_str", SignUtils.randomStr());
         return parameters;
 

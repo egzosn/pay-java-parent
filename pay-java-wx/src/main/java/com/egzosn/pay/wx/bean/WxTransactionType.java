@@ -90,10 +90,12 @@ public enum  WxTransactionType implements TransactionType {
     /**
      * 银行卡转账
      */
+    @Deprecated
     BANK("mmpaysptrans/pay_bank"),
     /**
      *  转账查询
      */
+    @Deprecated
     QUERY_BANK("mmpaysptrans/query_bank")
     ;
 
