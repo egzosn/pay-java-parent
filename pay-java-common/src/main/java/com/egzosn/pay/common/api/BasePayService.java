@@ -21,9 +21,9 @@ import java.util.*;
  *      date 2017/3/5 20:36
  *   </pre>
  */
-public abstract class BasePayService implements PayService {
+public abstract class BasePayService<PC extends PayConfigStorage> implements PayService<PC>  {
 
-    protected PayConfigStorage payConfigStorage;
+    protected PC payConfigStorage;
 
     protected HttpRequestTemplate requestTemplate;
     protected int retrySleepMillis = 1000;
@@ -35,13 +35,13 @@ public abstract class BasePayService implements PayService {
      * @param payConfigStorage 支付配置
      */
     @Override
-    public BasePayService setPayConfigStorage(PayConfigStorage payConfigStorage) {
+    public BasePayService setPayConfigStorage(PC payConfigStorage) {
         this.payConfigStorage = payConfigStorage;
         return this;
     }
 
     @Override
-    public PayConfigStorage getPayConfigStorage() {
+    public PC getPayConfigStorage() {
         return payConfigStorage;
     }
     @Override
@@ -61,11 +61,11 @@ public abstract class BasePayService implements PayService {
     }
 
 
-    public BasePayService(PayConfigStorage payConfigStorage) {
+    public BasePayService(PC payConfigStorage) {
         this(payConfigStorage, null);
     }
 
-    public BasePayService(PayConfigStorage payConfigStorage, HttpConfigStorage configStorage) {
+    public BasePayService(PC payConfigStorage, HttpConfigStorage configStorage) {
         setPayConfigStorage(payConfigStorage);
         setRequestTemplateConfigStorage(configStorage);
     }
