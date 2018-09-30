@@ -112,7 +112,7 @@ public class HttpRequestTemplate {
         }
 
             //读取本机存放的PKCS12证书文件
-        try(InputStream instream = configStorage.isPath() ? new FileInputStream(new File(configStorage.getKeystore())) : new ByteArrayInputStream(configStorage.getKeystore().getBytes())){
+        try(InputStream instream = configStorage.isPath() ? new FileInputStream(new File(configStorage.getKeystore())) : new ByteArrayInputStream(configStorage.getKeystore().getBytes("ISO-8859-1"))){
                 //指定读取证书格式为PKCS12
                 KeyStore keyStore = KeyStore.getInstance("PKCS12");
 
