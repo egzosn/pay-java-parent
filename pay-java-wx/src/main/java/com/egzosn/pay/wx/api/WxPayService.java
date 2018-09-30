@@ -598,10 +598,10 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
      * @param parameters 参数信息
      * @param order 转账订单
      * @return 包装后参数信息
-     * <br/>
+     * <p>
      *  <a href="https://pay.weixin.qq.com/wiki/doc/api/tools/mch_pay.php?chapter=14_2">企业付款到零钱</a>
      *  <a href="https://pay.weixin.qq.com/wiki/doc/api/tools/mch_pay.php?chapter=24_2">商户企业付款到银行卡</a>
-     * <br/>
+     * </p>
      */
     public Map<String, Object> transfers(Map<String, Object> parameters, TransferOrder order){
         //转账到余额, 申请商户号的appid或商户号绑定的appid
@@ -638,10 +638,10 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
      * @param outNo 商户转账订单号
      * @param wxTransferType 微信转账类型，.....这里没办法了只能这样写(┬＿┬)，请见谅 {@link com.egzosn.pay.wx.bean.WxTransferType}
      *
-     * <br/>
+     * <p>
      *  <a href="https://pay.weixin.qq.com/wiki/doc/api/tools/mch_pay.php?chapter=14_3">企业付款到零钱</a>
      *  <a href="https://pay.weixin.qq.com/wiki/doc/api/tools/mch_pay.php?chapter=24_3">商户企业付款到银行卡</a>
-     * <br/>
+     * </p>
      * @return 对应的转账订单
      */
     @Override
