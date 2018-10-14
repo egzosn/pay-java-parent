@@ -44,20 +44,22 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
     /**
      * 微信请求地址
      */
-    public final static String URI = "https://api.mch.weixin.qq.com/";
+    public static final String URI = "https://api.mch.weixin.qq.com/";
     /**
      * 沙箱
      */
-    public final static String SANDBOXNEW = "sandboxnew/";
+    public static final String SANDBOXNEW = "sandboxnew/";
 
-    public final static String SUCCESS = "SUCCESS";
-    public final static String RETURN_CODE = "return_code";
-    public final static String SIGN = "sign";
-    public final static String CIPHER_ALGORITHM = "RSA/ECB/OAEPWITHSHA-1ANDMGF1PADDING";
-    public final static String FAILURE = "failure";
-    public final static String APPID = "appid";
-    private final static DateFormat downloadbillDf = new SimpleDateFormat("yyyyMMdd");
-    private final static DateFormat df = new SimpleDateFormat("yyyyMMddHHmms");
+    public static final String SUCCESS = "SUCCESS";
+    public static final String RETURN_CODE = "return_code";
+    public static final String SIGN = "sign";
+    public static final String CIPHER_ALGORITHM = "RSA/ECB/OAEPWITHSHA-1ANDMGF1PADDING";
+    public static final String FAILURE = "failure";
+    public static final String APPID = "appid";
+    private static final DateFormat downloadbillDf = new SimpleDateFormat("yyyyMMdd");
+    private static final String HMAC_SHA256 = "HMAC-SHA256";
+    private static final String HMACSHA256 = "HMACSHA256";
+    private static final DateFormat df = new SimpleDateFormat("yyyyMMddHHmms");
 
     {
         TimeZone timeZone = TimeZone.getTimeZone("GMT+8");
@@ -82,7 +84,19 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
     public WxPayService(WxPayConfigStorage payConfigStorage, HttpConfigStorage configStorage) {
         super(payConfigStorage, configStorage);
     }
-
+    /**
+     * 设置支付配置
+     * @param payConfigStorage 支付配置
+     */
+    @Override
+    public BasePayService setPayConfigStorage(WxPayConfigStorage payConfigStorage) {
+        String signType = payConfigStorage.getSignType();
+        if (HMAC_SHA256.equals(signType)){
+            payConfigStorage.setSignType(HMACSHA256);
+        }
+        this.payConfigStorage = payConfigStorage;
+        return this;
+    }
     /**
      * 根据交易类型获取url
      *
@@ -158,7 +172,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
         parameters.put(APPID, payConfigStorage.getAppid());
         parameters.put("mch_id", payConfigStorage.getMchId());
         //判断如果是服务商模式信息则加入
-        if (StringUtils.isEmpty(payConfigStorage.getSubAppid()) && StringUtils.isEmpty(payConfigStorage.getSubMchId())){
+        if (!StringUtils.isEmpty(payConfigStorage.getSubAppid()) && !StringUtils.isEmpty(payConfigStorage.getSubMchId())){
             parameters.put("sub_appid", payConfigStorage.getSubAppid());
             parameters.put("sub_mch_id", payConfigStorage.getSubMchId());
         }
@@ -194,8 +208,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
         }
         ((WxTransactionType) order.getTransactionType()).setAttribute(parameters, order);
 
-        String sign = createSign(SignUtils.parameterText(parameters), payConfigStorage.getInputCharset());
-        parameters.put(SIGN, sign);
+       setSign(parameters);
 
         String requestXML = XML.getMap2Xml(parameters);
         LOG.debug("requestXML：" + requestXML);
@@ -260,7 +273,11 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
      * @return 请求参数
      */
     private Map<String, Object> setSign(Map<String, Object> parameters) {
-        parameters.put("sign_type", payConfigStorage.getSignType());
+        String signType = payConfigStorage.getSignType();
+        if (HMACSHA256.equals(signType)){
+            signType = HMAC_SHA256;
+        }
+        parameters.put("sign_type", signType);
         String sign = createSign(SignUtils.parameterText(parameters, "&", SIGN, "appId"), payConfigStorage.getInputCharset());
         parameters.put(SIGN, sign);
         return parameters;
