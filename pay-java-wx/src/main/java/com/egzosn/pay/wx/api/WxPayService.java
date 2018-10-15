@@ -59,7 +59,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
     private static final DateFormat downloadbillDf = new SimpleDateFormat("yyyyMMdd");
     private static final String HMAC_SHA256 = "HMAC-SHA256";
     private static final String HMACSHA256 = "HMACSHA256";
-    private static final DateFormat df = new SimpleDateFormat("yyyyMMddHHmms");
+    private static final DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
 
     {
         TimeZone timeZone = TimeZone.getTimeZone("GMT+8");
