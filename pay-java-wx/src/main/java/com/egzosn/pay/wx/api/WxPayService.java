@@ -292,7 +292,8 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
      */
     @Override
     public String createSign(String content, String characterEncoding) {
-        return SignUtils.valueOf(payConfigStorage.getSignType().toUpperCase()).createSign(content, "&key=" + payConfigStorage.getKeyPrivate(), characterEncoding).toUpperCase();
+        SignUtils signUtils = SignUtils.valueOf(payConfigStorage.getSignType().toUpperCase());
+        return signUtils.createSign(content + "&key="  + (signUtils == SignUtils.MD5 ? "" : payConfigStorage.getKeyPrivate()) ,  payConfigStorage.getKeyPrivate(), characterEncoding).toUpperCase();
     }
 
     /**
