@@ -316,7 +316,7 @@ public class WxPayController {
      *
      * @return 对应的转账结果
      */
-    @RequestMapping("transfer")
+    @RequestMapping("transferPayBank")
     public Map<String, Object> transferPayBank(TransferOrder order) {
         order.setOutNo("partner_trade_no 商户转账订单号");
         //采用标准RSA算法，公钥由微信侧提供,将公钥信息配置在PayConfigStorage#setKeyPublic(String)
