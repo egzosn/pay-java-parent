@@ -16,7 +16,7 @@ public enum WxTransferType implements TransferType{
     /**
      * 查询转账到零钱的记录
      */
-    GETTRANSFERINFO("mmpaymkttransfers/gettransferinfo "),
+    GETTRANSFERINFO("mmpaymkttransfers/gettransferinfo"),
     /**
      * 转账到银行卡
      */
@@ -24,7 +24,7 @@ public enum WxTransferType implements TransferType{
     /**
      * 查询转账到银行卡的记录
      */
-    QUERY_BANK("mmpaysptrans/pay_bank"),
+    QUERY_BANK("mmpaysptrans/query_bank"),
 
     ;
 
