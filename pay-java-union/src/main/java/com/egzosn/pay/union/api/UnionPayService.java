@@ -227,7 +227,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
             case WAP:
             case WEB:
             case B2B:
-                params.put(SDKConstants.param_txnAmt, order.getPrice().multiply(new BigDecimal(100)));
+                params.put(SDKConstants.param_txnAmt,conversion(order.getPrice()));
                 params.put("orderDesc", order.getSubject());
                 // 订单超时时间。
                 // 超过此时间后，除网银交易外，其他交易银联系统会拒绝受理，提示超时。 跳转银行网银交易如果超时后交易成功，会自动退款，大约5个工作日金额返还到持卡人账户。
@@ -241,7 +241,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
                 params.put(SDKConstants.param_frontUrl, payConfigStorage.getReturnUrl());
                 break;
             case CONSUME:
-                params.put(SDKConstants.param_txnAmt, order.getPrice().multiply(new BigDecimal(100)));
+                params.put(SDKConstants.param_txnAmt,conversion(order.getPrice()));
                 params.put(SDKConstants.param_qrNo, order.getAuthCode());
                 break;
             default:
@@ -634,6 +634,12 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
             return Collections.emptyMap();
     }
 
-
-
+    /**
+     * 元转分
+     * @param amount 元的金额
+     * @return 分的金额
+     */
+    public int conversion(BigDecimal amount){
+        return amount.multiply(new BigDecimal(100)).setScale(0, BigDecimal.ROUND_HALF_UP).intValue();
+    }
 }
