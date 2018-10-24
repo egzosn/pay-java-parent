@@ -227,7 +227,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
             case WAP:
             case WEB:
             case B2B:
-                params.put(SDKConstants.param_txnAmt, order.getPrice().multiply(new BigDecimal(100)));
+                params.put(SDKConstants.param_txnAmt,conversion(order.getPrice()));
                 params.put("orderDesc", order.getSubject());
                 // 订单超时时间。
                 // 超过此时间后，除网银交易外，其他交易银联系统会拒绝受理，提示超时。 跳转银行网银交易如果超时后交易成功，会自动退款，大约5个工作日金额返还到持卡人账户。
@@ -241,7 +241,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
                 params.put(SDKConstants.param_frontUrl, payConfigStorage.getReturnUrl());
                 break;
             case CONSUME:
-                params.put(SDKConstants.param_txnAmt, order.getPrice().multiply(new BigDecimal(100)));
+                params.put(SDKConstants.param_txnAmt,conversion(order.getPrice()));
                 params.put(SDKConstants.param_qrNo, order.getAuthCode());
                 break;
             default:
@@ -282,11 +282,11 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
             case SM3:
                 String key = payConfigStorage.getKeyPrivate();
                 signStr = SignUtils.parameterText(parameters, "&", "signature");
-                 key = signUtils.createSign(key,"",payConfigStorage.getInputCharset()) + "&";
+                key = signUtils.createSign(key,"",payConfigStorage.getInputCharset()) + "&";
                 parameters.put(SDKConstants.param_signature, signUtils.createSign(signStr, key, payConfigStorage.getInputCharset()));
                 break;
             default:
-              throw new PayErrorException(new PayException("sign fail", "未找到的签名类型"));
+                throw new PayErrorException(new PayException("sign fail", "未找到的签名类型"));
         }
 
 
@@ -358,11 +358,11 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
         if(this.verify(response)){
             if(SDKConstants.OK_RESP_CODE.equals(response.get(SDKConstants.param_respCode))){
                 //成功,获取tn号
-                    return MatrixToImageWriter.writeInfoToJpgBuff((String)response.get(SDKConstants.param_qrCode));
+                return MatrixToImageWriter.writeInfoToJpgBuff((String)response.get(SDKConstants.param_qrCode));
             }
-                throw new PayErrorException(new PayException((String)response.get(SDKConstants.param_respCode), (String)response.get(SDKConstants.param_respMsg), responseStr));
+            throw new PayErrorException(new PayException((String)response.get(SDKConstants.param_respCode), (String)response.get(SDKConstants.param_respMsg), responseStr));
         }
-            throw new PayErrorException(new PayException("failure", "验证签名失败", responseStr));
+        throw new PayErrorException(new PayException("failure", "验证签名失败", responseStr));
     }
 
     /**
@@ -538,7 +538,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
      */
     @Override
     public Map<String, Object> close (String tradeNo, String outTradeNo) {
-            return Collections.emptyMap();
+        return Collections.emptyMap();
     }
 
     /**
@@ -574,7 +574,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
      */
     @Override
     public Map<String, Object> refundquery (String tradeNo, String outTradeNo) {
-            return Collections.emptyMap();
+        return Collections.emptyMap();
     }
 
 
@@ -631,9 +631,15 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
      */
     @Override
     public Map<String, Object> secondaryInterface(Object tradeNoOrBillDate, String outTradeNoBillType, TransactionType transactionType) {
-            return Collections.emptyMap();
+        return Collections.emptyMap();
     }
 
-
-
+    /**
+     * 元转分
+     * @param amount 元的金额
+     * @return 分的金额
+     */
+    public int conversion(BigDecimal amount){
+        return amount.multiply(new BigDecimal(100)).setScale(0, BigDecimal.ROUND_HALF_UP).intValue();
+    }
 }
