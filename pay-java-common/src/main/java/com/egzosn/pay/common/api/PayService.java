@@ -361,6 +361,13 @@ public interface PayService<PC extends PayConfigStorage> {
      */
      <T>T transferQuery(String outNo, String tradeNo, Callback<T> callback);
 
-
+         /**
+     * 将请求参数或者请求流转化为 Map
+     *
+     * @param parameterMap 请求参数
+     * @param is           请求流
+     * @return 获得回调响应信息
+     */
+    PayOutMessage payBack(Map<String, String[]> parameterMap, InputStream is);
 
 }

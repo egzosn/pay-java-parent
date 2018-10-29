@@ -152,4 +152,26 @@ import java.util.concurrent.locks.Lock;
      * @return true测试环境
      */
     boolean isTest();
+
+
+    /**
+     * 设置支付消息处理器,这里用于处理具体的支付业务
+     * @param handler 消息处理器
+     * 配合{@link  com.egzosn.pay.common.api.PayService#payBack(java.util.Map, java.io.InputStream)}进行使用
+     *
+     *   默认使用{@link  com.egzosn.pay.common.api.DefaultPayMessageHandler }进行实现
+     *
+     */
+    void setPayMessageHandler(PayMessageHandler handler);
+
+
+    /**
+     * 获取支付消息处理器,这里用于处理具体的支付业务
+     * 配合{@link  com.egzosn.pay.common.api.PayService#payBack(java.util.Map, java.io.InputStream)}进行使用
+     *
+     *   默认使用{@link  com.egzosn.pay.common.api.DefaultPayMessageHandler }进行实现
+     *
+     */
+    PayMessageHandler getPayMessageHandler();
+
 }
