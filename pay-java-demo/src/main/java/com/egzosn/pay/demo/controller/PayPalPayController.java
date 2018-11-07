@@ -98,8 +98,8 @@ public class PayPalPayController {
      *
      * @return 付款成功信息
      */
-    @GetMapping(value = "payBack.json")
-    public String executePayment(HttpServletRequest request) throws IOException {
+    @GetMapping(value = "payBackBefore.json")
+    public String payBackBefore(HttpServletRequest request) throws IOException {
         try (InputStream is = request.getInputStream()) {
             if (service.verify(service.getParameter2Map(request.getParameterMap(), is))) {
                 // TODO 这里进行成功后的订单业务处理
@@ -108,6 +108,24 @@ public class PayPalPayController {
             }
         }
         return "failure";
+    }
+
+    /**
+     * 支付回调地址
+     *
+     * @param request
+     *
+     * @return
+     *
+     * 业务处理在对应的PayMessageHandler里面处理，在哪里设置PayMessageHandler，详情查看{@link com.egzosn.pay.common.api.PayService#setPayMessageHandler(com.egzosn.pay.common.api.PayMessageHandler)}
+     *
+     * 如果未设置 {@link com.egzosn.pay.common.api.PayMessageHandler} 那么会使用默认的 {@link com.egzosn.pay.common.api.DefaultPayMessageHandler}
+     *
+     */
+    @RequestMapping(value = "payBack.json")
+    public String payBack(HttpServletRequest request) throws IOException {
+        //业务处理在对应的PayMessageHandler里面处理，在哪里设置PayMessageHandler，详情查看com.egzosn.pay.common.api.PayService.setPayMessageHandler()
+        return service.payBack(request.getParameterMap(), request.getInputStream()).toMessage();
     }
 
 

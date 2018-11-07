@@ -7,6 +7,7 @@ import com.egzosn.pay.ali.api.AliPayService;
 import com.egzosn.pay.ali.bean.AliTransactionType;
 import com.egzosn.pay.common.api.Callback;
 import com.egzosn.pay.common.api.PayConfigStorage;
+import com.egzosn.pay.common.api.PayMessageInterceptor;
 import com.egzosn.pay.common.api.PayService;
 import com.egzosn.pay.common.bean.*;
 import com.egzosn.pay.common.http.UriVariables;
@@ -291,13 +292,19 @@ public class PayController {
 
 
     /**
-     * 支付回调地址
+     * 支付回调地址 方式一
+     *
+     * 方式二，{@link #payBack(HttpServletRequest, Integer)} 是属于简化方式， 试用与简单的业务场景
+     *
      *
      * @param request
+     * @param payId
      * @return 支付是否成功
+     *
+     *
      */
-    @RequestMapping(value = "payBack{payId}.json")
-    public String payBack(HttpServletRequest request, @PathVariable Integer payId) throws IOException {
+    @RequestMapping(value = "payBackOne{payId}.json")
+    public String payBackOne(HttpServletRequest request, @PathVariable Integer payId) throws IOException {
         //根据账户id，获取对应的支付账户操作工具
         PayResponse payResponse = service.getPayResponse(payId);
         PayConfigStorage storage = payResponse.getStorage();
@@ -318,6 +325,32 @@ public class PayController {
 
         return payResponse.getService().getPayOutMessage("fail", "失败").toMessage();
     }
+
+
+
+
+
+    /**
+     * 支付回调地址
+     * 方式二
+     * @param request
+     *
+     * @return
+     *
+     * 拦截器相关增加， 详情查看{@link com.egzosn.pay.common.api.PayService#addPayMessageInterceptor(PayMessageInterceptor)}
+     * <p></p>
+     * 业务处理在对应的PayMessageHandler里面处理，在哪里设置PayMessageHandler，详情查看{@link com.egzosn.pay.common.api.PayService#setPayMessageHandler(com.egzosn.pay.common.api.PayMessageHandler)}
+     *
+     * 如果未设置 {@link com.egzosn.pay.common.api.PayMessageHandler} 那么会使用默认的 {@link com.egzosn.pay.common.api.DefaultPayMessageHandler}
+     *
+     */
+    @RequestMapping(value = "payBack{payId}.json")
+    public String payBack(HttpServletRequest request, @PathVariable Integer payId) throws IOException {
+        //业务处理在对应的PayMessageHandler里面处理，在哪里设置PayMessageHandler，详情查看com.egzosn.pay.common.api.PayService.setPayMessageHandler()
+        PayResponse payResponse = service.getPayResponse(payId);
+        return payResponse.getService().payBack(request.getParameterMap(), request.getInputStream()).toMessage();
+    }
+
 
     /**
      * 查询

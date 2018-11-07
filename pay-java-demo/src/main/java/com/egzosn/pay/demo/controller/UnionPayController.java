@@ -167,14 +167,18 @@ public class UnionPayController {
     }
 
     /**
-     * 支付回调地址
+     * 支付回调地址 方式一
+     *
+     * 方式二，{@link #payBack(HttpServletRequest)} 是属于简化方式， 试用与简单的业务场景
      *
      * @param request
      *
      * @return
+     * @see #payBack(HttpServletRequest)
      */
-    @RequestMapping(value = "payBack.json")
-    public String payBack(HttpServletRequest request) throws IOException {
+    @Deprecated
+    @RequestMapping(value = "payBackBefore.json")
+    public String payBackBefore(HttpServletRequest request) throws IOException {
 
         //获取支付方返回的对应参数
         Map<String, Object> params = service.getParameter2Map(request.getParameterMap(), request.getInputStream());
@@ -190,6 +194,23 @@ public class UnionPayController {
         }
 
         return service.getPayOutMessage("fail", "失败").toMessage();
+    }
+    /**
+     * 支付回调地址
+     *
+     * @param request
+     *
+     * @return
+     *
+     * 业务处理在对应的PayMessageHandler里面处理，在哪里设置PayMessageHandler，详情查看{@link com.egzosn.pay.common.api.PayService#setPayMessageHandler(com.egzosn.pay.common.api.PayMessageHandler)}
+     *
+     * 如果未设置 {@link com.egzosn.pay.common.api.PayMessageHandler} 那么会使用默认的 {@link com.egzosn.pay.common.api.DefaultPayMessageHandler}
+     *
+     */
+    @RequestMapping(value = "payBack.json")
+    public String payBack(HttpServletRequest request) throws IOException {
+        //业务处理在对应的PayMessageHandler里面处理，在哪里设置PayMessageHandler，详情查看com.egzosn.pay.common.api.PayService.setPayMessageHandler()
+        return service.payBack(request.getParameterMap(), request.getInputStream()).toMessage();
     }
 
 

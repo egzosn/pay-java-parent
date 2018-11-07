@@ -10,15 +10,19 @@ import com.egzosn.pay.common.http.UriVariables;
 import com.egzosn.pay.demo.entity.PayType;
 import com.egzosn.pay.demo.request.QueryOrder;
 import com.egzosn.pay.demo.service.PayResponse;
+import com.egzosn.pay.demo.service.handler.AliPayMessageHandler;
+import com.egzosn.pay.demo.service.handler.WxPayMessageHandler;
 import com.egzosn.pay.wx.api.WxPayConfigStorage;
 import com.egzosn.pay.wx.api.WxPayService;
 import com.egzosn.pay.wx.bean.WxBank;
 import com.egzosn.pay.wx.bean.WxTransactionType;
 import com.egzosn.pay.wx.bean.WxTransferType;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 import java.io.ByteArrayOutputStream;
@@ -40,6 +44,8 @@ import java.util.UUID;
 public class WxPayController {
 
     private PayService service = null;
+
+
 
     //ssl 退款证书相关 不使用可注释
     private static String KEYSTORE = "ssl 退款证书";
@@ -81,6 +87,10 @@ public class WxPayController {
         //默认的每个路由的最大连接数
         httpConfigStorage.setDefaultMaxPerRoute(10);
         service.setRequestTemplateConfigStorage(httpConfigStorage);
+
+        //设置回调消息处理
+        //TODO {@link com.egzosn.pay.demo.controller.WxPayController#payBack}
+//        service.setPayMessageHandler(new WxPayMessageHandler(null));
     }
 
 
@@ -187,14 +197,18 @@ public class WxPayController {
     }
 
     /**
-     * 支付回调地址
+     * 支付回调地址 方式一
+     *
+     * 方式二，{@link #payBack(HttpServletRequest)} 是属于简化方式， 试用与简单的业务场景
      *
      * @param request
      *
      * @return
+     * @see #payBack(HttpServletRequest)
      */
-    @RequestMapping(value = "payBack.json")
-    public String payBack(HttpServletRequest request) throws IOException {
+    @Deprecated
+    @RequestMapping(value = "payBackBefore.json")
+    public String payBackBefore(HttpServletRequest request) throws IOException {
 
         //获取支付方返回的对应参数
         Map<String, Object> params = service.getParameter2Map(request.getParameterMap(), request.getInputStream());
@@ -206,10 +220,27 @@ public class WxPayController {
         if (service.verify(params)) {
             //这里处理业务逻辑
             //......业务逻辑处理块........
-            return service.getPayOutMessage("success", "成功").toMessage();
+            return service.getPayOutMessage("Success", "成功").toMessage();
         }
 
         return service.getPayOutMessage("fail", "失败").toMessage();
+    }
+    /**
+     * 支付回调地址
+     *
+     * @param request
+     *
+     * @return
+     *
+     * 业务处理在对应的PayMessageHandler里面处理，在哪里设置PayMessageHandler，详情查看{@link com.egzosn.pay.common.api.PayService#setPayMessageHandler(com.egzosn.pay.common.api.PayMessageHandler)}
+     *
+     * 如果未设置 {@link com.egzosn.pay.common.api.PayMessageHandler} 那么会使用默认的 {@link com.egzosn.pay.common.api.DefaultPayMessageHandler}
+     *
+     */
+    @RequestMapping(value = "payBack.json")
+    public String payBack(HttpServletRequest request) throws IOException {
+        //业务处理在对应的PayMessageHandler里面处理，在哪里设置PayMessageHandler，详情查看com.egzosn.pay.common.api.PayService.setPayMessageHandler()
+        return service.payBack(request.getParameterMap(), request.getInputStream()).toMessage();
     }
 
 
