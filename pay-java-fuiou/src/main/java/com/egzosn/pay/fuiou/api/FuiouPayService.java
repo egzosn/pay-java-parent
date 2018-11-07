@@ -7,9 +7,6 @@ import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.common.http.UriVariables;
 import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.str.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -25,8 +22,7 @@ import java.util.*;
  * </pre>
  */
 public class FuiouPayService extends BasePayService<FuiouPayConfigStorage> {
-    //日志
-    protected final Log log = LogFactory.getLog(FuiouPayService.class);
+
     //正式域名
     public final static String URL_FuiouBaseDomain = "https://pay.fuiou.com/";
     //测试域名
@@ -78,7 +74,7 @@ public class FuiouPayService extends BasePayService<FuiouPayConfigStorage> {
     @Override
     public boolean verify(Map<String, Object> params) {
         if (!"0000".equals(params.get("order_pay_code"))) {
-            log.debug(String.format("富友支付异常：order_pay_code=%s,错误原因=%s,参数集=%s", params.get("order_pay_code"), params.get("order_pay_error"), params));
+            LOG.debug(String.format("富友支付异常：order_pay_code=%s,错误原因=%s,参数集=%s", params.get("order_pay_code"), params.get("order_pay_error"), params));
             return false;
         }
         try {

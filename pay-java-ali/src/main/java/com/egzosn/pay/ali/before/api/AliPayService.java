@@ -13,8 +13,6 @@ import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.common.http.UriVariables;
 import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.str.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import java.awt.image.BufferedImage;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
@@ -24,16 +22,17 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
- *  支付宝支付通知
+ *  支付宝支付服务
  * @author  egan
  *
  * email egzosn@gmail.com
  * date 2016-5-18 14:09:01
- *
+ * 旧版本支付服务，2015年之前的支付方式，之后版本请看新类
  * @see com.egzosn.pay.ali.api.AliPayService
  */
+@Deprecated
 public class AliPayService extends BasePayService<AliPayConfigStorage> {
-    protected final Log LOG = LogFactory.getLog(AliPayService.class);
+
 
 
     private static final String HTTPS_REQ_URL = "https://mapi.alipay.com/gateway.do";

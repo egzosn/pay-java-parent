@@ -12,8 +12,6 @@ import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.str.StringUtils;
 import com.egzosn.pay.wx.youdian.bean.YdPayError;
 import com.egzosn.pay.wx.youdian.bean.YoudianTransactionType;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -28,7 +26,6 @@ import java.util.concurrent.locks.Lock;
  * date 2017/01/12 22:58
  */
 public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorage> {
-    protected static final Log LOG = LogFactory.getLog(WxYouDianPayService.class);
 
     private final static String URL = "http://life.51youdian.com/Api/CheckoutCounter/";
 

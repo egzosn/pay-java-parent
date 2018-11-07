@@ -13,8 +13,6 @@ import com.egzosn.pay.common.http.UriVariables;
 import com.egzosn.pay.common.util.MatrixToImageWriter;
 import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.str.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import java.awt.image.BufferedImage;
 import java.math.BigDecimal;
 import java.text.DateFormat;
@@ -29,7 +27,6 @@ import java.util.*;
  * date 2017-2-22 20:09
  */
 public class AliPayService extends BasePayService<AliPayConfigStorage> {
-    protected final Log log = LogFactory.getLog(AliPayService.class);
 
     /**
      * 正式测试环境
@@ -74,7 +71,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
 
 
         if (params.get("sign") == null) {
-            log.debug("支付宝支付异常：params：" + params);
+            LOG.debug("支付宝支付异常：params：" + params);
             return false;
         }
 
@@ -298,7 +295,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
         JSONObject result = getHttpRequestTemplate().postForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(orderInfo), null, JSONObject.class);
         JSONObject response = result.getJSONObject("alipay_trade_pay_response");
         if (!"10000".equals(response.getString("code"))){
-           log.info("收款失败");
+           LOG.info("收款失败");
         }
         return result;
     }
@@ -519,6 +516,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
         setSign(parameters);
         return getHttpRequestTemplate().postForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(parameters), null, JSONObject.class);
     }
+
 
     /**
      *  获取biz_content。请求参数的集合 不包含下载账单

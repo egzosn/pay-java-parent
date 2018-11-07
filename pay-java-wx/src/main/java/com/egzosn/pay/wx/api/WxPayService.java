@@ -15,8 +15,6 @@ import com.egzosn.pay.wx.bean.WxPayError;
 import com.egzosn.pay.wx.bean.WxTransactionType;
 import com.egzosn.pay.common.util.XML;
 import com.egzosn.pay.wx.bean.WxTransferType;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,7 +36,6 @@ import static com.egzosn.pay.wx.bean.WxTransferType.*;
  *         </pre>
  */
 public class WxPayService extends BasePayService<WxPayConfigStorage> {
-    protected final Log LOG = LogFactory.getLog(WxPayService.class);
 
 
     /**

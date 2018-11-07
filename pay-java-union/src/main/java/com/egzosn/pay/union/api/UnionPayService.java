@@ -15,8 +15,6 @@ import com.egzosn.pay.common.util.sign.encrypt.RSA;
 import com.egzosn.pay.common.util.sign.encrypt.RSA2;
 import com.egzosn.pay.union.bean.UnionTransactionType;
 import com.egzosn.pay.union.bean.SDKConstants;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -35,7 +33,6 @@ import java.util.*;
  * </pre>
  */
 public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
-    private static final Log log = LogFactory.getLog(UnionPayService.class);
     /**
      * 测试域名
      */
@@ -158,7 +155,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
     public boolean verify(Map<String, Object> result) {
 
         if (null == result || result.get(SDKConstants.param_signature) == null) {
-            log.debug("银联支付验签异常：params：" + result);
+            LOG.debug("银联支付验签异常：params：" + result);
             return false;
         }
         return this.signVerify(result, (String) result.get(SDKConstants.param_signature));
@@ -331,13 +328,13 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
                     .build(pkixParams);
             return cert;
         } catch (java.security.cert.CertPathBuilderException e) {
-            log.error("verify certificate chain fail.", e);
+            LOG.error("verify certificate chain fail.", e);
         } catch (CertificateExpiredException e) {
-            log.error(e);
+            LOG.error(e);
         } catch (CertificateNotYetValidException e) {
-            log.error(e);
+            LOG.error(e);
         } catch (Exception e) {
-            log.error(e);
+            LOG.error(e);
         }
         return null;
     }
@@ -393,7 +390,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
                     x509CertString.getBytes("ISO-8859-1"));
             x509Cert = (X509Certificate) cf.generateCertificate(tIn);
         } catch (Exception e) {
-            log.error("gen certificate error", e);
+            throw new PayErrorException(new PayException("证书加载失败", "gen certificate error:"+e.getLocalizedMessage() ));
         }
         return x509Cert;
     }
