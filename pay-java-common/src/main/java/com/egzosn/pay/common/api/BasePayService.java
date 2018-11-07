@@ -1,12 +1,13 @@
 package com.egzosn.pay.common.api;
 
-import com.egzosn.pay.common.bean.RefundOrder;
-import com.egzosn.pay.common.bean.TransactionType;
-import com.egzosn.pay.common.bean.TransferOrder;
+import com.alibaba.fastjson.JSON;
+import com.egzosn.pay.common.bean.*;
 import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.common.http.HttpRequestTemplate;
 import com.egzosn.pay.common.util.sign.SignUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -22,13 +23,21 @@ import java.util.*;
  *   </pre>
  */
 public abstract class BasePayService<PC extends PayConfigStorage> implements PayService<PC>  {
-
+    protected final Log LOG = LogFactory.getLog(getClass());
     protected PC payConfigStorage;
 
     protected HttpRequestTemplate requestTemplate;
     protected int retrySleepMillis = 1000;
 
     protected int maxRetryTimes = 5;
+    /**
+     * 支付消息处理器
+     */
+    protected PayMessageHandler handler;
+    /**
+     * 支付消息拦截器
+     */
+    protected List<PayMessageInterceptor> interceptors = new ArrayList<PayMessageInterceptor>();;
 
     /**
      * 设置支付配置
@@ -316,5 +325,67 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
     @Override
     public <T>T transferQuery(String outNo, String tradeNo, Callback<T> callback){
         return callback.perform(transferQuery(outNo, tradeNo));
+    }
+
+    /**
+     * 设置支付消息处理器,这里用于处理具体的支付业务
+     *
+     * @param handler 消息处理器
+     *                配合{@link  PayService#payBack(Map, InputStream)}进行使用
+     *                <p>
+     *                默认使用{@link  DefaultPayMessageHandler }进行实现
+     */
+    @Override
+    public void setPayMessageHandler(PayMessageHandler handler) {
+        this.handler = handler;
+    }
+
+    /**
+     * 获取支付消息处理器,这里用于处理具体的支付业务
+     * 配合{@link  PayService#payBack(Map, InputStream)}进行使用
+     * <p>
+     * 默认使用{@link  DefaultPayMessageHandler }进行实现
+     */
+    public PayMessageHandler getPayMessageHandler() {
+        if (null == handler){
+            setPayMessageHandler(new DefaultPayMessageHandler());
+        }
+        return handler;
+    }
+
+    /**
+     * 设置支付消息拦截器
+     *
+     * @param interceptor 消息拦截器
+     *                    配合{@link  PayService#payBack(Map, InputStream)}进行使用, 做一些预前处理
+     *                    <p>
+     */
+    @Override
+    public void addPayMessageInterceptor(PayMessageInterceptor interceptor) {
+        interceptors.add(interceptor);
+    }
+
+    /**
+     * 将请求参数或者请求流转化为 Map
+     *
+     * @param parameterMap 请求参数
+     * @param is           请求流
+     * @return 获得回调响应信息
+     */
+    @Override
+    public PayOutMessage payBack(Map<String, String[]> parameterMap, InputStream is) {
+        Map<String, Object> data = getParameter2Map(parameterMap, is);
+        LOG.debug("回调响应:" +  JSON.toJSONString(data));
+        if (!verify(data)){
+            return getPayOutMessage("fail", "失败");
+        }
+        PayMessage payMessage = new PayMessage(data);
+        Map<String, Object> context = new HashMap<String, Object>();
+        for (PayMessageInterceptor interceptor : interceptors){
+            if (!interceptor.intercept(payMessage, context, this)){
+                return successPayOutMessage(payMessage);
+            }
+        }
+        return getPayMessageHandler().handle(payMessage, context, this);
     }
 }

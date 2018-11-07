@@ -9,6 +9,7 @@ import java.awt.image.BufferedImage;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -369,5 +370,25 @@ public interface PayService<PC extends PayConfigStorage> {
      * @return 获得回调响应信息
      */
     PayOutMessage payBack(Map<String, String[]> parameterMap, InputStream is);
+
+    /**
+     * 设置支付消息处理器,这里用于处理具体的支付业务
+     * @param handler 消息处理器
+     * 配合{@link  com.egzosn.pay.common.api.PayService#payBack(java.util.Map, java.io.InputStream)}进行使用
+     *
+     *   默认使用{@link  com.egzosn.pay.common.api.DefaultPayMessageHandler }进行实现
+     *
+     */
+    void setPayMessageHandler(PayMessageHandler handler);
+
+    /**
+     * 设置支付消息处理器,这里用于处理具体的支付业务
+     * @param interceptor 消息拦截器
+     * 配合{@link  com.egzosn.pay.common.api.PayService#payBack(java.util.Map, java.io.InputStream)}进行使用
+     *
+     *   默认使用{@link  com.egzosn.pay.common.api.DefaultPayMessageHandler }进行实现
+     *
+     */
+    void addPayMessageInterceptor(PayMessageInterceptor interceptor);
 
 }

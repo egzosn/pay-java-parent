@@ -270,30 +270,5 @@ public abstract class BasePayConfigStorage implements PayConfigStorage{
         }
     }
 
-    /**
-     * 设置支付消息处理器,这里用于处理具体的支付业务
-     *
-     * @param handler 消息处理器
-     *                配合{@link  PayService#payBack(Map, InputStream)}进行使用
-     *                <p>
-     *                默认使用{@link  DefaultPayMessageHandler }进行实现
-     */
-    @Override
-    public void setPayMessageHandler(PayMessageHandler handler) {
-        this.handler = handler;
-    }
 
-    /**
-     * 获取支付消息处理器,这里用于处理具体的支付业务
-     * 配合{@link  PayService#payBack(Map, InputStream)}进行使用
-     * <p>
-     * 默认使用{@link  DefaultPayMessageHandler }进行实现
-     */
-    @Override
-    public PayMessageHandler getPayMessageHandler() {
-        if (null == handler){
-            setPayMessageHandler(new DefaultPayMessageHandler());
-        }
-        return handler;
-    }
 }
