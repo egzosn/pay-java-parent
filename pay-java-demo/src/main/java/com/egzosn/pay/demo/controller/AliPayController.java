@@ -160,9 +160,10 @@ public class AliPayController {
      *
      * 方式二，{@link #payBack(HttpServletRequest)} 是属于简化方式， 试用与简单的业务场景
      *
-     * @param request
      *
-     * @return
+     * @param request 请求
+     *
+     * @return 返回对应的响应码
      * @see #payBack(HttpServletRequest)
      */
     @Deprecated
@@ -187,9 +188,9 @@ public class AliPayController {
     /**
      * 支付回调地址
      *
-     * @param request
+     * @param request 请求
      *
-     * @return
+     * @return 返回对应的响应码
      *
      * 业务处理在对应的PayMessageHandler里面处理，在哪里设置PayMessageHandler，详情查看{@link com.egzosn.pay.common.api.PayService#setPayMessageHandler(com.egzosn.pay.common.api.PayMessageHandler)}
      *
