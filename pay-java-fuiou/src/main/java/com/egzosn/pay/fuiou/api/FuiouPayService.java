@@ -23,23 +23,40 @@ import java.util.*;
  */
 public class FuiouPayService extends BasePayService<FuiouPayConfigStorage> {
 
-    //正式域名
-    public final static String URL_FuiouBaseDomain = "https://pay.fuiou.com/";
-    //测试域名
-    public final static String DEV_URL_FUIOUBASEDOMAIN = "http://www-1.fuiou.com:8888/wg1_run/";
+    /**
+     * 正式域名
+     */
+    public static final String URL_FuiouBaseDomain = "https://pay.fuiou.com/";
+    /**
+     * 测试域名
+     */
+    public static final String DEV_URL_FUIOUBASEDOMAIN = "http://www-1.fuiou.com:8888/wg1_run/";
 
-    //B2C/B2B支付
-    public final static String URL_FuiouSmpGate  = "smpGate.do";
-    //B2C/B2B支付(跨境支付)
-    public final static String URL_FuiouNewSmpGate = "newSmpGate.do";
-    //订单退款
-    public final static String URL_FuiouSmpRefundGate = "newSmpRefundGate.do";
-    //3.2	支付结果查询
-    public final static String URL_FuiouSmpQueryGate = "smpQueryGate.do";
-    //3.3	支付结果查询(直接返回)
-    public final static String URL_FuiouSmpAQueryGate = "smpAQueryGate.do";
-    //3.4订单退款
-    public final static String URL_NewSmpRefundGate = "newSmpRefundGate.do";
+    /**
+     * B2C/B2B支付
+     */
+    public static final String URL_FuiouSmpGate  = "smpGate.do";
+    /**
+     * B2C/B2B支付(跨境支付)
+     */
+    public static final String URL_FuiouNewSmpGate = "newSmpGate.do";
+    /**
+     * 订单退款
+     */
+    public static final String URL_FuiouSmpRefundGate = "newSmpRefundGate.do";
+    /**
+     * 3.2	支付结果查询
+     */
+    public static final String URL_FuiouSmpQueryGate = "smpQueryGate.do";
+    /**
+     * 3.3	支付结果查询(直接返回)
+     */
+    public static final String URL_FuiouSmpAQueryGate = "smpAQueryGate.do";
+    /**
+     * 3.4订单退款
+     */
+    public static final String URL_NewSmpRefundGate = "newSmpRefundGate.do";
+
 
     /**
      * 获取对应的请求地址
@@ -141,24 +158,36 @@ public class FuiouPayService extends BasePayService<FuiouPayConfigStorage> {
      */
     private LinkedHashMap<String, Object> getOrderInfo(PayOrder order) {
         LinkedHashMap<String, Object> parameters = new LinkedHashMap<String, Object>();
-        parameters.put("mchnt_cd", payConfigStorage.getPid());//商户代码
-        parameters.put("order_id", order.getOutTradeNo());//商户订单号
-        parameters.put("order_amt", order.getPrice().multiply(new BigDecimal(100)).setScale( 0, BigDecimal.ROUND_HALF_UP).intValue());//交易金额
-//        parameters.put("cur_type", null == order.getCurType() ? FuiouCurType.CNY:order.getCurType());//交易币种
-        parameters.put("order_pay_type", order.getTransactionType());//支付类型
-        parameters.put("page_notify_url", payConfigStorage.getReturnUrl());//商户接受支付结果通知地址
-        parameters.put("back_notify_url", StringUtils.isBlank(payConfigStorage.getNotifyUrl()) ? "" : payConfigStorage.getNotifyUrl());//商户接受的支付结果后台通知地址 //非必填
+        //商户代码
+        parameters.put("mchnt_cd", payConfigStorage.getPid());
+        //商户订单号
+        parameters.put("order_id", order.getOutTradeNo());
+        //交易金额
+        parameters.put("order_amt", order.getPrice().multiply(new BigDecimal(100)).setScale( 0, BigDecimal.ROUND_HALF_UP).intValue());
+        //交易币种
+//        parameters.put("cur_type", null == order.getCurType() ? FuiouCurType.CNY:order.getCurType());
+        //支付类型
+        parameters.put("order_pay_type", order.getTransactionType());
+        //商户接受支付结果通知地址
+        parameters.put("page_notify_url", payConfigStorage.getReturnUrl());
+        //商户接受的支付结果后台通知地址 //非必填
+        parameters.put("back_notify_url", StringUtils.isBlank(payConfigStorage.getNotifyUrl()) ? "" : payConfigStorage.getNotifyUrl());
 
         if (null != order.getExpirationTime()){
             parameters.put("order_valid_time", ((order.getExpirationTime().getTime() - System.currentTimeMillis())/1000/60 + "m"));
         }else {
-            parameters.put("order_valid_time", "30m");//超时时间 1m-15天，m：分钟、h：小时、d天、1c当天有效，
+            //超时时间 1m-15天，m：分钟、h：小时、d天、1c当天有效，
+            parameters.put("order_valid_time", "30m");
         }
-        parameters.put("iss_ins_cd", order.getBankType());//银行代码
+        //银行代码
+        parameters.put("iss_ins_cd", order.getBankType());
         parameters.put("goods_name", order.getSubject());
-        parameters.put("goods_display_url", "");//商品展示网址 //非必填
-        parameters.put("rem", "");//备注 //非必填
-        parameters.put("ver", "1.0.1");//版本号
+        //商品展示网址 //非必填
+        parameters.put("goods_display_url", "");
+        //备注 //非必填
+        parameters.put("rem", "");
+        //版本号
+        parameters.put("ver", "1.0.1");
         return parameters;
     }
 
@@ -283,9 +312,9 @@ public class FuiouPayService extends BasePayService<FuiouPayConfigStorage> {
         formHtml.append(  "<form name=\"pay\" method=\""+method.name().toLowerCase()+"\" ");
         formHtml.append(  "action=\""+url+"\" id = \"form\">");
 
-        for (String key : param.keySet()) {
-            Object o = param.get(key);
-            formHtml.append("<input type=\"hidden\" value = '"+o+"' name=\""+key+"\"/>");
+        for (Map.Entry entry : param.entrySet()) {
+            Object o = entry.getValue();
+            formHtml.append("<input type=\"hidden\" value = '" + o + "' name=\"" + entry.getKey() + "\"/>");
         }
 
         formHtml.append("</form></body></html>");
@@ -307,8 +336,6 @@ public class FuiouPayService extends BasePayService<FuiouPayConfigStorage> {
         params.put("order_id", outTradeNo);
         params.put("md5", createSign(SignUtils.parameters2MD5Str(params, "|"), payConfigStorage.getInputCharset()));
         JSONObject resultJson = getHttpRequestTemplate().postForObject(getReqUrl() + URL_FuiouSmpAQueryGate + "?" + UriVariables.getMapToParameters(params), null, JSONObject.class);
-
-
         return resultJson;
     }
 
@@ -322,8 +349,9 @@ public class FuiouPayService extends BasePayService<FuiouPayConfigStorage> {
      */
     @Override
     public Map<String, Object> close(String tradeNo, String outTradeNo) {
-        return null;
+        return Collections.EMPTY_MAP;
     }
+
 
 
 
@@ -351,17 +379,20 @@ public class FuiouPayService extends BasePayService<FuiouPayConfigStorage> {
      * @return 退款返回结果集
      */
     @Override
-    public Map<String, Object> refund (RefundOrder refundOrder) {
-        Map<String ,Object> params = new HashMap<>();
-        params.put("mchnt_cd",payConfigStorage.getPid());//商户代码
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-        df.setTimeZone(TimeZone.getTimeZone("GMT+8"));
-        params.put("origin_order_date",refundOrder.getOrderDate());//原交易日期
-        params.put("origin_order_id",refundOrder.getTradeNo());//原订单号
-        params.put("refund_amt",refundOrder.getRefundAmount().multiply(new BigDecimal(100)).setScale( 0, BigDecimal.ROUND_HALF_UP).intValue());//退款金额
-        params.put("rem","");//备注
-        params.put("md5",createSign(SignUtils.parameters2MD5Str(params,"|"),payConfigStorage.getInputCharset()));
-        JSONObject resultJson   = getHttpRequestTemplate().postForObject(getReqUrl() + URL_FuiouSmpRefundGate,params,JSONObject.class);
+    public Map<String, Object> refund(RefundOrder refundOrder) {
+        Map<String, Object> params = new HashMap<>();
+        //商户代码
+        params.put("mchnt_cd", payConfigStorage.getPid());
+        //原交易日期
+        params.put("origin_order_date", refundOrder.getOrderDate());
+        //原订单号
+        params.put("origin_order_id", refundOrder.getTradeNo());
+        //退款金额
+        params.put("refund_amt", refundOrder.getRefundAmount().multiply(new BigDecimal(100)).setScale(0, BigDecimal.ROUND_HALF_UP).intValue());
+        //备注
+        params.put("rem", "");
+        params.put("md5", createSign(SignUtils.parameters2MD5Str(params, "|"), payConfigStorage.getInputCharset()));
+        JSONObject resultJson = getHttpRequestTemplate().postForObject(getReqUrl() + URL_FuiouSmpRefundGate, params, JSONObject.class);
         return resultJson;
     }
 

@@ -18,11 +18,10 @@ package com.egzosn.pay.common.util.sign;
 import com.egzosn.pay.common.util.str.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import java.io.*;
-import java.math.BigInteger;
 import java.security.*;
 import java.security.cert.*;
-import java.security.spec.RSAPublicKeySpec;
 import java.util.*;
 
 
@@ -32,7 +31,7 @@ import java.util.*;
  * 声明：以下代码只是为了方便接入方测试而提供的样例代码，商户可以根据自己需要，按照技术文档编写。该代码仅供参考，不提供编码，性能，规范性等方面的保障
  */
 public class CertDescriptor {
-	protected static final Log log = LogFactory.getLog(CertDescriptor.class);
+	protected static final Log LOG = LogFactory.getLog(CertDescriptor.class);
 	/** 证书容器，存储对商户请求报文签名私钥证书. */
 	private  KeyStore keyStore = null;
 
@@ -57,18 +56,19 @@ public class CertDescriptor {
 			in = new FileInputStream(path);
 			encryptCertTemp = (X509Certificate) cf.generateCertificate(in);
 			// 打印证书加载信息,供测试阶段调试
-			log.warn("[" + path + "][CertId="
-					+ encryptCertTemp.getSerialNumber().toString() + "]");
+			if (LOG.isWarnEnabled()) {
+				LOG.warn("[" + path + "][CertId=" + encryptCertTemp.getSerialNumber().toString() + "]");
+			}
 		} catch (CertificateException e) {
-			log.error("InitCert Error", e);
+			LOG.error("InitCert Error", e);
 		} catch (FileNotFoundException e) {
-			log.error("InitCert Error File Not Found", e);
+			LOG.error("InitCert Error File Not Found", e);
 		}finally {
 			if (null != in) {
 				try {
 					in.close();
 				} catch (IOException e) {
-					log.error(e.toString());
+					LOG.error(e.toString());
 				}
 			}
 		}
@@ -92,13 +92,13 @@ public class CertDescriptor {
 					pwd.toCharArray());
 			return privateKey;
 		} catch (KeyStoreException e) {
-			log.error("getSignCertPrivateKey Error", e);
+			LOG.error("getSignCertPrivateKey Error", e);
 			return null;
 		} catch (UnrecoverableKeyException e) {
-			log.error("getSignCertPrivateKey Error", e);
+			LOG.error("getSignCertPrivateKey Error", e);
 			return null;
 		} catch (NoSuchAlgorithmException e) {
-			log.error("getSignCertPrivateKey Error", e);
+			LOG.error("getSignCertPrivateKey Error", e);
 			return null;
 		}
 	}
@@ -122,7 +122,7 @@ public class CertDescriptor {
 					.getCertificate(keyAlias);
 			return cert.getSerialNumber().toString();
 		} catch (Exception e) {
-			log.error("getSignCertId Error", e);
+			LOG.error("getSignCertId Error", e);
 			return null;
 		}
 	}
@@ -143,12 +143,12 @@ public class CertDescriptor {
 			keyStore = null;
 		}
 		try {
-			keyStore = getKeyInfo(signCertPath,
-					signCertPwd,signCertType);
-			log.info("InitSignCert Successful. CertId=["
-					+ getSignCertId() + "]");
+			keyStore = getKeyInfo(signCertPath, signCertPwd,signCertType);
+			if (LOG.isInfoEnabled()) {
+				LOG.info("InitSignCert Successful. CertId=[" + getSignCertId() + "]");
+			}
 		} catch (IOException e) {
-			log.error("InitSignCert Error", e);
+			LOG.error("InitSignCert Error", e);
 		}
 	}
 
@@ -161,12 +161,15 @@ public class CertDescriptor {
 	 * @return 证书对象
 	 * @throws IOException 
 	 */
-	private  KeyStore getKeyInfo(String pfxkeyfile, String keypwd,
-			String type) throws IOException {
-		log.warn("加载签名证书==>" + pfxkeyfile);
+	private  KeyStore getKeyInfo(String pfxkeyfile, String keypwd, String type) throws IOException {
+		if (LOG.isWarnEnabled()) {
+			LOG.warn("加载签名证书==>" + pfxkeyfile);
+		}
 		try(FileInputStream fis = new FileInputStream(pfxkeyfile);) {
 			KeyStore ks = KeyStore.getInstance(type);
-			log.warn("Load RSA CertPath=[" + pfxkeyfile + "],Pwd=["+ keypwd + "],type=["+type+"]");
+			if (LOG.isWarnEnabled()) {
+				LOG.warn("Load RSA CertPath=[" + pfxkeyfile + "],Pwd=["+ keypwd + "],type=["+type+"]");
+			}
 
 			char[] nPassword = null;
 			nPassword = null == keypwd || "".equals(keypwd.trim()) ? null: keypwd.toCharArray();
@@ -175,7 +178,7 @@ public class CertDescriptor {
 			}
 			return ks;
 		} catch (Exception e) {
-			log.error("getKeyInfo Error", e);
+			LOG.error("getKeyInfo Error", e);
 			return null;
 		}
 	}
@@ -198,7 +201,7 @@ public class CertDescriptor {
 					.getCertificate(keyAlias);
 			return cert.getSerialNumber().toString();
 		} catch (KeyStoreException e) {
-			log.error("getCertIdIdByStore Error", e);
+			LOG.error("getCertIdIdByStore Error", e);
 			return null;
 		}
 	}
@@ -209,12 +212,14 @@ public class CertDescriptor {
 	 *  加载中级证书
 	 * @param certPath 证书地址
 	 */
-	public   void initPublicCert(String certPath) {
+	public void initPublicCert(String certPath) {
 		if (!StringUtils.isEmpty(certPath)) {
 			publicKeyCert = initCert(certPath);
-			log.info("Load PublicKeyCert Successful");
-		} else {
-			log.info("PublicKeyCert is empty");
+			if (LOG.isInfoEnabled()) {
+				LOG.info("Load PublicKeyCert Successful");
+			}
+		} else	if (LOG.isInfoEnabled()) {
+			LOG.info("PublicKeyCert is empty");
 		}
 	}
 
@@ -225,9 +230,11 @@ public class CertDescriptor {
 	public   void initRootCert(String certPath) {
 		if (!StringUtils.isEmpty(certPath)) {
 			rootKeyCert = initCert(certPath);
-			log.info("Load RootCert Successful");
-		} else {
-			log.info("RootCert is empty");
+			if (LOG.isInfoEnabled()) {
+				LOG.info("Load RootCert Successful");
+			}
+		} else	if (LOG.isInfoEnabled()) {
+			LOG.info("RootCert is empty");
 		}
 	}
 
@@ -247,10 +254,4 @@ public class CertDescriptor {
 		return rootKeyCert;
 	}
 	
-
-
-
-
-
-
 }

@@ -65,7 +65,7 @@ public class  Util{
      */
     public static byte[] byteConvert32Bytes(BigInteger n)
     {
-        byte tmpd[] = (byte[])null;
+        byte[] tmpd = (byte[])null;
         if(n == null)
         {
             return null;
@@ -166,7 +166,7 @@ public class  Util{
      */
     public static byte[] hexStringToBytes(String hexString)
     {
-        if (hexString == null || hexString.equals(""))
+        if (hexString == null || "".equals(hexString))
         {
             return null;
         }
@@ -328,15 +328,15 @@ public class  Util{
      * @param content   字符串
      * @return ASCII字符串
      */
-    public static String StringToAsciiString(String content) {
-        String result = "";
+    public static String stringToAsciiString(String content) {
+        StringBuilder result = new StringBuilder();
         int max = content.length();
         for (int i = 0; i < max; i++) {
             char c = content.charAt(i);
             String b = Integer.toHexString(c);
-            result = result + b;
+            result.append( b);
         }
-        return result;
+        return result.toString();
     }
 
     /**
@@ -349,14 +349,14 @@ public class  Util{
      * @return 字符串
      */
     public static String hexStringToString(String hexString, int encodeType) {
-        String result = "";
+        StringBuilder result = new StringBuilder();
         int max = hexString.length() / encodeType;
         for (int i = 0; i < max; i++) {
             char c = (char) hexStringToAlgorism(hexString
                     .substring(i * encodeType, (i + 1) * encodeType));
-            result += c;
+            result.append( c);
         }
-        return result;
+        return result.toString();
     }
 
     /**
@@ -391,60 +391,12 @@ public class  Util{
      */
     public static String hexStringToBinary(String hex) {
         hex = hex.toUpperCase();
+
         String result = "";
         int max = hex.length();
         for (int i = 0; i < max; i++) {
             char c = hex.charAt(i);
-            switch (c) {
-                case '0':
-                    result += "0000";
-                    break;
-                case '1':
-                    result += "0001";
-                    break;
-                case '2':
-                    result += "0010";
-                    break;
-                case '3':
-                    result += "0011";
-                    break;
-                case '4':
-                    result += "0100";
-                    break;
-                case '5':
-                    result += "0101";
-                    break;
-                case '6':
-                    result += "0110";
-                    break;
-                case '7':
-                    result += "0111";
-                    break;
-                case '8':
-                    result += "1000";
-                    break;
-                case '9':
-                    result += "1001";
-                    break;
-                case 'A':
-                    result += "1010";
-                    break;
-                case 'B':
-                    result += "1011";
-                    break;
-                case 'C':
-                    result += "1100";
-                    break;
-                case 'D':
-                    result += "1101";
-                    break;
-                case 'E':
-                    result += "1110";
-                    break;
-                case 'F':
-                    result += "1111";
-                    break;
-            }
+            result += Integer.toBinaryString( Character.digit(c,16));
         }
         return result;
     }
@@ -455,7 +407,7 @@ public class  Util{
      * @param content  ASCII字符串
      * @return 字符串
      */
-    public static String AsciiStringToString(String content) {
+    public static String asciiStringToString(String content) {
         String result = "";
         int length = content.length() / 2;
         for (int i = 0; i < length; i++) {
@@ -534,7 +486,7 @@ public class  Util{
         String result = "";
         result = Integer.toHexString(algorism);
 
-        if (result.length() % 2 == 1) {
+        if (result.length() % 2 != 0) {
             result = "0" + result;
 
         }
@@ -552,14 +504,17 @@ public class  Util{
      *            int 补充后十六进制字符串的长度
      * @return 补充结果
      */
-    static public String patchHexString(String str, int maxLength) {
-        String temp = "";
+    public static  String patchHexString(String str, int maxLength) {
+        StringBuilder temp = new StringBuilder();
         for (int i = 0; i < maxLength - str.length(); i++) {
-            temp = "0" + temp;
+            temp.append(0);
         }
-        str = (temp + str).substring(0, maxLength);
-        return str;
+        temp.append(str);
+        return temp.toString();
     }
+
+
+
 
     /**
      * 将一个字符串转换为int
@@ -616,7 +571,7 @@ public class  Util{
         for (int i = 0, j = 0, l = hex.length(); i < l; i++, j++) {
             String swap = "" + arr[i++] + arr[i];
             int byteint = Integer.parseInt(swap, 16) & 0xFF;
-            b[j] = new Integer(byteint).byteValue();
+            b[j] =  Integer.valueOf(byteint).byteValue();
         }
         return b;
     }
@@ -628,22 +583,23 @@ public class  Util{
      *            byte[] 需要转换的字节数组
      * @return String 十六进制字符串
      */
-    public static String byteToHex(byte b[]) {
+    public static String byteToHex(byte[] b) {
         if (b == null) {
             throw new IllegalArgumentException(
                     "Argument b ( byte array ) is null! ");
         }
-        String hs = "";
-        String stmp = "";
+        StringBuilder hs = new StringBuilder();
         for (int n = 0; n < b.length; n++) {
-            stmp = Integer.toHexString(b[n] & 0xff);
+            String stmp = Integer.toHexString(b[n] & 0xff);
             if (stmp.length() == 1) {
-                hs = hs + "0" + stmp;
-            } else {
+                hs.append(0);
+//                hs = hs + "0" + stmp;
+            } /*else {
                 hs = hs + stmp;
-            }
+            }*/
+            hs.append(stmp);
         }
-        return hs.toUpperCase();
+        return hs.toString().toUpperCase();
     }
 
     public static byte[] subByte(byte[] input, int startIndex, int length) {
@@ -653,4 +609,5 @@ public class  Util{
         }
         return bt;
     }
+
 }

@@ -51,8 +51,8 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
     private static final String FILE_TRANS_URL= "https://filedownload.%s/";
     private static final String APP_TRANS_URL= "https://gateway.%s/gateway/api/appTransReq.do";
     private static final String CARD_TRANS_URL= "https://gateway.%s/gateway/api/cardTransReq.do";
-    public final static DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
-    {
+    public static final DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
+    static {
         df.setTimeZone(TimeZone.getTimeZone("GMT+8"));
     }
 
@@ -324,8 +324,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
             CertPathBuilder builder = CertPathBuilder.getInstance("PKIX");
 
             @SuppressWarnings("unused")
-            PKIXCertPathBuilderResult result = (PKIXCertPathBuilderResult) builder
-                    .build(pkixParams);
+            PKIXCertPathBuilderResult result = (PKIXCertPathBuilderResult) builder.build(pkixParams);
             return cert;
         } catch (java.security.cert.CertPathBuilderException e) {
             LOG.error("verify certificate chain fail.", e);
@@ -516,7 +515,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
         JSONObject response =  UriVariables.getParametersToMap(responseStr);
         if(this.verify(response)){
             if(SDKConstants.OK_RESP_CODE.equals(response.getString(SDKConstants.param_respCode))){
-                String origRespCode = response.getString(SDKConstants.param_origRespCode);
+//                String origRespCode = response.getString(SDKConstants.param_origRespCode);
                 //交易成功，更新商户订单状态
                 //TODO
                 return response;

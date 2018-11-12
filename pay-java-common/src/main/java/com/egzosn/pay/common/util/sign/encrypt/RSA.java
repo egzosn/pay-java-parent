@@ -9,6 +9,13 @@ import java.security.PublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
+/**
+ * RSA
+ * @author egan
+ * <pre>
+ * email egzosn@gmail.com
+ *</pre>
+ */
 public class RSA{
 
 	private static final String ALGORITHM = "RSA";
@@ -221,7 +228,7 @@ public class RSA{
 	 * @return 公钥
 	*/
 	public static PublicKey getPublicKey(String key, String signAlgorithms) throws Exception {
-		return getPublicKey(new ByteArrayInputStream(key.getBytes()), signAlgorithms);
+		return getPublicKey(new ByteArrayInputStream(key.getBytes("ISO8859-1")), signAlgorithms);
 	}
 
 

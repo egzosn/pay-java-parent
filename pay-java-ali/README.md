@@ -167,6 +167,12 @@
           Map result = service.close("支付宝单号", "我方系统单号");
 
 ```
+#### 交易撤销接口
+  ```java
+
+          Map result = service.cancel("支付宝单号", "我方系统单号");
+
+```
 
 
 #### 申请退款接口

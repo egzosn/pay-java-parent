@@ -312,9 +312,10 @@ public class Base64 {
          */
         public int encode(byte[] src, byte[] dst) {
             int len = outLength(src.length);         // dst array size
-            if (dst.length < len)
+            if (dst.length < len) {
                 throw new IllegalArgumentException(
                         "Output byte array is too small for encoding all input bytes");
+            }
             return encode0(src, 0, src.length, dst);
         }
 
@@ -409,8 +410,9 @@ public class Base64 {
          *         padding character at the end
          */
         public Encoder withoutPadding() {
-            if (!doPadding)
+            if (!doPadding) {
                 return this;
+            }
             return new Encoder(isURL, newline, linemax, false);
         }
 
@@ -575,9 +577,10 @@ public class Base64 {
          *          if {@code src} is not in valid Base64 scheme
          */
         public byte[] decode(String src) {
-            if (null != src){
-                src = src.replaceAll("[\r\n]", "");
+            if (null == src){
+              return null;
             }
+            src = src.replaceAll("[\r\n]", "");
             return decode(src.getBytes(StandardCharsets.ISO_8859_1));
         }
 
@@ -608,9 +611,10 @@ public class Base64 {
          */
         public int decode(byte[] src, byte[] dst) {
             int len = outLength(src, 0, src.length);
-            if (dst.length < len)
+            if (dst.length < len) {
                 throw new IllegalArgumentException(
                         "Output byte array is too small for decoding all input bytes");
+            }
             return decode0(src, 0, src.length, dst);
         }
 
@@ -703,8 +707,9 @@ public class Base64 {
                         len -= (sl - sp + 1);
                         break;
                     }
-                    if ((b = base64[b]) == -1)
+                    if ((b = base64[b]) == -1) {
                         n++;
+                    }
                 }
                 len -= n;
             } else {

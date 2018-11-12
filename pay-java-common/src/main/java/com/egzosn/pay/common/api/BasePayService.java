@@ -91,7 +91,7 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
         try {
             base64ClientID = com.egzosn.pay.common.util.sign.encrypt.Base64.encode(String.format("%s:%s", user , password).getBytes("UTF-8"));
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+           LOG.error(e);
         }
 
         return base64ClientID;
@@ -132,9 +132,9 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
     public Map<String, Object> getParameter2Map (Map<String, String[]> parameterMap, InputStream is) {
 
         Map<String, Object> params = new TreeMap<String,Object>();
-        for (Iterator iter = parameterMap.keySet().iterator(); iter.hasNext();) {
-            String name = (String) iter.next();
-            String[] values = parameterMap.get(name);
+        for (Map.Entry<String,  String[]> entry  :  parameterMap.entrySet()) {
+            String name = (String) entry.getKey();
+            String[] values = entry.getValue();
             String valueStr = "";
             for (int i = 0,len =  values.length; i < len; i++) {
                 valueStr += (i == len - 1) ?  values[i] : values[i] + ",";
@@ -145,7 +145,7 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
                         valueStr=new String(valueStr.getBytes("iso8859-1"), payConfigStorage.getInputCharset());
                     }
                 } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
+                    LOG.error(e);
                 }
             }
             params.put(name, valueStr);
@@ -180,6 +180,31 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
     @Override
     public <T> T close(String tradeNo, String outTradeNo, Callback<T> callback) {
         return  callback.perform(close(tradeNo, outTradeNo));
+    }
+    /**
+     * 交易撤销
+     *
+     * @param tradeNo    支付平台订单号
+     * @param outTradeNo 商户单号
+     * @param callback 处理器
+     * @param <T> 返回类型
+     * @return 返回支付方交易撤销后的结果
+     */
+    @Override
+    public <T> T cancel(String tradeNo, String outTradeNo, Callback<T> callback) {
+        return  callback.perform(close(tradeNo, outTradeNo));
+    }
+
+    /**
+     * 交易交易撤销
+     *
+     * @param tradeNo    支付平台订单号
+     * @param outTradeNo 商户单号
+     * @return 返回支付方交易撤销后的结果
+     */
+    @Override
+    public Map<String, Object> cancel(String tradeNo, String outTradeNo) {
+        return Collections.EMPTY_MAP;
     }
 
     /**
@@ -375,7 +400,9 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
     @Override
     public PayOutMessage payBack(Map<String, String[]> parameterMap, InputStream is) {
         Map<String, Object> data = getParameter2Map(parameterMap, is);
-        LOG.debug("回调响应:" +  JSON.toJSONString(data));
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("回调响应:" + JSON.toJSONString(data));
+        }
         if (!verify(data)){
             return getPayOutMessage("fail", "失败");
         }

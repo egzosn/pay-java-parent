@@ -9,7 +9,6 @@ import com.egzosn.pay.common.exception.PayErrorException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -174,7 +173,6 @@ public class XML {
             JSON json = getChildren(children);
             return json.toJavaObject(clazz);
         } catch (Exception e) {
-//            e.printStackTrace();
             throw new PayErrorException(new PayException("XML failure", "XML解析失败\n" + e.getMessage()));
         } finally {
             in.close();
@@ -230,17 +228,17 @@ public class XML {
         try {
             document = newDocument();
         } catch (ParserConfigurationException e) {
-            e.printStackTrace();
+            throw new PayErrorException(new PayException("ParserConfigurationException", e.getLocalizedMessage()));
         }
         org.w3c.dom.Element root = document.createElement("xml");
         document.appendChild(root);
-        for (String key : data.keySet()) {
-            Object value = data.get(key);
+        for (Map.Entry<String, Object> entry : data.entrySet()) {
+            Object value = entry.getValue();
             if (value == null) {
                 value = "";
             }
             value = value.toString().trim();
-            org.w3c.dom.Element filed = document.createElement(key);
+            org.w3c.dom.Element filed = document.createElement(entry.getKey());
             filed.appendChild(document.createTextNode(value.toString()));
             root.appendChild(filed);
         }

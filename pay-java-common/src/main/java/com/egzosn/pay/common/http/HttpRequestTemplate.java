@@ -42,7 +42,7 @@ import java.util.Map;
  */
 public class HttpRequestTemplate {
 
-    protected final Log log = LogFactory.getLog(HttpRequestTemplate.class);
+    protected final Log LOG = LogFactory.getLog(HttpRequestTemplate.class);
 
     protected CloseableHttpClient httpClient;
 
@@ -107,7 +107,7 @@ public class HttpRequestTemplate {
             try {
                 return new SSLConnectionSocketFactory(SSLContext.getDefault());
             } catch (NoSuchAlgorithmException e) {
-                e.printStackTrace();
+                LOG.error(e);
             }
         }
 
@@ -133,9 +133,9 @@ public class HttpRequestTemplate {
 
                 return sslsf;
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.error(e);
         } catch (GeneralSecurityException e) {
-            e.printStackTrace();
+            LOG.error(e);
         }
         return null;
 
@@ -175,7 +175,9 @@ public class HttpRequestTemplate {
         if (0 == configStorage.getMaxTotal() || 0 == configStorage.getDefaultMaxPerRoute()){
             return null;
         }
-        log.info(String.format("Initialize the PoolingHttpClientConnectionManager -- maxTotal:%s, defaultMaxPerRoute:%s", configStorage.getMaxTotal(), configStorage.getDefaultMaxPerRoute()));
+        if (LOG.isInfoEnabled()) {
+            LOG.info(String.format("Initialize the PoolingHttpClientConnectionManager -- maxTotal:%s, defaultMaxPerRoute:%s", configStorage.getMaxTotal(), configStorage.getDefaultMaxPerRoute()));
+        }
         Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory> create()
                 .register("https", createSSL(configStorage))
                 .register("http", new PlainConnectionSocketFactory())
@@ -324,7 +326,9 @@ public class HttpRequestTemplate {
      * @return 类型对象
      */
     public <T>T doExecute(URI uri, Object request, Class<T> responseType, MethodType method){
-        log.debug(String.format("uri:%s, httpMethod:%s ", uri, method.name()));
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(String.format("uri:%s, httpMethod:%s ", uri, method.name()));
+        }
         ClientHttpRequest<T> httpRequest = new ClientHttpRequest(uri ,method, request);
         //判断是否有代理设置
         if (null == httpProxy){

@@ -21,7 +21,7 @@ import java.util.Map;
  */
 public class DefaultPayMessageHandler implements PayMessageHandler {
 
-    protected final Log log = LogFactory.getLog(DefaultPayMessageHandler.class);
+    protected final Log LOG = LogFactory.getLog(DefaultPayMessageHandler.class);
     /**
      * @param payMessage 支付消息
      * @param context    上下文，如果handler或interceptor之间有信息要传递，可以用这个
@@ -30,7 +30,9 @@ public class DefaultPayMessageHandler implements PayMessageHandler {
      */
     @Override
     public PayOutMessage handle(PayMessage payMessage, Map<String, Object> context, PayService payService) throws PayErrorException {
-        log.info("回调支付消息处理器，回调消息：" + JSON.toJSONString(payMessage));
+        if (LOG.isInfoEnabled()) {
+            LOG.info("回调支付消息处理器，回调消息：" + JSON.toJSONString(payMessage));
+        }
         return payService.successPayOutMessage(payMessage);
     }
 }

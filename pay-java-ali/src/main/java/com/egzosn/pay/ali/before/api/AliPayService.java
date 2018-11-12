@@ -21,6 +21,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import static com.egzosn.pay.ali.api.AliPayService.SIGN;
+
 /**
  *  支付宝支付服务
  * @author  egan
@@ -37,8 +39,11 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
 
     private static final String HTTPS_REQ_URL = "https://mapi.alipay.com/gateway.do";
     private static final String QUERY_REQ_URL = "https://openapi.alipay.com/gateway.do";
-    DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-    {
+    public static final String NOTIFY_ID = "notify_id";
+    
+    public static final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+    
+    static {
         df.setTimeZone(TimeZone.getTimeZone("GMT+8"));
     }
     public AliPayService(AliPayConfigStorage payConfigStorage) {
@@ -63,13 +68,13 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
     @Override
     public boolean verify(Map<String, Object> params) {
 
-        if (params.get("sign") == null || params.get("notify_id") == null) {
+        if (params.get(SIGN) == null || params.get(NOTIFY_ID) == null) {
             LOG.debug("支付宝支付异常：params：" + params);
             return false;
         }
 
         try {
-            return signVerify(params, (String) params.get("sign")) && verifySource((String) params.get("notify_id"));
+            return signVerify(params, (String) params.get(SIGN)) && verifySource((String) params.get(NOTIFY_ID));
         } catch (PayErrorException e) {
             LOG.error(e);
         }
@@ -107,8 +112,8 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
      */
     private Map<String, Object> setSign(Map<String, Object> parameters){
         parameters.put("sign_type", payConfigStorage.getSignType());
-        String sign = createSign(SignUtils.parameterText(parameters, "&",  "sign", "appId"), payConfigStorage.getInputCharset());
-        parameters.put("sign", sign);
+        String sign = createSign(SignUtils.parameterText(parameters, "&",  SIGN, "appId"), payConfigStorage.getInputCharset());
+        parameters.put(SIGN, sign);
 
         return parameters;
     }
@@ -160,7 +165,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-        orderInfo.put("sign", sign);
+        orderInfo.put(SIGN, sign);
         orderInfo.put("sign_type", payConfigStorage.getSignType());
         return orderInfo;
     }
@@ -220,9 +225,6 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
         orderInfo.put("it_b_pay",  "30m");
         // 支付宝处理完请求后，当前页面跳转到商户指定页面的路径，可空
         orderInfo.put("return_url", payConfigStorage.getReturnUrl());
-        // 调用银行卡支付，需配置此参数，参与签名， 固定值 （需要签约《无线银行卡快捷支付》才能使用）
-//        if (order.getTransactionType().getType())
-//          orderInfo.put("paymethod","expressGateway");
 
         return orderInfo;
     }
@@ -273,12 +275,12 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
                 .append( "\" method=\"")
                 .append( method.name().toLowerCase()) .append( "\">");
 
-        for (String key: orderInfo.keySet()) {
-            Object o = orderInfo.get(key);
-            if (null == o ||"null".equals(o) || "".equals(o) ){
+        for (Map.Entry<String, Object> entry : orderInfo.entrySet()) {
+            Object o = entry.getValue();
+            if (null == o || "null".equals(o) || "".equals(o)) {
                 continue;
             }
-            formHtml.append("<input type=\"hidden\" name=\"" + key + "\" value=\"" + orderInfo.get(key) + "\"/>");
+            formHtml.append("<input type=\"hidden\" name=\"" + entry.getKey() + "\" value=\"" + o + "\"/>");
         }
 
 
@@ -338,6 +340,22 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
     public Map<String, Object> close(String tradeNo, String outTradeNo) {
 
         return  secondaryInterface(tradeNo, outTradeNo, AliTransactionType.CLOSE);
+    }
+
+
+    /**
+     * 支付交易返回失败或支付系统超时，调用该接口撤销交易。
+     * 如果此订单用户支付失败，支付宝系统会将此订单关闭；如果用户支付成功，支付宝系统会将此订单资金退还给用户。
+     * 注意：只有发生支付系统超时或者支付结果未知时可调用撤销，其他正常支付的单如需实现相同功能请调用申请退款API。
+     * 提交支付交易后调用【查询订单API】，没有明确的支付结果再调用【撤销订单API】。
+     *
+     * @param tradeNo    支付平台订单号
+     * @param outTradeNo 商户单号
+     * @return 返回支付方交易撤销后的结果
+     */
+    @Override
+    public Map<String, Object> cancel(String tradeNo, String outTradeNo) {
+        return secondaryInterface(tradeNo, outTradeNo, AliTransactionType.CANCEL);
     }
 
     /**

@@ -226,6 +226,16 @@ public class AliPayController {
     public Map<String, Object> close(QueryOrder order) {
         return service.close(order.getTradeNo(), order.getOutTradeNo());
     }
+    /**
+     * 交易c撤销接口
+     *
+     * @param order 订单的请求体
+     * @return 返回支付方交易关闭后的结果
+     */
+    @RequestMapping("cancel")
+    public Map<String, Object> cancel(QueryOrder order) {
+        return service.cancel(order.getTradeNo(), order.getOutTradeNo());
+    }
 
     /**
      * 申请退款接口

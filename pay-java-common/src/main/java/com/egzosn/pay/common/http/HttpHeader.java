@@ -1,19 +1,12 @@
 package com.egzosn.pay.common.http;
 
 import org.apache.http.Header;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicHeader;
 
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
-import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import static com.egzosn.pay.common.http.UriVariables.getMapToParameters;
 
 /**
  *  请求头
@@ -82,8 +75,8 @@ public class HttpHeader{
      * @param headers 请求头集
      */
     public void setHeaders(Map<String, String> headers) {
-        for (String key : headers.keySet()) {
-            addHeader(new BasicHeader(key, headers.get(key)));
+        for (Map.Entry<String, String> entry : headers.entrySet()) {
+            addHeader(new BasicHeader(entry.getKey(), entry.getValue()));
         }
     }
 
