@@ -194,11 +194,13 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
         Map<String, Object> parameters = getPublicParameters();
 
         parameters.put("body", order.getSubject());// 购买支付信息
+//        parameters.put("detail", order.getBody());// 购买支付信息
         parameters.put("out_trade_no", order.getOutTradeNo());// 订单号
         parameters.put("spbill_create_ip", StringUtils.isEmpty(order.getSpbillCreateIp()) ? "192.168.1.150" : order.getSpbillCreateIp() );
         parameters.put("total_fee", conversion( order.getPrice()));// 总金额单位为分
-
-        parameters.put("attach", order.getBody());
+        if (StringUtils.isNotEmpty(order.getAddition())){
+            parameters.put("attach", order.getAddition());
+        }
         parameters.put("notify_url", payConfigStorage.getNotifyUrl());
         parameters.put("trade_type", order.getTransactionType().getType());
         if (null != order.getExpirationTime()){

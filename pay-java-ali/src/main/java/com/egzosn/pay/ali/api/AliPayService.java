@@ -179,10 +179,12 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
         switch ((AliTransactionType) order.getTransactionType()) {
             case PAGE:
             case DIRECT:
+                bizContent.put("passback_params", order.getAddition());
                 bizContent.put("product_code", "FAST_INSTANT_TRADE_PAY");
                 orderInfo.put("return_url", payConfigStorage.getReturnUrl());
                 break;
             case WAP:
+                bizContent.put("passback_params", order.getAddition());
                 bizContent.put("product_code", "QUICK_WAP_PAY");
                 orderInfo.put("return_url", payConfigStorage.getReturnUrl());
                 break;
