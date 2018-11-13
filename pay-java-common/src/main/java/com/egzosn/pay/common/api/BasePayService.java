@@ -369,7 +369,8 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
      * 获取支付消息处理器,这里用于处理具体的支付业务
      * 配合{@link  PayService#payBack(Map, InputStream)}进行使用
      * <p>
-     * 默认使用{@link  DefaultPayMessageHandler }进行实现
+     * @return  默认使用{@link  DefaultPayMessageHandler }进行实现
+     *
      */
     public PayMessageHandler getPayMessageHandler() {
         if (null == handler){
@@ -383,7 +384,6 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
      *
      * @param interceptor 消息拦截器
      *                    配合{@link  PayService#payBack(Map, InputStream)}进行使用, 做一些预前处理
-     *                    <p>
      */
     @Override
     public void addPayMessageInterceptor(PayMessageInterceptor interceptor) {

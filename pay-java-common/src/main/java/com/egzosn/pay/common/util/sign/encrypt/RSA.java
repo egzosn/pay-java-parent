@@ -224,6 +224,7 @@ public class RSA{
 	/**
 	* 得到公钥
 	* @param key 密钥字符串（经过base64编码）
+	* @param signAlgorithms 密钥类型
 	 * @throws Exception 加密异常
 	 * @return 公钥
 	*/

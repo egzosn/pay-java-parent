@@ -80,6 +80,7 @@ public class XML {
      *
      * @param content json字符串
      * @param clazz 需要转化的类
+     *              @param <T> 返回对应类型
      * @return Json值
      */
     public static <T> T toBean(String content, Class<T> clazz) {
