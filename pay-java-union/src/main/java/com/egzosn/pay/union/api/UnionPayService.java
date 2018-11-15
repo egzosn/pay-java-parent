@@ -508,7 +508,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
         Map<String ,Object> params = this.getCommonParam();
         type.convertMap(params);
         params.put(SDKConstants.param_orderId, refundOrder.getRefundNo());
-        params.put(SDKConstants.param_txnAmt, refundOrder.getRefundAmount());
+        params.put(SDKConstants.param_txnAmt, conversion(refundOrder.getRefundAmount()));
         params.put(SDKConstants.param_origQryId, refundOrder.getTradeNo());
         this.setSign(params);
         String responseStr =  getHttpRequestTemplate().postForObject(this.getBackTransUrl(),params,String.class);
