@@ -10,13 +10,14 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * 支付基础配置存储
+ *
  * @author: egan
  * <pre>
  *     email egzosn@gmail.com
  *     date 2017/3/5 20:33
  *  </pre>
  */
-public abstract class BasePayConfigStorage implements PayConfigStorage{
+public abstract class BasePayConfigStorage implements PayConfigStorage {
 
     private volatile Object attach;
     /**
@@ -25,39 +26,39 @@ public abstract class BasePayConfigStorage implements PayConfigStorage{
     private volatile CertDescriptor certDescriptor;
 
     /**
-     *   应用私钥，rsa_private pkcs8格式 生成签名时使用
+     * 应用私钥，rsa_private pkcs8格式 生成签名时使用
      */
-    private volatile  String keyPrivate;
+    private volatile String keyPrivate;
     /**
-     *   应用私钥，rsa_private pkcs8格式 生成签名时使用
+     * 应用私钥，rsa_private pkcs8格式 生成签名时使用
      */
-    private volatile  String keyPrivateCertPwd;
+    private volatile String keyPrivateCertPwd;
     /**
-     *  支付平台公钥(签名校验使用)
+     * 支付平台公钥(签名校验使用)
      */
-    private volatile  String keyPublic;
+    private volatile String keyPublic;
     /**
      * 异步回调地址
      */
-    private volatile  String notifyUrl;
+    private volatile String notifyUrl;
     /**
      * 同步回调地址，支付完成后展示的页面
      */
-    private volatile  String returnUrl;
+    private volatile String returnUrl;
     /**
      * 签名加密类型
      */
-    private volatile  String signType;
+    private volatile String signType;
     /**
      * 字符类型
      */
-    private volatile  String inputCharset;
+    private volatile String inputCharset;
 
 
     /**
      * 支付类型 aliPay 支付宝， wxPay微信..等等，扩展支付模块定义唯一。
      */
-    private volatile  String payType;
+    private volatile String payType;
 
     /**
      * 消息来源类型
@@ -66,7 +67,7 @@ public abstract class BasePayConfigStorage implements PayConfigStorage{
 
 
     /**
-     *  访问令牌 每次请求其他方法都要传入的值
+     * 访问令牌 每次请求其他方法都要传入的值
      */
     private volatile String accessToken;
     /**
@@ -87,6 +88,11 @@ public abstract class BasePayConfigStorage implements PayConfigStorage{
      */
     private boolean isCertSign = false;
 
+    /**
+     * 支付回调消息
+     */
+    protected volatile PayMessageHandler handler;
+
     @Override
     public Object getAttach() {
         return attach;
@@ -98,10 +104,10 @@ public abstract class BasePayConfigStorage implements PayConfigStorage{
 
     @Override
     public CertDescriptor getCertDescriptor() {
-        if (!isCertSign){
-           throw new PayErrorException(new PayException("certDescriptor fail", "isCertSign is false"));
+        if (!isCertSign) {
+            throw new PayErrorException(new PayException("certDescriptor fail", "isCertSign is false"));
         }
-        if(null == certDescriptor){
+        if (null == certDescriptor) {
             certDescriptor = new CertDescriptor();
         }
         return certDescriptor;
@@ -258,8 +264,10 @@ public abstract class BasePayConfigStorage implements PayConfigStorage{
 
     public void setCertSign(boolean certSign) {
         isCertSign = certSign;
-        if (certSign){
+        if (certSign) {
             certDescriptor = new CertDescriptor();
         }
     }
+
+
 }

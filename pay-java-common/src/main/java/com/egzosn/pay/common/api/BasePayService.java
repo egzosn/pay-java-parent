@@ -1,12 +1,13 @@
 package com.egzosn.pay.common.api;
 
-import com.egzosn.pay.common.bean.RefundOrder;
-import com.egzosn.pay.common.bean.TransactionType;
-import com.egzosn.pay.common.bean.TransferOrder;
+import com.alibaba.fastjson.JSON;
+import com.egzosn.pay.common.bean.*;
 import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.common.http.HttpRequestTemplate;
 import com.egzosn.pay.common.util.sign.SignUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -22,13 +23,21 @@ import java.util.*;
  *   </pre>
  */
 public abstract class BasePayService<PC extends PayConfigStorage> implements PayService<PC>  {
-
+    protected final Log LOG = LogFactory.getLog(getClass());
     protected PC payConfigStorage;
 
     protected HttpRequestTemplate requestTemplate;
     protected int retrySleepMillis = 1000;
 
     protected int maxRetryTimes = 5;
+    /**
+     * 支付消息处理器
+     */
+    protected PayMessageHandler handler;
+    /**
+     * 支付消息拦截器
+     */
+    protected List<PayMessageInterceptor> interceptors = new ArrayList<PayMessageInterceptor>();;
 
     /**
      * 设置支付配置
@@ -82,7 +91,7 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
         try {
             base64ClientID = com.egzosn.pay.common.util.sign.encrypt.Base64.encode(String.format("%s:%s", user , password).getBytes("UTF-8"));
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+           LOG.error(e);
         }
 
         return base64ClientID;
@@ -123,9 +132,9 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
     public Map<String, Object> getParameter2Map (Map<String, String[]> parameterMap, InputStream is) {
 
         Map<String, Object> params = new TreeMap<String,Object>();
-        for (Iterator iter = parameterMap.keySet().iterator(); iter.hasNext();) {
-            String name = (String) iter.next();
-            String[] values = parameterMap.get(name);
+        for (Map.Entry<String,  String[]> entry  :  parameterMap.entrySet()) {
+            String name = (String) entry.getKey();
+            String[] values = entry.getValue();
             String valueStr = "";
             for (int i = 0,len =  values.length; i < len; i++) {
                 valueStr += (i == len - 1) ?  values[i] : values[i] + ",";
@@ -136,7 +145,7 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
                         valueStr=new String(valueStr.getBytes("iso8859-1"), payConfigStorage.getInputCharset());
                     }
                 } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
+                    LOG.error(e);
                 }
             }
             params.put(name, valueStr);
@@ -171,6 +180,31 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
     @Override
     public <T> T close(String tradeNo, String outTradeNo, Callback<T> callback) {
         return  callback.perform(close(tradeNo, outTradeNo));
+    }
+    /**
+     * 交易撤销
+     *
+     * @param tradeNo    支付平台订单号
+     * @param outTradeNo 商户单号
+     * @param callback 处理器
+     * @param <T> 返回类型
+     * @return 返回支付方交易撤销后的结果
+     */
+    @Override
+    public <T> T cancel(String tradeNo, String outTradeNo, Callback<T> callback) {
+        return  callback.perform(close(tradeNo, outTradeNo));
+    }
+
+    /**
+     * 交易交易撤销
+     *
+     * @param tradeNo    支付平台订单号
+     * @param outTradeNo 商户单号
+     * @return 返回支付方交易撤销后的结果
+     */
+    @Override
+    public Map<String, Object> cancel(String tradeNo, String outTradeNo) {
+        return Collections.EMPTY_MAP;
     }
 
     /**
@@ -316,5 +350,69 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
     @Override
     public <T>T transferQuery(String outNo, String tradeNo, Callback<T> callback){
         return callback.perform(transferQuery(outNo, tradeNo));
+    }
+
+    /**
+     * 设置支付消息处理器,这里用于处理具体的支付业务
+     *
+     * @param handler 消息处理器
+     *                配合{@link  PayService#payBack(Map, InputStream)}进行使用
+     *                <p>
+     *                默认使用{@link  DefaultPayMessageHandler }进行实现
+     */
+    @Override
+    public void setPayMessageHandler(PayMessageHandler handler) {
+        this.handler = handler;
+    }
+
+    /**
+     * 获取支付消息处理器,这里用于处理具体的支付业务
+     * 配合{@link  PayService#payBack(Map, InputStream)}进行使用
+     * <p>
+     * @return  默认使用{@link  DefaultPayMessageHandler }进行实现
+     *
+     */
+    public PayMessageHandler getPayMessageHandler() {
+        if (null == handler){
+            setPayMessageHandler(new DefaultPayMessageHandler());
+        }
+        return handler;
+    }
+
+    /**
+     * 设置支付消息拦截器
+     *
+     * @param interceptor 消息拦截器
+     *                    配合{@link  PayService#payBack(Map, InputStream)}进行使用, 做一些预前处理
+     */
+    @Override
+    public void addPayMessageInterceptor(PayMessageInterceptor interceptor) {
+        interceptors.add(interceptor);
+    }
+
+    /**
+     * 将请求参数或者请求流转化为 Map
+     *
+     * @param parameterMap 请求参数
+     * @param is           请求流
+     * @return 获得回调响应信息
+     */
+    @Override
+    public PayOutMessage payBack(Map<String, String[]> parameterMap, InputStream is) {
+        Map<String, Object> data = getParameter2Map(parameterMap, is);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("回调响应:" + JSON.toJSONString(data));
+        }
+        if (!verify(data)){
+            return getPayOutMessage("fail", "失败");
+        }
+        PayMessage payMessage = new PayMessage(data);
+        Map<String, Object> context = new HashMap<String, Object>();
+        for (PayMessageInterceptor interceptor : interceptors){
+            if (!interceptor.intercept(payMessage, context, this)){
+                return successPayOutMessage(payMessage);
+            }
+        }
+        return getPayMessageHandler().handle(payMessage, context, this);
     }
 }

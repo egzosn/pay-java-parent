@@ -101,11 +101,10 @@ public class PayMessage implements Serializable {
     }
 
     public Number getTotalFee(){
-        String total_fee = (String) payMessage.get("total_fee");
-        if (null == total_fee || "".equals(total_fee)){    return 0;      }
-        if (isNumber(total_fee)){
-            BigDecimal totalFee = new BigDecimal(total_fee);
-            return totalFee;
+        String totalFee = (String) payMessage.get("total_fee");
+        if (null == totalFee || "".equals(totalFee)){    return 0;      }
+        if (isNumber(totalFee)){
+            return new BigDecimal(totalFee);
         }
         return 0;
     }
@@ -118,19 +117,7 @@ public class PayMessage implements Serializable {
         return str.matches("^(-?[1-9]\\d*\\.?\\d*)|(-?0\\.\\d*[1-9])|(-?[0])|(-?[0]\\.\\d*)$");
     }
 
-    public Date parseDate(String str){
 
-        if (null == str || "".equals(str)){
-            return null;
-        }
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        try {
-            return format.parse(str);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
 
     @Override
     public String toString() {

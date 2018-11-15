@@ -75,7 +75,6 @@ public interface PayService<PC extends PayConfigStorage> {
      * @param id 业务id, 数据的真实性.
      * @return true通过
      */
-    @Deprecated
     boolean verifySource(String id);
 
 
@@ -186,6 +185,7 @@ public interface PayService<PC extends PayConfigStorage> {
      */
     Map<String, Object> close(String tradeNo, String outTradeNo);
 
+
     /**
      * 交易关闭接口
      *
@@ -196,6 +196,26 @@ public interface PayService<PC extends PayConfigStorage> {
      * @return 返回支付方交易关闭后的结果
      */
     <T>T close(String tradeNo, String outTradeNo, Callback<T> callback);
+
+    /**
+     * 交易交易撤销
+     *
+     * @param tradeNo    支付平台订单号
+     * @param outTradeNo 商户单号
+     * @return 返回支付方交易撤销后的结果
+     */
+    Map<String, Object> cancel(String tradeNo, String outTradeNo);
+
+    /**
+     * 交易交易撤销
+     *
+     * @param tradeNo    支付平台订单号
+     * @param outTradeNo 商户单号
+     * @param callback 处理器
+     * @param <T> 返回类型
+     * @return 返回支付方交易撤销后的结果
+     */
+    <T>T cancel(String tradeNo, String outTradeNo, Callback<T> callback);
 
     /**
      * 申请退款接口
@@ -300,7 +320,7 @@ public interface PayService<PC extends PayConfigStorage> {
 
 
     /**
-     *
+     * 通用查询接口
      * @param tradeNoOrBillDate 支付平台订单号或者账单类型， 具体请
      *                          类型为{@link String }或者 {@link Date }，类型须强制限制，类型不对应则抛出异常{@link PayErrorException}
      * @param outTradeNoBillType  商户单号或者 账单类型
@@ -361,6 +381,33 @@ public interface PayService<PC extends PayConfigStorage> {
      */
      <T>T transferQuery(String outNo, String tradeNo, Callback<T> callback);
 
+         /**
+     * 将请求参数或者请求流转化为 Map
+     *
+     * @param parameterMap 请求参数
+     * @param is           请求流
+     * @return 获得回调响应信息
+     */
+    PayOutMessage payBack(Map<String, String[]> parameterMap, InputStream is);
 
+    /**
+     * 设置支付消息处理器,这里用于处理具体的支付业务
+     * @param handler 消息处理器
+     * 配合{@link  com.egzosn.pay.common.api.PayService#payBack(java.util.Map, java.io.InputStream)}进行使用
+     *
+     *   默认使用{@link  com.egzosn.pay.common.api.DefaultPayMessageHandler }进行实现
+     *
+     */
+    void setPayMessageHandler(PayMessageHandler handler);
+
+    /**
+     * 设置支付消息处理器,这里用于处理具体的支付业务
+     * @param interceptor 消息拦截器
+     * 配合{@link  com.egzosn.pay.common.api.PayService#payBack(java.util.Map, java.io.InputStream)}进行使用
+     *
+     *   默认使用{@link  com.egzosn.pay.common.api.DefaultPayMessageHandler }进行实现
+     *
+     */
+    void addPayMessageInterceptor(PayMessageInterceptor interceptor);
 
 }

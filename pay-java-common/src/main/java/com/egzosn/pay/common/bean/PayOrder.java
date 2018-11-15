@@ -13,33 +13,68 @@ import java.util.Date;
  *  </pre>
  */
 public class PayOrder {
-    //商品名称
+    /**
+     * 商品名称
+     */
     private String subject;
-    //商品描述
+    /**
+     * 商品描述
+     */
     private String body;
-    //价格
+    /**
+     * 商品描述
+     */
+    private String addition;
+    /**
+     * 价格
+     */
     private BigDecimal price;
-    //商户订单号
+    /**
+     * 商户订单号
+     */
     private String outTradeNo;
-    //银行卡类型
+    /**
+     * 银行卡类型
+     */
     private String bankType;
-    //设备信息，
+    /**
+     * 设备信息
+     */
     private String deviceInfo;
-    //支付创建ip
+    /**
+     * 支付创建ip
+     */
     private String spbillCreateIp;
-    //付款条码串  与设备号类似？？？
+    /**
+     * 付款条码串  与设备号类似？？？
+     */
     private String authCode;
-    //WAP支付链接
+    /**
+     * 微信专用，，，，
+     * WAP支付链接
+     */
     private String wapUrl;
-    //WAP支付网页名称
+    /**
+     * 微信专用，，，，
+     * WAP支付网页名称
+     */
+
     private String wapName;
-    //微信会员唯一标识
+    /**
+     * 微信会员唯一标识
+     */
     private String openid;
-    //交易类型
+    /**
+     * 交易类型
+     */
     private TransactionType transactionType;
-    //支付币种
+    /**
+     * 支付币种
+     */
     private CurType curType;
-    //订单过期时间
+    /**
+     * 订单过期时间
+     */
     private Date expirationTime;
 
 
@@ -67,6 +102,14 @@ public class PayOrder {
 
     public void setBody(String body) {
         this.body = body;
+    }
+
+    public String getAddition() {
+        return addition;
+    }
+
+    public void setAddition(String addition) {
+        this.addition = addition;
     }
 
     public BigDecimal getPrice() {

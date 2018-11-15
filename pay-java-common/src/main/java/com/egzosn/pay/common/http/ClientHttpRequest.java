@@ -32,7 +32,7 @@ import static com.egzosn.pay.common.http.UriVariables.getMapToParameters;
  *  </pre>
  */
 public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase implements  org.apache.http.client.ResponseHandler<T>{
-    protected final Log log = LogFactory.getLog(ClientHttpRequest.class);
+    protected static final Log LOG = LogFactory.getLog(ClientHttpRequest.class);
     public static final ContentType APPLICATION_FORM_URLENCODED_UTF_8 = ContentType.create("application/x-www-form-urlencoded", Consts.UTF_8);;
 
 
@@ -157,7 +157,9 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
         if (request instanceof HttpHeader){
             HttpHeader entity = (HttpHeader)request;
             if (null != entity.getHeaders() ){
-                log.debug("header : " + JSON.toJSONString(entity.getHeaders()));
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("header : " + JSON.toJSONString(entity.getHeaders()));
+                }
                 for (Header header : entity.getHeaders()){
                     addHeader(header);
                 }
@@ -168,7 +170,9 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
                 setEntity(entity);
             }
             if (null != entity.getHeaders() ){
-                log.debug("header : " + JSON.toJSONString(entity.getHeaders()));
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("header : " + JSON.toJSONString(entity.getHeaders()));
+                }
                 for (Header header : entity.getHeaders()){
                     addHeader(header);
                 }
@@ -177,16 +181,22 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
             setEntity((HttpEntity)request);
         } else if (request instanceof Map) {
             String parameters = getMapToParameters((Map) request);
-            log.debug("Parameter : " + parameters);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Parameter : " + parameters);
+            }
             StringEntity entity = new StringEntity(parameters, APPLICATION_FORM_URLENCODED_UTF_8);
             setEntity(entity);
         } else if (request instanceof String) {
-            log.debug("Parameter : " + request);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Parameter : " + request);
+            }
             StringEntity entity = new StringEntity((String) request,  APPLICATION_FORM_URLENCODED_UTF_8);
             setEntity(entity);
         } else {
             String body = JSON.toJSONString(request);
-            log.debug("body : " + request);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("body : " + request);
+            }
             StringEntity entity = new StringEntity(body, ContentType.APPLICATION_JSON);
             setEntity(entity);
         }

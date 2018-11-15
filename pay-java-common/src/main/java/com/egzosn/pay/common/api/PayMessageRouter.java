@@ -134,7 +134,7 @@ public class PayMessageRouter {
       }
     }
 
-    if (matchRules.size() == 0) {
+    if (matchRules.isEmpty()) {
       return null;
     }
 
@@ -154,7 +154,9 @@ public class PayMessageRouter {
       } else {
         res = rule.service(payMessage, payService, exceptionHandler);
         // 在同步操作结束，session访问结束
-        LOG.debug("End session access: async=false, fromPay=" + payMessage.getFromPay());
+        if (LOG.isDebugEnabled()) {
+          LOG.debug("End session access: async=false, fromPay=" + payMessage.getFromPay());
+        }
       }
     }
 
