@@ -84,7 +84,10 @@ public class PayoneerPayService extends BasePayService<PayoneerConfigStorage> im
         //设置 base atuh
         entity.setHeaders(authHeader());
         JSONObject response = getHttpRequestTemplate().postForObject(getReqUrl(PayoneerTransactionType.REGISTRATION), entity, JSONObject.class);
-        if (response != null && 0 == response.getIntValue(CODE)) {
+        if (null == response) {
+            return null;
+        }
+        if (0 == response.getIntValue(CODE)) {
             return response.getString("registration_link");
         }
         throw new PayErrorException(new PayException("fail", "Payoneer获取授权页面失败,原因:" + response.getString("hint"), response.toJSONString()));
@@ -266,7 +269,7 @@ public class PayoneerPayService extends BasePayService<PayoneerConfigStorage> im
         if (response != null) {
             return response;
         }
-        throw new PayErrorException(new PayException("fail", "Payoneer申请收款失败,原因:" + response.getString("description"), response.toJSONString()));
+        throw new PayErrorException(new PayException("fail", "Payoneer申请收款失败,原因:未有返回值" ));
     }
 
     /**
@@ -293,6 +296,18 @@ public class PayoneerPayService extends BasePayService<PayoneerConfigStorage> im
      */
     @Override
     public Map<String, Object> close(String tradeNo, String outTradeNo) {
+        return secondaryInterface(tradeNo, outTradeNo, PayoneerTransactionType.CHARGE_CANCEL);
+    }
+
+    /**
+     * 交易交易撤销
+     *
+     * @param tradeNo    支付平台订单号
+     * @param outTradeNo 商户单号
+     * @return 返回支付方交易撤销后的结果
+     */
+    @Override
+    public Map<String, Object> cancel(String tradeNo, String outTradeNo) {
         return secondaryInterface(tradeNo, outTradeNo, PayoneerTransactionType.CHARGE_CANCEL);
     }
 
