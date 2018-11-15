@@ -34,7 +34,7 @@ public enum  AliTransactionType implements TransactionType {
      */
     WAP("alipay.wap.create.direct.pay.by.user"),
 
-    //交易辅助接口
+    //交易辅助接口，以下属于新版接口
 
     /**
      * 交易订单查询
@@ -44,6 +44,10 @@ public enum  AliTransactionType implements TransactionType {
      * 交易订单关闭
      */
     CLOSE("alipay.trade.close"),
+    /**
+     * 交易订单撤销
+     */
+    CANCEL("alipay.trade.cancel "),
     /**
      * 退款
      */
