@@ -220,7 +220,7 @@ public class WxPayController {
         if (service.verify(params)) {
             //这里处理业务逻辑
             //......业务逻辑处理块........
-            return service.getPayOutMessage("Success", "成功").toMessage();
+            return service.successPayOutMessage(null).toMessage();
         }
 
         return service.getPayOutMessage("fail", "失败").toMessage();
