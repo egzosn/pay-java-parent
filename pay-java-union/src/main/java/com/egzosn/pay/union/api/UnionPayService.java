@@ -15,8 +15,6 @@ import com.egzosn.pay.common.util.sign.encrypt.RSA;
 import com.egzosn.pay.common.util.sign.encrypt.RSA2;
 import com.egzosn.pay.union.bean.UnionTransactionType;
 import com.egzosn.pay.union.bean.SDKConstants;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -35,7 +33,6 @@ import java.util.*;
  * </pre>
  */
 public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
-    private static final Log log = LogFactory.getLog(UnionPayService.class);
     /**
      * 测试域名
      */
@@ -54,8 +51,8 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
     private static final String FILE_TRANS_URL= "https://filedownload.%s/";
     private static final String APP_TRANS_URL= "https://gateway.%s/gateway/api/appTransReq.do";
     private static final String CARD_TRANS_URL= "https://gateway.%s/gateway/api/cardTransReq.do";
-    public final static DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
-    {
+    public static final DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
+    static {
         df.setTimeZone(TimeZone.getTimeZone("GMT+8"));
     }
 
@@ -158,7 +155,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
     public boolean verify(Map<String, Object> result) {
 
         if (null == result || result.get(SDKConstants.param_signature) == null) {
-            log.debug("银联支付验签异常：params：" + result);
+            LOG.debug("银联支付验签异常：params：" + result);
             return false;
         }
         return this.signVerify(result, (String) result.get(SDKConstants.param_signature));
@@ -282,11 +279,11 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
             case SM3:
                 String key = payConfigStorage.getKeyPrivate();
                 signStr = SignUtils.parameterText(parameters, "&", "signature");
-                 key = signUtils.createSign(key,"",payConfigStorage.getInputCharset()) + "&";
+                key = signUtils.createSign(key,"",payConfigStorage.getInputCharset()) + "&";
                 parameters.put(SDKConstants.param_signature, signUtils.createSign(signStr, key, payConfigStorage.getInputCharset()));
                 break;
             default:
-              throw new PayErrorException(new PayException("sign fail", "未找到的签名类型"));
+                throw new PayErrorException(new PayException("sign fail", "未找到的签名类型"));
         }
 
 
@@ -327,17 +324,16 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
             CertPathBuilder builder = CertPathBuilder.getInstance("PKIX");
 
             @SuppressWarnings("unused")
-            PKIXCertPathBuilderResult result = (PKIXCertPathBuilderResult) builder
-                    .build(pkixParams);
+            PKIXCertPathBuilderResult result = (PKIXCertPathBuilderResult) builder.build(pkixParams);
             return cert;
         } catch (java.security.cert.CertPathBuilderException e) {
-            log.error("verify certificate chain fail.", e);
+            LOG.error("verify certificate chain fail.", e);
         } catch (CertificateExpiredException e) {
-            log.error(e);
+            LOG.error(e);
         } catch (CertificateNotYetValidException e) {
-            log.error(e);
+            LOG.error(e);
         } catch (Exception e) {
-            log.error(e);
+            LOG.error(e);
         }
         return null;
     }
@@ -358,11 +354,11 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
         if(this.verify(response)){
             if(SDKConstants.OK_RESP_CODE.equals(response.get(SDKConstants.param_respCode))){
                 //成功,获取tn号
-                    return MatrixToImageWriter.writeInfoToJpgBuff((String)response.get(SDKConstants.param_qrCode));
+                return MatrixToImageWriter.writeInfoToJpgBuff((String)response.get(SDKConstants.param_qrCode));
             }
-                throw new PayErrorException(new PayException((String)response.get(SDKConstants.param_respCode), (String)response.get(SDKConstants.param_respMsg), responseStr));
+            throw new PayErrorException(new PayException((String)response.get(SDKConstants.param_respCode), (String)response.get(SDKConstants.param_respMsg), responseStr));
         }
-            throw new PayErrorException(new PayException("failure", "验证签名失败", responseStr));
+        throw new PayErrorException(new PayException("failure", "验证签名失败", responseStr));
     }
 
     /**
@@ -393,7 +389,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
                     x509CertString.getBytes("ISO-8859-1"));
             x509Cert = (X509Certificate) cf.generateCertificate(tIn);
         } catch (Exception e) {
-            log.error("gen certificate error", e);
+            throw new PayErrorException(new PayException("证书加载失败", "gen certificate error:"+e.getLocalizedMessage() ));
         }
         return x509Cert;
     }
@@ -519,7 +515,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
         JSONObject response =  UriVariables.getParametersToMap(responseStr);
         if(this.verify(response)){
             if(SDKConstants.OK_RESP_CODE.equals(response.getString(SDKConstants.param_respCode))){
-                String origRespCode = response.getString(SDKConstants.param_origRespCode);
+//                String origRespCode = response.getString(SDKConstants.param_origRespCode);
                 //交易成功，更新商户订单状态
                 //TODO
                 return response;
@@ -538,7 +534,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
      */
     @Override
     public Map<String, Object> close (String tradeNo, String outTradeNo) {
-            return Collections.emptyMap();
+        return Collections.emptyMap();
     }
 
     /**
@@ -574,7 +570,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
      */
     @Override
     public Map<String, Object> refundquery (String tradeNo, String outTradeNo) {
-            return Collections.emptyMap();
+        return Collections.emptyMap();
     }
 
 
@@ -631,7 +627,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
      */
     @Override
     public Map<String, Object> secondaryInterface(Object tradeNoOrBillDate, String outTradeNoBillType, TransactionType transactionType) {
-            return Collections.emptyMap();
+        return Collections.emptyMap();
     }
 
     /**
