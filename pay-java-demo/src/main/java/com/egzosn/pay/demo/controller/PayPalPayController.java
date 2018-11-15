@@ -104,7 +104,7 @@ public class PayPalPayController {
             if (service.verify(service.getParameter2Map(request.getParameterMap(), is))) {
                 // TODO 这里进行成功后的订单业务处理
                 // TODO 返回成功付款页面，这个到时候再做一个漂亮的页面显示，并使用前后端分离的模式
-                return "success";
+                return service.successPayOutMessage(null).toMessage();
             }
         }
         return "failure";
