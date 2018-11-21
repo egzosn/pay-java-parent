@@ -277,7 +277,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
 
         for (Map.Entry<String, Object> entry : orderInfo.entrySet()) {
             Object o = entry.getValue();
-            if (null == o || "null".equals(o) || "".equals(o)) {
+            if (StringUtils.isEmpty((String)o) || "null".equals(o) ) {
                 continue;
             }
             formHtml.append("<input type=\"hidden\" name=\"" + entry.getKey() + "\" value=\"" + o + "\"/>");

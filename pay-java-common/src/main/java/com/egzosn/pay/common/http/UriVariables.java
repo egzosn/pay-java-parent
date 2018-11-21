@@ -88,7 +88,7 @@ public class UriVariables {
     public static String getMapToParameters(Map pe){
         StringBuilder builder = new StringBuilder();
         for (Map.Entry entry : (Set<Map.Entry>)pe.entrySet()) {
-            Object o = entry.getKey();
+            Object o = entry.getValue();
 
             if (null == o) {
                 continue;
