@@ -251,6 +251,9 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
             }
             //获取响应的文本内容
             String result = EntityUtils.toString(entity, charset);
+            if (LOG.isDebugEnabled()){
+                LOG.debug("请求响应内容：\r\n" + result);
+            }
             if (responseType.isAssignableFrom(String.class)) {
                 return (T) result;
             }
