@@ -9,6 +9,7 @@ import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.common.http.UriVariables;
+import com.egzosn.pay.common.util.DateUtils;
 import com.egzosn.pay.common.util.MatrixToImageWriter;
 import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.str.StringUtils;
@@ -200,7 +201,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
                 }
         }
         if (null != order.getExpirationTime()) {
-            bizContent.put("timeout_express", ((order.getExpirationTime().getTime() - System.currentTimeMillis()) / 1000 / 60 + "m"));
+            bizContent.put("timeout_express", DateUtils.minutesRemaining(order.getExpirationTime()) + "m");
         }
         orderInfo.put("biz_content", JSON.toJSONString(bizContent));
         return orderInfo;
@@ -217,9 +218,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
         orderInfo.put("app_id", payConfigStorage.getAppid());
         orderInfo.put("method", transactionType.getMethod());
         orderInfo.put("charset", payConfigStorage.getInputCharset());
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        df.setTimeZone(TimeZone.getTimeZone("GMT+8"));
-        orderInfo.put("timestamp", df.format(new Date()));
+        orderInfo.put("timestamp", DateUtils.format(new Date()));
         orderInfo.put("version", "1.0");
         return orderInfo;
     }
