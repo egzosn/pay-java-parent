@@ -11,6 +11,8 @@ import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.common.http.UriVariables;
+import com.egzosn.pay.common.util.DateUtils;
+import com.egzosn.pay.common.util.Util;
 import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.str.StringUtils;
 import java.awt.image.BufferedImage;
@@ -176,7 +178,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
         orderInfo = orderInfo + "&out_trade_no=\"" + order.getOutTradeNo() + "\"";
         orderInfo = orderInfo + "&subject=\"" + order.getSubject() + "\"";
         orderInfo = orderInfo + "&body=\"" + order.getBody() + "\"";
-        orderInfo = orderInfo + "&total_fee=\"" + order.getPrice().setScale(2, BigDecimal.ROUND_HALF_UP).toString()  + "\"";
+        orderInfo = orderInfo + "&total_fee=\"" + Util.conversionAmount(order.getPrice()).toString()  + "\"";
         orderInfo = orderInfo + "&notify_url=\"" + this.payConfigStorage.getNotifyUrl() + "\"";
         orderInfo = orderInfo + "&service=\"mobile.securitypay.pay\"";
         orderInfo = orderInfo + "&payment_type=\"1\"";
@@ -207,7 +209,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
         // 商品详情
         orderInfo.put("body", order.getBody());
         // 商品金额
-        orderInfo.put("total_fee", order.getPrice().setScale(2, BigDecimal.ROUND_HALF_UP).toString() );
+        orderInfo.put("total_fee", Util.conversionAmount(order.getPrice()).toString() );
         // 服务器异步通知页面路径
         orderInfo.put("notify_url", payConfigStorage.getNotifyUrl() );
         // 服务接口名称， 固定值
@@ -222,7 +224,12 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
         // m-分钟，h-小时，d-天，1c-当天（无论交易何时创建，都在0点关闭）。
         // 该参数数值不接受小数点，如1.5h，可转换为90m。
         // TODO 2017/2/6 11:05 author: egan  目前写死，这一块建议配置
-        orderInfo.put("it_b_pay",  "30m");
+
+        if (null != order.getExpirationTime()) {
+            orderInfo.put("timeout_express", DateUtils.minutesRemaining(order.getExpirationTime()) + "m");
+        }else {
+            orderInfo.put("it_b_pay",  "30m");
+        }
         // 支付宝处理完请求后，当前页面跳转到商户指定页面的路径，可空
         orderInfo.put("return_url", payConfigStorage.getReturnUrl());
 

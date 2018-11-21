@@ -15,11 +15,18 @@ import java.util.TimeZone;
  */
 public final class DateUtils {
     public static final DateFormat  YYYY_MM_DD_HH_MM_SS = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    public static final DateFormat  YYYY_MM_DD = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    public static final DateFormat  YYYY_MM_DD = new SimpleDateFormat("yyyy-MM-dd");
+    public static final DateFormat YYYYMMDD = new SimpleDateFormat("yyyyMMdd");
+    public static final DateFormat YYYYMMDDHHMMSS = new SimpleDateFormat("yyyyMMddHHmmss");
+    public static final DateFormat MMDD = new SimpleDateFormat("MMdd");
 
     static {
-        YYYY_MM_DD_HH_MM_SS.setTimeZone(TimeZone.getTimeZone("GMT+8"));
-        YYYY_MM_DD.setTimeZone(TimeZone.getTimeZone("GMT+8"));
+        TimeZone timeZone = TimeZone.getTimeZone("GMT+8");
+        YYYY_MM_DD_HH_MM_SS.setTimeZone(timeZone);
+        YYYY_MM_DD.setTimeZone(timeZone);
+        YYYYMMDD.setTimeZone(timeZone);
+        YYYYMMDDHHMMSS.setTimeZone(timeZone);
+        MMDD.setTimeZone(timeZone);
     }
 
     public static final String format(Date date){

@@ -9,6 +9,7 @@ import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpHeader;
 import com.egzosn.pay.common.http.HttpStringEntity;
+import com.egzosn.pay.common.util.Util;
 import com.egzosn.pay.common.util.str.StringUtils;
 import com.egzosn.pay.paypal.bean.PayPalTransactionType;
 import com.egzosn.pay.paypal.bean.order.*;
@@ -151,7 +152,7 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage>{
             order.setCurType(CurType.USD);
         }
         amount.setCurrency(order.getCurType().name());
-        amount.setTotal(order.getPrice().setScale(2, BigDecimal.ROUND_HALF_UP).toString());
+        amount.setTotal(Util.conversionAmount(order.getPrice()).toString());
 
         Transaction transaction = new Transaction();
         if (!StringUtils.isEmpty(order.getSubject())){
@@ -262,7 +263,7 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage>{
         if (null != refundOrder.getRefundAmount() && BigDecimal.ZERO.compareTo( refundOrder.getRefundAmount()) > 0){
             Amount amount = new Amount();
             amount.setCurrency(refundOrder.getCurType().name());
-            amount.setTotal(refundOrder.getRefundAmount().toString());
+            amount.setTotal(Util.conversionAmount(refundOrder.getRefundAmount()).toString());
             request.put("amount", amount);
             request.put("description", refundOrder.getDescription());
         }

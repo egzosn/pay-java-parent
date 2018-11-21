@@ -11,6 +11,7 @@ import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.common.http.UriVariables;
 import com.egzosn.pay.common.util.DateUtils;
 import com.egzosn.pay.common.util.MatrixToImageWriter;
+import com.egzosn.pay.common.util.Util;
 import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.str.StringUtils;
 import java.awt.image.BufferedImage;
@@ -176,7 +177,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
         bizContent.put("seller_id", payConfigStorage.getSeller());
         bizContent.put("subject", order.getSubject());
         bizContent.put("out_trade_no", order.getOutTradeNo());
-        bizContent.put("total_amount", order.getPrice().setScale(2, BigDecimal.ROUND_HALF_UP).toString());
+        bizContent.put("total_amount", Util.conversionAmount(order.getPrice()).toString());
         switch ((AliTransactionType) order.getTransactionType()) {
             case PAGE:
             case DIRECT:
@@ -381,7 +382,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
         if (!StringUtils.isEmpty(refundOrder.getRefundNo())) {
             bizContent.put("out_request_no", refundOrder.getRefundNo());
         }
-        bizContent.put("refund_amount", refundOrder.getRefundAmount().setScale(2, BigDecimal.ROUND_HALF_UP));
+        bizContent.put("refund_amount", Util.conversionAmount(refundOrder.getRefundAmount()));
         //设置请求参数的集合
         parameters.put("biz_content", JSON.toJSONString(bizContent));
         //设置签名
@@ -441,9 +442,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
         Map<String, Object> bizContent = new TreeMap<>();
         bizContent.put("bill_type", billType);
         //目前只支持日账单
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-        df.setTimeZone(TimeZone.getTimeZone("GMT+8"));
-        bizContent.put("bill_date", df.format(billDate));
+        bizContent.put("bill_date", DateUtils.formatDay(billDate));
         //设置请求参数的集合
         parameters.put("biz_content", JSON.toJSONString(bizContent));
         //设置签名
@@ -501,7 +500,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
             bizContent.put("payee_type", order.getTransferType().getType());
         }
         bizContent.put("payee_account", order.getPayeeAccount());
-        bizContent.put("amount", order.getAmount().setScale(2, BigDecimal.ROUND_HALF_UP));
+        bizContent.put("amount", Util.conversionAmount(order.getAmount()));
         bizContent.put("payer_show_name", order.getPayerName());
         bizContent.put("payee_real_name", order.getPayeeName());
         bizContent.put("remark", order.getRemark());

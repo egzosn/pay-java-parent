@@ -7,7 +7,9 @@ import com.egzosn.pay.common.bean.*;
 import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpConfigStorage;
+import com.egzosn.pay.common.util.DateUtils;
 import com.egzosn.pay.common.util.MatrixToImageWriter;
+import com.egzosn.pay.common.util.Util;
 import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.sign.encrypt.RSA2;
 import com.egzosn.pay.common.util.str.StringUtils;
@@ -20,8 +22,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static com.egzosn.pay.wx.bean.WxTransferType.*;
@@ -53,16 +53,11 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
     public static final String CIPHER_ALGORITHM = "RSA/ECB/OAEPWITHSHA-1ANDMGF1PADDING";
     public static final String FAILURE = "failure";
     public static final String APPID = "appid";
-    private static final DateFormat downloadbillDf = new SimpleDateFormat("yyyyMMdd");
     private static final String HMAC_SHA256 = "HMAC-SHA256";
     private static final String HMACSHA256 = "HMACSHA256";
-    private static final DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
+    private static final String RETURN_MSG_CODE = "return_msg";
 
-    {
-        TimeZone timeZone = TimeZone.getTimeZone("GMT+8");
-        downloadbillDf.setTimeZone(timeZone);
-        df.setTimeZone(timeZone);
-    }
+
 
 
 
@@ -197,15 +192,15 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
 //        parameters.put("detail", order.getBody());// 购买支付信息
         parameters.put("out_trade_no", order.getOutTradeNo());// 订单号
         parameters.put("spbill_create_ip", StringUtils.isEmpty(order.getSpbillCreateIp()) ? "192.168.1.150" : order.getSpbillCreateIp() );
-        parameters.put("total_fee", conversion( order.getPrice()));// 总金额单位为分
+        parameters.put("total_fee", Util.conversionCentAmount( order.getPrice()));// 总金额单位为分
         if (StringUtils.isNotEmpty(order.getAddition())){
             parameters.put("attach", order.getAddition());
         }
         parameters.put("notify_url", payConfigStorage.getNotifyUrl());
         parameters.put("trade_type", order.getTransactionType().getType());
         if (null != order.getExpirationTime()){
-            parameters.put("time_start", df.format(new Date()));
-            parameters.put("time_expire", df.format(order.getExpirationTime()));
+            parameters.put("time_start", DateUtils.YYYYMMDDHHMMSS.format(new Date()));
+            parameters.put("time_expire", DateUtils.YYYYMMDDHHMMSS.format(order.getExpirationTime()));
         }
         ((WxTransactionType) order.getTransactionType()).setAttribute(parameters, order);
 
@@ -217,7 +212,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
         JSONObject result = requestTemplate.postForObject(getUrl(order.getTransactionType()), requestXML, JSONObject.class);
 
         if (!SUCCESS.equals(result.get(RETURN_CODE))) {
-            throw new PayErrorException(new WxPayError(result.getString(RETURN_CODE), result.getString("return_msg"), result.toJSONString()));
+            throw new PayErrorException(new WxPayError(result.getString(RETURN_CODE), result.getString(RETURN_MSG_CODE), result.toJSONString()));
         }
         return result;
     }
@@ -239,7 +234,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
         // 对微信返回的数据进行校验
         if (verify(result)) {
             //如果是扫码支付或者刷卡付无需处理，直接返回
-            if (WxTransactionType.NATIVE == order.getTransactionType() || WxTransactionType.MICROPAY == order.getTransactionType() || WxTransactionType.MWEB == order.getTransactionType()) {
+            if (((WxTransactionType)order.getTransactionType()).isReturn()) {
                 return result;
             }
 
@@ -263,7 +258,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
             params.put(SIGN, paySign);
             return params;
         }
-        throw new PayErrorException(new WxPayError(result.getString(RETURN_CODE), result.getString("return_msg"), "Invalid sign value"));
+        throw new PayErrorException(new WxPayError(result.getString(RETURN_CODE), result.getString(RETURN_MSG_CODE), "Invalid sign value"));
 
     }
 
@@ -352,7 +347,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
     @Override
     public String buildRequest(Map<String, Object> orderInfo, MethodType method) {
         if (!SUCCESS.equals(orderInfo.get(RETURN_CODE))) {
-            throw new PayErrorException(new WxPayError((String) orderInfo.get(RETURN_CODE), (String) orderInfo.get("return_msg")));
+            throw new PayErrorException(new WxPayError((String) orderInfo.get(RETURN_CODE), (String) orderInfo.get(RETURN_MSG_CODE)));
         }
         if (WxTransactionType.MWEB.name().equals(orderInfo.get("trade_type"))) {
             return String.format("<script type=\"text/javascript\">location.href=\"%s%s\"</script>",orderInfo.get("mweb_url"), StringUtils.isEmpty(payConfigStorage.getReturnUrl()) ? "" : "&redirect_url=" + URLEncoder.encode(payConfigStorage.getReturnUrl()));
@@ -459,8 +454,8 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
         setParameters(parameters, "transaction_id", refundOrder.getTradeNo());
         setParameters(parameters, "out_trade_no", refundOrder.getOutTradeNo());
         setParameters(parameters, "out_refund_no", refundOrder.getRefundNo());
-        parameters.put("total_fee", conversion(refundOrder.getTotalAmount()));
-        parameters.put("refund_fee", conversion(refundOrder.getRefundAmount()));
+        parameters.put("total_fee", Util.conversionCentAmount(refundOrder.getTotalAmount()));
+        parameters.put("refund_fee", Util.conversionCentAmount(refundOrder.getRefundAmount()));
         parameters.put("op_user_id", payConfigStorage.getPid());
 
         //设置签名
@@ -520,7 +515,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
         parameters.put("bill_type", billType);
         //目前只支持日账单
 
-        parameters.put("bill_date", downloadbillDf.format(billDate));
+        parameters.put("bill_date", DateUtils.YYYYMMDD.format(billDate));
 
         //设置签名
         setSign(parameters);
@@ -531,7 +526,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
 
         Map<String,Object> ret = new HashMap<String, Object>();
         ret.put(RETURN_CODE, SUCCESS);
-        ret.put("return_msg", "ok");
+        ret.put(RETURN_MSG_CODE, "ok");
         ret.put("data", respStr);
         return ret;
     }
@@ -596,7 +591,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
 
         parameters.put("mch_id", payConfigStorage.getPid());
         parameters.put("partner_trade_no", order.getOutNo());
-        parameters.put("amount", conversion(order.getAmount()));
+        parameters.put("amount", Util.conversionCentAmount(order.getAmount()));
         if (!StringUtils.isEmpty(order.getRemark())){
             parameters.put("desc", order.getRemark());
         }
@@ -681,14 +676,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
         return getHttpRequestTemplate().postForObject(getUrl(QUERY_BANK),  XML.getMap2Xml(parameters), JSONObject.class);
     }
 
-    /**
-     * 元转分
-     * @param amount 元的金额
-     * @return 分的金额
-     */
-    public int conversion(BigDecimal amount){
-        return amount.multiply(new BigDecimal(100)).setScale(0, BigDecimal.ROUND_HALF_UP).intValue();
-    }
+
 
     public String keyPublic(String content){
         try {
