@@ -62,7 +62,7 @@ public enum  AliTransactionType implements TransactionType {
     /**
      * 交易订单撤销
      */
-    CANCEL("alipay.trade.cancel "),
+    CANCEL("alipay.trade.cancel"),
     /**
      * 退款
      */
