@@ -433,12 +433,9 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
         sf.append("<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=" + payConfigStorage.getInputCharset() + "\"/></head><body>");
         sf.append("<form id = \"pay_form\" action=\"" + getFrontTransUrl()  + "\" method=\"post\">");
         if (null != orderInfo && 0 != orderInfo.size()) {
-            Set<Map.Entry<String, Object>> set = orderInfo.entrySet();
-            Iterator<Map.Entry<String, Object>> it = set.iterator();
-            while (it.hasNext()) {
-                Map.Entry<String, Object> ey = it.next();
-                String key = ey.getKey();
-                Object value = ey.getValue();
+            for ( Map.Entry<String, Object> entry: orderInfo.entrySet()) {
+                String key = entry.getKey();
+                Object value = entry.getValue();
                 sf.append("<input type=\"hidden\" name=\"" + key + "\" id=\"" + key + "\" value=\"" + value + "\"/>");
             }
         }

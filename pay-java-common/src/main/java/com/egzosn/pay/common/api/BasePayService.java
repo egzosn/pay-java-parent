@@ -133,7 +133,7 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
 
         Map<String, Object> params = new TreeMap<String,Object>();
         for (Map.Entry<String,  String[]> entry  :  parameterMap.entrySet()) {
-            String name = (String) entry.getKey();
+            String name = entry.getKey();
             String[] values = entry.getValue();
             String valueStr = "";
             for (int i = 0,len =  values.length; i < len; i++) {
