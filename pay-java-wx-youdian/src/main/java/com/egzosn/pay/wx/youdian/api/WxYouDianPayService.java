@@ -8,6 +8,7 @@ import com.egzosn.pay.common.bean.result.PayError;
 import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.common.util.MatrixToImageWriter;
+import com.egzosn.pay.common.util.Util;
 import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.str.StringUtils;
 import com.egzosn.pay.wx.youdian.bean.YdPayError;
@@ -224,7 +225,7 @@ public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorag
     public JSONObject orderInfo(PayOrder order) {
         TreeMap<String, String> data = new TreeMap<>();
         data.put("access_token",  getAccessToken());
-        data.put("paymoney", order.getPrice().setScale(2, BigDecimal.ROUND_HALF_UP).toString());
+        data.put("paymoney", Util.conversionAmount(order.getPrice()).toString());
         String apbNonce = SignUtils.randomStr();
         String sign = createSign(SignUtils.parameterText(data, "") + apbNonce, payConfigStorage.getInputCharset());
         data.put("PayMoney", data.remove("paymoney"));
@@ -272,8 +273,7 @@ public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorag
             String[] values = parameterMap.get(name);
             String valueStr = "";
             for (int i = 0; i < values.length; i++) {
-                valueStr = (i == values.length - 1) ? valueStr + values[i]
-                        : valueStr + values[i] + ",";
+                valueStr = (i == values.length - 1) ? valueStr + values[i] : valueStr + values[i] + ",";
             }
             params.put(name, valueStr.trim());
         }

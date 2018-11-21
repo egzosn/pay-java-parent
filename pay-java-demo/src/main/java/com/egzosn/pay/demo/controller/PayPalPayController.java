@@ -100,10 +100,12 @@ public class PayPalPayController {
      */
     @GetMapping(value = "payBackBefore.json")
     public String payBackBefore(HttpServletRequest request) throws IOException {
-        if (service.verify(service.getParameter2Map(request.getParameterMap(), request.getInputStream()))) {
-            // TODO 这里进行成功后的订单业务处理
-            // TODO 返回成功付款页面，这个到时候再做一个漂亮的页面显示，并使用前后端分离的模式
-            return service.successPayOutMessage(null).toMessage();
+        try (InputStream is = request.getInputStream()) {
+            if (service.verify(service.getParameter2Map(request.getParameterMap(), is))) {
+                // TODO 这里进行成功后的订单业务处理
+                // TODO 返回成功付款页面，这个到时候再做一个漂亮的页面显示，并使用前后端分离的模式
+                return service.successPayOutMessage(null).toMessage();
+            }
         }
         return "failure";
     }

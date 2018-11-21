@@ -11,9 +11,10 @@ import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.common.http.HttpHeader;
 import com.egzosn.pay.common.http.HttpStringEntity;
 import com.egzosn.pay.common.http.UriVariables;
+import com.egzosn.pay.common.util.DateUtils;
+import com.egzosn.pay.common.util.Util;
 import com.egzosn.pay.payoneer.bean.PayoneerTransactionType;
 import org.apache.http.Header;
-import org.apache.http.client.utils.DateUtils;
 import org.apache.http.entity.ContentType;
 import org.apache.http.message.BasicHeader;
 
@@ -176,7 +177,7 @@ public class PayoneerPayService extends BasePayService<PayoneerConfigStorage> im
     public Map<String, Object> orderInfo(PayOrder order) {
         Map<String, Object> params = new HashMap<>(7);
         params.put("payee_id", order.getAuthCode());
-        params.put("amount", order.getPrice().setScale(2, BigDecimal.ROUND_HALF_UP));
+        params.put("amount", Util.conversionAmount(order.getPrice()));
         params.put("client_reference_id", order.getOutTradeNo());
         if (null == order.getCurType()) {
             order.setCurType(CurType.USD);
@@ -416,7 +417,7 @@ public class PayoneerPayService extends BasePayService<PayoneerConfigStorage> im
         payOrder.setOutTradeNo(order.getOutNo());
 
         Map<String, Object> info = orderInfo(payOrder);
-        info.put("payout_date", DateUtils.formatDate(new Date(), "yyyy-MM-dd"));
+        info.put("payout_date", DateUtils.formatDay(new Date()));
         info.put("group_id", order.getPayerName());
         HttpStringEntity entity = new HttpStringEntity(JSON.toJSONString(info), ContentType.APPLICATION_JSON);
         entity.setHeaders(authHeader());

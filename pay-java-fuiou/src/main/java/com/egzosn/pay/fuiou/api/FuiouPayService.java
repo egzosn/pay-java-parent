@@ -5,6 +5,8 @@ import com.egzosn.pay.common.bean.*;
 import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.common.http.UriVariables;
+import com.egzosn.pay.common.util.DateUtils;
+import com.egzosn.pay.common.util.Util;
 import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.str.StringUtils;
 import java.awt.image.BufferedImage;
@@ -163,7 +165,7 @@ public class FuiouPayService extends BasePayService<FuiouPayConfigStorage> {
         //商户订单号
         parameters.put("order_id", order.getOutTradeNo());
         //交易金额
-        parameters.put("order_amt", order.getPrice().multiply(new BigDecimal(100)).setScale( 0, BigDecimal.ROUND_HALF_UP).intValue());
+        parameters.put("order_amt", Util.conversionCentAmount(order.getPrice()));
         //交易币种
 //        parameters.put("cur_type", null == order.getCurType() ? FuiouCurType.CNY:order.getCurType());
         //支付类型
@@ -174,7 +176,7 @@ public class FuiouPayService extends BasePayService<FuiouPayConfigStorage> {
         parameters.put("back_notify_url", StringUtils.isBlank(payConfigStorage.getNotifyUrl()) ? "" : payConfigStorage.getNotifyUrl());
 
         if (null != order.getExpirationTime()){
-            parameters.put("order_valid_time", ((order.getExpirationTime().getTime() - System.currentTimeMillis())/1000/60 + "m"));
+            parameters.put("order_valid_time", DateUtils.minutesRemaining(order.getExpirationTime()) + "m");
         }else {
             //超时时间 1m-15天，m：分钟、h：小时、d天、1c当天有效，
             parameters.put("order_valid_time", "30m");
@@ -388,7 +390,7 @@ public class FuiouPayService extends BasePayService<FuiouPayConfigStorage> {
         //原订单号
         params.put("origin_order_id", refundOrder.getTradeNo());
         //退款金额
-        params.put("refund_amt", refundOrder.getRefundAmount().multiply(new BigDecimal(100)).setScale(0, BigDecimal.ROUND_HALF_UP).intValue());
+        params.put("refund_amt", Util.conversionCentAmount(refundOrder.getRefundAmount()));
         //备注
         params.put("rem", "");
         params.put("md5", createSign(SignUtils.parameters2MD5Str(params, "|"), payConfigStorage.getInputCharset()));

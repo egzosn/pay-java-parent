@@ -1,5 +1,6 @@
 package com.egzosn.pay.common.util;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 
 public class  Util{
@@ -609,5 +610,24 @@ public class  Util{
         }
         return bt;
     }
+
+
+    /**
+     * 元转分
+     * @param amount 元的金额
+     * @return 分的金额
+     */
+    public static final int conversionCentAmount(BigDecimal amount){
+       return amount.multiply(new BigDecimal(100)).setScale(0, BigDecimal.ROUND_HALF_UP).intValue();
+    }
+    /**
+     * 元,两位小数
+     * @param amount 元的金额
+     * @return 元的金额 两位小数
+     */
+    public static final BigDecimal conversionAmount(BigDecimal amount){
+       return amount.setScale(2, BigDecimal.ROUND_HALF_UP);
+    }
+
 
 }

@@ -32,6 +32,16 @@ public enum  WxTransactionType implements TransactionType {
         public void setAttribute(Map<String, Object> parameters, PayOrder order) {
             parameters.put("product_id", order.getOutTradeNo());
         }
+
+        /**
+         * 是否直接返回
+         *
+         * @return 是否直接返回
+         */
+        @Override
+        public boolean isReturn() {
+            return true;
+        }
     },
     /**
      * 移动支付
@@ -54,6 +64,15 @@ public enum  WxTransactionType implements TransactionType {
             sceneInfo.put("h5_info", value);
             parameters.put("scene_info", sceneInfo.toJSONString());
         }
+        /**
+         * 是否直接返回
+         *
+         * @return 是否直接返回
+         */
+        @Override
+        public boolean isReturn() {
+            return true;
+        }
     },
     /**
      * 刷卡付
@@ -64,6 +83,15 @@ public enum  WxTransactionType implements TransactionType {
             parameters.put("auth_code", order.getAuthCode());
             parameters.remove("notify_url");
             parameters.remove("trade_type");
+        }
+        /**
+         * 是否直接返回
+         *
+         * @return 是否直接返回
+         */
+        @Override
+        public boolean isReturn() {
+            return true;
         }
     },
     // TODO 2017/3/8 19:14 author: egan  交易辅助接口
@@ -113,6 +141,15 @@ public enum  WxTransactionType implements TransactionType {
     public String getMethod() {
         return this.method;
     }
+
+    /**
+     * 是否直接返回
+     * @return 是否直接返回
+     */
+    public boolean isReturn(){
+        return false;
+    }
+
     public  void setAttribute(Map<String, Object> parameters, PayOrder order){
 
     }
