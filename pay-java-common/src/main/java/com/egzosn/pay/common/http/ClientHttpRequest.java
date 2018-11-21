@@ -16,11 +16,13 @@ import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.util.Map;
+
 import static com.egzosn.pay.common.http.UriVariables.getMapToParameters;
 
 /**
@@ -251,6 +253,9 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
             }
             //获取响应的文本内容
             String result = EntityUtils.toString(entity, charset);
+            if (LOG.isDebugEnabled()){
+                LOG.debug("请求响应内容：\r\n" + result);
+            }
             if (responseType.isAssignableFrom(String.class)) {
                 return (T) result;
             }
