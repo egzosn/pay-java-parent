@@ -232,7 +232,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
                 // 此时间建议取支付时的北京时间加15分钟。
                 // 超过超时时间调查询接口应答origRespCode不是A6或者00的就可以判断为失败。
                 if (null != order.getExpirationTime()) {
-                    params.put(SDKConstants.param_payTimeout, order.getExpirationTime());
+                    params.put(SDKConstants.param_payTimeout, DateUtils.YYYYMMDDHHMMSS.format(order.getExpirationTime()));
                 } else {
                     params.put(SDKConstants.param_payTimeout, DateUtils.YYYYMMDDHHMMSS.format(System.currentTimeMillis() + 30 * 60 * 1000));
                 }
