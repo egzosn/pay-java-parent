@@ -104,6 +104,10 @@ public enum  WxTransactionType implements TransactionType {
      */
     CLOSE("pay/closeorder"),
     /**
+     * 撤销订单
+     */
+    REVERSE("secapi/pay/reverse"),
+    /**
      * 申请退款
      */
     REFUND("secapi/pay/refund"),
