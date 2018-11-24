@@ -414,6 +414,17 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
         return secondaryInterface(transactionId, outTradeNo, WxTransactionType.CLOSE);
     }
 
+    /**
+     * 交易交易撤销
+     *
+     * @param transactionId    支付平台订单号
+     * @param outTradeNo 商户单号
+     * @return 返回支付方交易撤销后的结果
+     */
+    @Override
+    public Map<String, Object> cancel(String transactionId, String outTradeNo) {
+        return secondaryInterface(transactionId, outTradeNo, WxTransactionType.REVERSE);
+    }
 
     /**
      * 退款
