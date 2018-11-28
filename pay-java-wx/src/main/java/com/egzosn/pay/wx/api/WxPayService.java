@@ -111,7 +111,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
     @Override
     public boolean verify(Map<String, Object> params) {
 
-        if (!SUCCESS.equals(params.get(RETURN_CODE)) || !SUCCESS.equals(params.get(RESULT_CODE))){
+        if (!(SUCCESS.equals(params.get(RETURN_CODE)) && SUCCESS.equals(params.get(RESULT_CODE)))){
             LOG.debug(String.format("微信支付异常：return_code=%s,参数集=%s", params.get(RETURN_CODE), params));
             return false;
         }
