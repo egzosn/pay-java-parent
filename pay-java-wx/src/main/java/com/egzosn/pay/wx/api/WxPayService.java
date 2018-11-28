@@ -56,6 +56,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
     private static final String HMAC_SHA256 = "HMAC-SHA256";
     private static final String HMACSHA256 = "HMACSHA256";
     private static final String RETURN_MSG_CODE = "return_msg";
+    private static final String RESULT_CODE = "result_code";
 
 
 
@@ -110,7 +111,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
     @Override
     public boolean verify(Map<String, Object> params) {
 
-        if (!SUCCESS.equals(params.get(RETURN_CODE))){
+        if (!(SUCCESS.equals(params.get(RETURN_CODE)) && SUCCESS.equals(params.get(RESULT_CODE)))){
             LOG.debug(String.format("微信支付异常：return_code=%s,参数集=%s", params.get(RETURN_CODE), params));
             return false;
         }
@@ -185,14 +186,17 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
      */
     public JSONObject unifiedOrder(PayOrder order) {
 
-        ////统一下单
+        //统一下单
         Map<String, Object> parameters = getPublicParameters();
-
-        parameters.put("body", order.getSubject());// 购买支付信息
-//        parameters.put("detail", order.getBody());// 购买支付信息
-        parameters.put("out_trade_no", order.getOutTradeNo());// 订单号
+        // 购买支付信息
+        parameters.put("body", order.getSubject());
+        // 购买支付信息
+//        parameters.put("detail", order.getBody());
+        // 订单号
+        parameters.put("out_trade_no", order.getOutTradeNo());
         parameters.put("spbill_create_ip", StringUtils.isEmpty(order.getSpbillCreateIp()) ? "192.168.1.150" : order.getSpbillCreateIp() );
-        parameters.put("total_fee", Util.conversionCentAmount( order.getPrice()));// 总金额单位为分
+        // 总金额单位为分
+        parameters.put("total_fee", Util.conversionCentAmount( order.getPrice()));
         if (StringUtils.isNotEmpty(order.getAddition())){
             parameters.put("attach", order.getAddition());
         }
@@ -366,7 +370,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
     public BufferedImage genQrPay(PayOrder order) {
         Map<String, Object> orderInfo = orderInfo(order);
         //获取对应的支付账户操作工具（可根据账户id）
-        if (!SUCCESS.equals(orderInfo.get("result_code"))) {
+        if (!SUCCESS.equals(orderInfo.get(RESULT_CODE))) {
             throw new PayErrorException(new WxPayError("-1", (String) orderInfo.get("err_code")));
         }
 
