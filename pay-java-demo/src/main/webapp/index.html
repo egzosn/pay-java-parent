@@ -282,9 +282,9 @@ getOrderInfo" target="_blank">
    function onBridgeReady(data){
        WeixinJSBridge.invoke(
            'getBrandWCPayRequest', {
-               "appId": data.appid,     //公众号名称，由商户传入
-               "timeStamp": data.timestamp,         //时间戳，自1970年以来的秒数
-               "nonceStr": data.noncestr, //随机串
+               "appId": data.appId,     //公众号名称，由商户传入
+               "timeStamp": data.timeStamp,         //时间戳，自1970年以来的秒数
+               "nonceStr": data.nonceStr, //随机串
                "package": data.package,
                "signType": data.signType,         //微信签名方式：
                "paySign": data.sign //微信签名
