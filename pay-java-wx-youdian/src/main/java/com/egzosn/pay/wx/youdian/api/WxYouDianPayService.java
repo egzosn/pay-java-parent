@@ -3,20 +3,16 @@ package com.egzosn.pay.wx.youdian.api;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.api.BasePayService;
-import com.egzosn.pay.common.api.Callback;
-import com.egzosn.pay.common.api.PayConfigStorage;
 import com.egzosn.pay.common.bean.*;
-import com.egzosn.pay.common.bean.outbuilder.JsonBuilder;
 import com.egzosn.pay.common.bean.result.PayError;
 import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.common.util.MatrixToImageWriter;
+import com.egzosn.pay.common.util.Util;
 import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.str.StringUtils;
 import com.egzosn.pay.wx.youdian.bean.YdPayError;
 import com.egzosn.pay.wx.youdian.bean.YoudianTransactionType;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -30,8 +26,7 @@ import java.util.concurrent.locks.Lock;
  * email egzosn@gmail.com
  * date 2017/01/12 22:58
  */
-public class WxYouDianPayService extends BasePayService {
-    protected static final Log LOG = LogFactory.getLog(WxYouDianPayService.class);
+public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorage> {
 
     private final static String URL = "http://life.51youdian.com/Api/CheckoutCounter/";
 
@@ -230,7 +225,7 @@ public class WxYouDianPayService extends BasePayService {
     public JSONObject orderInfo(PayOrder order) {
         TreeMap<String, String> data = new TreeMap<>();
         data.put("access_token",  getAccessToken());
-        data.put("paymoney", order.getPrice().setScale(2, BigDecimal.ROUND_HALF_UP).toString());
+        data.put("paymoney", Util.conversionAmount(order.getPrice()).toString());
         String apbNonce = SignUtils.randomStr();
         String sign = createSign(SignUtils.parameterText(data, "") + apbNonce, payConfigStorage.getInputCharset());
         data.put("PayMoney", data.remove("paymoney"));
@@ -278,8 +273,7 @@ public class WxYouDianPayService extends BasePayService {
             String[] values = parameterMap.get(name);
             String valueStr = "";
             for (int i = 0; i < values.length; i++) {
-                valueStr = (i == values.length - 1) ? valueStr + values[i]
-                        : valueStr + values[i] + ",";
+                valueStr = (i == values.length - 1) ? valueStr + values[i] : valueStr + values[i] + ",";
             }
             params.put(name, valueStr.trim());
         }
@@ -351,7 +345,8 @@ public class WxYouDianPayService extends BasePayService {
      */
     @Override
     public Map<String, Object> microPay(PayOrder order) {
-        throw new UnsupportedOperationException();
+        JSONObject orderInfo = orderInfo(order);
+        return orderInfo;
     }
 
     /**
@@ -451,11 +446,11 @@ public class WxYouDianPayService extends BasePayService {
 
 
 
-    public WxYouDianPayService(PayConfigStorage payConfigStorage) {
+    public WxYouDianPayService(WxYouDianPayConfigStorage payConfigStorage) {
         super(payConfigStorage);
     }
 
-    public WxYouDianPayService(PayConfigStorage payConfigStorage, HttpConfigStorage configStorage) {
+    public WxYouDianPayService(WxYouDianPayConfigStorage payConfigStorage, HttpConfigStorage configStorage) {
         super(payConfigStorage, configStorage);
     }
 

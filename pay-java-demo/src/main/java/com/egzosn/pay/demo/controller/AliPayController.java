@@ -5,15 +5,20 @@ package com.egzosn.pay.demo.controller;
 import com.egzosn.pay.ali.api.AliPayConfigStorage;
 import com.egzosn.pay.ali.api.AliPayService;
 import com.egzosn.pay.ali.bean.AliTransactionType;
+import com.egzosn.pay.ali.bean.AliTransferType;
 import com.egzosn.pay.common.api.PayService;
 import com.egzosn.pay.common.bean.*;
 import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.common.http.UriVariables;
 import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.demo.request.QueryOrder;
+import com.egzosn.pay.demo.service.handler.AliPayMessageHandler;
+import com.egzosn.pay.demo.service.interceptor.AliPayMessageInterceptor;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 import java.io.ByteArrayOutputStream;
@@ -36,6 +41,8 @@ import java.util.UUID;
 public class AliPayController {
 
     private PayService service = null;
+    @Resource
+    private AutowireCapableBeanFactory spring;
 
     @PostConstruct
     public void init() {
@@ -59,8 +66,10 @@ public class AliPayController {
         //默认的每个路由的最大连接数
         httpConfigStorage.setDefaultMaxPerRoute(10);
         service =  new AliPayService(aliPayConfigStorage, httpConfigStorage);
-
-
+        //增加支付回调消息拦截器
+        service.addPayMessageInterceptor(new AliPayMessageInterceptor());
+        //设置回调消息处理
+        service.setPayMessageHandler(spring.getBean(AliPayMessageHandler.class));
     }
 
 
@@ -147,14 +156,19 @@ public class AliPayController {
     }
 
     /**
-     * 支付回调地址
+     * 支付回调地址 方式一
      *
-     * @param request
+     * 方式二，{@link #payBack(HttpServletRequest)} 是属于简化方式， 试用与简单的业务场景
      *
-     * @return
+     *
+     * @param request 请求
+     *
+     * @return 返回对应的响应码
+     * @see #payBack(HttpServletRequest)
      */
-    @RequestMapping(value = "payBack.json")
-    public String payBack(HttpServletRequest request) throws IOException {
+    @Deprecated
+    @RequestMapping(value = "payBackBefore.json")
+    public String payBackBefore(HttpServletRequest request) throws IOException {
 
         //获取支付方返回的对应参数
         Map<String, Object> params = service.getParameter2Map(request.getParameterMap(), request.getInputStream());
@@ -166,10 +180,27 @@ public class AliPayController {
         if (service.verify(params)) {
             //这里处理业务逻辑
             //......业务逻辑处理块........
-            return service.getPayOutMessage("success", "成功").toMessage();
+            return service.successPayOutMessage(null).toMessage();
         }
 
         return service.getPayOutMessage("fail", "失败").toMessage();
+    }
+    /**
+     * 支付回调地址
+     *
+     * @param request 请求
+     *
+     * @return 返回对应的响应码
+     *
+     * 业务处理在对应的PayMessageHandler里面处理，在哪里设置PayMessageHandler，详情查看{@link com.egzosn.pay.common.api.PayService#setPayMessageHandler(com.egzosn.pay.common.api.PayMessageHandler)}
+     *
+     * 如果未设置 {@link com.egzosn.pay.common.api.PayMessageHandler} 那么会使用默认的 {@link com.egzosn.pay.common.api.DefaultPayMessageHandler}
+     *
+     */
+    @RequestMapping(value = "payBack.json")
+    public String payBack(HttpServletRequest request) throws IOException {
+        //业务处理在对应的PayMessageHandler里面处理，在哪里设置PayMessageHandler，详情查看com.egzosn.pay.common.api.PayService.setPayMessageHandler()
+        return service.payBack(request.getParameterMap(), request.getInputStream()).toMessage();
     }
 
 
@@ -194,6 +225,16 @@ public class AliPayController {
     @RequestMapping("close")
     public Map<String, Object> close(QueryOrder order) {
         return service.close(order.getTradeNo(), order.getOutTradeNo());
+    }
+    /**
+     * 交易c撤销接口
+     *
+     * @param order 订单的请求体
+     * @return 返回支付方交易关闭后的结果
+     */
+    @RequestMapping("cancel")
+    public Map<String, Object> cancel(QueryOrder order) {
+        return service.cancel(order.getTradeNo(), order.getOutTradeNo());
     }
 
     /**
@@ -257,6 +298,8 @@ public class AliPayController {
 //        order.setPayerName("付款方姓名, 非必填");
 //        order.setPayeeName("收款方真实姓名, 非必填");
 //        order.setRemark("转账备注, 非必填");
+        //收款方账户类型 ,默认值 ALIPAY_LOGONID：支付宝登录号，支持邮箱和手机号格式。
+        order.setTransferType(AliTransferType.ALIPAY_LOGONID);
         return service.transfer(order);
     }
 

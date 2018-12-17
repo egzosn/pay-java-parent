@@ -15,7 +15,7 @@ import java.util.Map;
  * 
  */
 
-public interface AdvancedPayService extends PayService {
+public interface AdvancedPayService extends PayService<PayoneerConfigStorage> {
     /**
      * 获取授权页面
      * @param payeeId 用户id

@@ -10,10 +10,20 @@
     unionPayConfigStorage.setMerId("700000000000001");
     //设置CertSign必须在设置证书前
     unionPayConfigStorage.setCertSign(true);
-     //公钥，验签证书链格式： 中级证书路径;根证书路径
-    unionPayConfigStorage.setKeyPublic("D:/certs/acp_test_middle.cer;D:/certs/acp_test_root.cer");
-    //私钥, 私钥证书格式： 私钥证书路径;私钥证书对应的密码
-    unionPayConfigStorage.setKeyPrivate("D:/certs/acp_test_sign.pfx;000000");
+    //公钥，验签证书链格式： 中级证书路径;根证书路径
+//        unionPayConfigStorage.setKeyPublic("D:/certs/acp_test_middle.cer;D:/certs/acp_test_root.cer");
+     //中级证书路径
+     unionPayConfigStorage.setAcpMiddleCert("D:/certs/acp_test_middle.cer");
+     //根证书路径
+     unionPayConfigStorage.setAcpRootCert("D:/certs/acp_test_root.cer");
+
+     //私钥, 私钥证书格式： 私钥证书路径;私钥证书对应的密码
+//        unionPayConfigStorage.setKeyPrivate("D:/certs/acp_test_sign.pfx;000000");
+     // 私钥证书路径
+     unionPayConfigStorage.setKeyPrivateCert("D:/certs/acp_test_sign.pfx");
+     //私钥证书对应的密码
+     unionPayConfigStorage.setKeyPrivateCertPwd("000000");
+         
     unionPayConfigStorage.setNotifyUrl("http://www.pay.egzosn.com/payBack.json");
       // 无需同步回调可不填  app填这个就可以
     unionPayConfigStorage.setReturnUrl("http://www.pay.egzosn.com/payBack.json");

@@ -45,9 +45,19 @@ public class UnionPayController {
         //设置CertSign必须在设置证书前
         unionPayConfigStorage.setCertSign(true);
         //公钥，验签证书链格式： 中级证书路径;根证书路径
-        unionPayConfigStorage.setKeyPublic("D:/certs/acp_test_middle.cer;D:/certs/acp_test_root.cer");
+//        unionPayConfigStorage.setKeyPublic("D:/certs/acp_test_middle.cer;D:/certs/acp_test_root.cer");
+        //中级证书路径
+        unionPayConfigStorage.setAcpMiddleCert("D:/certs/acp_test_middle.cer");
+        //根证书路径
+        unionPayConfigStorage.setAcpRootCert("D:/certs/acp_test_root.cer");
+
         //私钥, 私钥证书格式： 私钥证书路径;私钥证书对应的密码
-        unionPayConfigStorage.setKeyPrivate("D:/certs/acp_test_sign.pfx;000000");
+//        unionPayConfigStorage.setKeyPrivate("D:/certs/acp_test_sign.pfx;000000");
+        // 私钥证书路径
+        unionPayConfigStorage.setKeyPrivateCert("D:/certs/acp_test_sign.pfx");
+        //私钥证书对应的密码
+        unionPayConfigStorage.setKeyPrivateCertPwd("000000");
+
         unionPayConfigStorage.setNotifyUrl("http://www.pay.egzosn.com/payBack.json");
         // 无需同步回调可不填  app填这个就可以
         unionPayConfigStorage.setReturnUrl("http://www.pay.egzosn.com/payBack.json");
@@ -157,14 +167,18 @@ public class UnionPayController {
     }
 
     /**
-     * 支付回调地址
+     * 支付回调地址 方式一
+     *
+     * 方式二，{@link #payBack(HttpServletRequest)} 是属于简化方式， 试用与简单的业务场景
      *
      * @param request
      *
      * @return
+     * @see #payBack(HttpServletRequest)
      */
-    @RequestMapping(value = "payBack.json")
-    public String payBack(HttpServletRequest request) throws IOException {
+    @Deprecated
+    @RequestMapping(value = "payBackBefore.json")
+    public String payBackBefore(HttpServletRequest request) throws IOException {
 
         //获取支付方返回的对应参数
         Map<String, Object> params = service.getParameter2Map(request.getParameterMap(), request.getInputStream());
@@ -176,10 +190,27 @@ public class UnionPayController {
         if (service.verify(params)) {
             //这里处理业务逻辑
             //......业务逻辑处理块........
-            return service.getPayOutMessage("success", "成功").toMessage();
+            return service.successPayOutMessage(null).toMessage();
         }
 
         return service.getPayOutMessage("fail", "失败").toMessage();
+    }
+    /**
+     * 支付回调地址
+     *
+     * @param request
+     *
+     * @return
+     *
+     * 业务处理在对应的PayMessageHandler里面处理，在哪里设置PayMessageHandler，详情查看{@link com.egzosn.pay.common.api.PayService#setPayMessageHandler(com.egzosn.pay.common.api.PayMessageHandler)}
+     *
+     * 如果未设置 {@link com.egzosn.pay.common.api.PayMessageHandler} 那么会使用默认的 {@link com.egzosn.pay.common.api.DefaultPayMessageHandler}
+     *
+     */
+    @RequestMapping(value = "payBack.json")
+    public String payBack(HttpServletRequest request) throws IOException {
+        //业务处理在对应的PayMessageHandler里面处理，在哪里设置PayMessageHandler，详情查看com.egzosn.pay.common.api.PayService.setPayMessageHandler()
+        return service.payBack(request.getParameterMap(), request.getInputStream()).toMessage();
     }
 
 

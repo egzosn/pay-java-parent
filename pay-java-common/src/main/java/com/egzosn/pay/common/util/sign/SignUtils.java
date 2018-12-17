@@ -62,12 +62,12 @@ public enum SignUtils {
          */
         @Override
         public String createSign(String content, String key, String characterEncoding) {
-            Mac sha256_HMAC = null;
+            Mac sha256HMAC = null;
             try {
-                sha256_HMAC = Mac.getInstance("HmacSHA256");
-                SecretKeySpec secret_key = new SecretKeySpec(key.getBytes(characterEncoding), "HmacSHA256");
-                sha256_HMAC.init(secret_key);
-                byte[] array = sha256_HMAC.doFinal(content.getBytes(characterEncoding));
+                sha256HMAC = Mac.getInstance("HmacSHA256");
+                SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(characterEncoding), "HmacSHA256");
+                sha256HMAC.init(secretKey);
+                byte[] array = sha256HMAC.doFinal(content.getBytes(characterEncoding));
                 StringBuilder sb = new StringBuilder();
                 for (byte item : array) {
                     sb.append(Integer.toHexString((item & 0xFF) | 0x100).substring(1, 3));
@@ -197,12 +197,12 @@ public enum SignUtils {
         }
         // TODO 2016/11/11 10:14 author: egan 已经排序好处理
         if (parameters instanceof SortedMap) {
-            for (String k : ((Set<String>) parameters.keySet())) {
-                Object v = parameters.get(k);
-                if (null == v || "".equals(v.toString().trim()) || (null != ignoreKey && Arrays.binarySearch(ignoreKey, k ) >= 0)) {
+            for (Map.Entry<String, Object> entry : (Set<Map.Entry<String, Object>>)parameters.entrySet()) {
+                Object v = entry.getValue();
+                if (null == v || "".equals(v.toString().trim()) || (null != ignoreKey && Arrays.binarySearch(ignoreKey, entry.getKey() ) >= 0)) {
                     continue;
                 }
-                sb.append(k ).append("=").append( v.toString().trim()).append(separator);
+                sb.append(entry.getKey() ).append("=").append( v.toString().trim()).append(separator);
             }
             if (sb.length() > 0 && !"".equals(separator)) {
                 sb.deleteCharAt(sb.length() - 1);
@@ -219,9 +219,12 @@ public enum SignUtils {
         for (String k : keys) {
             String valueStr = "";
             Object o = parameters.get(k);
+            if (null == o) {
+                continue;
+            }
             if (o instanceof String[]) {
                 String[] values = (String[]) o;
-                if (null == values){continue;}
+
                 for (int i = 0; i < values.length; i++) {
                     String value = values[i].trim();
                     if ("".equals(value)){ continue;}

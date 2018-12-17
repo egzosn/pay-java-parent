@@ -8,6 +8,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * URL表达式处理器
@@ -66,13 +67,13 @@ public class UriVariables {
         if (null == uriVariables){
             return uri;
         }
-        for (String key : uriVariables.keySet()){
-            Object uriVariable = uriVariables.get(key);
+        for (Map.Entry<String, Object> entry : uriVariables.entrySet()) {
+            Object uriVariable = entry.getValue();
             if (null == uriVariable){
                 continue;
             }
 
-            uri = uri.replace("{" + key + "}", uriVariable.toString());
+            uri = uri.replace("{" + entry.getKey() + "}", uriVariable.toString());
         }
         return uri;
     }
@@ -86,8 +87,8 @@ public class UriVariables {
      */
     public static String getMapToParameters(Map pe){
         StringBuilder builder = new StringBuilder();
-        for (Object key : pe.keySet()) {
-            Object o = pe.get(key);
+        for (Map.Entry entry : (Set<Map.Entry>)pe.entrySet()) {
+            Object o = entry.getValue();
 
             if (null == o) {
                 continue;
@@ -107,11 +108,11 @@ public class UriVariables {
                         String value = os[i].toString().trim();
                         valueStr += (i == len - 1) ?  value :  value + ",";
                     }
-                    builder.append(key).append("=").append(URLEncoder.encode(valueStr, "utf-8")).append("&");
+                    builder.append(entry.getKey()).append("=").append(URLEncoder.encode(valueStr, "utf-8")).append("&");
 
                     continue;
                 }
-                builder.append(key).append("=").append(URLEncoder.encode( pe.get(key).toString(), "utf-8")).append("&");
+                builder.append(entry.getKey()).append("=").append(URLEncoder.encode( entry.getValue().toString(), "utf-8")).append("&");
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
@@ -181,8 +182,7 @@ public class UriVariables {
         return map;
     }
 
-    private static void putKeyValueToMap (StringBuilder temp, boolean isKey,
-                                          String key, Map<String, Object> map) {
+    private static void putKeyValueToMap (StringBuilder temp, boolean isKey, String key, Map<String, Object> map) {
         if (isKey) {
             key = temp.toString();
             if (key.length() == 0) {

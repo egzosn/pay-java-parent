@@ -20,7 +20,7 @@ import java.util.Map;
  * date 2016-5-18 14:09:01
  *</pre>
  */
-public interface PayService {
+public interface PayService<PC extends PayConfigStorage> {
 
 
 
@@ -29,14 +29,14 @@ public interface PayService {
      * @param payConfigStorage 支付配置
      * @return 支付服务
      */
-    PayService setPayConfigStorage(PayConfigStorage payConfigStorage);
+    PayService setPayConfigStorage(PC payConfigStorage);
 
     /**
      * 获取支付配置
      *
      * @return 支付配置
      */
-    PayConfigStorage getPayConfigStorage();
+    PC getPayConfigStorage();
     /**
      * 获取http请求工具
      *
@@ -75,7 +75,6 @@ public interface PayService {
      * @param id 业务id, 数据的真实性.
      * @return true通过
      */
-    @Deprecated
     boolean verifySource(String id);
 
 
@@ -186,6 +185,7 @@ public interface PayService {
      */
     Map<String, Object> close(String tradeNo, String outTradeNo);
 
+
     /**
      * 交易关闭接口
      *
@@ -196,6 +196,26 @@ public interface PayService {
      * @return 返回支付方交易关闭后的结果
      */
     <T>T close(String tradeNo, String outTradeNo, Callback<T> callback);
+
+    /**
+     * 交易交易撤销
+     *
+     * @param tradeNo    支付平台订单号
+     * @param outTradeNo 商户单号
+     * @return 返回支付方交易撤销后的结果
+     */
+    Map<String, Object> cancel(String tradeNo, String outTradeNo);
+
+    /**
+     * 交易交易撤销
+     *
+     * @param tradeNo    支付平台订单号
+     * @param outTradeNo 商户单号
+     * @param callback 处理器
+     * @param <T> 返回类型
+     * @return 返回支付方交易撤销后的结果
+     */
+    <T>T cancel(String tradeNo, String outTradeNo, Callback<T> callback);
 
     /**
      * 申请退款接口
@@ -300,7 +320,7 @@ public interface PayService {
 
 
     /**
-     *
+     * 通用查询接口
      * @param tradeNoOrBillDate 支付平台订单号或者账单类型， 具体请
      *                          类型为{@link String }或者 {@link Date }，类型须强制限制，类型不对应则抛出异常{@link PayErrorException}
      * @param outTradeNoBillType  商户单号或者 账单类型
@@ -361,6 +381,33 @@ public interface PayService {
      */
      <T>T transferQuery(String outNo, String tradeNo, Callback<T> callback);
 
+         /**
+     * 将请求参数或者请求流转化为 Map
+     *
+     * @param parameterMap 请求参数
+     * @param is           请求流
+     * @return 获得回调响应信息
+     */
+    PayOutMessage payBack(Map<String, String[]> parameterMap, InputStream is);
 
+    /**
+     * 设置支付消息处理器,这里用于处理具体的支付业务
+     * @param handler 消息处理器
+     * 配合{@link  com.egzosn.pay.common.api.PayService#payBack(java.util.Map, java.io.InputStream)}进行使用
+     *
+     *   默认使用{@link  com.egzosn.pay.common.api.DefaultPayMessageHandler }进行实现
+     *
+     */
+    void setPayMessageHandler(PayMessageHandler handler);
+
+    /**
+     * 设置支付消息处理器,这里用于处理具体的支付业务
+     * @param interceptor 消息拦截器
+     * 配合{@link  com.egzosn.pay.common.api.PayService#payBack(java.util.Map, java.io.InputStream)}进行使用
+     *
+     *   默认使用{@link  com.egzosn.pay.common.api.DefaultPayMessageHandler }进行实现
+     *
+     */
+    void addPayMessageInterceptor(PayMessageInterceptor interceptor);
 
 }

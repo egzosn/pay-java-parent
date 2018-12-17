@@ -175,7 +175,7 @@ public class HttpStringEntity extends StringEntity {
     public HttpStringEntity(String request, Header... headers) throws UnsupportedEncodingException {
         super(request);
         requestIsEmpty(request);
-        if (null == headers) {
+        if (null != headers) {
             this.headers = Arrays.asList(headers);
         }
     }
@@ -192,8 +192,8 @@ public class HttpStringEntity extends StringEntity {
         super(request);
         requestIsEmpty(request);
         this.headers = new ArrayList<>();
-        for (String key : headers.keySet()) {
-            this.headers.add(new BasicHeader(key, headers.get(key)));
+        for (Map.Entry<String, String> entry : headers.entrySet()) {
+            addHeader(new BasicHeader(entry.getKey(), entry.getValue()));
         }
     }
 
@@ -233,8 +233,8 @@ public class HttpStringEntity extends StringEntity {
      * @param headers 请求头集
      */
     public void setHeaders(Map<String, String> headers) {
-        for (String key : headers.keySet()) {
-            addHeader(new BasicHeader(key, headers.get(key)));
+        for (Map.Entry<String, String> entry : headers.entrySet()) {
+            addHeader(new BasicHeader(entry.getKey(), entry.getValue()));
         }
     }
     /**

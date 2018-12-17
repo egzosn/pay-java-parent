@@ -3,7 +3,6 @@ package com.egzosn.pay.payoneer.api;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.api.BasePayService;
-import com.egzosn.pay.common.api.PayConfigStorage;
 import com.egzosn.pay.common.bean.*;
 import com.egzosn.pay.common.bean.outbuilder.PayTextOutMessage;
 import com.egzosn.pay.common.bean.result.PayException;
@@ -12,9 +11,10 @@ import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.common.http.HttpHeader;
 import com.egzosn.pay.common.http.HttpStringEntity;
 import com.egzosn.pay.common.http.UriVariables;
+import com.egzosn.pay.common.util.DateUtils;
+import com.egzosn.pay.common.util.Util;
 import com.egzosn.pay.payoneer.bean.PayoneerTransactionType;
 import org.apache.http.Header;
-import org.apache.http.client.utils.DateUtils;
 import org.apache.http.entity.ContentType;
 import org.apache.http.message.BasicHeader;
 
@@ -33,7 +33,7 @@ import java.util.*;
  *         create 2018-01-19
  *                 </pre>
  */
-public class PayoneerPayService extends BasePayService implements AdvancedPayService {
+public class PayoneerPayService extends BasePayService<PayoneerConfigStorage> implements AdvancedPayService {
     /**
      * 测试地址
      */
@@ -52,11 +52,11 @@ public class PayoneerPayService extends BasePayService implements AdvancedPaySer
     private final static String OUT_TRADE_NO = "client_reference_id";
 
 
-    public PayoneerPayService(PayConfigStorage payConfigStorage) {
+    public PayoneerPayService(PayoneerConfigStorage payConfigStorage) {
         super(payConfigStorage);
     }
 
-    public PayoneerPayService(PayConfigStorage payConfigStorage, HttpConfigStorage configStorage) {
+    public PayoneerPayService(PayoneerConfigStorage payConfigStorage, HttpConfigStorage configStorage) {
         super(payConfigStorage, configStorage);
     }
 
@@ -85,7 +85,10 @@ public class PayoneerPayService extends BasePayService implements AdvancedPaySer
         //设置 base atuh
         entity.setHeaders(authHeader());
         JSONObject response = getHttpRequestTemplate().postForObject(getReqUrl(PayoneerTransactionType.REGISTRATION), entity, JSONObject.class);
-        if (response != null && 0 == response.getIntValue(CODE)) {
+        if (null == response) {
+            return null;
+        }
+        if (0 == response.getIntValue(CODE)) {
             return response.getString("registration_link");
         }
         throw new PayErrorException(new PayException("fail", "Payoneer获取授权页面失败,原因:" + response.getString("hint"), response.toJSONString()));
@@ -174,7 +177,7 @@ public class PayoneerPayService extends BasePayService implements AdvancedPaySer
     public Map<String, Object> orderInfo(PayOrder order) {
         Map<String, Object> params = new HashMap<>(7);
         params.put("payee_id", order.getAuthCode());
-        params.put("amount", order.getPrice().setScale(2, BigDecimal.ROUND_HALF_UP));
+        params.put("amount", Util.conversionAmount(order.getPrice()));
         params.put("client_reference_id", order.getOutTradeNo());
         if (null == order.getCurType()) {
             order.setCurType(CurType.USD);
@@ -267,7 +270,7 @@ public class PayoneerPayService extends BasePayService implements AdvancedPaySer
         if (response != null) {
             return response;
         }
-        throw new PayErrorException(new PayException("fail", "Payoneer申请收款失败,原因:" + response.getString("description"), response.toJSONString()));
+        throw new PayErrorException(new PayException("fail", "Payoneer申请收款失败,原因:未有返回值" ));
     }
 
     /**
@@ -294,6 +297,18 @@ public class PayoneerPayService extends BasePayService implements AdvancedPaySer
      */
     @Override
     public Map<String, Object> close(String tradeNo, String outTradeNo) {
+        return secondaryInterface(tradeNo, outTradeNo, PayoneerTransactionType.CHARGE_CANCEL);
+    }
+
+    /**
+     * 交易交易撤销
+     *
+     * @param tradeNo    支付平台订单号
+     * @param outTradeNo 商户单号
+     * @return 返回支付方交易撤销后的结果
+     */
+    @Override
+    public Map<String, Object> cancel(String tradeNo, String outTradeNo) {
         return secondaryInterface(tradeNo, outTradeNo, PayoneerTransactionType.CHARGE_CANCEL);
     }
 
@@ -402,7 +417,7 @@ public class PayoneerPayService extends BasePayService implements AdvancedPaySer
         payOrder.setOutTradeNo(order.getOutNo());
 
         Map<String, Object> info = orderInfo(payOrder);
-        info.put("payout_date", DateUtils.formatDate(new Date(), "yyyy-MM-dd"));
+        info.put("payout_date", DateUtils.formatDay(new Date()));
         info.put("group_id", order.getPayerName());
         HttpStringEntity entity = new HttpStringEntity(JSON.toJSONString(info), ContentType.APPLICATION_JSON);
         entity.setHeaders(authHeader());

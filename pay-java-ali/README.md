@@ -64,8 +64,18 @@
 
      //设置网络请求配置根据需求进行设置
      //service.setRequestTemplateConfigStorage(httpConfigStorage)
+     
+```
+#### 精简版支付回调配置，主要用于实现业务与支付代码隔离使用，下面会讲到支付回调处理
+```java
+
+      //增加支付回调消息拦截器
+      service.addPayMessageInterceptor(new AliPayMessageInterceptor());
+      //设置回调消息处理
+      service.setPayMessageHandler(spring.getBean(AliPayMessageHandler.class));
 
 ```
+
 
 #### 创建支付订单信息
 
@@ -134,6 +144,7 @@
 ``` 
 
 #### 回调处理
+###### 方式一
 
 ```java
 
@@ -150,6 +161,19 @@
         /*-----------回调处理-------------------*/
 
 ```
+###### 方式二，对应的业务逻辑在对应的处理器里面执行
+
+```java
+
+        /*-----------回调处理-------------------*/
+           //HttpServletRequest request;
+           System.out.println(service.payBack(request.getParameterMap(), request.getInputStream()).toMessage());
+
+
+        /*-----------回调处理-------------------*/
+
+```
+
 
 
 #### 支付订单查询
@@ -165,6 +189,12 @@
   ```java
 
           Map result = service.close("支付宝单号", "我方系统单号");
+
+```
+#### 交易撤销接口
+  ```java
+
+          Map result = service.cancel("支付宝单号", "我方系统单号");
 
 ```
 
@@ -204,6 +234,8 @@
         order.setPayerName("付款方姓名, 非必填");
         order.setPayeeName("收款方真实姓名, 非必填");
         order.setRemark("转账备注, 非必填");
+        //收款方账户类型 ,默认值 ALIPAY_LOGONID：支付宝登录号，支持邮箱和手机号格式。
+        order.setTransferType(AliTransferType.ALIPAY_LOGONID);
         Map result = service.transfer(order);
 
 ```
