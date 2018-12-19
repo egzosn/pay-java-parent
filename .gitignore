@@ -1,0 +1,49 @@
+# Global.
+*.tmp
+*.class
+*.log
+*.zip
+*.zip.sha1
+ 
+# Package Files.
+#*.jar
+*.war
+*.ear
+
+# Windows Environment files.
+Thumbs.db
+Desktop.ini
+
+# Mac os X Environment files.
+.DS_Store
+
+# CVS files.
+CVS
+.cvsignore
+
+# Temporary build files.
+target
+build
+bin
+logs
+test
+# Eclipse project files.
+.classpath
+.project
+
+# MyEclipse project files.
+.metadata
+.myeclipse
+
+# intellij project files.
+.idea
+*.iml
+*.ipr
+*.iws
+*.mymetadata
+*.myumldata
+*.springBeans
+
+# SVN
+.svn
+.settings
