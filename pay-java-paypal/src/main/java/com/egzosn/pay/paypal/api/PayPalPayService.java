@@ -111,7 +111,7 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage>{
 
         HttpStringEntity httpEntity = new HttpStringEntity("{\"payer_id\":\""+(String)params.get("PayerID")+"\"}", ContentType.APPLICATION_JSON);
         httpEntity.setHeaders(authHeader());
-        JSONObject resp = getHttpRequestTemplate().postForObject(String.format(getReqUrl(PayPalTransactionType.EXECUTE), (String) params.get("paymentId")), httpEntity, JSONObject.class);
+        JSONObject resp = getHttpRequestTemplate().postForObject(getReqUrl(PayPalTransactionType.EXECUTE), httpEntity, JSONObject.class, (String) params.get("paymentId"));
         return  "approved".equals(resp.getString("state"));
 
     }
@@ -225,7 +225,7 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage>{
      */
     @Override
     public Map<String, Object> query(String tradeNo, String outTradeNo) {
-        JSONObject resp = getHttpRequestTemplate().getForObject(String.format(getReqUrl(PayPalTransactionType.ORDERS), tradeNo), authHeader(), JSONObject.class);
+        JSONObject resp = getHttpRequestTemplate().getForObject(getReqUrl(PayPalTransactionType.ORDERS), authHeader(), JSONObject.class, tradeNo);
         return resp;
     }
 
@@ -270,7 +270,7 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage>{
 
         HttpStringEntity httpEntity = new HttpStringEntity(request, ContentType.APPLICATION_JSON);
         httpEntity.setHeaders(authHeader());
-        JSONObject resp = getHttpRequestTemplate().postForObject(String.format(getReqUrl(PayPalTransactionType.REFUND), refundOrder.getTradeNo()), httpEntity, JSONObject.class);
+        JSONObject resp = getHttpRequestTemplate().postForObject(getReqUrl(PayPalTransactionType.REFUND),  httpEntity, JSONObject.class, refundOrder.getTradeNo());
         return resp;
 //
 //        return null;
@@ -284,7 +284,7 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage>{
      */
     @Override
     public Map<String, Object> refundquery(String tradeNo, String outTradeNo) {
-        JSONObject resp = getHttpRequestTemplate().getForObject(String.format(getReqUrl(PayPalTransactionType.REFUND_QUERY), tradeNo), authHeader(), JSONObject.class);
+        JSONObject resp = getHttpRequestTemplate().getForObject(getReqUrl(PayPalTransactionType.REFUND_QUERY), authHeader(), JSONObject.class, tradeNo);
         return resp;
     }
 
