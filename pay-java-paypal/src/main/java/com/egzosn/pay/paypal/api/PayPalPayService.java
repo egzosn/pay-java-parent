@@ -242,6 +242,7 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage>{
      * @param totalAmount 总金额
      * @return 返回支付方申请退款后的结果
      * @see #refund(RefundOrder)
+     * @deprecated {@link #refund(RefundOrder)}
      */
     @Deprecated
     @Override
@@ -272,8 +273,6 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage>{
         httpEntity.setHeaders(authHeader());
         JSONObject resp = getHttpRequestTemplate().postForObject(getReqUrl(PayPalTransactionType.REFUND),  httpEntity, JSONObject.class, refundOrder.getTradeNo());
         return resp;
-//
-//        return null;
     }
     /**
      * 查询退款
