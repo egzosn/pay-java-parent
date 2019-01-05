@@ -16,8 +16,6 @@ import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.str.StringUtils;
 import java.awt.image.BufferedImage;
 import java.math.BigDecimal;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -44,6 +42,23 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
     public static final String SUCCESS_CODE = "10000";
     
     public static final String CODE = "code";
+    /**
+     * 附加参数
+     */
+    public static final String PASSBACK_PARAMS = "passback_params";
+    /**
+     * 产品代码
+     */
+    public static final String PRODUCT_CODE = "product_code";
+    /**
+     * 返回地址
+     */
+    public static final String RETURN_URL = "return_url";
+
+    /**
+     * 请求内容
+     */
+    public static final String BIZ_CONTENT = "biz_content";
 
     /**
      * 获取对应的请求地址
@@ -181,30 +196,32 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
         switch ((AliTransactionType) order.getTransactionType()) {
             case PAGE:
             case DIRECT:
-                bizContent.put("passback_params", order.getAddition());
-                bizContent.put("product_code", "FAST_INSTANT_TRADE_PAY");
-                orderInfo.put("return_url", payConfigStorage.getReturnUrl());
+                bizContent.put(PASSBACK_PARAMS, order.getAddition());
+                bizContent.put(PRODUCT_CODE, "FAST_INSTANT_TRADE_PAY");
+                orderInfo.put(RETURN_URL, payConfigStorage.getReturnUrl());
                 break;
             case WAP:
-                bizContent.put("passback_params", order.getAddition());
-                bizContent.put("product_code", "QUICK_WAP_PAY");
-                orderInfo.put("return_url", payConfigStorage.getReturnUrl());
+                bizContent.put(PASSBACK_PARAMS, order.getAddition());
+                bizContent.put(PRODUCT_CODE, "QUICK_WAP_PAY");
+                orderInfo.put(RETURN_URL, payConfigStorage.getReturnUrl());
+                break;
+            case APP:
+                bizContent.put(PASSBACK_PARAMS, order.getAddition());
+                bizContent.put(PRODUCT_CODE, "QUICK_MSECURITY_PAY");
+                orderInfo.put(RETURN_URL, payConfigStorage.getReturnUrl());
                 break;
             case BAR_CODE:
             case WAVE_CODE:
                 bizContent.put("scene", order.getTransactionType().toString().toLowerCase());
-                bizContent.put("product_code", "FACE_TO_FACE_PAYMENT");
+                bizContent.put(PRODUCT_CODE, "FACE_TO_FACE_PAYMENT");
                 bizContent.put("auth_code", order.getAuthCode());
                 break;
-            default:
-                if (order.getTransactionType() != AliTransactionType.SWEEPPAY) {
-                    bizContent.put("product_code", "QUICK_MSECURITY_PAY");
-                }
+
         }
         if (null != order.getExpirationTime()) {
             bizContent.put("timeout_express", DateUtils.minutesRemaining(order.getExpirationTime()) + "m");
         }
-        orderInfo.put("biz_content", JSON.toJSONString(bizContent));
+        orderInfo.put(BIZ_CONTENT, JSON.toJSONString(bizContent));
         return orderInfo;
     }
 
@@ -256,9 +273,9 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
      */
     @Override
     public String buildRequest(Map<String, Object> orderInfo, MethodType method) {
-        StringBuffer formHtml = new StringBuffer();
+        StringBuilder formHtml = new StringBuilder();
         formHtml.append("<form id=\"_alipaysubmit_\" name=\"alipaysubmit\" action=\"");
-        String bizContent = (String) orderInfo.remove("biz_content");
+        String bizContent = (String) orderInfo.remove(BIZ_CONTENT);
         formHtml.append(getReqUrl()).append("?").append(UriVariables.getMapToParameters(orderInfo))
                 .append("\" method=\"").append(method.name().toLowerCase()).append("\">");
         formHtml.append("<input type=\"hidden\" name=\"biz_content\" value=\'" + bizContent + "\'/>");
@@ -359,6 +376,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
      * @param totalAmount  总金额
      * @return 返回支付方申请退款后的结果
      * @see #refund(RefundOrder, com.egzosn.pay.common.api.Callback)
+     *  @deprecated 版本替代 {@link #refund(RefundOrder, com.egzosn.pay.common.api.Callback)}
      */
     @Deprecated
     @Override
@@ -384,7 +402,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
         }
         bizContent.put("refund_amount", Util.conversionAmount(refundOrder.getRefundAmount()));
         //设置请求参数的集合
-        parameters.put("biz_content", JSON.toJSONString(bizContent));
+        parameters.put(BIZ_CONTENT, JSON.toJSONString(bizContent));
         //设置签名
         setSign(parameters);
         return requestTemplate.getForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(parameters), JSONObject.class);
@@ -419,7 +437,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
             bizContent.put("out_request_no", refundOrder.getRefundNo());
         }
         //设置请求参数的集合
-        parameters.put("biz_content", JSON.toJSONString(bizContent));
+        parameters.put(BIZ_CONTENT, JSON.toJSONString(bizContent));
 
         //设置签名
         setSign(parameters);
@@ -444,7 +462,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
         //目前只支持日账单
         bizContent.put("bill_date", DateUtils.formatDay(billDate));
         //设置请求参数的集合
-        parameters.put("biz_content", JSON.toJSONString(bizContent));
+        parameters.put(BIZ_CONTENT, JSON.toJSONString(bizContent));
         //设置签名
         setSign(parameters);
         return requestTemplate.getForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(parameters), JSONObject.class);
@@ -475,7 +493,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
         //获取公共参数
         Map<String, Object> parameters = getPublicParameters(transactionType);
         //设置请求参数的集合
-        parameters.put("biz_content", getContentToJson(tradeNoOrBillDate.toString(), outTradeNoBillType));
+        parameters.put(BIZ_CONTENT, getContentToJson(tradeNoOrBillDate.toString(), outTradeNoBillType));
         //设置签名
         setSign(parameters);
         return requestTemplate.getForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(parameters), JSONObject.class);
@@ -505,7 +523,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
         bizContent.put("payee_real_name", order.getPayeeName());
         bizContent.put("remark", order.getRemark());
         //设置请求参数的集合
-        parameters.put("biz_content", JSON.toJSONString(bizContent));
+        parameters.put(BIZ_CONTENT, JSON.toJSONString(bizContent));
         //设置签名
         setSign(parameters);
         return getHttpRequestTemplate().postForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(parameters), null, JSONObject.class);
@@ -530,7 +548,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
             bizContent.put("out_biz_no", outNo);
         }
         //设置请求参数的集合
-        parameters.put("biz_content", JSON.toJSONString(bizContent));
+        parameters.put(BIZ_CONTENT, JSON.toJSONString(bizContent));
         //设置签名
         setSign(parameters);
         return getHttpRequestTemplate().postForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(parameters), null, JSONObject.class);

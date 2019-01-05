@@ -1,5 +1,5 @@
 
-##整合支付模块（微信支付，支付宝）
+##整合支付模块
 
 声明： 本项目最初想法自 https://github.com/chanjarster/weixin-java-tools, 15年1月左右关注chanjarster/weixin-java-tools，并将其回调处理修改并进行使用。
 
