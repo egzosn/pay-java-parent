@@ -1,9 +1,10 @@
 package com.egzosn.pay.common.util;
 
-import java.text.DateFormat;
+import org.apache.http.util.Args;
+
+import java.lang.ref.SoftReference;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.TimeZone;
+import java.util.*;
 
 /**
  * 日期转换运算工具
@@ -14,27 +15,56 @@ import java.util.TimeZone;
  * </pre>
  */
 public final class DateUtils {
-    public static final DateFormat  YYYY_MM_DD_HH_MM_SS = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    public static final DateFormat  YYYY_MM_DD = new SimpleDateFormat("yyyy-MM-dd");
-    public static final DateFormat YYYYMMDD = new SimpleDateFormat("yyyyMMdd");
-    public static final DateFormat YYYYMMDDHHMMSS = new SimpleDateFormat("yyyyMMddHHmmss");
-    public static final DateFormat MMDD = new SimpleDateFormat("MMdd");
 
-    static {
-        TimeZone timeZone = TimeZone.getTimeZone("GMT+8");
-        YYYY_MM_DD_HH_MM_SS.setTimeZone(timeZone);
-        YYYY_MM_DD.setTimeZone(timeZone);
-        YYYYMMDD.setTimeZone(timeZone);
-        YYYYMMDDHHMMSS.setTimeZone(timeZone);
-        MMDD.setTimeZone(timeZone);
+    static final class DateFormatHolder {
+        private static final ThreadLocal<SoftReference<Map<String, SimpleDateFormat>>> THREADLOCAL_FORMATS = new ThreadLocal();
+
+        DateFormatHolder() {
+        }
+
+        public static SimpleDateFormat formatFor(String pattern) {
+            SoftReference ref = (SoftReference)THREADLOCAL_FORMATS.get();
+            Object formats = ref == null?null:(Map)ref.get();
+            if(formats == null) {
+                formats = new HashMap();
+                THREADLOCAL_FORMATS.set(new SoftReference(formats));
+            }
+
+            SimpleDateFormat format = (SimpleDateFormat)((Map)formats).get(pattern);
+
+            if(format == null) {
+                format = new SimpleDateFormat(pattern);
+                format.setTimeZone(TimeZone.getTimeZone("GMT+8"));
+                ((Map)formats).put(pattern, format);
+            }
+
+            return format;
+        }
+
+        public static void clearThreadLocal() {
+            THREADLOCAL_FORMATS.remove();
+        }
     }
 
+    public static final String  YYYY_MM_DD_HH_MM_SS = "yyyy-MM-dd HH:mm:ss";
+    public static final String  YYYY_MM_DD = "yyyy-MM-dd";
+    public static final String YYYYMMDD = "yyyyMMdd";
+    public static final String YYYYMMDDHHMMSS = "yyyyMMddHHmmss";
+    public static final String MMDD = "MMdd";
+
+
+    public static String formatDate(Date date, String pattern) {
+        Args.notNull(date, "Date");
+        Args.notNull(pattern, "Pattern");
+         SimpleDateFormat formatFor = DateFormatHolder.formatFor(YYYY_MM_DD);
+        return formatFor.format(System.currentTimeMillis());
+    }
     public static final String format(Date date){
-        return YYYY_MM_DD_HH_MM_SS.format(date);
+        return formatDate(date, YYYY_MM_DD_HH_MM_SS);
     }
 
     public static final String formatDay(Date date){
-        return YYYY_MM_DD.format(date);
+        return  formatDate(date, YYYY_MM_DD);
     }
 
     /**
