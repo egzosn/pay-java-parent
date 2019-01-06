@@ -1,6 +1,8 @@
 package com.egzosn.pay.common.http;
 
 
+import java.io.*;
+
 /**
  * HTTP 配置
  * @author: egan
@@ -34,8 +36,9 @@ public class HttpConfigStorage {
 
     /**
      * https请求所需的证书（PKCS12）
+     * 证书内容
      */
-    private String keystore;
+    private Object keystore;
     /**
      * 证书对应的密码
      */
@@ -144,7 +147,7 @@ public class HttpConfigStorage {
      */
     @Deprecated
     public String getKeystorePath() {
-        return keystore;
+        return (String) keystore;
     }
 
     /**
@@ -178,15 +181,45 @@ public class HttpConfigStorage {
      * 获取证书信息
      * @return 证书信息 根据 {@link #isPath()}进行区别地址与信息串
      */
-    public String getKeystore() {
-        return keystore;
+    public InputStream getKeystoreInputStream() throws FileNotFoundException, UnsupportedEncodingException {
+        if (null == keystore){
+            return null;
+        }
+        if(isPath()){
+            return new FileInputStream(new File(getKeystoreStr()));
+        }
+        if(this.keystore instanceof String){
+            return new ByteArrayInputStream(getKeystoreStr().getBytes("ISO-8859-1"));
+        }
+        return  (InputStream) keystore;
+    }
+    /**
+     * 获取证书信息
+     * @return 证书信息 根据 {@link #isPath()}进行区别地址与信息串
+     */
+    public Object getKeystore() {
+        return  keystore;
+    }
+    /**
+     * 获取证书信息 证书地址
+     * @return 证书信息 根据 {@link #isPath()}进行区别地址与信息串
+     */
+    public String getKeystoreStr() {
+        return (String) keystore;
     }
 
     /**
-     * 设置证书
-     * @param keystore 证书信息
+     * 设置证书字符串信息或证书绝对地址
+     * @param keystore 证书信息字符串信息或证书绝对地址
      */
     public void setKeystore(String keystore) {
+        this.keystore = keystore;
+    }
+    /**
+     * 设置证书字符串信息输入流
+     * @param keystore 证书信息 输入流
+     */
+    public void setKeystore(InputStream keystore) {
         this.keystore = keystore;
     }
 
