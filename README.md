@@ -3,7 +3,6 @@
 
 声明： 本项目最初想法自 https://github.com/chanjarster/weixin-java-tools, 15年1月左右关注chanjarster/weixin-java-tools，并将其回调处理修改并进行使用。
 
-开发版 https://git.oschina.net/egzosn/pay-java-parent/tree/develop
 
 ##### 详细文档请看 [wiki](https://gitee.com/egzosn/pay-java-parent/wikis/Home)。
 
@@ -31,7 +30,7 @@
 <dependency>
     <groupId>com.egzosn</groupId>
     <artifactId>pay-java-common</artifactId>
-    <version>2.12.2</version>
+    <version>2.12.3</version>
 </dependency>
 
 ```
@@ -43,7 +42,7 @@
 <dependency>
     <groupId>com.egzosn</groupId>
     <artifactId>{module-name}</artifactId>
-    <version>2.12.2</version>
+    <version>2.12.3</version>
 </dependency>
 
 ```
