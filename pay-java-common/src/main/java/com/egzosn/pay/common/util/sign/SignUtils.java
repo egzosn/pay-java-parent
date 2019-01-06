@@ -230,7 +230,7 @@ public enum SignUtils {
                     if ("".equals(value)){ continue;}
                     valueStr += (i == values.length - 1) ?  value :  value + ",";
                 }
-            } else if (o != null) {
+            } else {
                 valueStr = o.toString();
             }
             if (null == valueStr || "".equals(valueStr.toString().trim()) || (null != ignoreKey && Arrays.binarySearch(ignoreKey, k ) >= 0)) {
