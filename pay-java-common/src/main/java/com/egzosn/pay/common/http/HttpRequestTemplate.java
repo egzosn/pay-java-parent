@@ -103,7 +103,7 @@ public class HttpRequestTemplate {
      */
     public SSLConnectionSocketFactory createSSL( HttpConfigStorage configStorage){
 
-        if (StringUtils.isEmpty(configStorage.getKeystore())){
+        if (null == configStorage.getKeystore()){
             try {
                 return new SSLConnectionSocketFactory(SSLContext.getDefault());
             } catch (NoSuchAlgorithmException e) {
@@ -112,7 +112,7 @@ public class HttpRequestTemplate {
         }
 
             //读取本机存放的PKCS12证书文件
-        try(InputStream instream = configStorage.isPath() ? new FileInputStream(new File(configStorage.getKeystore())) : new ByteArrayInputStream(configStorage.getKeystore().getBytes("ISO-8859-1"))){
+        try(InputStream instream = configStorage.getKeystoreInputStream()){
                 //指定读取证书格式为PKCS12
                 KeyStore keyStore = KeyStore.getInstance("PKCS12");
 
