@@ -203,8 +203,8 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
         parameters.put("notify_url", payConfigStorage.getNotifyUrl());
         parameters.put("trade_type", order.getTransactionType().getType());
         if (null != order.getExpirationTime()){
-            parameters.put("time_start", DateUtils.YYYYMMDDHHMMSS.format(new Date()));
-            parameters.put("time_expire", DateUtils.YYYYMMDDHHMMSS.format(order.getExpirationTime()));
+            parameters.put("time_start", DateUtils.formatDate(new Date(), DateUtils.YYYYMMDDHHMMSS));
+            parameters.put("time_expire",  DateUtils.formatDate(order.getExpirationTime(), DateUtils.YYYYMMDDHHMMSS));
         }
         ((WxTransactionType) order.getTransactionType()).setAttribute(parameters, order);
 
@@ -530,7 +530,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
         parameters.put("bill_type", billType);
         //目前只支持日账单
 
-        parameters.put("bill_date", DateUtils.YYYYMMDD.format(billDate));
+        parameters.put("bill_date", DateUtils.formatDate(billDate, DateUtils.YYYYMMDD));
 
         //设置签名
         setSign(parameters);
