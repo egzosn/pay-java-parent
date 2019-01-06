@@ -22,7 +22,7 @@ public class PayOrder {
      */
     private String body;
     /**
-     * 商品描述
+     * 附加信息
      */
     private String addition;
     /**
