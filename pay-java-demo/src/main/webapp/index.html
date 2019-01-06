@@ -11,59 +11,59 @@
 账户信息添加用于下面测试
 <div>
     <form id="form">
-        账户id<input type="text" name="payId">
-        <br>
-        支付合作id<input type="text" name="partner">
-        <br>
-        应用id<input type="text" name="appid">
-        <br>
+    账户id<input type="text" name="payId">
+    <br>
+    支付合作id<input type="text" name="partner">
+    <br>
+    应用id<input type="text" name="appid">
+    <br>
 
 
-        支付平台公钥(签名校验使用)<input type="text" name="publicKey">
+    支付平台公钥(签名校验使用)<input type="text" name="publicKey">
+    <br>
+    <b>支付公钥，sign_type只有单一key时public_key与private_key相等，比如sign_type=MD5(友店支付除外)的情况
         <br>
-        <b>支付公钥，sign_type只有单一key时public_key与private_key相等，比如sign_type=MD5(友店支付除外)的情况
-            <br>
-            <span style="color: red">银联：验签证书链格式： 中级证书路径;根证书路径</span>
-        </b>
-        <br>
-        应用私钥(生成签名使用)<input type="text" name="privateKey">
+        <span style="color: red">银联：验签证书链格式： 中级证书路径;根证书路径</span>
+    </b>
+    <br>
+    应用私钥(生成签名使用)<input type="text" name="privateKey">
         <b>
             <br>
             <span style="color: red">银联, 私钥证书格式： 私钥证书路径;私钥证书对应的密码</span>
         </b>
-        <br>
-        异步回调地址<input type="text" name="notifyUrl"><b>友店支付用不到此参数，在友店管理端进行配置</b>
-        <br>
-        同步回调地址<input type="text" name="returnUrl"><b>同上</b>
-        <br>
-        收款账号(即时付款填写支付合作id)<input type="text" name="seller"><b>针对支付宝</b>
+    <br>
+    异步回调地址<input type="text" name="notifyUrl"><b>友店支付用不到此参数，在友店管理端进行配置</b>
+    <br>
+    同步回调地址<input type="text" name="returnUrl"><b>同上</b>
+    <br>
+    收款账号(即时付款填写支付合作id)<input type="text" name="seller"><b>针对支付宝</b>
         <br/>
-        签名类型<select name="signType">
-        <option>MD5</option>
-        <option>RSA</option>
-        <option>RSA2</option>
-    </select>
-        <br>
-        编码类型(建议UTF-8)<input type="text" name="inputCharset" value="UTF-8">
-        <br>
-        支付账户类型 <select name="payType">
-        <option value="aliPay">aliPay</option>
-        <option value="wxPay">wxPay</option>
-        <option value="youdianPay">youdianPay</option>
-        <option value="youdianPay">fuiou</option>
-    </select><b>此处为开发者自定义，详情请查看 com.egzosn.pay.demo.entity.PayType</b>
-        <br>
-        消息类型 <select name="msgType">
-        <option>text</option>
-        <option>xml</option>
-        <option>json</option>
-    </select>
-        <br>
+    签名类型<select name="signType">
+    <option>MD5</option>
+    <option>RSA</option>
+    <option>RSA2</option>
+</select>
+    <br>
+    编码类型(建议UTF-8)<input type="text" name="inputCharset" value="UTF-8">
+    <br>
+    支付账户类型 <select name="payType">
+    <option value="aliPay">aliPay</option>
+    <option value="wxPay">wxPay</option>
+    <option value="youdianPay">youdianPay</option>
+    <option value="youdianPay">fuiou</option>
+</select><b>此处为开发者自定义，详情请查看 com.egzosn.pay.demo.entity.PayType</b>
+    <br>
+    消息类型 <select name="msgType">
+    <option>text</option>
+    <option>xml</option>
+    <option>json</option>
+</select>
+    <br>
         是否为沙箱环境<select type="text" name="isTest">
         <option value="true">是</option>
         <option value="false">否</option>
     </select>
-        <br>
+    <br>
     </form>
     <button id="submit">提交</button>
 </div>
@@ -231,7 +231,7 @@ getOrderInfo" target="_blank">
 </form>
 <script src="jquery-3.1.1.min.js"></script>
 <script>
-    $(function ($) {
+   $(function ($) {
         $("#submit").click(function () {
             $.ajax({
                 url : "add",
@@ -250,7 +250,7 @@ getOrderInfo" target="_blank">
                 }
             })
         }) ;
-        $("#js_submit").click(function () {
+       $("#js_submit").click(function () {
             $.ajax({
                 url : "jsapi",
                 type : "post",
@@ -278,26 +278,26 @@ getOrderInfo" target="_blank">
                 }
             })
         })
-    });
-    function onBridgeReady(data){
-        WeixinJSBridge.invoke(
-            'getBrandWCPayRequest', {
-                "appId": data.appId,     //公众号名称，由商户传入
-                "timeStamp": data.timeStamp,         //时间戳，自1970年以来的秒数
-                "nonceStr": data.nonceStr, //随机串
-                "package": data.package,
-                "signType": data.signType,         //微信签名方式：
-                "paySign": data.sign //微信签名
-            },
-            function(res){
-                // 使用以断前端返回,微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。
-                if(res.err_msg == "get_brand_wcpay_request:ok" ) {
-                    alert("支付成功")
+   });
+   function onBridgeReady(data){
+       WeixinJSBridge.invoke(
+           'getBrandWCPayRequest', {
+               "appId": data.appId,     //公众号名称，由商户传入
+               "timeStamp": data.timeStamp,         //时间戳，自1970年以来的秒数
+               "nonceStr": data.nonceStr, //随机串
+               "package": data.package,
+               "signType": data.signType,         //微信签名方式：
+               "paySign": data.sign //微信签名
+           },
+           function(res){
+               // 使用以断前端返回,微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。
+               if(res.err_msg == "get_brand_wcpay_request:ok" ) {
+                   alert("支付成功")
 
-                }
-            }
-        );
-    }
+               }
+           }
+       );
+   }
 
 </script>
 <script type="text/javascript" src="jweixin-1.0.0.js"></script>

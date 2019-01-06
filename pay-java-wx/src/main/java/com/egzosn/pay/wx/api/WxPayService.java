@@ -186,22 +186,25 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
      */
     public JSONObject unifiedOrder(PayOrder order) {
 
-        ////统一下单
+        //统一下单
         Map<String, Object> parameters = getPublicParameters();
-
-        parameters.put("body", order.getSubject());// 购买支付信息
-//        parameters.put("detail", order.getBody());// 购买支付信息
-        parameters.put("out_trade_no", order.getOutTradeNo());// 订单号
+        // 购买支付信息
+        parameters.put("body", order.getSubject());
+        // 购买支付信息
+//        parameters.put("detail", order.getBody());
+        // 订单号
+        parameters.put("out_trade_no", order.getOutTradeNo());
         parameters.put("spbill_create_ip", StringUtils.isEmpty(order.getSpbillCreateIp()) ? "192.168.1.150" : order.getSpbillCreateIp() );
-        parameters.put("total_fee", Util.conversionCentAmount( order.getPrice()));// 总金额单位为分
+        // 总金额单位为分
+        parameters.put("total_fee", Util.conversionCentAmount( order.getPrice()));
         if (StringUtils.isNotEmpty(order.getAddition())){
             parameters.put("attach", order.getAddition());
         }
         parameters.put("notify_url", payConfigStorage.getNotifyUrl());
         parameters.put("trade_type", order.getTransactionType().getType());
         if (null != order.getExpirationTime()){
-            parameters.put("time_start", DateUtils.YYYYMMDDHHMMSS.format(new Date()));
-            parameters.put("time_expire", DateUtils.YYYYMMDDHHMMSS.format(order.getExpirationTime()));
+            parameters.put("time_start", DateUtils.formatDate(new Date(), DateUtils.YYYYMMDDHHMMSS));
+            parameters.put("time_expire",  DateUtils.formatDate(order.getExpirationTime(), DateUtils.YYYYMMDDHHMMSS));
         }
         ((WxTransactionType) order.getTransactionType()).setAttribute(parameters, order);
 
@@ -527,7 +530,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
         parameters.put("bill_type", billType);
         //目前只支持日账单
 
-        parameters.put("bill_date", DateUtils.YYYYMMDD.format(billDate));
+        parameters.put("bill_date", DateUtils.formatDate(billDate, DateUtils.YYYYMMDD));
 
         //设置签名
         setSign(parameters);

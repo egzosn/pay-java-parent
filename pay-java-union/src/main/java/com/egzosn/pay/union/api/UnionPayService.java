@@ -23,6 +23,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.security.cert.*;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -232,9 +233,9 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
                 // 此时间建议取支付时的北京时间加15分钟。
                 // 超过超时时间调查询接口应答origRespCode不是A6或者00的就可以判断为失败。
                 if (null != order.getExpirationTime()) {
-                    params.put(SDKConstants.param_payTimeout, DateUtils.YYYYMMDDHHMMSS.format(order.getExpirationTime()));
+                    params.put(SDKConstants.param_payTimeout, DateUtils.formatDate(order.getExpirationTime(), DateUtils.YYYYMMDDHHMMSS));
                 } else {
-                    params.put(SDKConstants.param_payTimeout, DateUtils.YYYYMMDDHHMMSS.format(System.currentTimeMillis() + 30 * 60 * 1000));
+                    params.put(SDKConstants.param_payTimeout, DateUtils.formatDate(new Timestamp(System.currentTimeMillis() + 30 * 60 * 1000), DateUtils.YYYYMMDDHHMMSS));
                 }
                 params.put(SDKConstants.param_frontUrl, payConfigStorage.getReturnUrl());
                 break;
@@ -589,7 +590,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
         Map<String, Object> params = this.getCommonParam();
         UnionTransactionType.FILE_TRANSFER.convertMap(params);
 
-        params.put(SDKConstants.param_settleDate, DateUtils.MMDD.format(billDate));
+        params.put(SDKConstants.param_settleDate, DateUtils.formatDate(billDate, DateUtils.MMDD));
         params.put(SDKConstants.param_fileType, billType);
         params.remove(SDKConstants.param_backUrl);
         params.remove(SDKConstants.param_currencyCode);

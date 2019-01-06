@@ -8,7 +8,6 @@
            http://www.springframework.org/schema/context/spring-context.xsd"
       >
 
-	<!-- 使用annotation注解的方式时，需要添加上此行配置 -->
 	<context:annotation-config />
 
 	<context:component-scan base-package="com.egzosn.pay.demo" />

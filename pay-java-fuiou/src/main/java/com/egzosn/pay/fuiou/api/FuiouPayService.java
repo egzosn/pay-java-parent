@@ -12,8 +12,6 @@ import com.egzosn.pay.common.util.str.StringUtils;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
 import java.math.BigDecimal;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
