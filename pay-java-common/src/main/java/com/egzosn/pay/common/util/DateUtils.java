@@ -56,7 +56,7 @@ public final class DateUtils {
     public static String formatDate(Date date, String pattern) {
         Args.notNull(date, "Date");
         Args.notNull(pattern, "Pattern");
-         SimpleDateFormat formatFor = DateFormatHolder.formatFor(YYYY_MM_DD);
+         SimpleDateFormat formatFor = DateFormatHolder.formatFor(pattern);
         return formatFor.format(System.currentTimeMillis());
     }
     public static final String format(Date date){
