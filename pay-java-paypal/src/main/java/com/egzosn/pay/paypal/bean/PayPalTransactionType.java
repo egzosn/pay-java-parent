@@ -35,7 +35,7 @@ public enum PayPalTransactionType implements TransactionType {
     /**
      * 回调订单状态查询
      */
-    EXECUTE("v1/payments/payment/{paymentId}/execute"),
+    EXECUTE("payments/payment/{paymentId}/execute"),
 
     ;
 
