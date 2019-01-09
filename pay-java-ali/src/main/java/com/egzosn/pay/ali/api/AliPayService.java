@@ -193,6 +193,9 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
         bizContent.put("subject", order.getSubject());
         bizContent.put("out_trade_no", order.getOutTradeNo());
         bizContent.put("total_amount", Util.conversionAmount(order.getPrice()).toString());
+        if(null!=order.getAddition()){
+            bizContent.put("extend_params", order.getAddition());
+        }
         switch ((AliTransactionType) order.getTransactionType()) {
             case PAGE:
             case DIRECT:
