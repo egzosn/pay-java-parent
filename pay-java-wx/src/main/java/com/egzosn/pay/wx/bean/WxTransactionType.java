@@ -21,7 +21,7 @@ public enum  WxTransactionType implements TransactionType {
     JSAPI("pay/unifiedorder") {
         @Override
         public void setAttribute(Map<String, Object> parameters, PayOrder order) {
-            parameters.put("openid", order.getOpenid());
+            parameters.put(parameters.containsKey("sub_appid") ? "sub_openid" : "openid", order.getOpenid());
         }
     },
     /**
