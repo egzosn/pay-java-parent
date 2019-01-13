@@ -6,6 +6,7 @@ import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.common.http.HttpRequestTemplate;
 import com.egzosn.pay.common.util.sign.SignUtils;
+import com.egzosn.pay.common.util.str.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -139,7 +140,7 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
             for (int i = 0,len =  values.length; i < len; i++) {
                 valueStr += (i == len - 1) ?  values[i] : values[i] + ",";
             }
-            if (!valueStr.matches("\\w+")){
+            if (StringUtils.isNotEmpty(payConfigStorage.getInputCharset()) && !valueStr.matches("\\w+")){
                 try {
                     if(valueStr.equals(new String(valueStr.getBytes("iso8859-1"), "iso8859-1"))){
                         valueStr=new String(valueStr.getBytes("iso8859-1"), payConfigStorage.getInputCharset());
