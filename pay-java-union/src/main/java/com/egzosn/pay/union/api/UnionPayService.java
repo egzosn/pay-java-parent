@@ -15,6 +15,7 @@ import com.egzosn.pay.common.util.sign.CertDescriptor;
 import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.sign.encrypt.RSA;
 import com.egzosn.pay.common.util.sign.encrypt.RSA2;
+import com.egzosn.pay.common.util.str.StringUtils;
 import com.egzosn.pay.union.bean.SDKConstants;
 import com.egzosn.pay.union.bean.UnionTransactionType;
 
@@ -222,6 +223,10 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
         type.convertMap(params);
 
         params.put(SDKConstants.param_orderId, order.getOutTradeNo());
+
+        if (StringUtils.isNotEmpty(order.getAddition())){
+            params.put(SDKConstants.param_reqReserved, order.getAddition());
+        }
         switch (type) {
             case WAP:
             case WEB:
