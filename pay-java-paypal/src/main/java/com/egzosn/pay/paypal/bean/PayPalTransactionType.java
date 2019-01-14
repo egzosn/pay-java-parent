@@ -52,7 +52,7 @@ public enum PayPalTransactionType implements TransactionType {
         return this.name();
     }
 
-    /* *
+    /**
      * 获取接口名称
      * @return 接口名称
      */
