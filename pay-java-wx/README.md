@@ -37,6 +37,8 @@
         //退款使用
          /* 网络请求ssl证书 根据需求进行设置**/
         //设置ssl证书路径
+          //TODO 这里也支持输入流的入参。
+        //  httpConfigStorage.setKeystore(this.getClass()..getResourceAsStream("/证书文件"));
         httpConfigStorage.setKeystorePath("证书绝对路径");
         //设置ssl证书对应的密码
         httpConfigStorage.setStorePassword("证书对应的密码");
