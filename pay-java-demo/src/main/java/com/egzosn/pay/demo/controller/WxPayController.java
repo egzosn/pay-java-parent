@@ -75,6 +75,8 @@ public class WxPayController {
 
         //ssl 退款证书相关 不使用可注释
         if(!"ssl 退款证书".equals(KEYSTORE)){
+            //TODO 这里也支持输入流的入参。
+//            httpConfigStorage.setKeystore(WxPayController.class.getResourceAsStream("/证书文件"));
             httpConfigStorage.setKeystore(KEYSTORE);
             httpConfigStorage.setStorePassword(STORE_PASSWORD);
             httpConfigStorage.setPath(true);
