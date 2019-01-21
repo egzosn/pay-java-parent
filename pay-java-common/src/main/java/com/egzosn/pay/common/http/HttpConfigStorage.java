@@ -15,19 +15,19 @@ public class HttpConfigStorage {
     /**
      * http代理地址
      */
-    protected String httpProxyHost;
+    private String httpProxyHost;
     /**
      * 代理端口
      */
-    protected int httpProxyPort;
+    private int httpProxyPort;
     /**
      * 请求授权用户名
      */
-    protected String authUsername;
+    private String authUsername;
     /**
      * 请求授权密码
      */
-    protected String authPassword;
+    private String authPassword;
 
     /**
      * @see #keystore 是否为https请求所需的证书（PKCS12）的地址,默认为地址，否则为证书信息串
@@ -51,6 +51,10 @@ public class HttpConfigStorage {
      * 默认的每个路由的最大连接数
      */
     private int defaultMaxPerRoute = 0;
+    /**
+     * 默认使用的响应编码
+     */
+    private String charset;
 
     /**
      * http代理地址
@@ -249,5 +253,13 @@ public class HttpConfigStorage {
 
     public void setDefaultMaxPerRoute(int defaultMaxPerRoute) {
         this.defaultMaxPerRoute = defaultMaxPerRoute;
+    }
+
+    public String getCharset() {
+        return charset;
+    }
+
+    public void setCharset(String charset) {
+        this.charset = charset;
     }
 }
