@@ -6,6 +6,7 @@ import com.egzosn.pay.common.bean.MethodType;
 import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.util.XML;
+import com.egzosn.pay.common.util.str.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.*;
@@ -46,7 +47,7 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
     /**
      * 默认使用的响应编码
      */
-    private Charset defaultCharset = Consts.UTF_8;
+    private Charset defaultCharset;
     /**
      *  响应类型
      */
@@ -73,8 +74,11 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
      */
     public ClientHttpRequest(URI uri, MethodType method, Object request, String defaultCharset) {
        this(uri, method);
-       setDefaultCharset( Charset.forName(defaultCharset));
         setParameters(request);
+        if (StringUtils.isNotEmpty(defaultCharset)){
+            setDefaultCharset( Charset.forName(defaultCharset));
+        }
+
     }
     /**
      *  根据请求地址 请求方法，请求内容对象
@@ -85,8 +89,8 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
      */
     public ClientHttpRequest(URI uri, MethodType method, Object request, Charset defaultCharset) {
         this(uri, method);
-        setDefaultCharset(defaultCharset);
         setParameters(request);
+        setDefaultCharset(defaultCharset);
     }
     /**
      *  根据请求地址 请求方法，请求内容对象
