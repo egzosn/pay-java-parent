@@ -61,7 +61,8 @@ public class PayOrder {
 
     private String wapName;
     /**
-     * 微信会员唯一标识
+     * 用户唯一标识
+     *  微信含 sub_openid 字段
      */
     private String openid;
     /**

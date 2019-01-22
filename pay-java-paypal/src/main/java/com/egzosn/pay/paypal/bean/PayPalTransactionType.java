@@ -35,7 +35,7 @@ public enum PayPalTransactionType implements TransactionType {
     /**
      * 回调订单状态查询
      */
-    EXECUTE("v1/payments/payment/{paymentId}/execute"),
+    EXECUTE("payments/payment/{paymentId}/execute"),
 
     ;
 
@@ -52,7 +52,7 @@ public enum PayPalTransactionType implements TransactionType {
         return this.name();
     }
 
-    /* *
+    /**
      * 获取接口名称
      * @return 接口名称
      */
