@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
+import com.egzosn.pay.common.util.str.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -20,6 +21,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.nio.charset.Charset;
 import java.util.Map;
 
 
@@ -64,10 +66,35 @@ public class XML {
      */
     public static JSONObject toJSONObject(String content) {
 
-        if (null == content || "".equals(content)) {
+        return toJSONObject(content, Charset.defaultCharset());
+
+
+    }
+    /**
+     * 解析xml并转化为Json值
+     *
+     * @param content json字符串
+     * @return Json值
+     */
+    public static JSONObject toJSONObject(String content, Charset charset) {
+
+        if (StringUtils.isEmpty(content)) {
             return null;
         }
-        try (InputStream in = new ByteArrayInputStream(content.getBytes("UTF-8"))) {
+        return toJSONObject(content.getBytes(charset));
+    }
+    /**
+     * 解析xml并转化为Json值
+     *
+     * @param content json字符串
+     * @return Json值
+     */
+    public static JSONObject toJSONObject(byte[] content) {
+
+        if (null == content) {
+            return null;
+        }
+        try (InputStream in = new ByteArrayInputStream(content)) {
             return (JSONObject) inputStream2Map(in, null);
         } catch (IOException e) {
             throw new PayErrorException(new PayException("IOException", e.getMessage()));
