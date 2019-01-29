@@ -182,8 +182,7 @@ public class UriVariables {
         return map;
     }
 
-    private static void putKeyValueToMap (StringBuilder temp, boolean isKey,
-                                          String key, Map<String, Object> map) {
+    private static void putKeyValueToMap (StringBuilder temp, boolean isKey, String key, Map<String, Object> map) {
         if (isKey) {
             key = temp.toString();
             if (key.length() == 0) {

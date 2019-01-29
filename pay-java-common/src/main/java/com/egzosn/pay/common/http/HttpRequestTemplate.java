@@ -25,7 +25,8 @@ import org.apache.http.ssl.SSLContexts;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
@@ -287,7 +288,7 @@ public class HttpRequestTemplate {
      *    getForObject(&quot;http://egan.in/pay/{id}/f/{type}&quot;, String.class, &quot;1&quot;, &quot;APP&quot;)
      * </code>
      */
-    public <T> T getForObject(String uri, HttpHeader header,Class<T> responseType, Object... uriVariables){
+    public <T> T getForObject(String uri, HttpHeader header, Class<T> responseType, Object... uriVariables){
 
         return doExecute(URI.create(UriVariables.getUri(uri, uriVariables)), header, responseType, MethodType.GET);
     }
