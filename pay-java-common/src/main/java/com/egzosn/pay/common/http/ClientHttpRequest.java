@@ -316,7 +316,7 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
             //xml类型
             if (isXml(contentType[0], first)) {
                 try {
-                    return XML.toJSONObject(result).toJavaObject(responseType);
+                    return XML.toJSONObject(result, defaultCharset).toJavaObject(responseType);
                 }catch (Exception e){
                     ;
                 }
