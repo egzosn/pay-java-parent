@@ -329,7 +329,7 @@ public class HttpRequestTemplate {
         if (LOG.isDebugEnabled()) {
             LOG.debug(String.format("uri:%s, httpMethod:%s ", uri, method.name()));
         }
-        ClientHttpRequest<T> httpRequest = new ClientHttpRequest(uri ,method, request, configStorage.getCharset());
+        ClientHttpRequest<T> httpRequest = new ClientHttpRequest(uri ,method, request, null == configStorage ? null : configStorage.getCharset());
         //判断是否有代理设置
         if (null == httpProxy){
             httpRequest.setProxy(httpProxy);
