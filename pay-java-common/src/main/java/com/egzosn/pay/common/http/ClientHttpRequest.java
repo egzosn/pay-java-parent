@@ -291,12 +291,13 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
     private T toBean(HttpEntity entity, String[] contentType) throws IOException {
         //判断内容类型是否为文本类型
         if (isText(contentType[0])) {
-      /*      String charset = "UTF-8";
+/*            String charset = "UTF-8";
             if (null != contentType && 2 == charset.length()) {
                 charset = contentType[1].substring(contentType[1].indexOf("=") + 1);
             }*/
+
             //获取响应的文本内容
-            String result = EntityUtils.toString(entity, defaultCharset);
+            String result = EntityUtils.toString(entity, getDefaultCharset());
             if (LOG.isDebugEnabled()){
                 LOG.debug("请求响应内容：\r\n" + result);
             }
@@ -316,7 +317,7 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
             //xml类型
             if (isXml(contentType[0], first)) {
                 try {
-                    return XML.toJSONObject(result, defaultCharset).toJavaObject(responseType);
+                    return XML.toJSONObject(result, getDefaultCharset()).toJavaObject(responseType);
                 }catch (Exception e){
                     ;
                 }

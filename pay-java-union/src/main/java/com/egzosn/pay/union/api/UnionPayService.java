@@ -242,11 +242,24 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
                 } else {
                     params.put(SDKConstants.param_payTimeout, DateUtils.formatDate(new Timestamp(System.currentTimeMillis() + 30 * 60 * 1000), DateUtils.YYYYMMDDHHMMSS));
                 }
+
                 params.put(SDKConstants.param_frontUrl, payConfigStorage.getReturnUrl());
                 break;
             case CONSUME:
                 params.put(SDKConstants.param_txnAmt, Util.conversionCentAmount(order.getPrice()));
                 params.put(SDKConstants.param_qrNo, order.getAuthCode());
+                break;
+            case APPLY_QR_CODE:
+                if (null != order.getPrice()){
+                    params.put(SDKConstants.param_txnAmt, Util.conversionCentAmount(order.getPrice()));
+                }
+
+                if (null != order.getExpirationTime()) {
+                    params.put(SDKConstants.param_payTimeout, DateUtils.formatDate(order.getExpirationTime(), DateUtils.YYYYMMDDHHMMSS));
+                } else {
+                    params.put(SDKConstants.param_payTimeout, DateUtils.formatDate(new Timestamp(System.currentTimeMillis() + 30 * 60 * 1000), DateUtils.YYYYMMDDHHMMSS));
+                }
+
                 break;
             default:
         }
