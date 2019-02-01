@@ -206,6 +206,21 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
     }
 
     /**
+     * 订单超时时间。
+     * 超过此时间后，除网银交易外，其他交易银联系统会拒绝受理，提示超时。 跳转银行网银交易如果超时后交易成功，会自动退款，大约5个工作日金额返还到持卡人账户。
+     * 此时间建议取支付时的北京时间加15分钟。
+     * 超过超时时间调查询接口应答origRespCode不是A6或者00的就可以判断为失败。
+     * @param expirationTime 超时时间
+     * @return 具体的时间字符串
+     */
+    private String getPayTimeout(Date expirationTime) {
+        //
+        if (null != expirationTime) {
+            return DateUtils.formatDate(expirationTime, DateUtils.YYYYMMDDHHMMSS);
+        }
+        return DateUtils.formatDate(new Timestamp(System.currentTimeMillis() + 30 * 60 * 1000), DateUtils.YYYYMMDDHHMMSS);
+    }
+    /**
      * 返回创建的订单信息
      *
      * @param order 支付订单
@@ -233,15 +248,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
             case B2B:
                 params.put(SDKConstants.param_txnAmt, Util.conversionCentAmount(order.getPrice()));
                 params.put("orderDesc", order.getSubject());
-                // 订单超时时间。
-                // 超过此时间后，除网银交易外，其他交易银联系统会拒绝受理，提示超时。 跳转银行网银交易如果超时后交易成功，会自动退款，大约5个工作日金额返还到持卡人账户。
-                // 此时间建议取支付时的北京时间加15分钟。
-                // 超过超时时间调查询接口应答origRespCode不是A6或者00的就可以判断为失败。
-                if (null != order.getExpirationTime()) {
-                    params.put(SDKConstants.param_payTimeout, DateUtils.formatDate(order.getExpirationTime(), DateUtils.YYYYMMDDHHMMSS));
-                } else {
-                    params.put(SDKConstants.param_payTimeout, DateUtils.formatDate(new Timestamp(System.currentTimeMillis() + 30 * 60 * 1000), DateUtils.YYYYMMDDHHMMSS));
-                }
+                params.put(SDKConstants.param_payTimeout, getPayTimeout(order.getExpirationTime()));
 
                 params.put(SDKConstants.param_frontUrl, payConfigStorage.getReturnUrl());
                 break;
@@ -250,18 +257,15 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
                 params.put(SDKConstants.param_qrNo, order.getAuthCode());
                 break;
             case APPLY_QR_CODE:
-                if (null != order.getPrice()){
+                if (null != order.getPrice()) {
                     params.put(SDKConstants.param_txnAmt, Util.conversionCentAmount(order.getPrice()));
                 }
-
-                if (null != order.getExpirationTime()) {
-                    params.put(SDKConstants.param_payTimeout, DateUtils.formatDate(order.getExpirationTime(), DateUtils.YYYYMMDDHHMMSS));
-                } else {
-                    params.put(SDKConstants.param_payTimeout, DateUtils.formatDate(new Timestamp(System.currentTimeMillis() + 30 * 60 * 1000), DateUtils.YYYYMMDDHHMMSS));
-                }
-
+                params.put(SDKConstants.param_payTimeout, getPayTimeout(order.getExpirationTime()));
                 break;
             default:
+                params.put(SDKConstants.param_txnAmt, Util.conversionCentAmount(order.getPrice()));
+                params.put(SDKConstants.param_payTimeout, getPayTimeout(order.getExpirationTime()));
+                params.put("orderDesc", order.getSubject());
         }
 
         return setSign(params);
