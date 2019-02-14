@@ -230,7 +230,11 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
     @Override
     public Map<String, Object> orderInfo(PayOrder order) {
         Map<String, Object> params = this.getCommonParam();
-
+//        if(order instanceof  UnionPayOrder){
+//            UnionPayOrder unionPayOrder = (UnionPayOrder)order;
+//            //todo 其他参数
+////            params.put();
+//        }
         UnionTransactionType type = (UnionTransactionType) order.getTransactionType();
 
 
@@ -245,6 +249,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
         switch (type) {
             case WAP:
             case WEB:
+                //todo PCwap网关跳转支付特殊用法.txt
             case B2B:
                 params.put(SDKConstants.param_txnAmt, Util.conversionCentAmount(order.getPrice()));
                 params.put("orderDesc", order.getSubject());
@@ -374,7 +379,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
         }
         if (this.verify(response)) {
             if (SDKConstants.OK_RESP_CODE.equals(response.get(SDKConstants.param_respCode))) {
-                //成功,获取tn号
+                //成功
                 return MatrixToImageWriter.writeInfoToJpgBuff((String) response.get(SDKConstants.param_qrCode));
             }
             throw new PayErrorException(new PayException((String) response.get(SDKConstants.param_respCode), (String) response.get(SDKConstants.param_respMsg), responseStr));
@@ -439,11 +444,11 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
     }
 
     /**
-     * 获取输出消息，用户返回给支付端, 针对于web端
+     * 功能：生成自动跳转的Html表单
      *
      * @param orderInfo 发起支付的订单信息
      * @param method    请求方式  "post" "get",
-     * @return 获取输出消息，用户返回给支付端, 针对于web端
+     * @return 生成自动跳转的Html表单返回给支付端, 针对于PC端
      * @see MethodType 请求类型
      */
     @Override
@@ -467,6 +472,30 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
         return sf.toString();
     }
 
+    /**
+     * 功能：将订单信息进行签名并提交请求
+     * 业务范围：手机控件支付产品(WAP),
+     * @param order         订单信息
+     * @return  成功：返回支付结果  失败：返回
+     */
+    public Map<String ,Object>  sendHttpRequest(PayOrder order){
+        Map<String, Object> params = orderInfo(order);
+        String responseStr = getHttpRequestTemplate().postForObject(this.getBackTransUrl(), params, String.class);
+        Map<String, Object> response = UriVariables.getParametersToMap(responseStr);
+        if (response.isEmpty()) {
+            throw new PayErrorException(new PayException("failure", "响应内容有误!", responseStr));
+        }
+        if (this.verify(response)) {
+            if (SDKConstants.OK_RESP_CODE.equals(response.get(SDKConstants.param_respCode))) {
+//                //成功,获取tn号
+//                String tn =  (String)response.get(SDKConstants.param_tn);
+//                //TODO
+                return response;
+            }
+            throw new PayErrorException(new PayException((String) response.get(SDKConstants.param_respCode), (String) response.get(SDKConstants.param_respMsg), responseStr));
+        }
+        throw new PayErrorException(new PayException("failure", "验证签名失败", responseStr));
+    }
 
     /**
      * 交易查询接口
