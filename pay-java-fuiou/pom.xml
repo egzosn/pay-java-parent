@@ -5,7 +5,7 @@
     <parent>
         <artifactId>pay-java-parent</artifactId>
         <groupId>com.egzosn</groupId>
-        <version>2.12.6-SNAPSHOT</version>
+        <version>2.12.6</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>pay-java-fuiou</artifactId>
