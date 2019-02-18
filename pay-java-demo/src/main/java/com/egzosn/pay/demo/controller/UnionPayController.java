@@ -3,7 +3,9 @@ package com.egzosn.pay.demo.controller;
 
 
 import com.egzosn.pay.common.api.PayService;
-import com.egzosn.pay.common.bean.*;
+import com.egzosn.pay.common.bean.MethodType;
+import com.egzosn.pay.common.bean.PayOrder;
+import com.egzosn.pay.common.bean.RefundOrder;
 import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.demo.request.QueryOrder;
@@ -36,7 +38,7 @@ import static com.egzosn.pay.union.bean.UnionTransactionType.WEB;
 @RequestMapping("union")
 public class UnionPayController {
 
-    private PayService service = null;
+    private UnionPayService service = null;
 
     @PostConstruct
     public void init() {
@@ -50,17 +52,17 @@ public class UnionPayController {
         unionPayConfigStorage.setAcpMiddleCert("D:/certs/acp_test_middle.cer");
         //根证书路径
         unionPayConfigStorage.setAcpRootCert("D:/certs/acp_test_root.cer");
-
         //私钥, 私钥证书格式： 私钥证书路径;私钥证书对应的密码
 //        unionPayConfigStorage.setKeyPrivate("D:/certs/acp_test_sign.pfx;000000");
         // 私钥证书路径
         unionPayConfigStorage.setKeyPrivateCert("D:/certs/acp_test_sign.pfx");
         //私钥证书对应的密码
         unionPayConfigStorage.setKeyPrivateCertPwd("000000");
-
-        unionPayConfigStorage.setNotifyUrl("http://www.pay.egzosn.com/payBack.json");
-        // 无需同步回调可不填  app填这个就可以
+        //前台通知网址  即SDKConstants.param_frontUrl
         unionPayConfigStorage.setReturnUrl("http://www.pay.egzosn.com/payBack.json");
+        //后台通知地址  即SDKConstants.param_backUrl
+        unionPayConfigStorage.setNotifyUrl("http://www.pay.egzosn.com/payBack.json");
+        //加密方式
         unionPayConfigStorage.setSignType(SignUtils.RSA2.name());
         //单一支付可不填
         unionPayConfigStorage.setPayType("unionPay");
@@ -82,18 +84,17 @@ public class UnionPayController {
 
 
     /**
-     * 跳到支付页面
-     * 针对实时支付,即时付款
-     *
+     * ---业务实现例子1---
+     * 功能：生成自动跳转的Html表单
+     * 业务类型（关键字）:网关支付(WEB)/手机网页支付,企业网银支付（B2B）,
      * @param price       金额
-     * @return 跳到支付页面
+     * @return 生成自动跳转的Html表单
      */
     @RequestMapping(value = "toPay.html", produces = "text/html;charset=UTF-8")
     public String toPay( BigDecimal price) {
-        //及时收款
-        PayOrder order = new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), WEB);
-        //WAP
-//        PayOrder order = new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), UnionTransactionType.WAP);
+        //网关支付(WEB)/手机网页支付
+        PayOrder order = new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""),
+                WEB);
          //企业网银支付（B2B支付）
 //        PayOrder order = new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), UnionTransactionType.B2B);
 
@@ -101,6 +102,20 @@ public class UnionPayController {
         return service.buildRequest(orderInfo, MethodType.POST);
     }
 
+    /**
+     *  ---业务实现例子2---
+     * 功能：获取调起控件的tn号，支付结果等
+     * 业务类型:手机控件支付产品(WAP),
+     * @param price             金额
+     * @return 支付结果
+     */
+    @RequestMapping(value = "toPay.json")
+    public Map<String, Object> sendHttpRequest( BigDecimal price) {
+        //手机控件支付产品
+        PayOrder order = new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", "")
+                ,UnionTransactionType.WAP);
+        return service.sendHttpRequest(order);
+    }
 
 
 
@@ -202,7 +217,7 @@ public class UnionPayController {
      *
      * @return
      *
-     * 业务处理在对应的PayMessageHandler里面处理，在哪里设置PayMessageHandler，详情查看{@link com.egzosn.pay.common.api.PayService#setPayMessageHandler(com.egzosn.pay.common.api.PayMessageHandler)}
+     * 业务处理在对应的PayMessageHandler里面处理，在哪里设置PayMessageHandler，详情查看{@link PayService#setPayMessageHandler(com.egzosn.pay.common.api.PayMessageHandler)}
      *
      * 如果未设置 {@link com.egzosn.pay.common.api.PayMessageHandler} 那么会使用默认的 {@link com.egzosn.pay.common.api.DefaultPayMessageHandler}
      *
