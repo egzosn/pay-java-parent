@@ -7,7 +7,7 @@
     <groupId>com.egzosn</groupId>
     <artifactId>pay-java-parent</artifactId>
     <packaging>pom</packaging>
-    <version>2.12.6-SNAPSHOT</version>
+    <version>2.12.6</version>
 
     <name>Pay Java - Parent</name>
     <description>Pay Java Parent</description>
@@ -56,7 +56,7 @@
 
 
     <properties>
-        <pay.version>2.12.6-SNAPSHOT</pay.version>
+        <pay.version>2.12.6</pay.version>
         <httpmime.version>4.5.4</httpmime.version>
         <log4j.version>1.2.17</log4j.version>
         <fastjson.version>1.2.41</fastjson.version>
@@ -126,7 +126,7 @@
                     <encoding>utf-8</encoding>
                 </configuration>
             </plugin>
-      <!--     <plugin>
+        <!--   <plugin>
                 <groupId>org.sonatype.plugins</groupId>
                 <artifactId>nexus-staging-maven-plugin</artifactId>
                 <version>1.6.3</version>
