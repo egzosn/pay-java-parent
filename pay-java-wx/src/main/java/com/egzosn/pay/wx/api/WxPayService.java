@@ -604,7 +604,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
     public Map<String, Object> transfer(TransferOrder order) {
         Map<String, Object> parameters = new TreeMap<String, Object>();
 
-        parameters.put("mch_id", payConfigStorage.getPid());
+
         parameters.put("partner_trade_no", order.getOutNo());
         parameters.put("amount", Util.conversionCentAmount(order.getAmount()));
         if (!StringUtils.isEmpty(order.getRemark())){
@@ -613,7 +613,9 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
         parameters.put("nonce_str", SignUtils.randomStr());
         if (null !=  order.getTransferType() && TRANSFERS ==  order.getTransferType()){
             transfers(parameters, order);
+            parameters.put("mchid", payConfigStorage.getPid());
         }else {
+            parameters.put("mch_id", payConfigStorage.getPid());
             order.setTransferType(WxTransferType.PAY_BANK);
             payBank(parameters, order);
         }
