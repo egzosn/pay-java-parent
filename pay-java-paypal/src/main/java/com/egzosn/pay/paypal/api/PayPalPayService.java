@@ -261,7 +261,7 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage>{
     public Map<String, Object> refund(RefundOrder refundOrder) {
         JSONObject request =  new JSONObject();
 
-        if (null != refundOrder.getRefundAmount() && BigDecimal.ZERO.compareTo( refundOrder.getRefundAmount()) > 0){
+        if (null != refundOrder.getRefundAmount() && BigDecimal.ZERO.compareTo( refundOrder.getRefundAmount()) == -1){
             Amount amount = new Amount();
             amount.setCurrency(refundOrder.getCurType().name());
             amount.setTotal(Util.conversionAmount(refundOrder.getRefundAmount()).toString());
@@ -269,7 +269,7 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage>{
             request.put("description", refundOrder.getDescription());
         }
 
-        HttpStringEntity httpEntity = new HttpStringEntity(request, ContentType.APPLICATION_JSON);
+        HttpStringEntity httpEntity = new HttpStringEntity(request.toJSONString(), ContentType.APPLICATION_JSON);
         httpEntity.setHeaders(authHeader());
         JSONObject resp = getHttpRequestTemplate().postForObject(getReqUrl(PayPalTransactionType.REFUND),  httpEntity, JSONObject.class, refundOrder.getTradeNo());
         return resp;
@@ -307,4 +307,6 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage>{
     public Map<String, Object> secondaryInterface(Object tradeNoOrBillDate, String outTradeNoBillType, TransactionType transactionType) {
         return Collections.emptyMap();
     }
+
+
 }
