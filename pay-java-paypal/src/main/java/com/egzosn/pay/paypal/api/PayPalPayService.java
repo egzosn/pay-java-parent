@@ -269,7 +269,7 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage>{
             request.put("description", refundOrder.getDescription());
         }
 
-        HttpStringEntity httpEntity = new HttpStringEntity(request, ContentType.APPLICATION_JSON);
+        HttpStringEntity httpEntity = new HttpStringEntity(request.toJSONString(), ContentType.APPLICATION_JSON);
         httpEntity.setHeaders(authHeader());
         JSONObject resp = getHttpRequestTemplate().postForObject(getReqUrl(PayPalTransactionType.REFUND),  httpEntity, JSONObject.class, refundOrder.getTradeNo());
         return resp;
