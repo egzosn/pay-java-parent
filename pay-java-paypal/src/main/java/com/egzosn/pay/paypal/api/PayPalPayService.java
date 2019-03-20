@@ -261,7 +261,7 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage>{
     public Map<String, Object> refund(RefundOrder refundOrder) {
         JSONObject request =  new JSONObject();
 
-        if (null != refundOrder.getRefundAmount() && BigDecimal.ZERO.compareTo( refundOrder.getRefundAmount()) > 0){
+        if (null != refundOrder.getRefundAmount() && BigDecimal.ZERO.compareTo( refundOrder.getRefundAmount()) == -1){
             Amount amount = new Amount();
             amount.setCurrency(refundOrder.getCurType().name());
             amount.setTotal(Util.conversionAmount(refundOrder.getRefundAmount()).toString());
