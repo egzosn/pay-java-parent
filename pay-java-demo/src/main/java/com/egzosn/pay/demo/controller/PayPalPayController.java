@@ -40,13 +40,13 @@ public class PayPalPayController {
     @PostConstruct
     public void init() {
         PayPalConfigStorage storage = new PayPalConfigStorage();
-        storage.setClientID("商户id");
-        storage.setClientSecret("商户密钥");
+        storage.setClientID("1AZ7HTcvrEAxYbzYx_iDZAi06GdqbjhqqQzFgPBFLxm2VUMzwlmiNUBk_y_5QNP4zWKblTuM6ZBAmxScd");
+        storage.setClientSecret("1EBMIjAag6NiRdXZxteTv0amEsmKN345xJv3bN7f_HRXSqcRJlW7PXhYXjI9sk5I4nKYOHgeqzhXCXKFo");
         storage.setTest(true);
         //发起付款后的页面转跳地址
-        storage.setReturnUrl("http://127.0.0.1:8088/pay/success");
+        storage.setReturnUrl("http://www.egzosn.com/pay/success");
         //取消按钮转跳地址,这里用异步通知地址的兼容的做法
-        storage.setNotifyUrl("http://127.0.0.1:8088/pay/cancel");
+        storage.setNotifyUrl("http://www.egzosn.com/pay/cancel");
         service = new PayPalPayService(storage);
 
         //请求连接池配置
@@ -72,6 +72,13 @@ public class PayPalPayController {
         PayOrder order = new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayPalTransactionType.sale);
 
         Map orderInfo = service.orderInfo(order);
+
+        //某些支付下单时无法设置单号，通过下单后返回对应单号，如 paypal，友店。
+        String outTradeNo = order.getOutTradeNo();
+
+        System.out.println("支付订单号：" + outTradeNo + "  这里可以进行回存");
+
+
         return service.buildRequest(orderInfo, MethodType.POST);
     }
     /**

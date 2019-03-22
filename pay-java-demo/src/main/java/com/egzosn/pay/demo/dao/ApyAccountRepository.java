@@ -109,6 +109,16 @@ public class ApyAccountRepository {
         apyAccount5.setMsgType(MsgType.json);
         apyAccount5.setTest(true);
         apyAccounts.put(apyAccount5.getPayId(), apyAccount5);
+
+        ApyAccount apyAccount6 = new ApyAccount();
+        apyAccount6.setPayId(6);
+        apyAccount6.setAppid("1AZ7HTcvrEAxYbzYx_iDZAi06GdqbjhqqQzFgPBFLxm2VUMzwlmiNUBk_y_5QNP4zWKblTuM6ZBAmxScd");//Program ID
+        apyAccount6.setPrivateKey("1EBMIjAag6NiRdXZxteTv0amEsmKN345xJv3bN7f_HRXSqcRJlW7PXhYXjI9sk5I4nKYOHgeqzhXCXKFo");//API password
+        apyAccount6.setInputCharset("UTF-8");
+        apyAccount6.setPayType(PayType.payPal);
+        apyAccount6.setMsgType(MsgType.json);
+        apyAccount6.setTest(true);
+        apyAccounts.put(apyAccount6.getPayId(), apyAccount6);
     }
     //_____________________________________________________________
 

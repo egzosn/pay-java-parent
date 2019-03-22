@@ -181,6 +181,9 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage>{
         HttpStringEntity entity = new HttpStringEntity(JSON.toJSONString(payment),  ContentType.APPLICATION_JSON);
         entity.setHeaders(authHeader());
         JSONObject resp = getHttpRequestTemplate().postForObject(getReqUrl(order.getTransactionType()), entity, JSONObject.class);
+        if ("created".equals(resp.getString("state")) && StringUtils.isNotEmpty(resp.getString("id"))){
+            order.setOutTradeNo(resp.getString("id"));
+        }
         return resp;
     }
 
