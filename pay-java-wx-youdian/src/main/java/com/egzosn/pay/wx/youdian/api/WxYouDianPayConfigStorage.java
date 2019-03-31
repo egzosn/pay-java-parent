@@ -4,10 +4,11 @@ import com.egzosn.pay.common.api.BasePayConfigStorage;
 
 /**
  * 支付客户端配置存储
- * @author  egan
  *
- * email egzosn@gmail.com
- * date 2017/01/12 22:58
+ * @author egan
+ *         <p>
+ *         email egzosn@gmail.com
+ *         date 2017/01/12 22:58
  */
 public class WxYouDianPayConfigStorage extends BasePayConfigStorage {
 
@@ -15,11 +16,7 @@ public class WxYouDianPayConfigStorage extends BasePayConfigStorage {
     /**
      * 账号
      */
-    public volatile String seller;
-
-
-
-
+    public String seller;
 
 
     @Override
@@ -43,19 +40,14 @@ public class WxYouDianPayConfigStorage extends BasePayConfigStorage {
     }
 
 
-
     public void setToken(String accessToken) {
-       setAccessToken(accessToken);
+        setAccessToken(accessToken);
     }
 
     @Override
     public String getToken() {
         return getAccessToken();
     }
-
-
-
-
 
 
 }
