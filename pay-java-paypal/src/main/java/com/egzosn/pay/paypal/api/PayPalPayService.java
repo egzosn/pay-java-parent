@@ -83,7 +83,6 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage>{
             }
 
             if (payConfigStorage.isAccessTokenExpired()) {
-                if (null == payConfigStorage.getAccessToken()){
                     Map<String, String> header = new HashMap<>();
                     header.put("Authorization", "Basic " + authorizationString(getPayConfigStorage().getAppid(), getPayConfigStorage().getKeyPrivate()));
                     header.put("Accept", "application/json");
@@ -91,12 +90,11 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage>{
                     try {
                         HttpStringEntity entity = new HttpStringEntity("grant_type=client_credentials", header);
                         JSONObject resp = getHttpRequestTemplate().postForObject(getReqUrl(PayPalTransactionType.AUTHORIZE), entity, JSONObject.class);
-                        payConfigStorage.updateAccessToken(String.format("%s %s", resp.getString("token_type" ), resp.getString("access_token" )), resp.getLongValue("expires_in" ));
+                        payConfigStorage.updateAccessToken(String.format("%s %s", resp.getString("token_type" ), resp.getString("access_token" )),  resp.getIntValue("expires_in" ));
 
                     } catch (UnsupportedEncodingException e) {
                         throw new PayErrorException(new PayException("failure", e.getMessage()));
                     }
-                }
                 return payConfigStorage.getAccessToken();
             }
         } finally {

@@ -40,8 +40,8 @@ public class PayPalPayController {
     @PostConstruct
     public void init() {
         PayPalConfigStorage storage = new PayPalConfigStorage();
-        storage.setClientID("1AZ7HTcvrEAxYbzYx_iDZAi06GdqbjhqqQzFgPBFLxm2VUMzwlmiNUBk_y_5QNP4zWKblTuM6ZBAmxScd");
-        storage.setClientSecret("1EBMIjAag6NiRdXZxteTv0amEsmKN345xJv3bN7f_HRXSqcRJlW7PXhYXjI9sk5I4nKYOHgeqzhXCXKFo");
+        storage.setClientID("AZ7HTcvrEAxYbzYx_iDZAi06GdqbjhqqQzFgPBFLxm2VUMzwlmiNUBk_y_5QNP4zWKblTuM6ZBAmxScd");
+        storage.setClientSecret("EBMIjAag6NiRdXZxteTv0amEsmKN345xJv3bN7f_HRXSqcRJlW7PXhYXjI9sk5I4nKYOHgeqzhXCXKFo");
         storage.setTest(true);
         //发起付款后的页面转跳地址
         storage.setReturnUrl("http://www.egzosn.com/pay/success");
