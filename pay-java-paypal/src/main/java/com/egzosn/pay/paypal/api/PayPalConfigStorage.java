@@ -4,14 +4,15 @@ import com.egzosn.pay.common.api.BasePayConfigStorage;
 
 /**
  * 贝宝支付配置存储
- * @author  egan
  *
- * email egzosn@gmail.com
- * date 2018-4-8 22:11:42
+ * @author egan
+ *         <p>
+ *         email egzosn@gmail.com
+ *         date 2018-4-8 22:11:42
  */
 public class PayPalConfigStorage extends BasePayConfigStorage {
 
-    private volatile String clientID;
+    private String clientID;
 
     @Override
     public String getAppid() {
@@ -41,28 +42,25 @@ public class PayPalConfigStorage extends BasePayConfigStorage {
     }
 
     public void setClientSecret(String clientSecret) {
-       setKeyPrivate(clientSecret);
+        setKeyPrivate(clientSecret);
     }
 
-    @Override
-    public boolean isAccessTokenExpired() {
-        if (getExpiresTime() == 0){
-            return true;
-        }
-        return (getExpiresTime() - System.currentTimeMillis() / 1000) <= 0;
-    }
 
     /**
      * 设置取消页面的url
+     *
      * @param cancelUrl 取消页面的url
      */
-    public void setCancelUrl(String cancelUrl){
+    public void setCancelUrl(String cancelUrl) {
         setNotifyUrl(cancelUrl);
     }
+
     /**
      * 获取取消页面的url
      */
-    public String getCancelUrl(){
-      return getNotifyUrl();
+    public String getCancelUrl() {
+        return getNotifyUrl();
     }
+
+
 }

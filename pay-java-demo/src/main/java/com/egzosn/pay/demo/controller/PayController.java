@@ -112,6 +112,12 @@ public class PayController {
             order.setBankType(bankType);
         }
         Map orderInfo = payResponse.getService().orderInfo(order);
+
+        //某些支付下单时无法设置单号，通过下单后返回对应单号，如 paypal，友店。
+        String outTradeNo = order.getOutTradeNo();
+
+        System.out.println("支付订单号：" + outTradeNo + "  这里可以进行回存");
+
         return payResponse.getService().buildRequest(orderInfo, MethodType.POST);
     }
 

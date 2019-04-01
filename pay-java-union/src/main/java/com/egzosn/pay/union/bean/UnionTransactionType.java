@@ -15,35 +15,46 @@ import java.util.Map;
 public enum UnionTransactionType implements TransactionType{
 
     /**
+     * ---尚未接入---
      * 苹果支付
+     * 官方文档：https://open.unionpay.com/tjweb/acproduct/list?apiservId=460
      */
-    APPLE("01","01","000802","08"),
+    APPLE_PAY("01","01","000802","08"),
     /**
      * 手机控件
      */
     APP("01","01","000000","08"),
     /**
-     * 手机网页支付（WAP支付）
+     * 手机控件支付产品(安卓/IOS/ApplePay 对应后台)
+     * 官方文档：https://open.unionpay.com/tjweb/acproduct/list?apiservId=450
      */
     WAP("01","01","000201","08"),
     /**
-     * 网关支付
+     * 网关支付(B2C)
+     * 官方文档：https://open.unionpay.com/tjweb/acproduct/list?apiservId=448
+     * 手机网页支付（WAP支付）,
+     * 官方文档：https://open.unionpay.com/tjweb/acproduct/list?apiservId=453
      */
     WEB("01","01","000201","07"),
     /**
-     * 无跳转支付
+     * ---尚未接入---
+     * 无跳转支付()
+     * 官方文档：https://open.unionpay.com/tjweb/acproduct/list?apiservId=449
      */
     NO_JUMP("01","01","000301","07"),
     /**
      * 企业网银支付（B2B支付）
+     * 官方文档：https://open.unionpay.com/tjweb/acproduct/list?apiservId=452
      */
     B2B("01","01","000202","07"),
     /**
      *  申码(主扫场景)
+     *  官方文档：https://open.unionpay.com/tjweb/acproduct/list?apiservId=468
      */
     APPLY_QR_CODE("01","07","000000","08"),
     /**
      * 消费(被扫场景)
+     * 官方文档:同申码(主扫场景)
      */
     CONSUME("01","06","000000","08"),
     //消费撤销
@@ -61,7 +72,7 @@ public enum UnionTransactionType implements TransactionType{
      */
     private String txnType;
     /**
-     * 交易子类
+     * 交易子类型
      */
     private String txnSubType;
 
@@ -71,7 +82,7 @@ public enum UnionTransactionType implements TransactionType{
     private String bizType;
 
     /**
-     * 渠道类型 05：语音07：互联网08：移动 16：数字机顶盒
+     * 渠道类型 05：语音 07：PC,平板  08：手机 16：数字机顶盒
      */
     private String channelType;
 

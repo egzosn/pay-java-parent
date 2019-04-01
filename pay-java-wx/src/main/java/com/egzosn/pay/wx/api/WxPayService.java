@@ -604,7 +604,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
     public Map<String, Object> transfer(TransferOrder order) {
         Map<String, Object> parameters = new TreeMap<String, Object>();
 
-        parameters.put("mch_id", payConfigStorage.getPid());
+
         parameters.put("partner_trade_no", order.getOutNo());
         parameters.put("amount", Util.conversionCentAmount(order.getAmount()));
         if (!StringUtils.isEmpty(order.getRemark())){
@@ -613,7 +613,9 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
         parameters.put("nonce_str", SignUtils.randomStr());
         if (null !=  order.getTransferType() && TRANSFERS ==  order.getTransferType()){
             transfers(parameters, order);
+            parameters.put("mchid", payConfigStorage.getPid());
         }else {
+            parameters.put("mch_id", payConfigStorage.getPid());
             order.setTransferType(WxTransferType.PAY_BANK);
             payBank(parameters, order);
         }
@@ -636,6 +638,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
         //转账到余额, 申请商户号的appid或商户号绑定的appid
         parameters.put("mch_appid", payConfigStorage.getAppid());
         parameters.put("openid", order.getPayeeAccount());
+        parameters.put("spbill_create_ip", StringUtils.isEmpty(order.getIp()) ? "192.168.1.150" : order.getIp());
         //默认不校验真实姓名
         parameters.put("check_name", "NO_CHECK");
         //当存在时候 校验收款用户真实姓名

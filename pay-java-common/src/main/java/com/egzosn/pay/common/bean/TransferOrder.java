@@ -55,6 +55,11 @@ public class TransferOrder {
      */
     private TransferType transferType;
 
+    /**
+     * 操作者ip，根据支付平台所需进行设置
+     */
+    private String ip;
+
     public String getOutNo() {
         return outNo;
     }
@@ -125,5 +130,13 @@ public class TransferOrder {
 
     public void setTransferType(TransferType transferType) {
         this.transferType = transferType;
+    }
+
+    public String getIp() {
+        return ip;
+    }
+
+    public void setIp(String ip) {
+        this.ip = ip;
     }
 }
