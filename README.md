@@ -1,8 +1,6 @@
 
 ##整合支付模块
 
-声明： 本项目最初想法自 https://github.com/chanjarster/weixin-java-tools, 15年1月左右关注chanjarster/weixin-java-tools，并将其回调处理修改并进行使用。
-
 
 ##### 详细文档请看 [wiki](https://gitee.com/egzosn/pay-java-parent/wikis/Home)。
 
@@ -50,6 +48,9 @@
 * 码云：https://gitee.com/egzosn/pay-java-parent
 * GitHub：https://github.com/egzosn/pay-java-parent
 
+#### spring-boot-starter-pay 是一个基于spring-boot实现自动化配置的支付对接，让你可以不用理解支付怎么对接，只需要专注你的业务
+* 码云：https://gitee.com/egzosn/pay-spring-boot-starter-parent
+* GitHub：https://github.com/egzosn/pay-spring-boot-starter-parent
 
 ### 使用
 这里不多说直接上代码 
