@@ -1,7 +1,7 @@
 
 ##整合支付模块
 
-声明： 本项目最初想法自 https://github.com/chanjarster/weixin-java-tools, 15年1月左右关注chanjarster/weixin-java-tools，并将其回调处理修改并进行使用。
+声明： 本项目最初想法自 https://github.com/chanjarster/weixin-java-tools, 15年1月左右关注chanjarster/weixin-java-tools
 
 
 ##### 详细文档请看 [wiki](https://github.com/egzosn/pay-java-parent/wiki)。
