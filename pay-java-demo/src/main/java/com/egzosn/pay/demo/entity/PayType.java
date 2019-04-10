@@ -85,7 +85,7 @@ public enum PayType implements BasePayType {
         public PayService getPayService(ApyAccount apyAccount) {
             WxPayConfigStorage wxPayConfigStorage = new WxPayConfigStorage();
             wxPayConfigStorage.setMchId(apyAccount.getPartner());
-            wxPayConfigStorage.setAppid(apyAccount.getAppid());
+            wxPayConfigStorage.setAppId(apyAccount.getAppid());
             //转账公钥，转账时必填
             wxPayConfigStorage.setKeyPublic(apyAccount.getPublicKey());
             wxPayConfigStorage.setSecretKey(apyAccount.getPrivateKey());

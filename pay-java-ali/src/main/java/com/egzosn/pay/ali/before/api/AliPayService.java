@@ -127,7 +127,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
      */
     private Map<String, Object> getPublicParameters(TransactionType transactionType ){
         Map<String, Object> orderInfo = new TreeMap<>();
-        orderInfo.put("app_id", payConfigStorage.getAppid());
+        orderInfo.put("app_id", payConfigStorage.getAppId());
         orderInfo.put("method", transactionType.getMethod());
         orderInfo.put("format", "json");
         orderInfo.put("charset", payConfigStorage.getInputCharset());

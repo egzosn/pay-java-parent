@@ -54,7 +54,7 @@ public class WxPayController {
     @PostConstruct
     public void init() {
         WxPayConfigStorage wxPayConfigStorage = new WxPayConfigStorage();
-        wxPayConfigStorage.setAppid("公众账号ID");
+        wxPayConfigStorage.setAppId("公众账号ID");
 
         wxPayConfigStorage.setMchId("合作者id（商户号）");
         //以下两个参数在 服务商版模式中必填--------

@@ -17,7 +17,7 @@ public class FuiouPayConfigStorage extends BasePayConfigStorage {
      * @return 空
      */
     @Override
-    public String getAppid() {
+    public String getAppId() {
         return null;
     }
 

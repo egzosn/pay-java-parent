@@ -32,7 +32,7 @@ public class AliPayConfigStorage extends BasePayConfigStorage {
     }
 
     @Override
-    public String getAppid() {
+    public String getAppId() {
         return appId;
     }
 

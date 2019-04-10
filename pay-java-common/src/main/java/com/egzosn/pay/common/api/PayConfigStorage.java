@@ -35,7 +35,7 @@ import java.util.concurrent.locks.Lock;
      *  应用id
      *  @return 应用id
      */
-     String getAppid();
+     String getAppId();
 
     /**
      * 合作商唯一标识
