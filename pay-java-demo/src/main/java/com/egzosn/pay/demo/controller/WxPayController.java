@@ -79,7 +79,8 @@ public class WxPayController {
 //            httpConfigStorage.setKeystore(WxPayController.class.getResourceAsStream("/证书文件"));
             httpConfigStorage.setKeystore(KEYSTORE);
             httpConfigStorage.setStorePassword(STORE_PASSWORD);
-            httpConfigStorage.setPath(true);
+            //设置ssl证书对应的存储方式，这里默认为文件地址
+            httpConfigStorage.setCertStoreType(CertStoreType.PATH);
         }
 
 

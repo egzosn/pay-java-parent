@@ -1,6 +1,8 @@
 package com.egzosn.pay.common.http;
 
 
+import com.egzosn.pay.common.bean.CertStoreType;
+
 import java.io.*;
 
 /**
@@ -29,10 +31,12 @@ public class HttpConfigStorage {
      */
     private String authPassword;
 
+
     /**
-     * @see #keystore 是否为https请求所需的证书（PKCS12）的地址,默认为地址，否则为证书信息串
+     * 证书存储类型
+     * @see #keystore 是否为https请求所需的证书（PKCS12）的地址,默认为地址，否则为证书信息串，文件流
      */
-    private boolean isPath = true;
+    private CertStoreType certStoreType = CertStoreType.PATH;
 
     /**
      * https请求所需的证书（PKCS12）
@@ -104,109 +108,35 @@ public class HttpConfigStorage {
         this.authPassword = authPassword;
     }
 
-    /**
-     * 代理用户名
-     * @return 代理用户名
-     * @see #getAuthUsername()
-     */
-    @Deprecated
-    public String getHttpProxyUsername() {
-        return authUsername;
+
+    public CertStoreType getCertStoreType() {
+        return certStoreType;
     }
 
-    /**
-     * 设置代理用户名
-     * @param httpProxyUsername 代理用户名
-     *  @see #setAuthUsername(String)
-     */
-    @Deprecated
-    public void setHttpProxyUsername(String httpProxyUsername) {
-        this.authUsername = httpProxyUsername;
-    }
-
-    /**
-     *  代理密码
-     * @return 代理密码
-     * @see #getAuthPassword()
-     */
-    @Deprecated
-    public String getHttpProxyPassword() {
-        return authPassword;
-    }
-
-    /**
-     * 设置代理密码
-     * @param httpProxyPassword 代理密码
-     * @see #setAuthPassword(String)
-     */
-    @Deprecated
-    public void setHttpProxyPassword(String httpProxyPassword) {
-        this.authPassword = httpProxyPassword;
-    }
-
-    /**
-     * https请求所需的证书（PKCS12）地址，请使用绝对路径
-     * @return 证书（PKCS12）地址
-     * @see #getKeystore()
-     */
-    @Deprecated
-    public String getKeystorePath() {
-        return (String) keystore;
-    }
-
-    /**
-     * 设置https请求所需的证书（PKCS12）地址，请使用绝对路径
-     * @param keystorePath 证书（PKCS12）地址
-     * @see #getKeystore()
-     */
-    @Deprecated
-    public void setKeystorePath(String keystorePath) {
-        this.keystore = keystorePath;
-    }
-
-
-    /**
-     * 获取是否为证书地址
-     * @return  是否为证书地址,配合 {@link #getKeystore()}使用
-     */
-    public boolean isPath() {
-        return isPath;
-    }
-
-    /**
-     * 设置是否为证书地址
-     * @param path 是否为证书地址
-     */
-    public void setPath(boolean path) {
-        isPath = path;
+    public void setCertStoreType(CertStoreType certStoreType) {
+        this.certStoreType = certStoreType;
     }
 
     /**
      * 获取证书信息
-     * @return 证书信息 根据 {@link #isPath()}进行区别地址与信息串
+     * @return 证书信息 根据 {@link #getCertStoreType()}进行区别地址与信息串
      */
-    public InputStream getKeystoreInputStream() throws FileNotFoundException, UnsupportedEncodingException {
-        if (null == keystore){
+    public InputStream getKeystoreInputStream() throws IOException {
+        if (null == keystore) {
             return null;
         }
-        if(isPath()){
-            return new FileInputStream(new File(getKeystoreStr()));
-        }
-        if(this.keystore instanceof String){
-            return new ByteArrayInputStream(getKeystoreStr().getBytes("ISO-8859-1"));
-        }
-        return  (InputStream) keystore;
+        return certStoreType.getInputStream(keystore);
     }
     /**
      * 获取证书信息
-     * @return 证书信息 根据 {@link #isPath()}进行区别地址与信息串
+     * @return 证书信息 根据 {@link #getCertStoreType()}进行区别地址与信息串
      */
     public Object getKeystore() {
         return  keystore;
     }
     /**
      * 获取证书信息 证书地址
-     * @return 证书信息 根据 {@link #isPath()}进行区别地址与信息串
+     * @return 证书信息 根据 {@link #getCertStoreType()}进行区别地址与信息串
      */
     public String getKeystoreStr() {
         return (String) keystore;

@@ -5,6 +5,7 @@ import com.egzosn.pay.ali.api.AliPayService;
 import com.egzosn.pay.ali.bean.AliTransactionType;
 import com.egzosn.pay.common.api.PayService;
 import com.egzosn.pay.common.bean.BasePayType;
+import com.egzosn.pay.common.bean.CertStoreType;
 import com.egzosn.pay.common.bean.MsgType;
 import com.egzosn.pay.common.bean.TransactionType;
 import com.egzosn.pay.common.http.HttpConfigStorage;
@@ -51,7 +52,7 @@ public enum PayType implements BasePayType {
             //配置的附加参数的使用
             configStorage.setAttach(apyAccount.getPayId());
             configStorage.setPid(apyAccount.getPartner());
-            configStorage.setAppId(apyAccount.getAppid());
+            configStorage.setAppid(apyAccount.getAppid());
             configStorage.setKeyPublic(apyAccount.getPublicKey());
             configStorage.setKeyPrivate(apyAccount.getPrivateKey());
             configStorage.setNotifyUrl(apyAccount.getNotifyUrl());
@@ -103,8 +104,8 @@ public enum PayType implements BasePayType {
 //          httpConfigStorage.setKeystore(PayType.class.getResourceAsStream("/证书文件"));
             httpConfigStorage.setKeystore("证书信息串");
             httpConfigStorage.setStorePassword("证书密码");
-            //是否为证书地址
-            httpConfigStorage.setPath(false);
+            //设置ssl证书对应的存储方式，这里默认为文件地址
+            httpConfigStorage.setCertStoreType(CertStoreType.PATH);
             return  new WxPayService(wxPayConfigStorage, httpConfigStorage);*/
             return  new WxPayService(wxPayConfigStorage);
         }
@@ -179,8 +180,20 @@ public enum PayType implements BasePayType {
             UnionPayConfigStorage unionPayConfigStorage = new UnionPayConfigStorage();
             unionPayConfigStorage.setMerId(apyAccount.getPartner());
             unionPayConfigStorage.setCertSign(true);
-            unionPayConfigStorage.setKeyPublic(apyAccount.getPublicKey());
-            unionPayConfigStorage.setKeyPrivate(apyAccount.getPrivateKey());
+//            unionPayConfigStorage.setKeyPublic(apyAccount.getPublicKey());
+//            unionPayConfigStorage.setKeyPrivate(apyAccount.getPrivateKey());
+
+            //中级证书路径
+            unionPayConfigStorage.setAcpMiddleCert("D:/certs/acp_test_middle.cer");
+            //根证书路径
+            unionPayConfigStorage.setAcpRootCert("D:/certs/acp_test_root.cer");
+            // 私钥证书路径
+            unionPayConfigStorage.setKeyPrivateCert("D:/certs/acp_test_sign.pfx");
+            //私钥证书对应的密码
+            unionPayConfigStorage.setKeyPrivateCertPwd("000000");
+            //设置证书对应的存储方式，这里默认为文件地址
+            unionPayConfigStorage.setCertStoreType(CertStoreType.PATH);
+
             unionPayConfigStorage.setNotifyUrl(apyAccount.getNotifyUrl());
             unionPayConfigStorage.setReturnUrl(apyAccount.getReturnUrl());
             unionPayConfigStorage.setSignType(apyAccount.getSignType());

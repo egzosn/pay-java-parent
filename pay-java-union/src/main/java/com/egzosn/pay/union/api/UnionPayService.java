@@ -21,6 +21,7 @@ import com.egzosn.pay.union.bean.UnionTransactionType;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.security.cert.*;
@@ -55,7 +56,10 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
     private static final String FILE_TRANS_URL = "https://filedownload.%s/";
     private static final String APP_TRANS_URL = "https://gateway.%s/gateway/api/appTransReq.do";
     private static final String CARD_TRANS_URL = "https://gateway.%s/gateway/api/cardTransReq.do";
-
+    /**
+     * 证书解释器
+     */
+    private CertDescriptor certDescriptor = new CertDescriptor();
     /**
      * 构造函数
      *
@@ -81,14 +85,14 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
         if (!payConfigStorage.isCertSign()) {
             return this;
         }
-        CertDescriptor certDescriptor = payConfigStorage.getCertDescriptor();
-        if (!payConfigStorage.isKeyPrivateInit()) {
-            certDescriptor.initPrivateSignCert(payConfigStorage.getKeyPrivate(), payConfigStorage.getKeyPrivateCertPwd(), "PKCS12");
+        try {
+            certDescriptor.initPrivateSignCert(payConfigStorage.getKeyPrivateCertInputStream(), payConfigStorage.getKeyPrivateCertPwd(), "PKCS12");
+            certDescriptor.initPublicCert(payConfigStorage.getAcpMiddleCertInputStream());
+            certDescriptor.initRootCert(payConfigStorage.getAcpRootCertInputStream());
+        } catch (IOException e) {
+            LOG.error(e);
         }
-        if (!payConfigStorage.isKeyPublicInit()) {
-            certDescriptor.initPublicCert(payConfigStorage.getAcpMiddleCert());
-            certDescriptor.initRootCert(payConfigStorage.getAcpRootCert());
-        }
+
 
         return this;
     }
@@ -127,7 +131,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
      */
     private Map<String, Object> getCommonParam() {
         Map<String, Object> params = new TreeMap<>();
-        UnionPayConfigStorage configStorage = (UnionPayConfigStorage) payConfigStorage;
+        UnionPayConfigStorage configStorage = payConfigStorage;
         //银联接口版本
         params.put(SDKConstants.param_version, configStorage.getVersion());
         //编码方式
@@ -291,15 +295,15 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
         switch (signUtils) {
             case RSA:
                 parameters.put(SDKConstants.param_signMethod, SDKConstants.SIGNMETHOD_RSA);
-                parameters.put(SDKConstants.param_certId, payConfigStorage.getCertDescriptor().getSignCertId());
+                parameters.put(SDKConstants.param_certId, certDescriptor.getSignCertId());
                 signStr = SignUtils.SHA1.createSign(SignUtils.parameterText(parameters, "&", "signature"), "", payConfigStorage.getInputCharset());
-                parameters.put(SDKConstants.param_signature, RSA.sign(signStr, payConfigStorage.getCertDescriptor().getSignCertPrivateKey(payConfigStorage.getKeyPrivateCertPwd()), payConfigStorage.getInputCharset()));
+                parameters.put(SDKConstants.param_signature, RSA.sign(signStr, certDescriptor.getSignCertPrivateKey(payConfigStorage.getKeyPrivateCertPwd()), payConfigStorage.getInputCharset()));
                 break;
             case RSA2:
                 parameters.put(SDKConstants.param_signMethod, SDKConstants.SIGNMETHOD_RSA);
-                parameters.put(SDKConstants.param_certId, payConfigStorage.getCertDescriptor().getSignCertId());
+                parameters.put(SDKConstants.param_certId, certDescriptor.getSignCertId());
                 signStr = SignUtils.SHA256.createSign(SignUtils.parameterText(parameters, "&", "signature"), "", payConfigStorage.getInputCharset());
-                parameters.put(SDKConstants.param_signature, RSA2.sign(signStr, payConfigStorage.getCertDescriptor().getSignCertPrivateKey(payConfigStorage.getKeyPrivateCertPwd()), payConfigStorage.getInputCharset()));
+                parameters.put(SDKConstants.param_signature, RSA2.sign(signStr, certDescriptor.getSignCertPrivateKey(payConfigStorage.getKeyPrivateCertPwd()), payConfigStorage.getInputCharset()));
                 break;
             case SHA1:
             case SHA256:
@@ -326,8 +330,8 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
     private X509Certificate verifyCertificate(X509Certificate cert) {
         try {
             cert.checkValidity();//验证有效期
-            X509Certificate middleCert = payConfigStorage.getCertDescriptor().getPublicCert();
-            X509Certificate rootCert = payConfigStorage.getCertDescriptor().getRootCert();
+            X509Certificate middleCert = certDescriptor.getPublicCert();
+            X509Certificate rootCert = certDescriptor.getRootCert();
 
             X509CertSelector selector = new X509CertSelector();
             selector.setCertificate(cert);

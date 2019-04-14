@@ -3,6 +3,7 @@ package com.egzosn.pay.demo.controller;
 
 
 import com.egzosn.pay.common.api.PayService;
+import com.egzosn.pay.common.bean.CertStoreType;
 import com.egzosn.pay.common.bean.MethodType;
 import com.egzosn.pay.common.bean.PayOrder;
 import com.egzosn.pay.common.bean.RefundOrder;
@@ -44,20 +45,22 @@ public class UnionPayController {
     public void init() {
         UnionPayConfigStorage unionPayConfigStorage = new UnionPayConfigStorage();
         unionPayConfigStorage.setMerId("700000000000001");
-        //设置CertSign必须在设置证书前
+        //是否为证书签名
         unionPayConfigStorage.setCertSign(true);
-        //公钥，验签证书链格式： 中级证书路径;根证书路径
-//        unionPayConfigStorage.setKeyPublic("D:/certs/acp_test_middle.cer;D:/certs/acp_test_root.cer");
         //中级证书路径
         unionPayConfigStorage.setAcpMiddleCert("D:/certs/acp_test_middle.cer");
         //根证书路径
         unionPayConfigStorage.setAcpRootCert("D:/certs/acp_test_root.cer");
-        //私钥, 私钥证书格式： 私钥证书路径;私钥证书对应的密码
-//        unionPayConfigStorage.setKeyPrivate("D:/certs/acp_test_sign.pfx;000000");
         // 私钥证书路径
         unionPayConfigStorage.setKeyPrivateCert("D:/certs/acp_test_sign.pfx");
         //私钥证书对应的密码
         unionPayConfigStorage.setKeyPrivateCertPwd("000000");
+        //设置证书对应的存储方式，这里默认为文件地址
+        unionPayConfigStorage.setCertStoreType(CertStoreType.PATH);
+
+
+
+
         //前台通知网址  即SDKConstants.param_frontUrl
         unionPayConfigStorage.setReturnUrl("http://www.pay.egzosn.com/payBack.json");
         //后台通知地址  即SDKConstants.param_backUrl
