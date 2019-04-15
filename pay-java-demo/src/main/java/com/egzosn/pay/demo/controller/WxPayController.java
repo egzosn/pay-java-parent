@@ -54,7 +54,7 @@ public class WxPayController {
     @PostConstruct
     public void init() {
         WxPayConfigStorage wxPayConfigStorage = new WxPayConfigStorage();
-        wxPayConfigStorage.setAppId("公众账号ID");
+        wxPayConfigStorage.setAppid("公众账号ID");
 
         wxPayConfigStorage.setMchId("合作者id（商户号）");
         //以下两个参数在 服务商版模式中必填--------
@@ -79,7 +79,8 @@ public class WxPayController {
 //            httpConfigStorage.setKeystore(WxPayController.class.getResourceAsStream("/证书文件"));
             httpConfigStorage.setKeystore(KEYSTORE);
             httpConfigStorage.setStorePassword(STORE_PASSWORD);
-            httpConfigStorage.setPath(true);
+            //设置ssl证书对应的存储方式，这里默认为文件地址
+            httpConfigStorage.setCertStoreType(CertStoreType.PATH);
         }
 
 
@@ -181,7 +182,7 @@ public class WxPayController {
     public Map<String, Object> microPay( BigDecimal price, String authCode) throws IOException {
         //获取对应的支付账户操作工具（可根据账户id）
         //条码付
-        PayOrder order = new PayOrder("huodull order", "huodull order", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), WxTransactionType.MICROPAY);
+        PayOrder order = new PayOrder("egan order", "egan order", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), WxTransactionType.MICROPAY);
         //设置授权码，条码等
         order.setAuthCode(authCode);
         //支付结果
@@ -189,6 +190,34 @@ public class WxPayController {
         //校验
         if (service.verify(params)) {
 
+            //支付校验通过后的处理
+            //......业务逻辑处理块........
+
+
+        }
+        //这里开发者自行处理
+        return params;
+    }
+
+    /**
+     * 刷脸付
+     * @param price       金额
+     * @param authCode        人脸凭证
+     * @param openid        用户在商户 appid下的唯一标识
+     * @return 支付结果
+     */
+    @RequestMapping(value = "facePay")
+    public Map<String, Object> facePay(BigDecimal price, String authCode, String openid) throws IOException {
+        //获取对应的支付账户操作工具（可根据账户id）
+        PayOrder order = new PayOrder("egan order", "egan order", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), WxTransactionType.FACEPAY);
+        //设置人脸凭证
+        order.setAuthCode(authCode);
+        //  用户在商户 appid下的唯一标识
+        order.setOpenid(openid);
+        //支付结果
+        Map<String, Object> params = service.microPay(order);
+        //校验
+        if (service.verify(params)) {
             //支付校验通过后的处理
             //......业务逻辑处理块........
 

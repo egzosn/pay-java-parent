@@ -17,7 +17,7 @@ public class WxPayConfigStorage extends BasePayConfigStorage {
     /**
      * 微信分配的公众账号ID
      */
-    private String appId ;
+    private String appid ;
     /**
      * 微信分配的子商户公众账号ID
      */
@@ -36,12 +36,12 @@ public class WxPayConfigStorage extends BasePayConfigStorage {
 
 
     @Override
-    public String getAppId() {
-        return appId;
+    public String getAppid() {
+        return appid;
     }
 
-    public void setAppId(String appId) {
-        this.appId = appId;
+    public void setAppid(String appid) {
+        this.appid = appid;
     }
 
     /**

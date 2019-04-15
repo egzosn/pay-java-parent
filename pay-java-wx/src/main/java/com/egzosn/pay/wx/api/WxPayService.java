@@ -164,7 +164,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
     private Map<String, Object> getPublicParameters() {
 
         Map<String, Object> parameters = new TreeMap<String, Object>();
-        parameters.put(APPID, payConfigStorage.getAppId());
+        parameters.put(APPID, payConfigStorage.getAppid());
         parameters.put("mch_id", payConfigStorage.getMchId());
         //判断如果是服务商模式信息则加入
         if (!StringUtils.isEmpty(payConfigStorage.getSubAppid()) && !StringUtils.isEmpty(payConfigStorage.getSubMchId())){
@@ -211,7 +211,9 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
        setSign(parameters);
 
         String requestXML = XML.getMap2Xml(parameters);
-        LOG.debug("requestXML：" + requestXML);
+        if (LOG.isDebugEnabled()){
+            LOG.debug("requestXML：" + requestXML);
+        }
         //调起支付的参数列表
         JSONObject result = requestTemplate.postForObject(getUrl(order.getTransactionType()), requestXML, JSONObject.class);
 
@@ -246,13 +248,13 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
 
             if (WxTransactionType.JSAPI == order.getTransactionType()) {
                 params.put("signType", payConfigStorage.getSignType());
-                params.put("appId", payConfigStorage.getAppId());
+                params.put("appId", payConfigStorage.getAppid());
                 params.put("timeStamp", System.currentTimeMillis() / 1000);
                 params.put("nonceStr", result.get("nonce_str"));
                 params.put("package", "prepay_id=" + result.get("prepay_id"));
             } else if (WxTransactionType.APP == order.getTransactionType()) {
                 params.put("partnerid", payConfigStorage.getPid());
-                params.put(APPID, payConfigStorage.getAppId());
+                params.put(APPID, payConfigStorage.getAppid());
                 params.put("prepayid", result.get("prepay_id"));
                 params.put("timestamp", System.currentTimeMillis() / 1000);
                 params.put("noncestr", result.get("nonce_str"));
@@ -636,7 +638,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
      */
     public Map<String, Object> transfers(Map<String, Object> parameters, TransferOrder order){
         //转账到余额, 申请商户号的appid或商户号绑定的appid
-        parameters.put("mch_appid", payConfigStorage.getAppId());
+        parameters.put("mch_appid", payConfigStorage.getAppid());
         parameters.put("openid", order.getPayeeAccount());
         parameters.put("spbill_create_ip", StringUtils.isEmpty(order.getIp()) ? "192.168.1.150" : order.getIp());
         //默认不校验真实姓名
