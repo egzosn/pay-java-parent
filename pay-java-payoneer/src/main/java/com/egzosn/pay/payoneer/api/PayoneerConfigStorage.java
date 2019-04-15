@@ -25,7 +25,7 @@ public class PayoneerConfigStorage extends BasePayConfigStorage {
      * @return 空
      */
     @Override
-    public String getAppId() {
+    public String getAppid() {
         return null;
     }
 

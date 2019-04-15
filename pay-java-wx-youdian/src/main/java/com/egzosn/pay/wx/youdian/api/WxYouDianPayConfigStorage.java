@@ -20,7 +20,7 @@ public class WxYouDianPayConfigStorage extends BasePayConfigStorage {
 
 
     @Override
-    public String getAppId() {
+    public String getAppid() {
         return null;
     }
 

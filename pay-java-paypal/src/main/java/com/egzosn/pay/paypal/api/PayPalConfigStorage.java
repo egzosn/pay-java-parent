@@ -15,7 +15,7 @@ public class PayPalConfigStorage extends BasePayConfigStorage {
     private String clientID;
 
     @Override
-    public String getAppId() {
+    public String getAppid() {
         return clientID;
     }
 
