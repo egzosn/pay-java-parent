@@ -48,6 +48,17 @@ public enum  WxTransactionType implements TransactionType {
      */
     APP("pay/unifiedorder"),
     /**
+     * 刷
+     脸支付
+     */
+    FACEPAY("pay/facepay"){
+        @Override
+        public void setAttribute(Map<String, Object> parameters, PayOrder order) {
+            parameters.put("openid", order.getOpenid());
+            parameters.put("face_code", order.getAuthCode());
+        }
+    },
+    /**
      * H5支付
      */
     MWEB("pay/unifiedorder"){

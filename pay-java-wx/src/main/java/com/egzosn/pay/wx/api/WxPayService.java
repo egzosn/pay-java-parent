@@ -211,7 +211,9 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
        setSign(parameters);
 
         String requestXML = XML.getMap2Xml(parameters);
-        LOG.debug("requestXML：" + requestXML);
+        if (LOG.isDebugEnabled()){
+            LOG.debug("requestXML：" + requestXML);
+        }
         //调起支付的参数列表
         JSONObject result = requestTemplate.postForObject(getUrl(order.getTransactionType()), requestXML, JSONObject.class);
 
