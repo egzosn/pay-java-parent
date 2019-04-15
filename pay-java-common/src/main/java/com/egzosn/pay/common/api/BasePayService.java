@@ -123,6 +123,18 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
     }
 
     /**
+     * 页面转跳支付， 返回对应页面重定向信息
+     *
+     * @param order 订单信息
+     * @return 对应页面重定向信息
+     */
+    @Override
+    public String toPay(PayOrder order) {
+        Map orderInfo = orderInfo(order);
+        return buildRequest(orderInfo, MethodType.POST);
+    }
+
+    /**
      * 将请求参数或者请求流转化为 Map
      *
      * @param parameterMap 请求参数

@@ -97,7 +97,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
      *
      * @return 请求url
      */
-    private String getUrl(TransactionType transactionType) {
+    public String getReqUrl(TransactionType transactionType) {
 
         return URI + (payConfigStorage.isTest() ? SANDBOXNEW : "") + transactionType.getMethod();
     }
@@ -215,7 +215,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
             LOG.debug("requestXML：" + requestXML);
         }
         //调起支付的参数列表
-        JSONObject result = requestTemplate.postForObject(getUrl(order.getTransactionType()), requestXML, JSONObject.class);
+        JSONObject result = requestTemplate.postForObject(getReqUrl(order.getTransactionType()), requestXML, JSONObject.class);
 
         if (!SUCCESS.equals(result.get(RETURN_CODE))) {
             throw new PayErrorException(new WxPayError(result.getString(RETURN_CODE), result.getString(RETURN_MSG_CODE), result.toJSONString()));
@@ -477,7 +477,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
 
         //设置签名
         setSign(parameters);
-        return requestTemplate.postForObject(getUrl(WxTransactionType.REFUND), XML.getMap2Xml(parameters), JSONObject.class);
+        return requestTemplate.postForObject(getReqUrl(WxTransactionType.REFUND), XML.getMap2Xml(parameters), JSONObject.class);
     }
 
 
@@ -512,7 +512,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
         setParameters(parameters, "out_refund_no", refundOrder.getRefundNo());
         //设置签名
         setSign(parameters);
-        return  requestTemplate.postForObject(getUrl( WxTransactionType.REFUNDQUERY), XML.getMap2Xml(parameters) , JSONObject.class);
+        return  requestTemplate.postForObject(getReqUrl( WxTransactionType.REFUNDQUERY), XML.getMap2Xml(parameters) , JSONObject.class);
     }
 
 
@@ -536,7 +536,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
 
         //设置签名
         setSign(parameters);
-        String respStr = requestTemplate.postForObject(getUrl(WxTransactionType.DOWNLOADBILL), XML.getMap2Xml(parameters), String.class);
+        String respStr = requestTemplate.postForObject(getReqUrl(WxTransactionType.DOWNLOADBILL), XML.getMap2Xml(parameters), String.class);
         if (respStr.indexOf("<") == 0) {
            return XML.toJSONObject(respStr);
         }
@@ -583,7 +583,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
         }
         //设置签名
         setSign(parameters);
-        return  requestTemplate.postForObject(getUrl(transactionType), XML.getMap2Xml(parameters) , JSONObject.class);
+        return  requestTemplate.postForObject(getReqUrl(transactionType), XML.getMap2Xml(parameters) , JSONObject.class);
     }
 
     /**
@@ -623,7 +623,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
         }
         parameters.put(SIGN, createSign(SignUtils.parameterText(parameters, "&", SIGN), payConfigStorage.getInputCharset()));
 
-        return getHttpRequestTemplate().postForObject(getUrl(order.getTransferType()),  XML.getMap2Xml(parameters), JSONObject.class);
+        return getHttpRequestTemplate().postForObject(getReqUrl(order.getTransferType()),  XML.getMap2Xml(parameters), JSONObject.class);
     }
 
     /**
@@ -690,10 +690,10 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
         }
         //如果类型为余额方式
         if (TRANSFERS.getType().equals(wxTransferType) || GETTRANSFERINFO.getType().equals(wxTransferType)){
-            return getHttpRequestTemplate().postForObject(getUrl(GETTRANSFERINFO),  XML.getMap2Xml(parameters), JSONObject.class);
+            return getHttpRequestTemplate().postForObject(getReqUrl(GETTRANSFERINFO),  XML.getMap2Xml(parameters), JSONObject.class);
         }
         //默认查询银行卡的记录
-        return getHttpRequestTemplate().postForObject(getUrl(QUERY_BANK),  XML.getMap2Xml(parameters), JSONObject.class);
+        return getHttpRequestTemplate().postForObject(getReqUrl(QUERY_BANK),  XML.getMap2Xml(parameters), JSONObject.class);
     }
 
 

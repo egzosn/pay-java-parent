@@ -88,6 +88,12 @@ public interface PayService<PC extends PayConfigStorage> {
     Map<String, Object>  orderInfo(PayOrder order);
 
     /**
+     * 页面转跳支付， 返回对应页面重定向信息
+     * @param order 订单信息
+     * @return 对应页面重定向信息
+     */
+    String toPay(PayOrder order);
+    /**
      * 创建签名
      *
      * @param content           需要签名的内容
@@ -140,6 +146,8 @@ public interface PayService<PC extends PayConfigStorage> {
      * @see MethodType 请求类型
      */
     String buildRequest(Map<String, Object> orderInfo, MethodType method);
+
+
 
     /**
      * 获取输出二维码，用户返回给支付端,
@@ -409,5 +417,12 @@ public interface PayService<PC extends PayConfigStorage> {
      *
      */
     void addPayMessageInterceptor(PayMessageInterceptor interceptor);
+
+    /**
+     *  获取支付请求地址
+     * @param transactionType 交易类型
+     * @return 请求地址
+     */
+     String getReqUrl(TransactionType transactionType);
 
 }
