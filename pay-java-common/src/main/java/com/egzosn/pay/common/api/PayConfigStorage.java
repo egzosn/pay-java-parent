@@ -20,11 +20,6 @@ import java.util.concurrent.locks.Lock;
      * @return 附加信息
      */
      Object getAttach();
-    /**
-     * 获取证书解释器
-     * @return 证书解释器
-     */
-     CertDescriptor getCertDescriptor();
 
     /**
      * 获取私钥证书密码
@@ -35,7 +30,7 @@ import java.util.concurrent.locks.Lock;
      *  应用id
      *  @return 应用id
      */
-     String getAppId();
+     String getAppid();
 
     /**
      * 合作商唯一标识

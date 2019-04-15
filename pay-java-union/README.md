@@ -8,22 +8,23 @@
 
     UnionPayConfigStorage unionPayConfigStorage = new UnionPayConfigStorage();
     unionPayConfigStorage.setMerId("700000000000001");
-    //设置CertSign必须在设置证书前
+    //是否为证书签名
     unionPayConfigStorage.setCertSign(true);
-    //公钥，验签证书链格式： 中级证书路径;根证书路径
-//        unionPayConfigStorage.setKeyPublic("D:/certs/acp_test_middle.cer;D:/certs/acp_test_root.cer");
+    
      //中级证书路径
-     unionPayConfigStorage.setAcpMiddleCert("D:/certs/acp_test_middle.cer");
+     unionPayConfigStorage.setAcpMiddleCert("证书文件流，证书字符串信息或证书绝对地址");
      //根证书路径
-     unionPayConfigStorage.setAcpRootCert("D:/certs/acp_test_root.cer");
-
-     //私钥, 私钥证书格式： 私钥证书路径;私钥证书对应的密码
-//        unionPayConfigStorage.setKeyPrivate("D:/certs/acp_test_sign.pfx;000000");
+     unionPayConfigStorage.setAcpRootCert("证书文件流，证书字符串信息或证书绝对地址");
      // 私钥证书路径
-     unionPayConfigStorage.setKeyPrivateCert("D:/certs/acp_test_sign.pfx");
+     unionPayConfigStorage.setKeyPrivateCert("证书文件流，证书字符串信息或证书绝对地址");
      //私钥证书对应的密码
-     unionPayConfigStorage.setKeyPrivateCertPwd("000000");
-         
+     unionPayConfigStorage.setKeyPrivateCertPwd("私钥证书对应的密码");
+     //设置证书对应的存储方式，这里默认为文件地址
+     httpConfigStorage.setCertStoreType(CertStoreType.PATH);
+     
+     
+     
+     
     unionPayConfigStorage.setNotifyUrl("http://www.pay.egzosn.com/payBack.json");
       // 无需同步回调可不填  app填这个就可以
     unionPayConfigStorage.setReturnUrl("http://www.pay.egzosn.com/payBack.json");
@@ -48,9 +49,9 @@
         //代理端口
         httpConfigStorage.setHttpProxyPort(3308);
         //代理用户名
-        httpConfigStorage.setHttpProxyUsername("user");
+        httpConfigStorage.setAuthUsername("user");
         //代理密码
-        httpConfigStorage.setHttpProxyPassword("password");
+        httpConfigStorage.setAuthPassword("password");
         /* /网路代理配置 根据需求进行设置**/
 
       /* /网络请求连接池**/

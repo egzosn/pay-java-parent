@@ -1,8 +1,7 @@
 package com.egzosn.pay.common.api;
 
+import com.egzosn.pay.common.bean.CertStoreType;
 import com.egzosn.pay.common.bean.MsgType;
-import com.egzosn.pay.common.bean.result.PayException;
-import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.util.sign.CertDescriptor;
 
 import java.util.concurrent.locks.Lock;
@@ -18,21 +17,15 @@ import java.util.concurrent.locks.ReentrantLock;
  *  </pre>
  */
 public abstract class BasePayConfigStorage implements PayConfigStorage {
-    /**
-     * 附加支付配置
-     */
+
     private Object attach;
-    /**
-     * 证书管理器
-     */
-    private CertDescriptor certDescriptor;
 
     /**
      * 应用私钥，rsa_private pkcs8格式 生成签名时使用
      */
     private String keyPrivate;
     /**
-     * 应用私钥，rsa_private pkcs8格式 生成签名时使用
+     * 应用私钥证书，rsa_private pkcs8格式 生成签名时使用
      */
     private String keyPrivateCertPwd;
     /**
@@ -90,10 +83,6 @@ public abstract class BasePayConfigStorage implements PayConfigStorage {
      */
     private boolean isCertSign = false;
 
-    /**
-     * 支付回调消息
-     */
-    protected PayMessageHandler handler;
 
     @Override
     public Object getAttach() {
@@ -102,17 +91,6 @@ public abstract class BasePayConfigStorage implements PayConfigStorage {
 
     public void setAttach(Object attach) {
         this.attach = attach;
-    }
-
-    @Override
-    public CertDescriptor getCertDescriptor() {
-        if (!isCertSign) {
-            throw new PayErrorException(new PayException("certDescriptor fail", "isCertSign is false"));
-        }
-        if (null == certDescriptor) {
-            certDescriptor = new CertDescriptor();
-        }
-        return certDescriptor;
     }
 
     @Override
@@ -150,7 +128,6 @@ public abstract class BasePayConfigStorage implements PayConfigStorage {
     public void setNotifyUrl(String notifyUrl) {
         this.notifyUrl = notifyUrl;
     }
-
 
     @Override
     public String getReturnUrl() {
@@ -267,9 +244,6 @@ public abstract class BasePayConfigStorage implements PayConfigStorage {
 
     public void setCertSign(boolean certSign) {
         isCertSign = certSign;
-        if (certSign) {
-            certDescriptor = new CertDescriptor();
-        }
     }
 
 
