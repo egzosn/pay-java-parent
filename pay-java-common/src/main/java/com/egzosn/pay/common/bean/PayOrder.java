@@ -30,6 +30,10 @@ public class PayOrder {
      */
     private BigDecimal price;
     /**
+     * 支付平台订单号,交易号
+     */
+    private String tradeNo;
+    /**
      * 商户订单号
      */
     private String outTradeNo;
@@ -122,24 +126,18 @@ public class PayOrder {
     }
 
     /**
-     * 获取商户订单号
-     * @return 商户订单号
-     * @see  #getOutTradeNo()
+     * 支付平台订单号,交易号
+     * @return 支付平台订单号,交易号
      */
-    @Deprecated
     public String getTradeNo() {
-        return outTradeNo;
+        return tradeNo;
     }
-
-
     /**
-     *
-     * @param tradeNo 商户订单号
-     * @see  #setOutTradeNo(String)
+     * 支付平台订单号,交易号
+     * @param tradeNo 支付平台订单号,交易号
      */
-    @Deprecated
     public void setTradeNo(String tradeNo) {
-        this.outTradeNo = tradeNo;
+        this.tradeNo = tradeNo;
     }
 
     /**

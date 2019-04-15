@@ -101,8 +101,9 @@ public class UnionPayController {
          //企业网银支付（B2B支付）
 //        PayOrder order = new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), UnionTransactionType.B2B);
 
-        Map orderInfo = service.orderInfo(order);
-        return service.buildRequest(orderInfo, MethodType.POST);
+//        Map orderInfo = service.orderInfo(order);
+//        return service.buildRequest(orderInfo, MethodType.POST);
+        return service.toPay(order);
     }
 
     /**

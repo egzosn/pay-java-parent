@@ -65,8 +65,16 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
      *
      * @return 请求地址
      */
-    public String getReqUrl() {
+    public String getReqUrl(TransactionType transactionType) {
         return payConfigStorage.isTest() ? DEV_REQ_URL : HTTPS_REQ_URL;
+    }
+    /**
+     * 获取对应的请求地址
+     *
+     * @return 请求地址
+     */
+    public String getReqUrl() {
+        return getReqUrl(null);
     }
 
 
@@ -78,10 +86,6 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
         super(payConfigStorage);
     }
 
-
-    public String getHttpsVerifyUrl() {
-        return getReqUrl() + "?service=notify_verify";
-    }
 
     /**
      * 回调校验

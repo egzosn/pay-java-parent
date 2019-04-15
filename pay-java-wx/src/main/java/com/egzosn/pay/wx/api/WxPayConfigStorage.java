@@ -44,6 +44,9 @@ public class WxPayConfigStorage extends BasePayConfigStorage {
         this.appid = appid;
     }
 
+
+
+
     /**
      * 合作商唯一标识
      */

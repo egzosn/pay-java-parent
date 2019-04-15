@@ -102,7 +102,7 @@ public class ApyAccountRepository {
         ApyAccount apyAccount5 = new ApyAccount();
         apyAccount5.setPayId(5);
         apyAccount5.setPartner("100086190");//Program ID
-        apyAccount5.setSeller("Huodull6190");//Username
+        apyAccount5.setSeller("egan6190");//Username
         apyAccount5.setStorePassword("12BkDT8152Zj");//API password
         apyAccount5.setInputCharset("UTF-8");
         apyAccount5.setPayType(PayType.payoneer);

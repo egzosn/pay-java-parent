@@ -115,8 +115,9 @@ public class WxPayController {
         //设置网页名称
         order.setWapName("在线充值");
 
-        Map orderInfo = service.orderInfo(order);
-        return service.buildRequest(orderInfo, MethodType.POST);
+//        Map orderInfo = service.orderInfo(order);
+//        return service.buildRequest(orderInfo, MethodType.POST);
+        return service.toPay(order);
     }
 
     /**

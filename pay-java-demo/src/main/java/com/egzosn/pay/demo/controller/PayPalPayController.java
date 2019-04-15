@@ -71,15 +71,16 @@ public class PayPalPayController {
         //及时收款
         PayOrder order = new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayPalTransactionType.sale);
 
-        Map orderInfo = service.orderInfo(order);
+//        Map orderInfo = service.orderInfo(order);
+//        return service.buildRequest(orderInfo, MethodType.POST);
+
+        String toPayHtml = service.toPay(order);
 
         //某些支付下单时无法设置单号，通过下单后返回对应单号，如 paypal，友店。
         String outTradeNo = order.getOutTradeNo();
-
         System.out.println("支付订单号：" + outTradeNo + "  这里可以进行回存");
 
-
-        return service.buildRequest(orderInfo, MethodType.POST);
+        return toPayHtml;
     }
     /**
      * 申请退款接口
