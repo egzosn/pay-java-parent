@@ -200,7 +200,7 @@ public class WxPayController {
     }
 
     /**
-     * 刷卡付,pos主动扫码付款(条码付)
+     * 刷脸付
      * @param price       金额
      * @param authCode        人脸凭证
      * @param openid        用户在商户 appid下的唯一标识
@@ -209,17 +209,15 @@ public class WxPayController {
     @RequestMapping(value = "facePay")
     public Map<String, Object> facePay(BigDecimal price, String authCode, String openid) throws IOException {
         //获取对应的支付账户操作工具（可根据账户id）
-        //条码付
-        PayOrder order = new PayOrder("egan order", "egan order", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), WxTransactionType.MICROPAY);
-        //设置授权码，条码等
+        PayOrder order = new PayOrder("egan order", "egan order", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), WxTransactionType.FACEPAY);
+        //设置人脸凭证
         order.setAuthCode(authCode);
+        //  用户在商户 appid下的唯一标识
         order.setOpenid(openid);
-
         //支付结果
         Map<String, Object> params = service.microPay(order);
         //校验
         if (service.verify(params)) {
-
             //支付校验通过后的处理
             //......业务逻辑处理块........
 

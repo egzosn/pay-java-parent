@@ -139,6 +139,23 @@
         /*-----------/条码付 刷卡付-------------------*/
 
 ``` 
+#### 刷脸付
+
+```java
+
+        /*-----------刷脸付-------------------*/
+           //获取对应的支付账户操作工具（可根据账户id）
+              PayOrder order = new PayOrder("egan order", "egan order", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), WxTransactionType.FACEPAY);
+              //设置人脸凭证
+              order.setAuthCode(authCode);
+              //  用户在商户 appid下的唯一标识
+              order.setOpenid(openid);
+              //支付结果
+              Map<String, Object> params = service.microPay(order);
+
+        /*-----------/刷脸付-------------------*/
+
+``` 
 
 #### 回调处理
 ###### 方式一
