@@ -9,6 +9,7 @@ import com.egzosn.pay.common.bean.CertStoreType;
 import com.egzosn.pay.common.bean.MsgType;
 import com.egzosn.pay.common.bean.TransactionType;
 import com.egzosn.pay.common.http.HttpConfigStorage;
+import com.egzosn.pay.demo.service.handler.WxPayMessageHandler;
 import com.egzosn.pay.fuiou.api.FuiouPayConfigStorage;
 import com.egzosn.pay.fuiou.api.FuiouPayService;
 import com.egzosn.pay.fuiou.bean.FuiouTransactionType;
@@ -107,7 +108,9 @@ public enum PayType implements BasePayType {
             //设置ssl证书对应的存储方式，这里默认为文件地址
             httpConfigStorage.setCertStoreType(CertStoreType.PATH);
             return  new WxPayService(wxPayConfigStorage, httpConfigStorage);*/
-            return  new WxPayService(wxPayConfigStorage);
+            WxPayService wxPayService = new WxPayService(wxPayConfigStorage);
+            wxPayService.setPayMessageHandler(new WxPayMessageHandler(1));
+            return wxPayService;
         }
 
         /**

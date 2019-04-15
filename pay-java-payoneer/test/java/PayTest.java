@@ -36,7 +36,7 @@ public class PayTest {
 
         if (1==1){
 
-            String auth = Base64.encode("Huodull6190:12BkDT8152Zj".getBytes());
+            String auth = Base64.encode("egan6190:12BkDT8152Zj".getBytes());
             System.out.println(auth);
             return;
         }
@@ -49,7 +49,7 @@ public class PayTest {
         CredentialsProvider credsProvider = new BasicCredentialsProvider();
         credsProvider.setCredentials(
                 new AuthScope(uri.getHost(), uri.getPort()),
-                new UsernamePasswordCredentials("Huodull6190", "12BkDT8152Zj"));
+                new UsernamePasswordCredentials("egan6190", "12BkDT8152Zj"));
 
         CloseableHttpClient httpclient = HttpClients.custom()
                 .setDefaultCredentialsProvider(credsProvider)
@@ -73,7 +73,7 @@ public class PayTest {
 
 //            PayoneerRequestBean bean = new PayoneerRequestBean("666");
             String referenceId = UUID.randomUUID().toString().replace("-", "");
-            PayoneerRequestBean bean = new PayoneerRequestBean("8a2950f959043699015904453b330057","1.01", referenceId, CurType.USD,"huodull order");
+            PayoneerRequestBean bean = new PayoneerRequestBean("8a2950f959043699015904453b330057","1.01", referenceId, CurType.USD,"egan order");
 //            PayoneerRequestBean bean = JSON.parseObject("{\"amount\":\"1.00\",\"client_reference_id\":\""+ System.nanoTime()+"\",\"currency\":\"USD\",\"description\":\"aaabb\",\"payee_id\":\"asdfg13\"}", PayoneerRequestBean.class);
             System.out.println(JSON.toJSONString(bean));
             StringEntity entity = new StringEntity(JSON.toJSONString(bean), ContentType.APPLICATION_JSON);

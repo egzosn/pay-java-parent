@@ -46,7 +46,7 @@ public class PayOrder {
      */
     private String spbillCreateIp;
     /**
-     * 付款条码串  与设备号类似？？？
+     * 付款条码串,人脸凭证，有关支付代码相关的，
      */
     private String authCode;
     /**

@@ -68,7 +68,7 @@ public class PayResponse {
 //        //代理密码
 //        httpConfigStorage.setHttpProxyPassword("password");
         //设置ssl证书路径 https证书设置 方式二
-        httpConfigStorage.setKeystorePath(apyAccount.getKeystorePath());
+        httpConfigStorage.setKeystore(apyAccount.getKeystorePath());
         //设置ssl证书对应的密码
         httpConfigStorage.setStorePassword(apyAccount.getStorePassword());
         return httpConfigStorage;

@@ -181,7 +181,7 @@ public class PayController {
         //获取对应的支付账户操作工具（可根据账户id）
         PayResponse payResponse = service.getPayResponse(payId);
 
-        PayOrder order = new PayOrder("huodull order", "huodull order", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType));
+        PayOrder order = new PayOrder("egan order", "egan order", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType));
         //设置授权码，条码等
         order.setAuthCode(authCode);
         //支付结果
