@@ -1,20 +1,23 @@
 package com.egzosn.pay.yiji.api;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.api.BasePayService;
 import com.egzosn.pay.common.bean.*;
-import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpConfigStorage;
-import com.egzosn.pay.common.http.UriVariables;
-import com.egzosn.pay.common.util.MatrixToImageWriter;
+import com.egzosn.pay.common.util.DateUtils;
 import com.egzosn.pay.common.util.Util;
 import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.str.StringUtils;
+import com.egzosn.pay.yiji.bean.YiJiTransactionType;
+
 import java.awt.image.BufferedImage;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Map;
+import java.util.TreeMap;
+
 
 /**
  * 易极付支付服务
@@ -31,6 +34,10 @@ public class YiJiPayService extends BasePayService<YiJiPayConfigStorage> {
      */
     private static final String HTTPS_REQ_URL = "https://api.yiji.com";
     /**
+     * 全球正式测试环境
+     */
+    private static final String HTTPS_GLOBAL_REQ_URL = "https://openapiglobal.yiji.com/gateway.html";
+    /**
      * 沙箱测试环境账号
      */
     private static final String DEV_REQ_URL = "https://openapi.yijifu.net/gateway.html";
@@ -40,40 +47,21 @@ public class YiJiPayService extends BasePayService<YiJiPayConfigStorage> {
     public static final String SUCCESS_CODE = "10000";
 
     public static final String CODE = "code";
-    /**
-     * 附加参数
-     */
-    public static final String PASSBACK_PARAMS = "passback_params";
-    /**
-     * 产品代码
-     */
-    public static final String PRODUCT_CODE = "product_code";
-    /**
-     * 返回地址
-     */
-    public static final String RETURN_URL = "return_url";
 
-    /**
-     * 请求内容
-     */
-    public static final String BIZ_CONTENT = "biz_content";
     /**
      * 获取对应的请求地址
      *
      * @return 请求地址
      */
     public String getReqUrl(TransactionType transactionType) {
-        return payConfigStorage.isTest() ? DEV_REQ_URL : HTTPS_REQ_URL;
+        if (payConfigStorage.isTest()){
+            return DEV_REQ_URL;
+        }else if (/*YiJiTransactionType.corderRemittanceSynOrder == transactionType ||*/ YiJiTransactionType.applyRemittranceWithSynOrder == transactionType){
+            return HTTPS_GLOBAL_REQ_URL;
+        }else {
+            return HTTPS_REQ_URL;
+        }
     }
-    /**
-     * 获取对应的请求地址
-     *
-     * @return 请求地址
-     */
-    public String getReqUrl() {
-        return getReqUrl(null);
-    }
-
 
     public YiJiPayService(YiJiPayConfigStorage payConfigStorage, HttpConfigStorage configStorage) {
         super(payConfigStorage, configStorage);
@@ -84,9 +72,6 @@ public class YiJiPayService extends BasePayService<YiJiPayConfigStorage> {
     }
 
 
-    public String getHttpsVerifyUrl() {
-        return getReqUrl() + "?service=notify_verify";
-    }
 
     /**
      * 回调校验
@@ -102,7 +87,7 @@ public class YiJiPayService extends BasePayService<YiJiPayConfigStorage> {
             return false;
         }
 
-        return signVerify(params, (String) params.get(SIGN)) && verifySource((String) params.get("notify_id"));
+        return signVerify(params, (String) params.get(SIGN));
 
     }
 
@@ -115,20 +100,6 @@ public class YiJiPayService extends BasePayService<YiJiPayConfigStorage> {
      */
     @Override
     public boolean signVerify(Map<String, Object> params, String sign) {
-
-        if (params instanceof JSONObject) {
-            for (Map.Entry<String, Object> entry : params.entrySet()) {
-                if (SIGN.equals(entry.getKey())) {
-                    continue;
-                }
-                TreeMap<String, Object> response = new TreeMap((Map<String, Object> )entry.getValue());
-                LinkedHashMap<Object, Object> linkedHashMap = new LinkedHashMap<>();
-                linkedHashMap.put(CODE, response.remove(CODE));
-                linkedHashMap.put("msg", response.remove("msg"));
-                linkedHashMap.putAll(response);
-                return SignUtils.valueOf(payConfigStorage.getSignType()).verify(JSON.toJSONString(linkedHashMap), sign, payConfigStorage.getKeyPublic(), payConfigStorage.getInputCharset());
-            }
-        }
 
         return SignUtils.valueOf(payConfigStorage.getSignType()).verify(params, sign, payConfigStorage.getKeyPublic(), payConfigStorage.getInputCharset());
     }
@@ -153,7 +124,7 @@ public class YiJiPayService extends BasePayService<YiJiPayConfigStorage> {
      * @return 请求参数
      */
     private Map<String, Object> setSign(Map<String, Object> parameters) {
-        parameters.put("sign_type", payConfigStorage.getSignType());
+        parameters.put("signType", payConfigStorage.getSignType());
         String sign = createSign(SignUtils.parameterText(parameters, "&", SIGN), payConfigStorage.getInputCharset());
 
         parameters.put(SIGN, sign);
@@ -185,17 +156,24 @@ public class YiJiPayService extends BasePayService<YiJiPayConfigStorage> {
      */
     private Map<String, Object> getOrder(PayOrder order) {
 
-
         Map<String, Object> orderInfo = getPublicParameters(order.getTransactionType());
-        orderInfo.put("orderNo", order.getTradeNo());
+        orderInfo.put("orderNo", order.getOutTradeNo());
         orderInfo.put("outOrderNo", order.getOutTradeNo());
 
         if (StringUtils.isNotEmpty(payConfigStorage.getSeller())){
             orderInfo.put("sellerUserId", payConfigStorage.getSeller());
         }
-        orderInfo.put("tradeAmount", Util.conversionAmount(order.getPrice()));
-        orderInfo.put("goodsClauses", String.format("[{'name':'%s'}]", order.getBody()));
 
+        ((YiJiTransactionType)order.getTransactionType()).setAttribute(orderInfo, order);
+
+        orderInfo.put("tradeAmount", Util.conversionAmount(order.getPrice()));
+        //商品条款信息                商品名称
+        orderInfo.put("goodsClauses", String.format("[{'name':'%s'}]", order.getBody()));
+        //交易名称
+        orderInfo.put("tradeName", order.getSubject());
+        if (null != order.getCurType()){
+            orderInfo.put("currency", order.getCurType());
+        }
 
         return orderInfo;
     }
@@ -208,7 +186,6 @@ public class YiJiPayService extends BasePayService<YiJiPayConfigStorage> {
     private Map<String, Object> getPublicParameters(TransactionType transactionType) {
         Map<String, Object> orderInfo = new TreeMap<>();
         orderInfo.put("partnerId", payConfigStorage.getPid());
-        orderInfo.put("signType", payConfigStorage.getSignType());
         orderInfo.put("returnUrl", payConfigStorage.getReturnUrl());
         orderInfo.put("notifyUrl", payConfigStorage.getNotifyUrl());
         orderInfo.put("service", transactionType.getMethod());
@@ -248,13 +225,19 @@ public class YiJiPayService extends BasePayService<YiJiPayConfigStorage> {
     @Override
     public String buildRequest(Map<String, Object> orderInfo, MethodType method) {
         StringBuilder formHtml = new StringBuilder();
-        formHtml.append("<form id=\"_alipaysubmit_\" name=\"alipaysubmit\" action=\"");
-        String bizContent = (String) orderInfo.remove(BIZ_CONTENT);
-        formHtml.append(getReqUrl()).append("?").append(UriVariables.getMapToParameters(orderInfo))
+        formHtml.append("<meta charset=\"UTF-8\">\n");
+        formHtml.append("<form id=\"gatewayform\" name=\"gatewayform\" action=\"");
+
+        formHtml.append(getReqUrl(YiJiTransactionType.getTransactionType((String) orderInfo.get("service"))))
                 .append("\" method=\"").append(method.name().toLowerCase()).append("\">");
-        formHtml.append("<input type=\"hidden\" name=\"biz_content\" value=\'" + bizContent + "\'/>");
-        formHtml.append("</form>");
-        formHtml.append("<script>document.forms['_alipaysubmit_'].submit();</script>");
+        for (Map.Entry<String, Object> entry : orderInfo.entrySet()) {
+            formHtml.append("<input type=\"hidden\" name=\"").append(entry.getKey()).append("\" value=\"").append(entry.getValue()).append("\" />\n");
+        }
+        formHtml.append("</form>\n");
+        formHtml.append("<script type=\"text/javascript\">\n");
+        formHtml.append("window.onload = function() {document.getElementById('gatewayform').submit();}\n");
+        formHtml.append("</script>\n");
+
 
         return formHtml.toString();
     }
@@ -268,17 +251,7 @@ public class YiJiPayService extends BasePayService<YiJiPayConfigStorage> {
     @Override
     public BufferedImage genQrPay(PayOrder order) {
 
-        Map<String, Object> orderInfo = orderInfo(order);
-
-
-        //预订单
-        JSONObject result = getHttpRequestTemplate().postForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(orderInfo), null, JSONObject.class);
-        JSONObject response = result.getJSONObject("alipay_trade_precreate_response");
-        if (SUCCESS_CODE.equals(response.getString(CODE))) {
-            return MatrixToImageWriter.writeInfoToJpgBuff(response.getString("qr_code"));
-        }
-        throw new PayErrorException(new PayException(response.getString(CODE), response.getString("msg"), result.toJSONString()));
-
+        return null;
     }
 
     /**
@@ -289,14 +262,8 @@ public class YiJiPayService extends BasePayService<YiJiPayConfigStorage> {
      */
     @Override
     public Map<String, Object> microPay(PayOrder order) {
-        Map<String, Object> orderInfo = orderInfo(order);
-        //预订单
-        JSONObject result = getHttpRequestTemplate().postForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(orderInfo), null, JSONObject.class);
-        JSONObject response = result.getJSONObject("alipay_trade_pay_response");
-        if (!SUCCESS_CODE.equals(response.getString(CODE))) {
-            LOG.info("收款失败");
-        }
-        return result;
+
+        return Collections.emptyMap();
     }
 
     /**
@@ -308,8 +275,7 @@ public class YiJiPayService extends BasePayService<YiJiPayConfigStorage> {
      */
     @Override
     public Map<String, Object> query(String tradeNo, String outTradeNo) {
-        return null;
-
+        return Collections.emptyMap();
     }
 
 
@@ -322,23 +288,10 @@ public class YiJiPayService extends BasePayService<YiJiPayConfigStorage> {
      */
     @Override
     public Map<String, Object> close(String tradeNo, String outTradeNo) {
-        return null;
+        return Collections.emptyMap();
     }
 
-    /**
-     * 支付交易返回失败或支付系统超时，调用该接口撤销交易。
-     * 如果此订单用户支付失败，易极付系统会将此订单关闭；如果用户支付成功，易极付系统会将此订单资金退还给用户。
-     * 注意：只有发生支付系统超时或者支付结果未知时可调用撤销，其他正常支付的单如需实现相同功能请调用申请退款API。
-     * 提交支付交易后调用【查询订单API】，没有明确的支付结果再调用【撤销订单API】。
-     *
-     * @param tradeNo    支付平台订单号
-     * @param outTradeNo 商户单号
-     * @return 返回支付方交易撤销后的结果
-     */
-    @Override
-    public Map<String, Object> cancel(String tradeNo, String outTradeNo) {
-        return null;
-    }
+
 
     /**
      * 申请退款接口
@@ -367,8 +320,14 @@ public class YiJiPayService extends BasePayService<YiJiPayConfigStorage> {
      */
     @Override
     public Map<String, Object> refund(RefundOrder refundOrder) {
-
-        return null;
+        Map<String, Object> orderInfo = getPublicParameters(YiJiTransactionType.tradeRefund);
+        orderInfo.put("orderNo", refundOrder.getOutTradeNo());
+        orderInfo.put("outOrderNo", refundOrder.getOutTradeNo());
+        orderInfo.put("refundAmount", refundOrder.getRefundAmount());
+        orderInfo.put("refundTime", DateUtils.formatDay(refundOrder.getOrderDate()));
+        orderInfo.put("refundReason", refundOrder.getDescription());
+        setSign(orderInfo);
+        return getHttpRequestTemplate().postForObject(getReqUrl(YiJiTransactionType.tradeRefund), orderInfo, JSONObject.class);
     }
 
     /**
@@ -380,7 +339,7 @@ public class YiJiPayService extends BasePayService<YiJiPayConfigStorage> {
      */
     @Override
     public Map<String, Object> refundquery(String tradeNo, String outTradeNo) {
-        return null;
+        return Collections.emptyMap();
     }
 
     /**
@@ -392,7 +351,7 @@ public class YiJiPayService extends BasePayService<YiJiPayConfigStorage> {
     @Override
     public Map<String, Object> refundquery(RefundOrder refundOrder) {
 
-        return null;
+        return Collections.emptyMap();
 
     }
 
@@ -406,7 +365,7 @@ public class YiJiPayService extends BasePayService<YiJiPayConfigStorage> {
     @Override
     public Map<String, Object> downloadbill(Date billDate, String billType) {
 
-        return null;
+        return Collections.emptyMap();
     }
 
 
@@ -421,19 +380,36 @@ public class YiJiPayService extends BasePayService<YiJiPayConfigStorage> {
     public Map<String, Object> secondaryInterface(Object tradeNoOrBillDate, String outTradeNoBillType, TransactionType transactionType) {
 
 
-        return null;
+        return Collections.emptyMap();
     }
 
     /**
-     * 转账
+     * 转账 这里外部进行调用{@link #buildRequest(Map, MethodType)}
      *
      * @param order 转账订单
      * @return 对应的转账结果
      */
     @Override
     public Map<String, Object> transfer(TransferOrder order) {
+        Map<String, Object> data = getPublicParameters(YiJiTransactionType.applyRemittranceWithSynOrder);
+        data.put("remittranceBatchNo", order.getBatchNo());
+        data.put("outOrderNo", order.getOutNo());
+        data.put("payAmount", Util.conversionAmount(order.getAmount()) );
+        data.put("payCurrency", order.getCurType().getType());
+        data.put("withdrawCurrency", DefaultCurType.CNY.getType());
+        data.put("payMemo",order.getRemark());
+        data.put("toCountryCode", order.getCountryCode().getCode());
+        data.put("tradeUseCode", "326");
+        data.put("payeeName", order.getPayeeName());
+        data.put("payeeAddress", order.getPayeeAddress());
+        data.put("payeeBankName", order.getBank().getCode());
+        data.put("payeeBankAddress", order.getPayeeBankAddress());
+        data.put("payeeBankSwiftCode", "CNAPS CODE");
+        data.put("payeeBankNo", order.getPayeeAccount());
+        setSign(data);
 
-        return null;
+
+        return data;
     }
 
     /**
@@ -446,7 +422,7 @@ public class YiJiPayService extends BasePayService<YiJiPayConfigStorage> {
     @Override
     public Map<String, Object> transferQuery(String outNo, String tradeNo) {
 
-        return null;
+        return Collections.emptyMap();
     }
 
 }
