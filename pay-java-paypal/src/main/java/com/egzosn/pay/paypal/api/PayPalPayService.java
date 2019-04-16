@@ -147,9 +147,9 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage>{
     public Map<String, Object> orderInfo(PayOrder order) {
         Amount amount = new Amount();
         if (null == order.getCurType()){
-            order.setCurType(CurType.USD);
+            order.setCurType(DefaultCurType.USD);
         }
-        amount.setCurrency(order.getCurType().name());
+        amount.setCurrency(order.getCurType().getType());
         amount.setTotal(Util.conversionAmount(order.getPrice()).toString());
 
         Transaction transaction = new Transaction();
@@ -264,7 +264,11 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage>{
 
         if (null != refundOrder.getRefundAmount() && BigDecimal.ZERO.compareTo( refundOrder.getRefundAmount()) == -1){
             Amount amount = new Amount();
-            amount.setCurrency(refundOrder.getCurType().name());
+            if(null == refundOrder.getCurType()){
+                refundOrder.setCurType(DefaultCurType.USD);
+            }
+
+            amount.setCurrency(refundOrder.getCurType().getType());
             amount.setTotal(Util.conversionAmount(refundOrder.getRefundAmount()).toString());
             request.put("amount", amount);
             request.put("description", refundOrder.getDescription());

@@ -305,7 +305,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
         String sign = createSign(SignUtils.parameterText(parameters, "&", SIGN, "appId"), payConfigStorage.getInputCharset(), false);
         parameters.put(SIGN, sign);
 
-        JSONObject result = requestTemplate.postForObject(getUrl(WxTransactionType.GETSIGNKEY), XML.getMap2Xml(parameters), JSONObject.class);
+        JSONObject result = requestTemplate.postForObject(getReqUrl(WxTransactionType.GETSIGNKEY), XML.getMap2Xml(parameters), JSONObject.class);
         if (SUCCESS.equals(result.get(RETURN_CODE))) {
             return result.getString("sandbox_signkey");
         }
