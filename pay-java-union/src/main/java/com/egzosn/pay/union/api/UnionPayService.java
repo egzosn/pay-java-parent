@@ -96,14 +96,23 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
 
         return this;
     }
-
+    /**
+     * 获取支付请求地址
+     *
+     * @param transactionType 交易类型
+     * @return 请求地址
+     */
+    @Override
+    public String getReqUrl(TransactionType transactionType) {
+        return (payConfigStorage.isTest() ? TEST_BASE_DOMAIN : RELEASE_BASE_DOMAIN);
+    }
     /**
      * 根据是否为沙箱环境进行获取请求地址
      *
      * @return 请求地址
      */
     public String getReqUrl() {
-        return (payConfigStorage.isTest() ? TEST_BASE_DOMAIN : RELEASE_BASE_DOMAIN);
+        return getReqUrl(null);
     }
 
     public String getFrontTransUrl() {
@@ -675,6 +684,8 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
     public Map<String, Object> secondaryInterface(Object tradeNoOrBillDate, String outTradeNoBillType, TransactionType transactionType) {
         return Collections.emptyMap();
     }
+
+
 
 
 }

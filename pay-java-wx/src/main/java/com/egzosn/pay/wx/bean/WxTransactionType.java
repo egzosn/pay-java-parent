@@ -131,15 +131,10 @@ public enum  WxTransactionType implements TransactionType {
      */
     DOWNLOADBILL("pay/downloadbill"),
     /**
-     * 银行卡转账
+     * 获取验签秘钥，沙箱使用
      */
-    @Deprecated
-    BANK("mmpaysptrans/pay_bank"),
-    /**
-     *  转账查询
-     */
-    @Deprecated
-    QUERY_BANK("mmpaysptrans/query_bank")
+    GETSIGNKEY("pay/getsignkey"),
+
     ;
 
     WxTransactionType(String method) {

@@ -282,7 +282,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
         String bizContent = (String) orderInfo.remove(BIZ_CONTENT);
         formHtml.append(getReqUrl()).append("?").append(UriVariables.getMapToParameters(orderInfo))
                 .append("\" method=\"").append(method.name().toLowerCase()).append("\">");
-        formHtml.append("<input type=\"hidden\" name=\"biz_content\" value=\'" + bizContent + "\'/>");
+        formHtml.append("<input type=\"hidden\" name=\"biz_content\" value=\'" ).append( bizContent ).append( "\'/>");
         formHtml.append("</form>");
         formHtml.append("<script>document.forms['_alipaysubmit_'].submit();</script>");
 
