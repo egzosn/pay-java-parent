@@ -44,7 +44,7 @@ public class PayPalPayController {
         storage.setClientSecret("EBMIjAag6NiRdXZxteTv0amEsmKN345xJv3bN7f_HRXSqcRJlW7PXhYXjI9sk5I4nKYOHgeqzhXCXKFo");
         storage.setTest(true);
         //发起付款后的页面转跳地址
-        storage.setReturnUrl("http://www.egzosn.com/pay/success");
+        storage.setReturnUrl("http://www.egzosn.com/payPal/payBack.json");
         //取消按钮转跳地址,这里用异步通知地址的兼容的做法
         storage.setNotifyUrl("http://www.egzosn.com/pay/cancel");
         service = new PayPalPayService(storage);
