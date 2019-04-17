@@ -38,7 +38,7 @@
          /* 网络请求ssl证书 根据需求进行设置**/
         //设置ssl证书路径
           //TODO 这里也支持输入流的入参。
-        //  httpConfigStorage.setKeystore(this.getClass()..getResourceAsStream("/证书文件"));
+        //  httpConfigStorage.setKeystore(this.getClass().getResourceAsStream("/证书文件"));
         //设置ssl证书路径 跟着setCertStoreType 进行对应
         httpConfigStorage.setKeystore("证书文件流，证书字符串信息或证书绝对地址");
         //设置ssl证书对应的密码
