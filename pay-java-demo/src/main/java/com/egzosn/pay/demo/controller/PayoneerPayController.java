@@ -102,7 +102,7 @@ public class PayoneerPayController {
 
         PayOrder order = new PayOrder("Order_payment:", "Order payment", price, UUID.randomUUID().toString().replace("-", ""), PayoneerTransactionType.CHARGE);
         //币种
-        order.setCurType(CurType.USD);
+        order.setCurType(DefaultCurType.USD);
         //设置授权码，条码等
         order.setAuthCode( userId);
         //支付结果
@@ -200,7 +200,7 @@ public class PayoneerPayController {
     @RequestMapping("transfer")
     public Map<String, Object> transfer(TransferOrder order) {
         order.setOutNo("商户转账订单号");
-        order.setCurType(CurType.USD);
+        order.setCurType(DefaultCurType.USD);
         order.setPayeeAccount("收款方账户,用户授权所使用的userId");
         order.setAmount(new BigDecimal(10));
         order.setRemark("转账备注, 非必填");

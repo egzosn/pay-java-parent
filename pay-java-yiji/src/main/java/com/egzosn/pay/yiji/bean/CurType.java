@@ -57,13 +57,13 @@ public enum CurType implements com.egzosn.pay.common.bean.CurType {
     COP(170, "哥伦比亚比索"),
     HUF(348, "匈牙利福林");
 
+    private int code;
     /**
      * 币种名称
      */
     private String name;
-    private int code;
 
-    CurType(String name, int code) {
+    CurType(int code, String name) {
         this.name = name;
         this.code = code;
     }
