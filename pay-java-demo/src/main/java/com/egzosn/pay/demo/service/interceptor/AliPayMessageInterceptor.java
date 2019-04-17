@@ -22,9 +22,10 @@ public class AliPayMessageInterceptor implements PayMessageInterceptor {
      *
      * @param payMessage     支付回调消息
      * @param context        上下文，如果handler或interceptor之间有信息要传递，可以用这个
-     * @param payService
+     * @param payService 支付服务
      * @return true代表OK，false代表不OK并直接中断对应的支付处理器
      * @see PayMessageHandler 支付处理器
+     * @throws PayErrorException PayErrorException*
      */
     @Override
     public boolean intercept(PayMessage payMessage, Map<String, Object> context, PayService payService) throws PayErrorException {

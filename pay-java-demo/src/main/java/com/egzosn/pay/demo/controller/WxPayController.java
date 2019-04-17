@@ -36,8 +36,8 @@ import java.util.UUID;
  * 发起支付入口
  *
  * @author: egan
- * @email egzosn@gmail.com
- * @date 2016/11/18 0:25
+ * email egzosn@gmail.com
+ * date 2016/11/18 0:25
  */
 @RestController
 @RequestMapping("wx")
@@ -102,6 +102,7 @@ public class WxPayController {
      * 跳到支付页面
      * 针对实时支付
      *
+     * @param request       请求
      * @param price       金额
      * @return 跳到支付页面
      */
@@ -163,6 +164,7 @@ public class WxPayController {
      * 二维码支付
      * @param price       金额
      * @return 二维码图像
+     * @throws IOException IOException
      */
     @RequestMapping(value = "toQrPay.jpg", produces = "image/jpeg;charset=UTF-8")
     public byte[] toWxQrPay( BigDecimal price) throws IOException {
@@ -180,7 +182,7 @@ public class WxPayController {
      * @return 支付结果
      */
     @RequestMapping(value = "microPay")
-    public Map<String, Object> microPay( BigDecimal price, String authCode) throws IOException {
+    public Map<String, Object> microPay( BigDecimal price, String authCode) {
         //获取对应的支付账户操作工具（可根据账户id）
         //条码付
         PayOrder order = new PayOrder("egan order", "egan order", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), WxTransactionType.MICROPAY);
@@ -208,7 +210,7 @@ public class WxPayController {
      * @return 支付结果
      */
     @RequestMapping(value = "facePay")
-    public Map<String, Object> facePay(BigDecimal price, String authCode, String openid) throws IOException {
+    public Map<String, Object> facePay(BigDecimal price, String authCode, String openid)  {
         //获取对应的支付账户操作工具（可根据账户id）
         PayOrder order = new PayOrder("egan order", "egan order", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), WxTransactionType.FACEPAY);
         //设置人脸凭证
@@ -233,9 +235,10 @@ public class WxPayController {
      *
      * 方式二，{@link #payBack(HttpServletRequest)} 是属于简化方式， 试用与简单的业务场景
      *
-     * @param request
+     * @param request 请求
      *
-     * @return
+     * @return 是否成功
+     * @throws IOException IOException
      * @see #payBack(HttpServletRequest)
      */
     @Deprecated
@@ -260,14 +263,14 @@ public class WxPayController {
     /**
      * 支付回调地址
      *
-     * @param request
+     * @param request 请求
      *
-     * @return
+     * @return 是否成功
      *
      * 业务处理在对应的PayMessageHandler里面处理，在哪里设置PayMessageHandler，详情查看{@link com.egzosn.pay.common.api.PayService#setPayMessageHandler(com.egzosn.pay.common.api.PayMessageHandler)}
      *
      * 如果未设置 {@link com.egzosn.pay.common.api.PayMessageHandler} 那么会使用默认的 {@link com.egzosn.pay.common.api.DefaultPayMessageHandler}
-     *
+     * @throws IOException IOException
      */
     @RequestMapping(value = "payBack.json")
     public String payBack(HttpServletRequest request) throws IOException {
@@ -403,10 +406,10 @@ public class WxPayController {
      *                       {@link com.egzosn.pay.wx.bean.WxTransferType#QUERY_BANK}
      *                       {@link com.egzosn.pay.wx.bean.WxTransferType#GETTRANSFERINFO}
      *
-     * <br/>
+     * <p>
      *  <a href="https://pay.weixin.qq.com/wiki/doc/api/tools/mch_pay.php?chapter=14_3">企业付款到零钱</a>
      *  <a href="https://pay.weixin.qq.com/wiki/doc/api/tools/mch_pay.php?chapter=24_3">商户企业付款到银行卡</a>
-     * <br/>
+     * </p>
      * @return 对应的转账订单
      */
     @RequestMapping("transferQuery")

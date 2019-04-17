@@ -10,7 +10,7 @@ import java.util.Map;
 
 /**
  * @author Actinia
- * @email hayesfu@qq.com
+ * email hayesfu@qq.com
  * <pre>
  * create 2017 2017/11/4 0004
  * </pre>

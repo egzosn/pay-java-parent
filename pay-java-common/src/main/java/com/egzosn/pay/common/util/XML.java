@@ -79,6 +79,7 @@ public class XML {
      * 解析xml并转化为Json值
      *
      * @param content json字符串
+     * @param charset 字符编码
      * @return Json值
      */
     public static JSONObject toJSONObject(String content, Charset charset) {
@@ -264,6 +265,7 @@ public class XML {
      *
      * @param data Map类型数据
      * @param rootElementName 最外层节点名称
+     * @param encoding 字符编码
      * @return XML格式的字符串
      */
     public static String getMap2Xml(Map<String, Object> data, String rootElementName, String encoding) {
@@ -312,7 +314,7 @@ public class XML {
      *
      * @param data Map类型数据
      * @param document 文档
-     * @return XML格式的字符串
+     * @param element  节点
      */
     public static void map2Xml(Map<String, Object> data, Document document, org.w3c.dom.Element element) {
         for (Map.Entry<String, Object> entry : data.entrySet()) {

@@ -39,8 +39,8 @@ import static com.egzosn.pay.demo.dao.ApyAccountRepository.apyAccounts;
  * 发起支付入口
  *
  * @author: egan
- * @email egzosn@gmail.com
- * @date 2016/11/18 0:25
+ * email egzosn@gmail.com
+ * date 2016/11/18 0:25
  */
 @RestController
 @RequestMapping
@@ -58,7 +58,7 @@ public class PayController {
     /**
      * 这里模拟账户信息增加
      *
-     * @param account
+     * @param account 支付账户信息
      * @return 支付账户信息
      */
     @RequestMapping("add")
@@ -76,6 +76,7 @@ public class PayController {
      * 跳到支付页面
      * 针对实时支付,即时付款
      *
+     * @param request           请求
      * @param payId           账户id
      * @param transactionType 交易类型， 这个针对于每一个 支付类型的对应的几种交易方式
      * @param bankType        针对刷卡支付，卡的类型，类型值
@@ -114,7 +115,7 @@ public class PayController {
     /**
      * 跳到支付页面
      * 针对实时支付,即时付款
-     *
+     * @param request 请求
      * @return 跳到支付页面
      */
     @RequestMapping(value = "toWxPay.html", produces = "text/html;charset=UTF-8")
@@ -169,7 +170,7 @@ public class PayController {
      * @return 支付结果
      */
     @RequestMapping(value = "microPay")
-    public Map<String, Object> microPay(Integer payId, String transactionType, BigDecimal price, String authCode) throws IOException {
+    public Map<String, Object> microPay(Integer payId, String transactionType, BigDecimal price, String authCode)  {
         //获取对应的支付账户操作工具（可根据账户id）
         PayResponse payResponse = service.getPayResponse(payId);
 
@@ -196,7 +197,9 @@ public class PayController {
      * @param payId           账户id
      * @param transactionType 交易类型， 这个针对于每一个 支付类型的对应的几种交易方式
      * @param price           金额
+     *
      * @return 二维码图像
+     * @throws IOException IOException
      */
     @RequestMapping(value = "toQrPay.jpg", produces = "image/jpeg;charset=UTF-8")
     public byte[] toWxQrPay(Integer payId, String transactionType, BigDecimal price) throws IOException {
@@ -215,7 +218,9 @@ public class PayController {
      * @param wxPayId  微信账户id
      * @param aliPayId 支付宝id
      * @param price    金额
+     * @param request    请求
      * @return 二维码图像
+     * @throws IOException IOException
      */
     @RequestMapping(value = "toWxAliQrPay.jpg", produces = "image/jpeg;charset=UTF-8")
     public byte[] toWxAliQrPay(Integer wxPayId, Integer aliPayId, BigDecimal price, HttpServletRequest request) throws IOException {
@@ -243,7 +248,9 @@ public class PayController {
      * @param wxPayId  微信账户id
      * @param aliPayId 支付宝id
      * @param price    金额
+     * @param request    请求
      * @return 支付宝与微信平台的判断
+     * @throws IOException IOException
      */
     @RequestMapping(value = "toWxAliPay.html", produces = "text/html;charset=UTF-8")
     public String toWxAliPay(Integer wxPayId, Integer aliPayId, BigDecimal price, HttpServletRequest request) throws IOException {
@@ -276,6 +283,7 @@ public class PayController {
      *
      * @param payId           支付账户id
      * @param transactionType 交易类型
+     * @param price 金额
      * @return 支付预订单信息
      */
     @RequestMapping("getOrderInfo")
@@ -295,9 +303,10 @@ public class PayController {
      * <p>
      * 方式二，{@link #payBack(HttpServletRequest, Integer)} 是属于简化方式， 试用与简单的业务场景
      *
-     * @param request
-     * @param payId
+     * @param request 请求
+     * @param payId 账户id
      * @return 支付是否成功
+     * @throws IOException IOException
      */
     @RequestMapping(value = "payBackOne{payId}.json")
     public String payBackOne(HttpServletRequest request, @PathVariable Integer payId) throws IOException {
@@ -327,11 +336,14 @@ public class PayController {
      * 支付回调地址
      * 方式二
      *
-     * @param request
-     * @return 拦截器相关增加， 详情查看{@link com.egzosn.pay.common.api.PayService#addPayMessageInterceptor(PayMessageInterceptor)}
-     * <p></p>
-     * 业务处理在对应的PayMessageHandler里面处理，在哪里设置PayMessageHandler，详情查看{@link com.egzosn.pay.common.api.PayService#setPayMessageHandler(com.egzosn.pay.common.api.PayMessageHandler)}
+     * @param request 请求
+     * @param payId 账户id
+     * @return 支付是否成功
+     * @throws IOException IOException
+     * 拦截器相关增加， 详情查看{@link com.egzosn.pay.common.api.PayService#addPayMessageInterceptor(PayMessageInterceptor)}
      * <p>
+     * 业务处理在对应的PayMessageHandler里面处理，在哪里设置PayMessageHandler，详情查看{@link com.egzosn.pay.common.api.PayService#setPayMessageHandler(com.egzosn.pay.common.api.PayMessageHandler)}
+     * </p>
      * 如果未设置 {@link com.egzosn.pay.common.api.PayMessageHandler} 那么会使用默认的 {@link com.egzosn.pay.common.api.DefaultPayMessageHandler}
      */
     @RequestMapping(value = "payBack{payId}.json")
@@ -381,7 +393,7 @@ public class PayController {
 
     /**
      * 申请退款接口
-     *
+     * @param payId 账户id
      * @param order 订单的请求体
      * @return 返回支付方申请退款后的结果
      */
@@ -435,7 +447,7 @@ public class PayController {
 
     /**
      * 转账
-     *
+     * @param payId 账户id
      * @param order 转账订单
      * @return 对应的转账结果
      */
@@ -447,7 +459,7 @@ public class PayController {
 
     /**
      * 转账查询
-     *
+     * @param payId 账户id
      * @param outNo   商户转账订单号
      * @param tradeNo 支付平台转账订单号
      * @return 对应的转账订单
