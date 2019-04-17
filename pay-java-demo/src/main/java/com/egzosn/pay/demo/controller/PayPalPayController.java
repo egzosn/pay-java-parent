@@ -1,12 +1,8 @@
 package com.egzosn.pay.demo.controller;
 
 
-import com.egzosn.pay.ali.bean.AliTransactionType;
 import com.egzosn.pay.common.api.PayService;
-import com.egzosn.pay.common.bean.CurType;
-import com.egzosn.pay.common.bean.MethodType;
-import com.egzosn.pay.common.bean.PayOrder;
-import com.egzosn.pay.common.bean.RefundOrder;
+import com.egzosn.pay.common.bean.*;
 import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.paypal.api.PayPalConfigStorage;
 import com.egzosn.pay.paypal.api.PayPalPayService;
@@ -91,7 +87,7 @@ public class PayPalPayController {
     public Map<String, Object> refund() {
         // TODO 这里需要  refundAmount， curType， description， tradeNo
         RefundOrder order = new RefundOrder();
-        order.setCurType(CurType.USD);
+        order.setCurType(DefaultCurType.USD);
         order.setDescription(" description ");
         order.setTradeNo("paypal 平台的单号");
         order.setRefundAmount(new BigDecimal(0.01));

@@ -27,6 +27,7 @@ public enum YiJiTransactionType implements TransactionType {
      * 跳转收银台支付
      */
     commonTradePay("commonTradePay"){
+        @Override
         public String getVersion() {
             return "2.0";
         }
