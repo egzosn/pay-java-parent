@@ -52,6 +52,10 @@ public enum  AliTransactionType implements TransactionType {
     //交易辅助接口
 
     /**
+     *  统一收单交易结算接口
+     */
+    SETTLE("alipay.trade.order.settle"),
+    /**
      * 交易订单查询
      */
     QUERY("alipay.trade.query"),
