@@ -21,7 +21,7 @@
 <dependency>
     <groupId>com.egzosn</groupId>
     <artifactId>{module-name}</artifactId>
-    <version>2.12.6</version>
+    <version>2.12.7</version>
 </dependency>
 
 ```
