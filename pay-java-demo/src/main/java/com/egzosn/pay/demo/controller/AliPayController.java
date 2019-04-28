@@ -6,6 +6,7 @@ import com.egzosn.pay.ali.api.AliPayConfigStorage;
 import com.egzosn.pay.ali.api.AliPayService;
 import com.egzosn.pay.ali.bean.AliTransactionType;
 import com.egzosn.pay.ali.bean.AliTransferType;
+import com.egzosn.pay.ali.bean.OrderSettle;
 import com.egzosn.pay.common.api.PayService;
 import com.egzosn.pay.common.bean.*;
 import com.egzosn.pay.common.http.HttpConfigStorage;
@@ -40,7 +41,7 @@ import java.util.UUID;
 @RequestMapping("ali")
 public class AliPayController {
 
-    private PayService service = null;
+    private AliPayService service = null;
     @Resource
     private AutowireCapableBeanFactory spring;
 
@@ -217,6 +218,22 @@ public class AliPayController {
     @RequestMapping("query")
     public Map<String, Object> query(QueryOrder order) {
         return service.query(order.getTradeNo(), order.getOutTradeNo());
+    }
+
+    /**
+     * 统一收单交易结算接口
+     *
+     * @param order 订单的请求体
+     * @return 返回查询回来的结果集，支付方原值返回
+     */
+    @RequestMapping("settle")
+    public Map<String, Object> settle(OrderSettle order) {
+       /* OrderSettle order = new OrderSettle();
+        order.setTradeNo("支付宝单号");
+        order.setOutRequestNo("商户单号");
+        order.setAmount(new BigDecimal(100));
+        order.setDesc("线下转账");*/
+        return service.settle(order);
     }
 
 
