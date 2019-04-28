@@ -120,6 +120,7 @@ public class HttpConfigStorage {
     /**
      * 获取证书信息
      * @return 证书信息 根据 {@link #getCertStoreType()}进行区别地址与信息串
+     * @throws IOException 找不到文件异常
      */
     public InputStream getKeystoreInputStream() throws IOException {
         if (null == keystore) {

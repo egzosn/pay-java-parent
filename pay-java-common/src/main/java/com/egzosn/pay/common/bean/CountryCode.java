@@ -16,7 +16,7 @@ public interface CountryCode {
 
     /**
      * 获取国家名称
-     * @return
+     * @return 国家名称
      */
     String getName();
 }

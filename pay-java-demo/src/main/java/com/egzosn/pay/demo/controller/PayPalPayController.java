@@ -23,8 +23,8 @@ import java.util.UUID;
  * 发起支付入口
  *
  * @author: egan
- * @email egzosn@gmail.com
- * @date 2018/05/06 10:30
+ * email egzosn@gmail.com
+ * date 2018/05/06 10:30
  */
 @RestController
 @RequestMapping("payPal")
@@ -99,8 +99,9 @@ public class PayPalPayController {
      * return url
      * PayPal确认付款调用的接口
      * 用户确认付款后，paypal调用的这个方法执行付款
-     *
+     * @param request 请求
      * @return 付款成功信息
+     * @throws IOException IOException
      */
     @GetMapping(value = "payBackBefore.json")
     public String payBackBefore(HttpServletRequest request) throws IOException {
@@ -117,10 +118,10 @@ public class PayPalPayController {
     /**
      * 支付回调地址
      *
-     * @param request
+     * @param request  请求
      *
-     * @return
-     *
+     * @return 结果
+     * @throws IOException IOException
      * 业务处理在对应的PayMessageHandler里面处理，在哪里设置PayMessageHandler，详情查看{@link com.egzosn.pay.common.api.PayService#setPayMessageHandler(com.egzosn.pay.common.api.PayMessageHandler)}
      *
      * 如果未设置 {@link com.egzosn.pay.common.api.PayMessageHandler} 那么会使用默认的 {@link com.egzosn.pay.common.api.DefaultPayMessageHandler}

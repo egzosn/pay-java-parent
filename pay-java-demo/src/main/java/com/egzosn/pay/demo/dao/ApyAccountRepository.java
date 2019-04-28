@@ -14,8 +14,8 @@ import java.util.Map;
 /**
  * 账户
  * @author: egan
- * @email egzosn@gmail.com
- * @date 2016/11/18 1:21
+ * email egzosn@gmail.com
+ * date 2016/11/18 1:21
  */
 //@Repository
 public class ApyAccountRepository {
@@ -126,7 +126,7 @@ public class ApyAccountRepository {
     /**
      * 根据id获取对应的账户信息
      * @param payId 账户id
-     * @return
+     * @return 账户信息
      */
     public ApyAccount findByPayId(Integer payId){
         // TODO 2016/11/18 1:23 author: egan  这里简单模拟 具体实现 略。。

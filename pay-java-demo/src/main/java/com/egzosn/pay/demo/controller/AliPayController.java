@@ -33,8 +33,8 @@ import java.util.UUID;
  * 发起支付入口
  *
  * @author: egan
- * @email egzosn@gmail.com
- * @date 2016/11/18 0:25
+ * email egzosn@gmail.com
+ * date 2016/11/18 0:25
  */
 @RestController
 @RequestMapping("ali")
@@ -118,6 +118,7 @@ public class AliPayController {
      * 二维码支付
      * @param price       金额
      * @return 二维码图像
+     * @throws IOException IOException
      */
     @RequestMapping(value = "toQrPay.jpg", produces = "image/jpeg;charset=UTF-8")
     public byte[] toWxQrPay( BigDecimal price) throws IOException {
@@ -135,7 +136,7 @@ public class AliPayController {
      * @return 支付结果
      */
     @RequestMapping(value = "microPay")
-    public Map<String, Object> microPay(BigDecimal price, String authCode) throws IOException {
+    public Map<String, Object> microPay(BigDecimal price, String authCode) {
         //获取对应的支付账户操作工具（可根据账户id）
         //条码付
         PayOrder order = new PayOrder("egan order", "egan order", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), AliTransactionType.BAR_CODE);
@@ -167,6 +168,7 @@ public class AliPayController {
      *
      * @return 返回对应的响应码
      * @see #payBack(HttpServletRequest)
+     * @throws IOException IOException
      */
     @Deprecated
     @RequestMapping(value = "payBackBefore.json")
@@ -197,7 +199,7 @@ public class AliPayController {
      * 业务处理在对应的PayMessageHandler里面处理，在哪里设置PayMessageHandler，详情查看{@link com.egzosn.pay.common.api.PayService#setPayMessageHandler(com.egzosn.pay.common.api.PayMessageHandler)}
      *
      * 如果未设置 {@link com.egzosn.pay.common.api.PayMessageHandler} 那么会使用默认的 {@link com.egzosn.pay.common.api.DefaultPayMessageHandler}
-     *
+     * @throws IOException IOException
      */
     @RequestMapping(value = "payBack.json")
     public String payBack(HttpServletRequest request) throws IOException {
