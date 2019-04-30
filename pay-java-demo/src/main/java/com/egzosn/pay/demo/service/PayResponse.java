@@ -18,8 +18,8 @@ import javax.annotation.Resource;
 /**
  * 支付响应对象
  * @author: egan
- * @email egzosn@gmail.com
- * @date 2016/11/18 0:34
+ * email egzosn@gmail.com
+ * date 2016/11/18 0:34
  */
 public class PayResponse {
 

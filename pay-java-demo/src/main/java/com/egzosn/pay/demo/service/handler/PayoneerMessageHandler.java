@@ -9,10 +9,10 @@ import com.egzosn.pay.payoneer.api.PayoneerPayService;
 import java.util.Map;
 
 /**
- * @descrption
  * @author Actinia
- * @email hayesfu@qq.com
- * @date 2018-01-19
+ * email hayesfu@qq.com
+ * date 2018-01-19
+ *
  */
 public class PayoneerMessageHandler extends BasePayMessageHandler {
 

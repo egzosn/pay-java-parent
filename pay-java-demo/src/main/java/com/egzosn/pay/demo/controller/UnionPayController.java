@@ -32,8 +32,8 @@ import static com.egzosn.pay.union.bean.UnionTransactionType.WEB;
  *  银联相关
  *
  * @author: egan
- * @email egzosn@gmail.com
- * @date 2016/11/18 0:25
+ * email egzosn@gmail.com
+ * date 2016/11/18 0:25
  */
 @RestController
 @RequestMapping("union")
@@ -148,6 +148,7 @@ public class UnionPayController {
      * 二维码支付
      * @param price       金额
      * @return 二维码图像
+     * @throws IOException IOException
      */
     @RequestMapping(value = "toQrPay.jpg", produces = "image/jpeg;charset=UTF-8")
     public byte[] toWxQrPay( BigDecimal price) throws IOException {
@@ -165,7 +166,7 @@ public class UnionPayController {
      * @return 支付结果
      */
     @RequestMapping(value = "microPay")
-    public Map<String, Object> microPay(BigDecimal price, String authCode) throws IOException {
+    public Map<String, Object> microPay(BigDecimal price, String authCode)  {
         //获取对应的支付账户操作工具（可根据账户id）
         //条码付
         PayOrder order = new PayOrder("egan order", "egan order", null == price ? new BigDecimal(0.01) : price, SignUtils.randomStr(), UnionTransactionType.CONSUME);
@@ -190,10 +191,11 @@ public class UnionPayController {
      *
      * 方式二，{@link #payBack(HttpServletRequest)} 是属于简化方式， 试用与简单的业务场景
      *
-     * @param request
+     * @param request 请求
      *
-     * @return
+     * @return 是否成功
      * @see #payBack(HttpServletRequest)
+     * @throws IOException IOException
      */
     @Deprecated
     @RequestMapping(value = "payBackBefore.json")
@@ -217,13 +219,14 @@ public class UnionPayController {
     /**
      * 支付回调地址
      *
-     * @param request
+     * @param request 请求
      *
-     * @return
+     * @return  是否成功
      *
      * 业务处理在对应的PayMessageHandler里面处理，在哪里设置PayMessageHandler，详情查看{@link PayService#setPayMessageHandler(com.egzosn.pay.common.api.PayMessageHandler)}
      *
      * 如果未设置 {@link com.egzosn.pay.common.api.PayMessageHandler} 那么会使用默认的 {@link com.egzosn.pay.common.api.DefaultPayMessageHandler}
+     * @throws IOException IOException
      *
      */
     @RequestMapping(value = "payBack.json")

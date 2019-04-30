@@ -9,7 +9,7 @@ import java.util.Map;
 
 /**
  * @author Fuzx
- * @create 2017 2017/1/24 0024
+ * create 2017 2017/1/24 0024
  */
 public class FuiouPayMessageHandler extends BasePayMessageHandler {
 

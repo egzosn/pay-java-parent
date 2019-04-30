@@ -214,7 +214,6 @@ public class CertDescriptor {
      * @param keyPwd    证书密码
      * @param type      证书类型
      * @return 证书对象
-     * @throws IOException
      */
     public KeyStore getKeyInfo(InputStream fxKeyFile, String keyPwd, String type) {
 

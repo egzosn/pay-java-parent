@@ -3,6 +3,7 @@ package com.egzosn.pay.ali.api;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.ali.bean.AliTransactionType;
+import com.egzosn.pay.ali.bean.OrderSettle;
 import com.egzosn.pay.common.api.BasePayService;
 import com.egzosn.pay.common.bean.*;
 import com.egzosn.pay.common.bean.result.PayException;
@@ -327,6 +328,21 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
             LOG.info("收款失败");
         }
         return result;
+    }
+
+
+    /**
+     * 统一收单交易结算接口
+     * @param order 交易结算信息
+     * @return 结算结果
+     */
+    public Map<String, Object> settle(OrderSettle order){
+        //获取公共参数
+        Map<String, Object> parameters = getPublicParameters(AliTransactionType.SETTLE);
+        parameters.put(BIZ_CONTENT, JSON.toJSONString(order.toBizContent()));
+        //设置签名
+        setSign(parameters);
+        return getHttpRequestTemplate().postForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(parameters), null, JSONObject.class);
     }
 
     /**

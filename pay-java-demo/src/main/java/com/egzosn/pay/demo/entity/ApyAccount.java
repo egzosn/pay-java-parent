@@ -9,8 +9,8 @@ import com.egzosn.pay.common.bean.MsgType;
 /**
  * 支付账户
  * @author: egan
- * @email egzosn@gmail.com
- * @date 2016/11/18 0:36
+ * email egzosn@gmail.com
+ * date 2016/11/18 0:36
  */
 //@Table(name = "apy_account")
 //@Entity

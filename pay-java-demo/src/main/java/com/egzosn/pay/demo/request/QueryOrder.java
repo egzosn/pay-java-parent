@@ -6,8 +6,8 @@ import java.util.Date;
 /**
  * 订单辅助接口
  * @author: egan
- * @email egzosn@gmail.com
- * @date 2017/3/12 14:50
+ * email egzosn@gmail.com
+ * date 2017/3/12 14:50
  */
 public class QueryOrder {
 
