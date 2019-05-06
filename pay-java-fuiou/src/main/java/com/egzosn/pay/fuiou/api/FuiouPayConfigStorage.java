@@ -9,8 +9,10 @@ import com.egzosn.pay.common.api.BasePayConfigStorage;
  * </pre>
  */
 public class FuiouPayConfigStorage extends BasePayConfigStorage {
-
-    public String mchntCd;//商户代码
+    /**
+     * 商户代码
+     */
+    private String mchntCd;
 
     /**
      *  应用id
