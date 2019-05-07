@@ -346,6 +346,25 @@ public class HttpRequestTemplate {
 
     }
 
+    public HttpResult doExecute(URI uri, Object request,MethodType method){
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(String.format("uri:%s, httpMethod:%s ", uri, method.name()));
+        }
+        ClientHttpRequest httpRequest = new ClientHttpRequest(uri ,method, request, null == configStorage ? null : configStorage.getCharset());
+        //判断是否有代理设置
+        if (null == httpProxy){
+            httpRequest.setProxy(httpProxy);
+        }
+        try (CloseableHttpResponse response = getHttpClient().execute(httpRequest)) {
+            return httpRequest.handleSimpleResponse(response);
+        }catch (IOException e){
+            throw new PayErrorException(new PayException("IOException", e.getLocalizedMessage()));
+        }finally {
+            httpRequest.releaseConnection();
+        }
+
+    }
+
 
     /**
      * http 请求执行
