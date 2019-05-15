@@ -50,6 +50,8 @@ public class CertDescriptor {
      */
     private X509Certificate rootKeyCert = null;
 
+    public CertDescriptor() {
+    }
 
     /**
      * 通过证书路径初始化为公钥证书
