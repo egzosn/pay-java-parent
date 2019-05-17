@@ -63,7 +63,7 @@
 
 ```java
     //支付服务
-     PayService service = new AliPayService(aliPayConfigStorage);
+     AliPayService service = new AliPayService(aliPayConfigStorage);
 
      //设置网络请求配置根据需求进行设置
      //service.setRequestTemplateConfigStorage(httpConfigStorage)
@@ -177,6 +177,19 @@
 
 ```
 
+
+
+#### 统一收单交易结算接口
+
+```java
+        OrderSettle order = new OrderSettle();
+        order.setTradeNo("支付宝单号");
+        order.setOutRequestNo("商户单号");
+        order.setAmount(new BigDecimal(100));
+        order.setDesc("线下转账");
+        Map result = service.settle(order);
+
+```
 
 
 #### 支付订单查询

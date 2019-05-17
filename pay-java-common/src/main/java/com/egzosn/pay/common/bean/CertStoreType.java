@@ -20,6 +20,7 @@ public enum CertStoreType {
          *
          * @param cert 证书信息
          * @return 输入流
+         * @throws IOException 找不到文件异常
          */
         @Override
         public InputStream getInputStream(Object cert) throws IOException {
@@ -35,6 +36,7 @@ public enum CertStoreType {
          *
          * @param cert 证书信息
          * @return 输入流
+         * @throws IOException 找不到文件异常
          */
         @Override
         public InputStream getInputStream(Object cert) throws IOException {
@@ -51,6 +53,7 @@ public enum CertStoreType {
          *
          * @param cert 证书信息
          * @return 输入流
+         * @throws IOException 找不到文件异常
          */
         @Override
         public InputStream getInputStream(Object cert) throws IOException {
@@ -63,6 +66,7 @@ public enum CertStoreType {
      *
      * @param cert 证书信息
      * @return 输入流
+     * @throws IOException 找不到文件异常
      */
     public abstract InputStream getInputStream(Object cert) throws IOException;
 
