@@ -59,7 +59,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
     /**
      * 证书解释器
      */
-    private CertDescriptor certDescriptor = new CertDescriptor();
+    private CertDescriptor certDescriptor = null;
     /**
      * 构造函数
      *
@@ -82,9 +82,11 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
     @Override
     public UnionPayService setPayConfigStorage(UnionPayConfigStorage payConfigStorage) {
         super.setPayConfigStorage(payConfigStorage);
-        if (!payConfigStorage.isCertSign()) {
+        if (!payConfigStorage.isCertSign() || null != certDescriptor) {
             return this;
         }
+
+        certDescriptor = new CertDescriptor();
         try {
             certDescriptor.initPrivateSignCert(payConfigStorage.getKeyPrivateCertInputStream(), payConfigStorage.getKeyPrivateCertPwd(), "PKCS12");
             certDescriptor.initPublicCert(payConfigStorage.getAcpMiddleCertInputStream());
