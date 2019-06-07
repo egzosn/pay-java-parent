@@ -154,9 +154,17 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
      */
     @Override
     public boolean signVerify(Map<String, Object> params, String sign) {
+        return signVerify(params, sign, payConfigStorage.isTest());
+    }
+
+    private boolean signVerify(Map<String, Object> params, String sign, boolean isTest) {
         SignUtils signUtils = SignUtils.valueOf(payConfigStorage.getSignType());
-        String content = SignUtils.parameterText(params, "&", SIGN, "appId") + "&key=" + (signUtils == SignUtils.MD5 ? "" : payConfigStorage.getKeyPrivate());
-        return signUtils.verify(content, sign, payConfigStorage.getKeyPrivate(), payConfigStorage.getInputCharset());
+        String keyPrivate = payConfigStorage.getKeyPrivate();
+        if (isTest) {
+            keyPrivate = getKeyPrivate();
+        }
+        String content = SignUtils.parameterText(params, "&", SIGN, "appId") + "&key=" + (signUtils == SignUtils.MD5 ? "" : keyPrivate);
+        return signUtils.verify(content, sign, keyPrivate, payConfigStorage.getInputCharset());
     }
 
     /**
