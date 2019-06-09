@@ -59,7 +59,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
     /**
      * 证书解释器
      */
-    private CertDescriptor certDescriptor = null;
+    private CertDescriptor certDescriptor;
     /**
      * 构造函数
      *
