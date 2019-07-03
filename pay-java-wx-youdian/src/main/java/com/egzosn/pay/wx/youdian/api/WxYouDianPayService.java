@@ -11,6 +11,7 @@ import com.egzosn.pay.common.util.MatrixToImageWriter;
 import com.egzosn.pay.common.util.Util;
 import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.str.StringUtils;
+import com.egzosn.pay.wx.youdian.bean.WxYoudianPayMessage;
 import com.egzosn.pay.wx.youdian.bean.YdPayError;
 import com.egzosn.pay.wx.youdian.bean.YoudianTransactionType;
 import java.awt.image.BufferedImage;
@@ -462,5 +463,16 @@ public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorag
     public String getReqUrl(TransactionType type){
         return URL + type.getMethod();
 
+    }
+
+    /**
+     * 创建消息
+     *
+     * @param message 支付平台返回的消息
+     * @return 支付消息对象
+     */
+    @Override
+    public PayMessage createMessage(Map<String, Object> message) {
+        return WxYoudianPayMessage.create(message);
     }
 }
