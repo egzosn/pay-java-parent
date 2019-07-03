@@ -22,7 +22,7 @@ public class PayoneerMessageHandler extends BasePayMessageHandler {
     }
 
     @Override
-    public PayOutMessage handle(PayMessage payMessage, Map<String, Object> context, PayService payService) throws PayErrorException {
+    public PayOutMessage handle(PayMessage payMessage, Map context, PayService payService) throws PayErrorException {
         //交易状态
         if ("0".equals(payMessage.getPayMessage().get(PayoneerPayService.CODE))) {
             /////这里进行成功的处理
