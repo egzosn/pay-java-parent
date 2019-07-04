@@ -29,17 +29,22 @@
         //代理端口
         httpConfigStorage.setHttpProxyPort(3308);
         //代理用户名
-        httpConfigStorage.setHttpProxyUsername("user");
+        httpConfigStorage.setAuthUsername("user");
         //代理密码
-        httpConfigStorage.setHttpProxyPassword("password");
+        httpConfigStorage.setAuthPassword("password");
         /* /网路代理配置 根据需求进行设置**/
     
         //退款使用
          /* 网络请求ssl证书 根据需求进行设置**/
         //设置ssl证书路径
-        httpConfigStorage.setKeystorePath("证书绝对路径");
+          //TODO 这里也支持输入流的入参。
+        //  httpConfigStorage.setKeystore(this.getClass()..getResourceAsStream("/证书文件"));
+        //设置ssl证书路径 跟着setCertStoreType 进行对应
+        httpConfigStorage.setKeystore("证书文件流，证书字符串信息或证书绝对地址");
         //设置ssl证书对应的密码
         httpConfigStorage.setStorePassword("证书对应的密码");
+        //设置ssl证书对应的存储方式
+        httpConfigStorage.setCertStoreType(CertStoreType.PATH);
         /* /网络请求ssl证书**/
       /* /网络请求连接池**/
         //最大连接数
@@ -132,6 +137,23 @@
         Map params = service.microPay(payOrder);
 
         /*-----------/条码付 刷卡付-------------------*/
+
+``` 
+#### 刷脸付
+
+```java
+
+        /*-----------刷脸付-------------------*/
+           //获取对应的支付账户操作工具（可根据账户id）
+              PayOrder order = new PayOrder("egan order", "egan order", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), WxTransactionType.FACEPAY);
+              //设置人脸凭证
+              order.setAuthCode(authCode);
+              //  用户在商户 appid下的唯一标识
+              order.setOpenid(openid);
+              //支付结果
+              Map<String, Object> params = service.microPay(order);
+
+        /*-----------/刷脸付-------------------*/
 
 ``` 
 

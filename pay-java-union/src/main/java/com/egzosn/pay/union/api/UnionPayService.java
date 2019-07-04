@@ -15,14 +15,18 @@ import com.egzosn.pay.common.util.sign.CertDescriptor;
 import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.sign.encrypt.RSA;
 import com.egzosn.pay.common.util.sign.encrypt.RSA2;
+import com.egzosn.pay.common.util.str.StringUtils;
 import com.egzosn.pay.union.bean.SDKConstants;
+import com.egzosn.pay.union.bean.UnionPayMessage;
 import com.egzosn.pay.union.bean.UnionTransactionType;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.security.cert.*;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -53,7 +57,10 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
     private static final String FILE_TRANS_URL = "https://filedownload.%s/";
     private static final String APP_TRANS_URL = "https://gateway.%s/gateway/api/appTransReq.do";
     private static final String CARD_TRANS_URL = "https://gateway.%s/gateway/api/cardTransReq.do";
-
+    /**
+     * 证书解释器
+     */
+    private CertDescriptor certDescriptor = null;
     /**
      * 构造函数
      *
@@ -76,28 +83,39 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
     @Override
     public UnionPayService setPayConfigStorage(UnionPayConfigStorage payConfigStorage) {
         super.setPayConfigStorage(payConfigStorage);
-        if (!payConfigStorage.isCertSign()) {
+        if (!payConfigStorage.isCertSign() || null != certDescriptor) {
             return this;
         }
-        CertDescriptor certDescriptor = payConfigStorage.getCertDescriptor();
-        if (!payConfigStorage.isKeyPrivateInit()) {
-            certDescriptor.initPrivateSignCert(payConfigStorage.getKeyPrivate(), payConfigStorage.getKeyPrivateCertPwd(), "PKCS12");
+
+        certDescriptor = new CertDescriptor();
+        try {
+            certDescriptor.initPrivateSignCert(payConfigStorage.getKeyPrivateCertInputStream(), payConfigStorage.getKeyPrivateCertPwd(), "PKCS12");
+            certDescriptor.initPublicCert(payConfigStorage.getAcpMiddleCertInputStream());
+            certDescriptor.initRootCert(payConfigStorage.getAcpRootCertInputStream());
+        } catch (IOException e) {
+            LOG.error(e);
         }
-        if (!payConfigStorage.isKeyPublicInit()) {
-            certDescriptor.initPublicCert(payConfigStorage.getAcpMiddleCert());
-            certDescriptor.initRootCert(payConfigStorage.getAcpRootCert());
-        }
+
 
         return this;
     }
-
+    /**
+     * 获取支付请求地址
+     *
+     * @param transactionType 交易类型
+     * @return 请求地址
+     */
+    @Override
+    public String getReqUrl(TransactionType transactionType) {
+        return (payConfigStorage.isTest() ? TEST_BASE_DOMAIN : RELEASE_BASE_DOMAIN);
+    }
     /**
      * 根据是否为沙箱环境进行获取请求地址
      *
      * @return 请求地址
      */
     public String getReqUrl() {
-        return (payConfigStorage.isTest() ? TEST_BASE_DOMAIN : RELEASE_BASE_DOMAIN);
+        return getReqUrl(null);
     }
 
     public String getFrontTransUrl() {
@@ -125,7 +143,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
      */
     private Map<String, Object> getCommonParam() {
         Map<String, Object> params = new TreeMap<>();
-        UnionPayConfigStorage configStorage = (UnionPayConfigStorage) payConfigStorage;
+        UnionPayConfigStorage configStorage = payConfigStorage;
         //银联接口版本
         params.put(SDKConstants.param_version, configStorage.getVersion());
         //编码方式
@@ -204,6 +222,21 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
     }
 
     /**
+     * 订单超时时间。
+     * 超过此时间后，除网银交易外，其他交易银联系统会拒绝受理，提示超时。 跳转银行网银交易如果超时后交易成功，会自动退款，大约5个工作日金额返还到持卡人账户。
+     * 此时间建议取支付时的北京时间加15分钟。
+     * 超过超时时间调查询接口应答origRespCode不是A6或者00的就可以判断为失败。
+     * @param expirationTime 超时时间
+     * @return 具体的时间字符串
+     */
+    private String getPayTimeout(Date expirationTime) {
+        //
+        if (null != expirationTime) {
+            return DateUtils.formatDate(expirationTime, DateUtils.YYYYMMDDHHMMSS);
+        }
+        return DateUtils.formatDate(new Timestamp(System.currentTimeMillis() + 30 * 60 * 1000), DateUtils.YYYYMMDDHHMMSS);
+    }
+    /**
      * 返回创建的订单信息
      *
      * @param order 支付订单
@@ -213,7 +246,11 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
     @Override
     public Map<String, Object> orderInfo(PayOrder order) {
         Map<String, Object> params = this.getCommonParam();
-
+//        if(order instanceof  UnionPayOrder){
+//            UnionPayOrder unionPayOrder = (UnionPayOrder)order;
+//            //todo 其他参数
+////            params.put();
+//        }
         UnionTransactionType type = (UnionTransactionType) order.getTransactionType();
 
 
@@ -221,28 +258,35 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
         type.convertMap(params);
 
         params.put(SDKConstants.param_orderId, order.getOutTradeNo());
+
+        if (StringUtils.isNotEmpty(order.getAddition())){
+            params.put(SDKConstants.param_reqReserved, order.getAddition());
+        }
         switch (type) {
             case WAP:
             case WEB:
+                //todo PCwap网关跳转支付特殊用法.txt
             case B2B:
                 params.put(SDKConstants.param_txnAmt, Util.conversionCentAmount(order.getPrice()));
                 params.put("orderDesc", order.getSubject());
-                // 订单超时时间。
-                // 超过此时间后，除网银交易外，其他交易银联系统会拒绝受理，提示超时。 跳转银行网银交易如果超时后交易成功，会自动退款，大约5个工作日金额返还到持卡人账户。
-                // 此时间建议取支付时的北京时间加15分钟。
-                // 超过超时时间调查询接口应答origRespCode不是A6或者00的就可以判断为失败。
-                if (null != order.getExpirationTime()) {
-                    params.put(SDKConstants.param_payTimeout, DateUtils.YYYYMMDDHHMMSS.format(order.getExpirationTime()));
-                } else {
-                    params.put(SDKConstants.param_payTimeout, DateUtils.YYYYMMDDHHMMSS.format(System.currentTimeMillis() + 30 * 60 * 1000));
-                }
+                params.put(SDKConstants.param_payTimeout, getPayTimeout(order.getExpirationTime()));
+
                 params.put(SDKConstants.param_frontUrl, payConfigStorage.getReturnUrl());
                 break;
             case CONSUME:
                 params.put(SDKConstants.param_txnAmt, Util.conversionCentAmount(order.getPrice()));
                 params.put(SDKConstants.param_qrNo, order.getAuthCode());
                 break;
+            case APPLY_QR_CODE:
+                if (null != order.getPrice()) {
+                    params.put(SDKConstants.param_txnAmt, Util.conversionCentAmount(order.getPrice()));
+                }
+                params.put(SDKConstants.param_payTimeout, getPayTimeout(order.getExpirationTime()));
+                break;
             default:
+                params.put(SDKConstants.param_txnAmt, Util.conversionCentAmount(order.getPrice()));
+                params.put(SDKConstants.param_payTimeout, getPayTimeout(order.getExpirationTime()));
+                params.put("orderDesc", order.getSubject());
         }
 
         return setSign(params);
@@ -263,15 +307,15 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
         switch (signUtils) {
             case RSA:
                 parameters.put(SDKConstants.param_signMethod, SDKConstants.SIGNMETHOD_RSA);
-                parameters.put(SDKConstants.param_certId, payConfigStorage.getCertDescriptor().getSignCertId());
+                parameters.put(SDKConstants.param_certId, certDescriptor.getSignCertId());
                 signStr = SignUtils.SHA1.createSign(SignUtils.parameterText(parameters, "&", "signature"), "", payConfigStorage.getInputCharset());
-                parameters.put(SDKConstants.param_signature, RSA.sign(signStr, payConfigStorage.getCertDescriptor().getSignCertPrivateKey(payConfigStorage.getKeyPrivateCertPwd()), payConfigStorage.getInputCharset()));
+                parameters.put(SDKConstants.param_signature, RSA.sign(signStr, certDescriptor.getSignCertPrivateKey(payConfigStorage.getKeyPrivateCertPwd()), payConfigStorage.getInputCharset()));
                 break;
             case RSA2:
                 parameters.put(SDKConstants.param_signMethod, SDKConstants.SIGNMETHOD_RSA);
-                parameters.put(SDKConstants.param_certId, payConfigStorage.getCertDescriptor().getSignCertId());
+                parameters.put(SDKConstants.param_certId, certDescriptor.getSignCertId());
                 signStr = SignUtils.SHA256.createSign(SignUtils.parameterText(parameters, "&", "signature"), "", payConfigStorage.getInputCharset());
-                parameters.put(SDKConstants.param_signature, RSA2.sign(signStr, payConfigStorage.getCertDescriptor().getSignCertPrivateKey(payConfigStorage.getKeyPrivateCertPwd()), payConfigStorage.getInputCharset()));
+                parameters.put(SDKConstants.param_signature, RSA2.sign(signStr, certDescriptor.getSignCertPrivateKey(payConfigStorage.getKeyPrivateCertPwd()), payConfigStorage.getInputCharset()));
                 break;
             case SHA1:
             case SHA256:
@@ -298,8 +342,8 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
     private X509Certificate verifyCertificate(X509Certificate cert) {
         try {
             cert.checkValidity();//验证有效期
-            X509Certificate middleCert = payConfigStorage.getCertDescriptor().getPublicCert();
-            X509Certificate rootCert = payConfigStorage.getCertDescriptor().getRootCert();
+            X509Certificate middleCert = certDescriptor.getPublicCert();
+            X509Certificate rootCert = certDescriptor.getRootCert();
 
             X509CertSelector selector = new X509CertSelector();
             selector.setCertificate(cert);
@@ -351,7 +395,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
         }
         if (this.verify(response)) {
             if (SDKConstants.OK_RESP_CODE.equals(response.get(SDKConstants.param_respCode))) {
-                //成功,获取tn号
+                //成功
                 return MatrixToImageWriter.writeInfoToJpgBuff((String) response.get(SDKConstants.param_qrCode));
             }
             throw new PayErrorException(new PayException((String) response.get(SDKConstants.param_respCode), (String) response.get(SDKConstants.param_respMsg), responseStr));
@@ -416,11 +460,11 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
     }
 
     /**
-     * 获取输出消息，用户返回给支付端, 针对于web端
+     * 功能：生成自动跳转的Html表单
      *
      * @param orderInfo 发起支付的订单信息
      * @param method    请求方式  "post" "get",
-     * @return 获取输出消息，用户返回给支付端, 针对于web端
+     * @return 生成自动跳转的Html表单返回给支付端, 针对于PC端
      * @see MethodType 请求类型
      */
     @Override
@@ -444,6 +488,30 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
         return sf.toString();
     }
 
+    /**
+     * 功能：将订单信息进行签名并提交请求
+     * 业务范围：手机控件支付产品(WAP),
+     * @param order         订单信息
+     * @return  成功：返回支付结果  失败：返回
+     */
+    public Map<String ,Object>  sendHttpRequest(PayOrder order){
+        Map<String, Object> params = orderInfo(order);
+        String responseStr = getHttpRequestTemplate().postForObject(this.getBackTransUrl(), params, String.class);
+        Map<String, Object> response = UriVariables.getParametersToMap(responseStr);
+        if (response.isEmpty()) {
+            throw new PayErrorException(new PayException("failure", "响应内容有误!", responseStr));
+        }
+        if (this.verify(response)) {
+            if (SDKConstants.OK_RESP_CODE.equals(response.get(SDKConstants.param_respCode))) {
+//                //成功,获取tn号
+//                String tn =  (String)response.get(SDKConstants.param_tn);
+//                //TODO
+                return response;
+            }
+            throw new PayErrorException(new PayException((String) response.get(SDKConstants.param_respCode), (String) response.get(SDKConstants.param_respMsg), responseStr));
+        }
+        throw new PayErrorException(new PayException("failure", "验证签名失败", responseStr));
+    }
 
     /**
      * 交易查询接口
@@ -589,7 +657,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
         Map<String, Object> params = this.getCommonParam();
         UnionTransactionType.FILE_TRANSFER.convertMap(params);
 
-        params.put(SDKConstants.param_settleDate, DateUtils.MMDD.format(billDate));
+        params.put(SDKConstants.param_settleDate, DateUtils.formatDate(billDate, DateUtils.MMDD));
         params.put(SDKConstants.param_fileType, billType);
         params.remove(SDKConstants.param_backUrl);
         params.remove(SDKConstants.param_currencyCode);
@@ -621,4 +689,14 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
     }
 
 
+    /**
+     * 创建消息
+     *
+     * @param message 支付平台返回的消息
+     * @return 支付消息对象
+     */
+    @Override
+    public PayMessage createMessage(Map<String, Object> message) {
+        return UnionPayMessage.create(message);
+    }
 }

@@ -13,12 +13,17 @@ import java.math.BigDecimal;
 public class TransferOrder {
 
     /**
+     * 转账批次订单单号
+     */
+    private String batchNo;
+
+    /**
      * 转账订单单号
      */
     private String outNo;
 
     /**
-     * 收款方账户, 用户openid
+     * 收款方账户, 用户openid,卡号等等
      */
     private String  payeeAccount ;
 
@@ -37,6 +42,11 @@ public class TransferOrder {
      */
     private String payeeName;
     /**
+     * 收款人地址
+     */
+    private String payeeAddress;
+
+    /**
      * 备注
      */
     private String remark;
@@ -47,13 +57,35 @@ public class TransferOrder {
     private Bank bank;
 
     /**
+     *  收款开户行地址
+     */
+    private String payeeBankAddress;
+
+    /**
      * 币种
      */
     private CurType curType;
     /**
+     * 国家代码
+     */
+    private CountryCode countryCode;
+    /**
      * 转账类型，收款方账户类型，比如支付宝账户或者银行卡
      */
     private TransferType transferType;
+
+    /**
+     * 操作者ip，根据支付平台所需进行设置
+     */
+    private String ip;
+
+    public String getBatchNo() {
+        return batchNo;
+    }
+
+    public void setBatchNo(String batchNo) {
+        this.batchNo = batchNo;
+    }
 
     public String getOutNo() {
         return outNo;
@@ -95,6 +127,14 @@ public class TransferOrder {
         this.payeeName = payeeName;
     }
 
+    public String getPayeeAddress() {
+        return payeeAddress;
+    }
+
+    public void setPayeeAddress(String payeeAddress) {
+        this.payeeAddress = payeeAddress;
+    }
+
     public String getRemark() {
         return remark;
     }
@@ -111,6 +151,22 @@ public class TransferOrder {
         this.bank = bank;
     }
 
+    public String getPayeeBankAddress() {
+        return payeeBankAddress;
+    }
+
+    public void setPayeeBankAddress(String payeeBankAddress) {
+        this.payeeBankAddress = payeeBankAddress;
+    }
+
+    public CountryCode getCountryCode() {
+        return countryCode;
+    }
+
+    public void setCountryCode(CountryCode countryCode) {
+        this.countryCode = countryCode;
+    }
+
     public CurType getCurType() {
         return curType;
     }
@@ -125,5 +181,13 @@ public class TransferOrder {
 
     public void setTransferType(TransferType transferType) {
         this.transferType = transferType;
+    }
+
+    public String getIp() {
+        return ip;
+    }
+
+    public void setIp(String ip) {
+        this.ip = ip;
     }
 }

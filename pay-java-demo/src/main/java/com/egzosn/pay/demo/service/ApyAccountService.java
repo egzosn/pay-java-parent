@@ -11,8 +11,8 @@ import java.util.Map;
 
 /**
  * @author: egan
- * @email egzosn@gmail.com
- * @date 2016/11/18 1:11
+ * email egzosn@gmail.com
+ * date 2016/11/18 1:11
  */
 @Service
 public class ApyAccountService {
@@ -40,7 +40,7 @@ public class ApyAccountService {
     /**
      *  获取支付响应
      * @param id 账户id
-     * @return
+     * @return 支付响应
      */
     public PayResponse getPayResponse(Integer id) {
 

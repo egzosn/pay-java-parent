@@ -14,8 +14,8 @@ import java.util.Map;
 /**
  * 账户
  * @author: egan
- * @email egzosn@gmail.com
- * @date 2016/11/18 1:21
+ * email egzosn@gmail.com
+ * date 2016/11/18 1:21
  */
 //@Repository
 public class ApyAccountRepository {
@@ -33,10 +33,10 @@ public class ApyAccountRepository {
         apyAccount1.setAppid("2016080400165436");
         // TODO 2017/2/9 16:20 author: egan  sign_type只有单一key时public_key与private_key相等，比如sign_type=MD5的情况
         apyAccount1.setPublicKey("MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDIgHnOn7LLILlKETd6BFRJ0GqgS2Y3mn1wMQmyh9zEyWlz5p1zrahRahbXAfCfSqshSNfqOmAQzSHRVjCqjsAw1jyqrXaPdKBmr90DIpIxmIyKXv4GGAkPyJ/6FTFY99uhpiq0qadD/uSzQsefWo0aTvP/65zi3eof7TcZ32oWpwIDAQAB");
-        apyAccount1.setPrivateKey("MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBAKroe/8h5vC4L6T+B2WdXiVwGsMvUKgb2XsKix6VY3m2wcf6tyzpNRDCNykbIwGtaeo7FshN+qZxdXHLiIam9goYncBit/8ojfLGy2gLxO/PXfzGxYGs0KsDZ+ryVPPmE34ZZ8jiJpR0ygzCFl8pN3QJPJRGTJn5+FTT9EF/9zyZAgMBAAECgYAktngcYC35u7cQXDk+jMVyiVhWYU2ULxdSpPspgLGzrZyG1saOcTIi/XVX8Spd6+B6nmLQeF/FbU3rOeuD8U2clzul2Z2YMbJ0FYay9oVZFfp5gTEFpFRTVfzqUaZQBIjJe/xHL9kQVqc5xHlE/LVA27/Kx3dbC35Y7B4EVBDYAQJBAOhsX8ZreWLKPhXiXHTyLmNKhOHJc+0tFH7Ktise/0rNspojU7o9prOatKpNylp9v6kux7migcMRdVUWWiVe+4ECQQC8PqsuEz7B0yqirQchRg1DbHjh64bw9Kj82EN1/NzOUd53tP9tg+SO97EzsibK1F7tOcuwqsa7n2aY48mQ+y0ZAkBndA2xcRcnvOOjtAz5VO8G7R12rse181HjGfG6AeMadbKg30aeaGCyIxN1loiSfNR5xsPJwibGIBg81mUrqzqBAkB+K6rkaPXJR9XtzvdWb/N3235yPkDlw7Z4MiOVM3RzvR/VMDV7m8lXoeDde2zQyeMOMYy6ztwA6WgE1bhGOnQRAkEAouUBv1sVdSBlsexX15qphOmAevzYrpufKgJIRLFWQxroXMS7FTesj+f+FmGrpPCxIde1dqJ8lqYLTyJmbzMPYw==\n");
-        apyAccount1.setNotifyUrl("http://pay.egan.in/payBack1.json");
+        apyAccount1.setPrivateKey("MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBAKroe/8h5vC4L6T+B2WdXiVwGsMvUKgb2XsKix6VY3m2wcf6tyzpNRDCNykbIwGtaeo7FshN+qZxdXHLiIam9goYncBit/8ojfLGy2gLxO/PXfzGxYGs0KsDZ+ryVPPmE34ZZ8jiJpR0ygzCFl8pN3QJPJRGTJn5+FTT9EF/9zyZAgMBAAECgYAktngcYC35u7cQXDk+jMVyiVhWYU2ULxdSpPspgLGzrZyG1saOcTIi/XVX8Spd6+B6nmLQeF/FbU3rOeuD8U2clzul2Z2YMbJ0FYay9oVZFfp5gTEFpFRTVfzqUaZQBIjJe/xHL9kQVqc5xHlE/LVA27/Kx3dbC35Y7B4EVBDYAQJBAOhsX8ZreWLKPhXiXHTyLmNKhOHJc+0tFH7Ktise/0rNspojU7o9prOatKpNylp9v6kux7migcMRdVUWWiVe+4ECQQC8PqsuEz7B0yqirQchRg1DbHjh64bw9Kj82EN1/NzOUd53tP9tg+SO97EzsibK1F7tOcuwqsa7n2aY48mQ+y0ZAkBndA2xcRcnvOOjtAz5VO8G7R12rse181HjGfG6AeMadbKg30aeaGCyIxN1loiSfNR5xsPJwibGIBg81mUrqzqBAkB+K6rkaPXJR9XtzvdWb/N3235yPkDlw7Z4MiOVM3RzvR/VMDV7m8lXoeDde2zQyeMOMYy6ztwA6WgE1bhGOnQRAkEAouUBv1sVdSBlsexX15qphOmAevzYrpufKgJIRLFWQxroXMS7FTesj+f+FmGrpPCxIde1dqJ8lqYLTyJmbzMPYw==");
+        apyAccount1.setNotifyUrl("http://pay.egzosn.com/payBack1.json");
         // 无需同步回调可不填
-        apyAccount1.setReturnUrl("http://pay.egan.in/payBack1.json");
+        apyAccount1.setReturnUrl("http://pay.egzosn.com/payBack1.json");
         apyAccount1.setInputCharset("UTF-8");
         apyAccount1.setSeller("2088102169916436");
         apyAccount1.setSignType(SignUtils.RSA.name());
@@ -102,13 +102,23 @@ public class ApyAccountRepository {
         ApyAccount apyAccount5 = new ApyAccount();
         apyAccount5.setPayId(5);
         apyAccount5.setPartner("100086190");//Program ID
-        apyAccount5.setSeller("Huodull6190");//Username
+        apyAccount5.setSeller("egan6190");//Username
         apyAccount5.setStorePassword("12BkDT8152Zj");//API password
         apyAccount5.setInputCharset("UTF-8");
         apyAccount5.setPayType(PayType.payoneer);
         apyAccount5.setMsgType(MsgType.json);
         apyAccount5.setTest(true);
         apyAccounts.put(apyAccount5.getPayId(), apyAccount5);
+
+        ApyAccount apyAccount6 = new ApyAccount();
+        apyAccount6.setPayId(6);
+        apyAccount6.setAppid("1AZ7HTcvrEAxYbzYx_iDZAi06GdqbjhqqQzFgPBFLxm2VUMzwlmiNUBk_y_5QNP4zWKblTuM6ZBAmxScd");//Program ID
+        apyAccount6.setPrivateKey("1EBMIjAag6NiRdXZxteTv0amEsmKN345xJv3bN7f_HRXSqcRJlW7PXhYXjI9sk5I4nKYOHgeqzhXCXKFo");//API password
+        apyAccount6.setInputCharset("UTF-8");
+        apyAccount6.setPayType(PayType.payPal);
+        apyAccount6.setMsgType(MsgType.json);
+        apyAccount6.setTest(true);
+        apyAccounts.put(apyAccount6.getPayId(), apyAccount6);
     }
     //_____________________________________________________________
 
@@ -116,7 +126,7 @@ public class ApyAccountRepository {
     /**
      * 根据id获取对应的账户信息
      * @param payId 账户id
-     * @return
+     * @return 账户信息
      */
     public ApyAccount findByPayId(Integer payId){
         // TODO 2016/11/18 1:23 author: egan  这里简单模拟 具体实现 略。。

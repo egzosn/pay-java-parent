@@ -12,10 +12,13 @@ import java.util.Date;
 import java.util.Map;
 
 /**
+ *
  * Descrption:银联支付测试
  * Author:Actinia
  * Date:2017/12/19  21:12
+ * 移步@see com.egzosn.pay.demo.controller.UnionPayController
  */
+@Deprecated
 public class PayTest {
 
     public static void main(String[] args) {

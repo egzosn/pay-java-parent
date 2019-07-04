@@ -1,6 +1,10 @@
 package com.egzosn.pay.common.http;
 
 
+import com.egzosn.pay.common.bean.CertStoreType;
+
+import java.io.*;
+
 /**
  * HTTP 配置
  * @author: egan
@@ -13,29 +17,32 @@ public class HttpConfigStorage {
     /**
      * http代理地址
      */
-    protected String httpProxyHost;
+    private String httpProxyHost;
     /**
      * 代理端口
      */
-    protected int httpProxyPort;
+    private int httpProxyPort;
     /**
      * 请求授权用户名
      */
-    protected String authUsername;
+    private String authUsername;
     /**
      * 请求授权密码
      */
-    protected String authPassword;
+    private String authPassword;
+
 
     /**
-     * @see #keystore 是否为https请求所需的证书（PKCS12）的地址,默认为地址，否则为证书信息串
+     * 证书存储类型
+     * @see #keystore 是否为https请求所需的证书（PKCS12）的地址,默认为地址，否则为证书信息串，文件流
      */
-    private boolean isPath = true;
+    private CertStoreType certStoreType = CertStoreType.PATH;
 
     /**
      * https请求所需的证书（PKCS12）
+     * 证书内容
      */
-    private String keystore;
+    private Object keystore;
     /**
      * 证书对应的密码
      */
@@ -48,6 +55,10 @@ public class HttpConfigStorage {
      * 默认的每个路由的最大连接数
      */
     private int defaultMaxPerRoute = 0;
+    /**
+     * 默认使用的响应编码
+     */
+    private String charset;
 
     /**
      * http代理地址
@@ -97,96 +108,53 @@ public class HttpConfigStorage {
         this.authPassword = authPassword;
     }
 
-    /**
-     * 代理用户名
-     * @return 代理用户名
-     * @see #getAuthUsername()
-     */
-    @Deprecated
-    public String getHttpProxyUsername() {
-        return authUsername;
+
+    public CertStoreType getCertStoreType() {
+        return certStoreType;
     }
 
-    /**
-     * 设置代理用户名
-     * @param httpProxyUsername 代理用户名
-     *  @see #setAuthUsername(String)
-     */
-    @Deprecated
-    public void setHttpProxyUsername(String httpProxyUsername) {
-        this.authUsername = httpProxyUsername;
-    }
-
-    /**
-     *  代理密码
-     * @return 代理密码
-     * @see #getAuthPassword()
-     */
-    @Deprecated
-    public String getHttpProxyPassword() {
-        return authPassword;
-    }
-
-    /**
-     * 设置代理密码
-     * @param httpProxyPassword 代理密码
-     * @see #setAuthPassword(String)
-     */
-    @Deprecated
-    public void setHttpProxyPassword(String httpProxyPassword) {
-        this.authPassword = httpProxyPassword;
-    }
-
-    /**
-     * https请求所需的证书（PKCS12）地址，请使用绝对路径
-     * @return 证书（PKCS12）地址
-     * @see #getKeystore()
-     */
-    @Deprecated
-    public String getKeystorePath() {
-        return keystore;
-    }
-
-    /**
-     * 设置https请求所需的证书（PKCS12）地址，请使用绝对路径
-     * @param keystorePath 证书（PKCS12）地址
-     * @see #getKeystore()
-     */
-    @Deprecated
-    public void setKeystorePath(String keystorePath) {
-        this.keystore = keystorePath;
-    }
-
-
-    /**
-     * 获取是否为证书地址
-     * @return  是否为证书地址,配合 {@link #getKeystore()}使用
-     */
-    public boolean isPath() {
-        return isPath;
-    }
-
-    /**
-     * 设置是否为证书地址
-     * @param path 是否为证书地址
-     */
-    public void setPath(boolean path) {
-        isPath = path;
+    public void setCertStoreType(CertStoreType certStoreType) {
+        this.certStoreType = certStoreType;
     }
 
     /**
      * 获取证书信息
-     * @return 证书信息 根据 {@link #isPath()}进行区别地址与信息串
+     * @return 证书信息 根据 {@link #getCertStoreType()}进行区别地址与信息串
+     * @throws IOException 找不到文件异常
      */
-    public String getKeystore() {
-        return keystore;
+    public InputStream getKeystoreInputStream() throws IOException {
+        if (null == keystore) {
+            return null;
+        }
+        return certStoreType.getInputStream(keystore);
+    }
+    /**
+     * 获取证书信息
+     * @return 证书信息 根据 {@link #getCertStoreType()}进行区别地址与信息串
+     */
+    public Object getKeystore() {
+        return  keystore;
+    }
+    /**
+     * 获取证书信息 证书地址
+     * @return 证书信息 根据 {@link #getCertStoreType()}进行区别地址与信息串
+     */
+    public String getKeystoreStr() {
+        return (String) keystore;
     }
 
     /**
-     * 设置证书
-     * @param keystore 证书信息
+     * 设置证书字符串信息或证书绝对地址
+     * @param keystore 证书信息字符串信息或证书绝对地址
      */
     public void setKeystore(String keystore) {
+        this.keystore = keystore;
+    }
+    /**
+     * 设置证书字符串信息输入流
+     * @param keystore 证书信息 输入流
+     */
+    public void setKeystore(InputStream keystore) {
         this.keystore = keystore;
     }
 
@@ -216,5 +184,13 @@ public class HttpConfigStorage {
 
     public void setDefaultMaxPerRoute(int defaultMaxPerRoute) {
         this.defaultMaxPerRoute = defaultMaxPerRoute;
+    }
+
+    public String getCharset() {
+        return charset;
+    }
+
+    public void setCharset(String charset) {
+        this.charset = charset;
     }
 }

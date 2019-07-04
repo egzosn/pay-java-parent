@@ -1,42 +1,20 @@
+第三方支付对接全能支付Java开发工具包.优雅的轻量级支付模块集成支付对接支付整合（微信,支付宝,银联,友店,富友,跨境支付paypal,payoneer(P卡派安盈)易极付）app,扫码,即时到帐刷卡付条码付转账服务商模式、支持多种支付类型多支付账户，支付与业务完全剥离，简单几行代码即可实现支付，简单快速完成支付模块的开发，可轻松嵌入到任何系统里 目前仅是一个开发工具包（即SDK），只提供简单Web实现，建议使用maven或gradle引用本项目即可使用本SDK提供的各种支付相关的功能 
 
-#pay-java-parent
-
-##整合支付模块（微信支付，支付宝）
-
-声明： 本项目最初想法自 https://github.com/chanjarster/weixin-java-tools, 15年1月左右关注chanjarster/weixin-java-tools，并将其回调处理修改并进行使用。
-
-开发版 https://git.oschina.net/egzosn/pay-java-parent/tree/develop
-
-##### 详细文档请看 [wiki](https://github.com/egzosn/pay-java-parent/wiki)。
 
 ### 特性
-
-
-
-    1. 不依赖任何 mvc 框架
+    1. 不依赖任何 mvc 框架，依赖极少:httpclient，fastjson,log4j,com.google.zxing，项目精简，不用担心项目迁移问题
     2. 也不依赖 servlet，仅仅作为工具使用，可轻松嵌入到任何系统里（项目例子利用spring mvc的 @PathVariable进行，推荐使用类似的框架）
-    3. 支付请求调用支持HTTP和异步、支持http代理
-    4. 控制层统一异常处理
-    5. LogBack日志记录
-    6. 简单快速完成支付模块的开发
-    7. 支持多种支付类型多支付账户扩展（目前已支持微信支付，支付宝支付，友店支付）
+    3. 支付请求调用支持HTTP和异步、支持http代理，连接池
+    4. 简单快速完成支付模块的开发
+    5. 支持多种支付类型多支付账户扩展
 
 ### 本项目包含 3 个部分：
 
      1. pay-java-common  公共lib,支付核心与规范定义
      2. pay-java-demo  具体的支付demo
      3. pay-java-*  具体的支付实现库
+     
 ### Maven配置
-支付核心模块
-```xml
-
-<dependency>
-    <groupId>com.egzosn</groupId>
-    <artifactId>pay-java-common</artifactId>
-    <version>2.12.2</version>
-</dependency>
-
-```
 
 具体支付模块 "{module-name}" 为具体的支付渠道的模块名 pay-java-ali，pay-java-wx等
 
@@ -45,7 +23,7 @@
 <dependency>
     <groupId>com.egzosn</groupId>
     <artifactId>{module-name}</artifactId>
-    <version>2.12.2</version>
+    <version>2.12.7</version>
 </dependency>
 
 ```
@@ -53,14 +31,17 @@
 * 码云：https://gitee.com/egzosn/pay-java-parent
 * GitHub：https://github.com/egzosn/pay-java-parent
 
+#### spring-boot-starter-pay 是一个基于spring-boot实现自动化配置的支付对接，让你可以不用理解支付怎么对接，只需要专注你的业务
+* 码云：https://gitee.com/egzosn/pay-spring-boot-starter-parent
+* GitHub：https://github.com/egzosn/pay-spring-boot-starter-parent
 
 ### 使用
 这里不多说直接上代码 
 
 
-###### 单一支付教程 
+###### 支付教程 
 
- * [基础模块支付宝微信讲解](https://github.com/egzosn/pay-java-parent/wiki)
+ * [基础模块支付宝微信讲解](https://github.com/egzosn/pay-java-parent/wikis/Home)
  * [银联](pay-java-union?dir=1&filepath=pay-java-union)
  * [payoneer](pay-java-payoneer?dir=1&filepath=pay-java-payoneer)
  * [paypal](pay-java-paypal?dir=1&filepath=pay-java-paypal)
@@ -70,7 +51,7 @@
 
 支付整合》服务端+网页端详细使用与简单教程请看 [pay-java-demo](pay-java-demo?dir=1&filepath=pay-java-demo)
 
-android 例子 [pay-java-android](https://github.com/egzosn/pay-java-android)
+android 例子 [pay-java-android](https://gitee.com/egzosn/pay-java-android)
 
 
 

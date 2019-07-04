@@ -1,5 +1,7 @@
 package com.egzosn.pay.common.util.sign;
 
+import com.egzosn.pay.common.bean.result.PayException;
+import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.util.sign.encrypt.sm3.SM3Digest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -91,7 +93,7 @@ public class SecureUtil {
         try {
             bytes = digestByData(data.getBytes(encoding),ALGORITHM_SHA1);
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+           throw new PayErrorException(new PayException("error", e.getLocalizedMessage()));
         }
         StringBuilder sha256StrBuff = new StringBuilder();
         for (int i = 0; i < bytes.length; i++) {

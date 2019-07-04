@@ -83,7 +83,6 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage>{
             }
 
             if (payConfigStorage.isAccessTokenExpired()) {
-                if (null == payConfigStorage.getAccessToken()){
                     Map<String, String> header = new HashMap<>();
                     header.put("Authorization", "Basic " + authorizationString(getPayConfigStorage().getAppid(), getPayConfigStorage().getKeyPrivate()));
                     header.put("Accept", "application/json");
@@ -91,12 +90,11 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage>{
                     try {
                         HttpStringEntity entity = new HttpStringEntity("grant_type=client_credentials", header);
                         JSONObject resp = getHttpRequestTemplate().postForObject(getReqUrl(PayPalTransactionType.AUTHORIZE), entity, JSONObject.class);
-                        payConfigStorage.updateAccessToken(String.format("%s %s", resp.getString("token_type" ), resp.getString("access_token" )), resp.getLongValue("expires_in" ));
+                        payConfigStorage.updateAccessToken(String.format("%s %s", resp.getString("token_type" ), resp.getString("access_token" )),  resp.getIntValue("expires_in" ));
 
                     } catch (UnsupportedEncodingException e) {
                         throw new PayErrorException(new PayException("failure", e.getMessage()));
                     }
-                }
                 return payConfigStorage.getAccessToken();
             }
         } finally {
@@ -111,7 +109,7 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage>{
 
         HttpStringEntity httpEntity = new HttpStringEntity("{\"payer_id\":\""+(String)params.get("PayerID")+"\"}", ContentType.APPLICATION_JSON);
         httpEntity.setHeaders(authHeader());
-        JSONObject resp = getHttpRequestTemplate().postForObject(String.format(getReqUrl(PayPalTransactionType.EXECUTE), (String) params.get("paymentId")), httpEntity, JSONObject.class);
+        JSONObject resp = getHttpRequestTemplate().postForObject(getReqUrl(PayPalTransactionType.EXECUTE), httpEntity, JSONObject.class, (String) params.get("paymentId"));
         return  "approved".equals(resp.getString("state"));
 
     }
@@ -149,9 +147,9 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage>{
     public Map<String, Object> orderInfo(PayOrder order) {
         Amount amount = new Amount();
         if (null == order.getCurType()){
-            order.setCurType(CurType.USD);
+            order.setCurType(DefaultCurType.USD);
         }
-        amount.setCurrency(order.getCurType().name());
+        amount.setCurrency(order.getCurType().getType());
         amount.setTotal(Util.conversionAmount(order.getPrice()).toString());
 
         Transaction transaction = new Transaction();
@@ -181,6 +179,9 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage>{
         HttpStringEntity entity = new HttpStringEntity(JSON.toJSONString(payment),  ContentType.APPLICATION_JSON);
         entity.setHeaders(authHeader());
         JSONObject resp = getHttpRequestTemplate().postForObject(getReqUrl(order.getTransactionType()), entity, JSONObject.class);
+        if ("created".equals(resp.getString("state")) && StringUtils.isNotEmpty(resp.getString("id"))){
+            order.setOutTradeNo(resp.getString("id"));
+        }
         return resp;
     }
 
@@ -225,7 +226,7 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage>{
      */
     @Override
     public Map<String, Object> query(String tradeNo, String outTradeNo) {
-        JSONObject resp = getHttpRequestTemplate().getForObject(String.format(getReqUrl(PayPalTransactionType.ORDERS), tradeNo), authHeader(), JSONObject.class);
+        JSONObject resp = getHttpRequestTemplate().getForObject(getReqUrl(PayPalTransactionType.ORDERS), authHeader(), JSONObject.class, tradeNo);
         return resp;
     }
 
@@ -242,6 +243,7 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage>{
      * @param totalAmount 总金额
      * @return 返回支付方申请退款后的结果
      * @see #refund(RefundOrder)
+     * @deprecated {@link #refund(RefundOrder)}
      */
     @Deprecated
     @Override
@@ -260,20 +262,22 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage>{
     public Map<String, Object> refund(RefundOrder refundOrder) {
         JSONObject request =  new JSONObject();
 
-        if (null != refundOrder.getRefundAmount() && BigDecimal.ZERO.compareTo( refundOrder.getRefundAmount()) > 0){
+        if (null != refundOrder.getRefundAmount() && BigDecimal.ZERO.compareTo( refundOrder.getRefundAmount()) == -1){
             Amount amount = new Amount();
-            amount.setCurrency(refundOrder.getCurType().name());
+            if(null == refundOrder.getCurType()){
+                refundOrder.setCurType(DefaultCurType.USD);
+            }
+
+            amount.setCurrency(refundOrder.getCurType().getType());
             amount.setTotal(Util.conversionAmount(refundOrder.getRefundAmount()).toString());
             request.put("amount", amount);
             request.put("description", refundOrder.getDescription());
         }
 
-        HttpStringEntity httpEntity = new HttpStringEntity(request, ContentType.APPLICATION_JSON);
+        HttpStringEntity httpEntity = new HttpStringEntity(request.toJSONString(), ContentType.APPLICATION_JSON);
         httpEntity.setHeaders(authHeader());
-        JSONObject resp = getHttpRequestTemplate().postForObject(String.format(getReqUrl(PayPalTransactionType.REFUND), refundOrder.getTradeNo()), httpEntity, JSONObject.class);
+        JSONObject resp = getHttpRequestTemplate().postForObject(getReqUrl(PayPalTransactionType.REFUND),  httpEntity, JSONObject.class, refundOrder.getTradeNo());
         return resp;
-//
-//        return null;
     }
     /**
      * 查询退款
@@ -284,7 +288,7 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage>{
      */
     @Override
     public Map<String, Object> refundquery(String tradeNo, String outTradeNo) {
-        JSONObject resp = getHttpRequestTemplate().getForObject(String.format(getReqUrl(PayPalTransactionType.REFUND_QUERY), tradeNo), authHeader(), JSONObject.class);
+        JSONObject resp = getHttpRequestTemplate().getForObject(getReqUrl(PayPalTransactionType.REFUND_QUERY), authHeader(), JSONObject.class, tradeNo);
         return resp;
     }
 
@@ -308,4 +312,6 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage>{
     public Map<String, Object> secondaryInterface(Object tradeNoOrBillDate, String outTradeNoBillType, TransactionType transactionType) {
         return Collections.emptyMap();
     }
+
+
 }

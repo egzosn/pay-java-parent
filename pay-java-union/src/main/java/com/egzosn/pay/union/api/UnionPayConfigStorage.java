@@ -1,15 +1,19 @@
 package com.egzosn.pay.union.api;
 
 import com.egzosn.pay.common.api.BasePayConfigStorage;
+import com.egzosn.pay.common.bean.CertStoreType;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 
 /**
  * @author Actinia
- *
- *  <pre>
- * email hayesfu@qq.com
- *   create 2017 2017/11/4 0004
- * </pre>
+ *         <p>
+ *         <pre>
+ *         email hayesfu@qq.com
+ *           create 2017 2017/11/4 0004
+ *         </pre>
  */
 public class UnionPayConfigStorage extends BasePayConfigStorage {
 
@@ -17,114 +21,115 @@ public class UnionPayConfigStorage extends BasePayConfigStorage {
     /**
      * 商户号
      */
-    private volatile String merId;
+    private String merId;
 
     /**
      * 商户收款账号
      */
-    private volatile String seller;
+    private String seller;
 
-    private volatile String version = "5.1.0";
+    private String version = "5.1.0";
     /**
      * 0：普通商户直连接入
      * 1： 收单机构
      * 2：平台类商户接入
      */
-    private volatile String accessType = "0";
+    private String accessType = "0";
+
 
     /**
-     * 中级证书路径
+     * 应用私钥证书
      */
-    private String acpMiddleCert;
-    /**
-     * 根证书路径
-     */
-    private String acpRootCert;
+    private Object keyPrivateCert;
 
     /**
-     * 私钥证书是否已经初始化
-     *  默认没有
+     * 中级证书
      */
-    private boolean keyPrivateInit = false;
+    private Object acpMiddleCert;
+    /**
+     * 根证书
+     */
+    private Object acpRootCert;
 
     /**
-     * 公钥证书是否已经初始化
-     *  默认没有
+     * 证书存储类型
      */
-    private boolean keyPublicInit = false;
-
-
+    private CertStoreType certStoreType;
     /**
      * 设置私钥证书
-     * @param certificatePath 私钥证书地址
-     *  私钥证书密码 {@link #setKeyPrivateCertPwd(String)}
+     *
+     * @param certificate 私钥证书地址 或者证书内容字符串
+     *                        私钥证书密码 {@link #setKeyPrivateCertPwd(String)}
      */
-    public void setKeyPrivateCert(String certificatePath){
-        super.setKeyPrivate(certificatePath);
+    public void setKeyPrivateCert(String certificate) {
+        super.setKeyPrivate(certificate);
+        this.keyPrivateCert = certificate;
+    }
+    /**
+     * 设置私钥证书
+     *
+     * @param keyPrivateCert 私钥证书信息流
+     * 私钥证书密码 {@link #setKeyPrivateCertPwd(String)}
+     */
+    public void setKeyPrivateCert(InputStream keyPrivateCert) {
+        this.keyPrivateCert = keyPrivateCert;
+    }
+
+    public InputStream getKeyPrivateCertInputStream() throws IOException {
+        return certStoreType.getInputStream(keyPrivateCert);
     }
 
     /**
      * 设置中级证书
-     * @param certificatePath 证书地址
+     *
+     * @param acpMiddleCert 证书信息或者证书路径
      */
-    public void setAcpMiddleCert(String certificatePath){
-        this.acpMiddleCert = certificatePath;
+    public void setAcpMiddleCert(String acpMiddleCert) {
+        this.acpMiddleCert = acpMiddleCert;
     }
     /**
-     * 设置根证书路径
-     * @param certificatePath 证书路径
+     * 设置中级证书
+     *
+     * @param acpMiddleCert 证书文件
      */
-    public void setAcpRootCert(String certificatePath){
-        this.acpRootCert = certificatePath;
+    public void setAcpMiddleCert(InputStream acpMiddleCert) {
+        this.acpMiddleCert = acpMiddleCert;
+    }
+
+    /**
+     * 设置根证书
+     *
+     * @param acpRootCert 证书路径或者证书信息字符串
+     */
+    public void setAcpRootCert(String acpRootCert) {
+        this.acpRootCert = acpRootCert;
+    }
+    /**
+     * 设置根证书
+     *
+     * @param acpRootCert 证书文件流
+     */
+    public void setAcpRootCert(InputStream acpRootCert) {
+        this.acpRootCert = acpRootCert;
     }
 
     public String getAcpMiddleCert() {
-        return acpMiddleCert;
+        return (String) acpMiddleCert;
     }
 
     public String getAcpRootCert() {
-        return acpRootCert;
+        return (String) acpRootCert;
+    }
+    public InputStream getAcpMiddleCertInputStream() throws IOException {
+        return certStoreType.getInputStream(acpMiddleCert);
     }
 
-    /**
-     *
-     *  设置私钥证书与证书密码
-     * @param keyPrivate 私钥证书与证书对应的密码 格式: D:/certs/acp_test_sign.pfx;000000
-     *  替代方法
-     * {@link #setKeyPrivateCert(String)}
-     * {@link #setKeyPrivateCertPwd(String)}
-     */
-    @Deprecated
-    @Override
-    public void setKeyPrivate(String keyPrivate) {
-        super.setKeyPrivate(keyPrivate);
-        if (isCertSign() && keyPrivate.length() < 1024 && keyPrivate.contains(";")){
-            String[] split = keyPrivate.split(";");
-            super.setKeyPrivateCertPwd( split[1]);
-            super.setKeyPrivate(split[0]);
-            getCertDescriptor().initPrivateSignCert(getKeyPrivate(), getKeyPrivateCertPwd(), "PKCS12");
-            keyPrivateInit = true;
-        }
+    public InputStream getAcpRootCertInputStream() throws IOException {
+        return certStoreType.getInputStream(acpRootCert);
     }
 
-    /**
-     * 设置中级证书与根证书  格式：D:/certs/acp_test_middle.cer;D:/certs/acp_test_root.cer
-     * @param keyPublic 中级证书与根证书
-     *  替代方法
-     * {@link #setAcpRootCert(String)}
-     * {@link #setAcpMiddleCert(String)}
-     */
-    @Deprecated
-    @Override
-    public void setKeyPublic(String keyPublic) {
-        super.setKeyPublic(keyPublic);
-        if (isCertSign() && keyPublic.length() < 1024 ){
-            String[] split = keyPublic.split(";");
-            getCertDescriptor().initPublicCert(split[0]);
-            getCertDescriptor().initRootCert(split[1]);
-            keyPublicInit = true;
-        }
-    }
+
+
 
     @Override
     public String getAppid() {
@@ -157,15 +162,16 @@ public class UnionPayConfigStorage extends BasePayConfigStorage {
         return merId;
     }
 
-    public void setPid (String pid) {
+    public void setPid(String pid) {
         this.merId = pid;
     }
+
     @Override
     public String getSeller() {
         return seller;
     }
 
-    public void setSeller (String seller) {
+    public void setSeller(String seller) {
         this.seller = seller;
     }
 
@@ -173,7 +179,7 @@ public class UnionPayConfigStorage extends BasePayConfigStorage {
         return merId;
     }
 
-    public void setMerId (String merId) {
+    public void setMerId(String merId) {
         this.merId = merId;
     }
 
@@ -193,11 +199,15 @@ public class UnionPayConfigStorage extends BasePayConfigStorage {
         this.accessType = accessType;
     }
 
-    public boolean isKeyPrivateInit() {
-        return keyPrivateInit;
+    /**
+     * 证书存储类型
+     * @return 证书存储类型
+     */
+    public CertStoreType getCertStoreType() {
+        return certStoreType;
     }
 
-    public boolean isKeyPublicInit() {
-        return keyPublicInit;
+    public void setCertStoreType(CertStoreType certStoreType) {
+        this.certStoreType = certStoreType;
     }
 }

@@ -25,7 +25,8 @@ import org.apache.http.ssl.SSLContexts;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
@@ -103,7 +104,7 @@ public class HttpRequestTemplate {
      */
     public SSLConnectionSocketFactory createSSL( HttpConfigStorage configStorage){
 
-        if (StringUtils.isEmpty(configStorage.getKeystore())){
+        if (null == configStorage.getKeystore()){
             try {
                 return new SSLConnectionSocketFactory(SSLContext.getDefault());
             } catch (NoSuchAlgorithmException e) {
@@ -112,7 +113,7 @@ public class HttpRequestTemplate {
         }
 
             //读取本机存放的PKCS12证书文件
-        try(InputStream instream = configStorage.isPath() ? new FileInputStream(new File(configStorage.getKeystore())) : new ByteArrayInputStream(configStorage.getKeystore().getBytes("ISO-8859-1"))){
+        try(InputStream instream = configStorage.getKeystoreInputStream()){
                 //指定读取证书格式为PKCS12
                 KeyStore keyStore = KeyStore.getInstance("PKCS12");
 
@@ -200,7 +201,7 @@ public class HttpRequestTemplate {
 
         if (null != configStorage && StringUtils.isNotBlank(configStorage.getHttpProxyHost())) {
             //http代理地址设置
-            httpProxy = new HttpHost(configStorage.getHttpProxyHost(),configStorage.httpProxyPort);;
+            httpProxy = new HttpHost(configStorage.getHttpProxyHost(),configStorage.getHttpProxyPort());;
         }
 
         return this;
@@ -287,7 +288,7 @@ public class HttpRequestTemplate {
      *    getForObject(&quot;http://egan.in/pay/{id}/f/{type}&quot;, String.class, &quot;1&quot;, &quot;APP&quot;)
      * </code>
      */
-    public <T> T getForObject(String uri, HttpHeader header,Class<T> responseType, Object... uriVariables){
+    public <T> T getForObject(String uri, HttpHeader header, Class<T> responseType, Object... uriVariables){
 
         return doExecute(URI.create(UriVariables.getUri(uri, uriVariables)), header, responseType, MethodType.GET);
     }
@@ -329,7 +330,7 @@ public class HttpRequestTemplate {
         if (LOG.isDebugEnabled()) {
             LOG.debug(String.format("uri:%s, httpMethod:%s ", uri, method.name()));
         }
-        ClientHttpRequest<T> httpRequest = new ClientHttpRequest(uri ,method, request);
+        ClientHttpRequest<T> httpRequest = new ClientHttpRequest(uri ,method, request, null == configStorage ? null : configStorage.getCharset());
         //判断是否有代理设置
         if (null == httpProxy){
             httpRequest.setProxy(httpProxy);

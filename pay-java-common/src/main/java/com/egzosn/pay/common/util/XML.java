@@ -6,20 +6,27 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
+import com.egzosn.pay.common.util.str.StringUtils;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.*;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.nio.charset.Charset;
 import java.util.Map;
 
 
@@ -64,10 +71,36 @@ public class XML {
      */
     public static JSONObject toJSONObject(String content) {
 
-        if (null == content || "".equals(content)) {
+        return toJSONObject(content, Charset.defaultCharset());
+
+
+    }
+    /**
+     * 解析xml并转化为Json值
+     *
+     * @param content json字符串
+     * @param charset 字符编码
+     * @return Json值
+     */
+    public static JSONObject toJSONObject(String content, Charset charset) {
+
+        if (StringUtils.isEmpty(content)) {
             return null;
         }
-        try (InputStream in = new ByteArrayInputStream(content.getBytes("UTF-8"))) {
+        return toJSONObject(content.getBytes(charset));
+    }
+    /**
+     * 解析xml并转化为Json值
+     *
+     * @param content json字符串
+     * @return Json值
+     */
+    public static JSONObject toJSONObject(byte[] content) {
+
+        if (null == content) {
+            return null;
+        }
+        try (InputStream in = new ByteArrayInputStream(content)) {
             return (JSONObject) inputStream2Map(in, null);
         } catch (IOException e) {
             throw new PayErrorException(new PayException("IOException", e.getMessage()));
@@ -223,36 +256,50 @@ public class XML {
      * @return XML格式的字符串
      */
     public static String getMap2Xml(Map<String, Object> data) {
+        return getMap2Xml(data, "xml", "UTF-8");
+    }
 
 
+    /**
+     * 将Map转换为XML格式的字符串
+     *
+     * @param data Map类型数据
+     * @param rootElementName 最外层节点名称
+     * @param encoding 字符编码
+     * @return XML格式的字符串
+     */
+    public static String getMap2Xml(Map<String, Object> data, String rootElementName, String encoding) {
         Document document = null;
         try {
             document = newDocument();
         } catch (ParserConfigurationException e) {
             throw new PayErrorException(new PayException("ParserConfigurationException", e.getLocalizedMessage()));
         }
-        org.w3c.dom.Element root = document.createElement("xml");
+        org.w3c.dom.Element root = document.createElement(rootElementName);
         document.appendChild(root);
-        for (Map.Entry<String, Object> entry : data.entrySet()) {
+  /*      for (Map.Entry<String, Object> entry : data.entrySet()) {
             Object value = entry.getValue();
             if (value == null) {
                 value = "";
             }
+
             value = value.toString().trim();
             org.w3c.dom.Element filed = document.createElement(entry.getKey());
             filed.appendChild(document.createTextNode(value.toString()));
             root.appendChild(filed);
-        }
+        }*/
+
+        map2Xml(data, document, root);
         try {
             TransformerFactory tf = TransformerFactory.newInstance();
             Transformer transformer = tf.newTransformer();
             DOMSource source = new DOMSource(document);
-            transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+            transformer.setOutputProperty(OutputKeys.ENCODING, encoding);
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
             StringWriter writer = new StringWriter();
             StreamResult result = new StreamResult(writer);
             transformer.transform(source, result);
-            String output = writer.getBuffer().toString(); //.replaceAll("\n|\r", "");
+            String output = writer.getBuffer().toString();
             return output;
         } catch (TransformerException e) {
             e.printStackTrace();
@@ -262,5 +309,27 @@ public class XML {
         return "";
     }
 
-
+    /**
+     * 将Map转换为XML格式的字符串
+     *
+     * @param data Map类型数据
+     * @param document 文档
+     * @param element  节点
+     */
+    public static void map2Xml(Map<String, Object> data, Document document, org.w3c.dom.Element element) {
+        for (Map.Entry<String, Object> entry : data.entrySet()) {
+            Object value = entry.getValue();
+            if (value == null) {
+                value = "";
+            }
+            org.w3c.dom.Element filed = document.createElement(entry.getKey());
+            if (value instanceof Map){
+                map2Xml((Map)value, document, filed);
+            }else {
+                value = value.toString().trim();
+                filed.appendChild(document.createTextNode(value.toString()));
+            }
+            element.appendChild(filed);
+        }
+    }
 }

@@ -20,8 +20,8 @@ import java.util.UUID;
 
 /**
  * @author egan
- * @email egzosn@gmail.com
- * @date 2018/2/5
+ * email egzosn@gmail.com
+ * date 2018/2/5
  */
 @RestController
 @RequestMapping("payoneer")
@@ -63,8 +63,8 @@ public class PayoneerPayController {
 
     /**
      * 获取授权页面
-     * @param payeeId
-     * @return
+     * @param payeeId 用户id
+     * @return 获取授权页面
      */
     @RequestMapping("getAuthorizationPage.json")
     public Map<String ,Object> getAuthorizationPage( String payeeId ){
@@ -78,7 +78,7 @@ public class PayoneerPayController {
      /**
      * 获取授权用户信息，包含用户状态，注册时间，联系人信息，地址信息等等
      * @param payeeId 用户id
-     * @return
+     * @return 获取授权用户信息
      */
     @RequestMapping("getAuthorizationUser.json")
     public Map<String ,Object> getAuthorizationUser( String payeeId ){
@@ -98,11 +98,11 @@ public class PayoneerPayController {
      */
     @ResponseBody
     @RequestMapping(value = "microPay.json")
-    public Map<String, Object> microPay(BigDecimal price, String userId) throws IOException {
+    public Map<String, Object> microPay(BigDecimal price, String userId){
 
         PayOrder order = new PayOrder("Order_payment:", "Order payment", price, UUID.randomUUID().toString().replace("-", ""), PayoneerTransactionType.CHARGE);
         //币种
-        order.setCurType(CurType.USD);
+        order.setCurType(DefaultCurType.USD);
         //设置授权码，条码等
         order.setAuthCode( userId);
         //支付结果
@@ -120,9 +120,10 @@ public class PayoneerPayController {
     /**
      * 用户授权回调地址
      *
-     * @param request
+     * @param request 请求
      *
-     * @return
+     * @return 是否成功
+     * @throws IOException IOException
      */
     @RequestMapping(value = "payBack.json")
     public String payBack(HttpServletRequest request) throws IOException {
@@ -200,7 +201,7 @@ public class PayoneerPayController {
     @RequestMapping("transfer")
     public Map<String, Object> transfer(TransferOrder order) {
         order.setOutNo("商户转账订单号");
-        order.setCurType(CurType.USD);
+        order.setCurType(DefaultCurType.USD);
         order.setPayeeAccount("收款方账户,用户授权所使用的userId");
         order.setAmount(new BigDecimal(10));
         order.setRemark("转账备注, 非必填");

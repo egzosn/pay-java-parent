@@ -12,8 +12,6 @@ import com.egzosn.pay.common.util.str.StringUtils;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
 import java.math.BigDecimal;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -28,11 +26,11 @@ public class FuiouPayService extends BasePayService<FuiouPayConfigStorage> {
     /**
      * 正式域名
      */
-    public static final String URL_FuiouBaseDomain = "https://pay.fuiou.com/";
+    public static final String URL_FUIOU_BASE_DOMAIN = "https://pay.fuiou.com/";
     /**
      * 测试域名
      */
-    public static final String DEV_URL_FUIOUBASEDOMAIN = "http://www-1.fuiou.com:8888/wg1_run/";
+    public static final String DEV_URL_FUIOU_BASE_DOMAIN = "http://www-1.fuiou.com:8888/wg1_run/";
 
     /**
      * B2C/B2B支付
@@ -64,8 +62,15 @@ public class FuiouPayService extends BasePayService<FuiouPayConfigStorage> {
      * 获取对应的请求地址
      * @return 请求地址
      */
+    public String getReqUrl(TransactionType transactionType){
+        return payConfigStorage.isTest() ? DEV_URL_FUIOU_BASE_DOMAIN : URL_FUIOU_BASE_DOMAIN;
+    }
+    /**
+     * 获取对应的请求地址
+     * @return 请求地址
+     */
     public String getReqUrl(){
-        return payConfigStorage.isTest() ? DEV_URL_FUIOUBASEDOMAIN : URL_FuiouBaseDomain;
+        return getReqUrl(null);
     }
 
     /**

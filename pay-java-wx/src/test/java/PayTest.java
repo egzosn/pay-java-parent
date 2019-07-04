@@ -23,10 +23,15 @@ public class PayTest {
 
     public static void main(String[] args) {
         WxPayConfigStorage wxPayConfigStorage = new WxPayConfigStorage();
+        wxPayConfigStorage.setAppid("公众账号ID");
+
         wxPayConfigStorage.setMchId("合作者id（商户号）");
-        wxPayConfigStorage.setAppid("应用id");
-        wxPayConfigStorage.setKeyPublic("密钥");
-        wxPayConfigStorage.setKeyPrivate("密钥");
+        //以下两个参数在 服务商版模式中必填--------
+//        wxPayConfigStorage.setSubAppid("子商户公众账号ID ");
+//        wxPayConfigStorage.setSubMchId("微信支付分配的子商户号 ");
+        //-----------------------------------------------
+        wxPayConfigStorage.setKeyPublic("转账公钥，转账时必填");
+        wxPayConfigStorage.setSecretKey("密钥");
         wxPayConfigStorage.setNotifyUrl("异步回调地址");
         wxPayConfigStorage.setReturnUrl("同步回调地址");
         wxPayConfigStorage.setSignType("签名方式");

@@ -2,17 +2,17 @@ package com.egzosn.pay.demo.service.handler;
 
 import com.alibaba.fastjson.JSON;
 import com.egzosn.pay.common.api.PayService;
-import com.egzosn.pay.common.bean.PayMessage;
 import com.egzosn.pay.common.bean.PayOutMessage;
 import com.egzosn.pay.common.exception.PayErrorException;
+import com.egzosn.pay.wx.youdian.bean.WxYoudianPayMessage;
 
 import java.util.Map;
 
 /**
  * @author Fuzx
- * @create 2017 2017/1/24 0024
+ * create 2017 2017/1/24 0024
  */
-public class YouDianPayMessageHandler extends BasePayMessageHandler {
+public class YouDianPayMessageHandler extends BasePayMessageHandler<WxYoudianPayMessage, PayService> {
 
 
 
@@ -22,7 +22,7 @@ public class YouDianPayMessageHandler extends BasePayMessageHandler {
     }
 
     @Override
-    public PayOutMessage handle(PayMessage payMessage, Map<String, Object> context, PayService payService) throws PayErrorException {
+    public PayOutMessage handle(WxYoudianPayMessage payMessage, Map<String, Object> context, PayService payService) throws PayErrorException {
         //交易状态
         Map<String, Object> message = payMessage.getPayMessage();
         //上下文对象中获取账单

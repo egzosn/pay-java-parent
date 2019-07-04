@@ -22,8 +22,8 @@ public enum PayType implements BasePayType {
         public PayService getPayService(ApyAccount apyAccount) {
             AliPayConfigStorage aliPayConfigStorage = new AliPayConfigStorage();
             aliPayConfigStorage.setPid(apyAccount.getPartner());
-            aliPayConfigStorage.setAppId(apyAccount.getAppid());
-            aliPayConfigStorage.setAliPublicKey(apyAccount.getPublicKey());
+            aliPayConfigStorage.setAppid(apyAccount.getAppid());
+            aliPayConfigStorage.setKeyPublic(apyAccount.getPublicKey());
             aliPayConfigStorage.setKeyPrivate(apyAccount.getPrivateKey());
             aliPayConfigStorage.setNotifyUrl(apyAccount.getNotifyUrl());
             aliPayConfigStorage.setReturnUrl(apyAccount.getReturnUrl());
@@ -153,13 +153,13 @@ public class PayResponse {
         //代理端口
         httpConfigStorage.setHttpProxyPort(3308);
         //代理用户名
-        httpConfigStorage.setHttpProxyUsername("user");
+        httpConfigStorage.setAuthUsername("user");
         //代理密码
-        httpConfigStorage.setHttpProxyPassword("password");
+        httpConfigStorage.setAuthPassword("password");
 
         */
         //设置ssl证书路径
-        httpConfigStorage.setKeystorePath(apyAccount.getKeystorePath());
+        httpConfigStorage.setKeystore(apyAccount.getKeystorePath());
         //设置ssl证书对应的密码
         httpConfigStorage.setStorePassword(apyAccount.getStorePassword());
         return httpConfigStorage;

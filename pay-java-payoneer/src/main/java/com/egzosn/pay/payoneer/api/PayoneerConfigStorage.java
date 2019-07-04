@@ -14,11 +14,11 @@ public class PayoneerConfigStorage extends BasePayConfigStorage {
     /**
      * 商户Id
      */
-    public String programId;
+    private String programId;
     /**
      *  PayoneerPay 用户名
      */
-    public String userName;
+    private String userName;
 
     /**
      *  应用id
