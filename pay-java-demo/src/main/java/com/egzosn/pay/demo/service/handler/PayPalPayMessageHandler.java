@@ -5,6 +5,7 @@ import com.egzosn.pay.common.api.PayService;
 import com.egzosn.pay.common.bean.PayMessage;
 import com.egzosn.pay.common.bean.PayOutMessage;
 import com.egzosn.pay.common.exception.PayErrorException;
+import com.egzosn.pay.paypal.api.PayPalPayService;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -16,14 +17,14 @@ import java.util.Map;
  *
  */
 @Component
-public class PayPalPayMessageHandler implements PayMessageHandler {
+public class PayPalPayMessageHandler implements PayMessageHandler<PayMessage, PayPalPayService> {
 
 
 
 
 
     @Override
-    public PayOutMessage handle(PayMessage payMessage, Map<String, Object> context, PayService payService) throws PayErrorException {
+    public PayOutMessage handle(PayMessage payMessage, Map<String, Object> context, PayPalPayService payService) throws PayErrorException {
 
 
         return payService.getPayOutMessage("fail", "失败");

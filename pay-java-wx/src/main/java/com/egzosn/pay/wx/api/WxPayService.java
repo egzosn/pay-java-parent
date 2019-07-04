@@ -14,6 +14,7 @@ import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.sign.encrypt.RSA2;
 import com.egzosn.pay.common.util.str.StringUtils;
 import com.egzosn.pay.wx.bean.WxPayError;
+import com.egzosn.pay.wx.bean.WxPayMessage;
 import com.egzosn.pay.wx.bean.WxTransactionType;
 import com.egzosn.pay.common.util.XML;
 import com.egzosn.pay.wx.bean.WxTransferType;
@@ -154,9 +155,17 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
      */
     @Override
     public boolean signVerify(Map<String, Object> params, String sign) {
+        return signVerify(params, sign, payConfigStorage.isTest());
+    }
+
+    private boolean signVerify(Map<String, Object> params, String sign, boolean isTest) {
         SignUtils signUtils = SignUtils.valueOf(payConfigStorage.getSignType());
-        String content = SignUtils.parameterText(params, "&", SIGN, "appId") + "&key=" + (signUtils == SignUtils.MD5 ? "" : payConfigStorage.getKeyPrivate());
-        return signUtils.verify(content, sign, payConfigStorage.getKeyPrivate(), payConfigStorage.getInputCharset());
+        String keyPrivate = payConfigStorage.getKeyPrivate();
+        if (isTest) {
+            keyPrivate = getKeyPrivate();
+        }
+        String content = SignUtils.parameterText(params, "&", SIGN, "appId") + "&key=" + (signUtils == SignUtils.MD5 ? "" : keyPrivate);
+        return signUtils.verify(content, sign, keyPrivate, payConfigStorage.getInputCharset());
     }
 
     /**
@@ -745,5 +754,14 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
         }
     }
 
-
+    /**
+     * 创建消息
+     *
+     * @param message 支付平台返回的消息
+     * @return 支付消息对象
+     */
+    @Override
+    public PayMessage createMessage(Map<String, Object> message) {
+        return WxPayMessage.create(message);
+    }
 }

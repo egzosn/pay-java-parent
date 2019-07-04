@@ -1,8 +1,11 @@
 package com.egzosn.pay.common.util;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.util.Args;
 
 import java.lang.ref.SoftReference;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -16,7 +19,10 @@ import java.util.*;
  *         </pre>
  */
 public final class DateUtils {
+    private DateUtils() {
+    }
 
+    private static final Log LOG = LogFactory.getLog(DateUtils.class);
     static final class DateFormatHolder {
         private static final ThreadLocal<SoftReference<Map<String, SimpleDateFormat>>> THREADLOCAL_FORMATS = new ThreadLocal<SoftReference<Map<String, SimpleDateFormat>>>();
 
@@ -60,9 +66,26 @@ public final class DateUtils {
         SimpleDateFormat formatFor = DateFormatHolder.formatFor(pattern);
         return formatFor.format(date);
     }
-
+    public static Date parseDate(String date, String pattern) {
+        Args.notNull(date, "Date");
+        Args.notNull(pattern, "Pattern");
+        SimpleDateFormat formatFor = DateFormatHolder.formatFor(pattern);
+        try {
+            return formatFor.parse(date);
+        } catch (ParseException e) {
+            LOG.error(e);
+        }
+        return null;
+    }
+    public static Date parse(String date) {
+        return parseDate(date, YYYY_MM_DD_HH_MM_SS);
+    }
     public static final String format(Date date) {
         return formatDate(date, YYYY_MM_DD_HH_MM_SS);
+    }
+
+    public static final Date parseDay(String date) {
+        return parseDate(date, YYYY_MM_DD);
     }
 
     public static final String formatDay(Date date) {

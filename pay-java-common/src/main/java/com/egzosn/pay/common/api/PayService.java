@@ -15,17 +15,17 @@ import java.util.Map;
  * 支付服务
  *
  * @author egan
- * <pre>
- * email egzosn@gmail.com
- * date 2016-5-18 14:09:01
- *</pre>
+ *         <pre>
+ *         email egzosn@gmail.com
+ *         date 2016-5-18 14:09:01
+ *         </pre>
  */
 public interface PayService<PC extends PayConfigStorage> {
 
 
-
     /**
      * 设置支付配置
+     *
      * @param payConfigStorage 支付配置
      * @return 支付服务
      */
@@ -37,6 +37,7 @@ public interface PayService<PC extends PayConfigStorage> {
      * @return 支付配置
      */
     PC getPayConfigStorage();
+
     /**
      * 获取http请求工具
      *
@@ -46,8 +47,9 @@ public interface PayService<PC extends PayConfigStorage> {
 
     /**
      * 设置 请求工具配置  设置并创建请求模版， 代理请求配置这里是否合理？？，
+     *
      * @param configStorage http请求配置
-     * @return  支付服务
+     * @return 支付服务
      */
     PayService setRequestTemplateConfigStorage(HttpConfigStorage configStorage);
 
@@ -72,6 +74,7 @@ public interface PayService<PC extends PayConfigStorage> {
     /**
      * 支付宝需要,微信是否也需要再次校验来源，进行订单查询
      * 校验数据来源
+     *
      * @param id 业务id, 数据的真实性.
      * @return true通过
      */
@@ -85,14 +88,16 @@ public interface PayService<PC extends PayConfigStorage> {
      * @return 订单信息
      * @see PayOrder 支付订单信息
      */
-    Map<String, Object>  orderInfo(PayOrder order);
+    Map<String, Object> orderInfo(PayOrder order);
 
     /**
      * 页面转跳支付， 返回对应页面重定向信息
+     *
      * @param order 订单信息
      * @return 对应页面重定向信息
      */
     String toPay(PayOrder order);
+
     /**
      * 创建签名
      *
@@ -123,7 +128,7 @@ public interface PayService<PC extends PayConfigStorage> {
     /**
      * 获取输出消息，用户返回给支付端
      *
-     * @param code 状态
+     * @param code    状态
      * @param message 消息
      * @return 返回输出消息
      */
@@ -132,6 +137,7 @@ public interface PayService<PC extends PayConfigStorage> {
     /**
      * 获取成功输出消息，用户返回给支付端
      * 主要用于拦截器中返回
+     *
      * @param payMessage 支付回调消息
      * @return 返回输出消息
      */
@@ -148,7 +154,6 @@ public interface PayService<PC extends PayConfigStorage> {
     String buildRequest(Map<String, Object> orderInfo, MethodType method);
 
 
-
     /**
      * 获取输出二维码，用户返回给支付端,
      *
@@ -163,7 +168,7 @@ public interface PayService<PC extends PayConfigStorage> {
      * @param order 发起支付的订单信息
      * @return 返回支付结果
      */
-    Map<String, Object>  microPay(PayOrder order);
+    Map<String, Object> microPay(PayOrder order);
 
     /**
      * 交易查询接口
@@ -176,13 +181,14 @@ public interface PayService<PC extends PayConfigStorage> {
 
     /**
      * 交易查询接口，带处理器
+     *
      * @param tradeNo    支付平台订单号
      * @param outTradeNo 商户单号
-     * @param callback 处理器
-     * @param <T> 返回类型
-     * @return  返回查询回来的结果集
+     * @param callback   处理器
+     * @param <T>        返回类型
+     * @return 返回查询回来的结果集
      */
-    <T>T query(String tradeNo, String outTradeNo, Callback<T> callback);
+    <T> T query(String tradeNo, String outTradeNo, Callback<T> callback);
 
     /**
      * 交易关闭接口
@@ -199,11 +205,11 @@ public interface PayService<PC extends PayConfigStorage> {
      *
      * @param tradeNo    支付平台订单号
      * @param outTradeNo 商户单号
-     * @param callback 处理器
-     * @param <T> 返回类型
+     * @param callback   处理器
+     * @param <T>        返回类型
      * @return 返回支付方交易关闭后的结果
      */
-    <T>T close(String tradeNo, String outTradeNo, Callback<T> callback);
+    <T> T close(String tradeNo, String outTradeNo, Callback<T> callback);
 
     /**
      * 交易交易撤销
@@ -219,55 +225,59 @@ public interface PayService<PC extends PayConfigStorage> {
      *
      * @param tradeNo    支付平台订单号
      * @param outTradeNo 商户单号
-     * @param callback 处理器
-     * @param <T> 返回类型
+     * @param callback   处理器
+     * @param <T>        返回类型
      * @return 返回支付方交易撤销后的结果
      */
-    <T>T cancel(String tradeNo, String outTradeNo, Callback<T> callback);
+    <T> T cancel(String tradeNo, String outTradeNo, Callback<T> callback);
 
     /**
      * 申请退款接口
      * 废弃
-     * @param tradeNo    支付平台订单号
-     * @param outTradeNo 商户单号
+     *
+     * @param tradeNo      支付平台订单号
+     * @param outTradeNo   商户单号
      * @param refundAmount 退款金额
-     * @param totalAmount 总金额
+     * @param totalAmount  总金额
      * @return 返回支付方申请退款后的结果
      * @see #refund(RefundOrder)
      */
     @Deprecated
     Map<String, Object> refund(String tradeNo, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount);
+
     /**
      * 申请退款接口
      * 废弃
-     * @param tradeNo    支付平台订单号
-     * @param outTradeNo 商户单号
+     *
+     * @param tradeNo      支付平台订单号
+     * @param outTradeNo   商户单号
      * @param refundAmount 退款金额
-     * @param totalAmount 总金额
-     * @param callback 处理器
-     * @param <T> 返回类型
+     * @param totalAmount  总金额
+     * @param callback     处理器
+     * @param <T>          返回类型
      * @return 返回支付方申请退款后的结果
      * @see #refund(RefundOrder, Callback)
      */
     @Deprecated
-    <T>T refund(String tradeNo, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount, Callback<T> callback);
+    <T> T refund(String tradeNo, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount, Callback<T> callback);
 
     /**
      * 申请退款接口
      *
-     * @param refundOrder   退款订单信息
+     * @param refundOrder 退款订单信息
      * @return 返回支付方申请退款后的结果
      */
     Map<String, Object> refund(RefundOrder refundOrder);
+
     /**
      * 申请退款接口
      *
-     * @param refundOrder   退款订单信息
-     * @param callback 处理器
-     * @param <T> 返回类型
+     * @param refundOrder 退款订单信息
+     * @param callback    处理器
+     * @param <T>         返回类型
      * @return 返回支付方申请退款后的结果
      */
-    <T>T refund(RefundOrder refundOrder, Callback<T> callback);
+    <T> T refund(RefundOrder refundOrder, Callback<T> callback);
 
     /**
      * 查询退款
@@ -278,33 +288,36 @@ public interface PayService<PC extends PayConfigStorage> {
      */
     @Deprecated
     Map<String, Object> refundquery(String tradeNo, String outTradeNo);
+
     /**
      * 查询退款
      *
      * @param tradeNo    支付平台订单号
      * @param outTradeNo 商户单号
-     * @param callback 处理器
-     * @param <T> 返回类型
+     * @param callback   处理器
+     * @param <T>        返回类型
      * @return 返回支付方查询退款后的结果
      */
     @Deprecated
-    <T>T refundquery(String tradeNo, String outTradeNo, Callback<T> callback);
+    <T> T refundquery(String tradeNo, String outTradeNo, Callback<T> callback);
+
     /**
      * 查询退款
      *
-     * @param refundOrder   退款订单单号信息
+     * @param refundOrder 退款订单单号信息
      * @return 返回支付方查询退款后的结果
      */
     Map<String, Object> refundquery(RefundOrder refundOrder);
+
     /**
      * 查询退款
      *
-     * @param refundOrder   退款订单信息
-     * @param callback 处理器
-     * @param <T> 返回类型
+     * @param refundOrder 退款订单信息
+     * @param callback    处理器
+     * @param <T>         返回类型
      * @return 返回支付方查询退款后的结果
      */
-    <T>T refundquery(RefundOrder refundOrder, Callback<T> callback);
+    <T> T refundquery(RefundOrder refundOrder, Callback<T> callback);
 
     /**
      * 下载对账单
@@ -321,18 +334,19 @@ public interface PayService<PC extends PayConfigStorage> {
      * @param billDate 账单时间：具体请查看对应支付平台
      * @param billType 账单类型，具体请查看对应支付平台
      * @param callback 处理器
-     * @param <T> 返回类型
+     * @param <T>      返回类型
      * @return 返回支付方下载对账单的结果
      */
-    <T>T downloadbill(Date billDate, String billType, Callback<T> callback);
+    <T> T downloadbill(Date billDate, String billType, Callback<T> callback);
 
 
     /**
      * 通用查询接口
-     * @param tradeNoOrBillDate 支付平台订单号或者账单类型， 具体请
-     *                          类型为{@link String }或者 {@link Date }，类型须强制限制，类型不对应则抛出异常{@link PayErrorException}
-     * @param outTradeNoBillType  商户单号或者 账单类型
-     * @param transactionType 交易类型
+     *
+     * @param tradeNoOrBillDate  支付平台订单号或者账单类型， 具体请
+     *                           类型为{@link String }或者 {@link Date }，类型须强制限制，类型不对应则抛出异常{@link PayErrorException}
+     * @param outTradeNoBillType 商户单号或者 账单类型
+     * @param transactionType    交易类型
      * @return 返回支付方对应接口的结果
      */
     Map<String, Object> secondaryInterface(Object tradeNoOrBillDate, String outTradeNoBillType, TransactionType transactionType);
@@ -340,56 +354,56 @@ public interface PayService<PC extends PayConfigStorage> {
     /**
      * 通用查询接口
      *
-     * @param tradeNoOrBillDate 支付平台订单号或者账单日期， 具体请 类型为{@link String }或者 {@link Date }，类型须强制限制，类型不对应则抛出异常{@link PayErrorException}
-     *
-     * @param outTradeNoBillType  商户单号或者 账单类型
-     * @param transactionType 交易类型
-     * @param callback 处理器
-     * @param <T> 返回类型
+     * @param tradeNoOrBillDate  支付平台订单号或者账单日期， 具体请 类型为{@link String }或者 {@link Date }，类型须强制限制，类型不对应则抛出异常{@link PayErrorException}
+     * @param outTradeNoBillType 商户单号或者 账单类型
+     * @param transactionType    交易类型
+     * @param callback           处理器
+     * @param <T>                返回类型
      * @return 返回支付方对应接口的结果
      */
-    <T>T secondaryInterface(Object tradeNoOrBillDate, String outTradeNoBillType, TransactionType transactionType, Callback<T> callback);
+    <T> T secondaryInterface(Object tradeNoOrBillDate, String outTradeNoBillType, TransactionType transactionType, Callback<T> callback);
 
 
     /**
      * 转账
+     *
      * @param order 转账订单
      * @return 对应的转账结果
      */
     Map<String, Object> transfer(TransferOrder order);
+
     /**
      * 转账
-     * @param order 转账订单
+     *
+     * @param order    转账订单
      * @param callback 处理器
-     * @param <T> 返回类型
+     * @param <T>      返回类型
      * @return 对应的转账结果
      */
-    <T>T transfer(TransferOrder order, Callback<T> callback);
-
+    <T> T transfer(TransferOrder order, Callback<T> callback);
 
 
     /**
      * 转账查询
      *
-     * @param outNo 商户转账订单号
+     * @param outNo   商户转账订单号
      * @param tradeNo 支付平台转账订单号
-     *
      * @return 对应的转账订单
      */
-     Map<String, Object> transferQuery(String outNo, String tradeNo);
+    Map<String, Object> transferQuery(String outNo, String tradeNo);
 
     /**
      * 转账查询
      *
-     * @param outNo 商户转账订单号
-     * @param tradeNo 支付平台转账订单号
+     * @param outNo    商户转账订单号
+     * @param tradeNo  支付平台转账订单号
      * @param callback 处理器
-     * @param <T> 返回类型
+     * @param <T>      返回类型
      * @return 对应的转账订单
      */
-     <T>T transferQuery(String outNo, String tradeNo, Callback<T> callback);
+    <T> T transferQuery(String outNo, String tradeNo, Callback<T> callback);
 
-         /**
+    /**
      * 将请求参数或者请求流转化为 Map
      *
      * @param parameterMap 请求参数
@@ -400,29 +414,36 @@ public interface PayService<PC extends PayConfigStorage> {
 
     /**
      * 设置支付消息处理器,这里用于处理具体的支付业务
+     *
      * @param handler 消息处理器
-     * 配合{@link  com.egzosn.pay.common.api.PayService#payBack(java.util.Map, java.io.InputStream)}进行使用
-     *
-     *   默认使用{@link  com.egzosn.pay.common.api.DefaultPayMessageHandler }进行实现
-     *
+     *                配合{@link  com.egzosn.pay.common.api.PayService#payBack(java.util.Map, java.io.InputStream)}进行使用
+     *                <p>
+     *                默认使用{@link  com.egzosn.pay.common.api.DefaultPayMessageHandler }进行实现
      */
     void setPayMessageHandler(PayMessageHandler handler);
 
     /**
      * 设置支付消息处理器,这里用于处理具体的支付业务
+     *
      * @param interceptor 消息拦截器
-     * 配合{@link  com.egzosn.pay.common.api.PayService#payBack(java.util.Map, java.io.InputStream)}进行使用
-     *
-     *   默认使用{@link  com.egzosn.pay.common.api.DefaultPayMessageHandler }进行实现
-     *
+     *                    配合{@link  com.egzosn.pay.common.api.PayService#payBack(java.util.Map, java.io.InputStream)}进行使用
+     *                    <p>
+     *                    默认使用{@link  com.egzosn.pay.common.api.DefaultPayMessageHandler }进行实现
      */
     void addPayMessageInterceptor(PayMessageInterceptor interceptor);
 
     /**
-     *  获取支付请求地址
+     * 获取支付请求地址
+     *
      * @param transactionType 交易类型
      * @return 请求地址
      */
-     String getReqUrl(TransactionType transactionType);
+    String getReqUrl(TransactionType transactionType);
 
+    /**
+     * 创建消息
+     * @param message 支付平台返回的消息
+     * @return 支付消息对象
+     */
+    PayMessage createMessage(Map<String, Object> message);
 }
