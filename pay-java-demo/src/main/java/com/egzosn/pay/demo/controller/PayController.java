@@ -323,8 +323,19 @@ public class PayController {
 
         //校验
         if (payResponse.getService().verify(params)) {
-            PayMessage message = new PayMessage(params, storage.getPayType(), storage.getMsgType().name());
-            PayOutMessage outMessage = payResponse.getRouter().route(message);
+            //方式一  或者创建PayMessage的子类，AliPayMessage，WxPayMessage等等
+       /*    PayMessage message = new PayMessage(params, storage.getPayType(), storage.getMsgType().name());
+            PayOutMessage outMessage = payResponse.getRouter().route(message);*/
+
+            //方式二
+            /*PayMessage message = payResponse.getService().createMessage(params);
+            message.setPayType(storage.getPayType());
+            message.setMsgType(storage.getMsgType().name());
+             PayOutMessage outMessage = payResponse.getRouter().route(message);
+            */
+            //方式三
+            PayOutMessage outMessage = payResponse.getRouter().route(params, storage);
+
             return outMessage.toMessage();
         }
 

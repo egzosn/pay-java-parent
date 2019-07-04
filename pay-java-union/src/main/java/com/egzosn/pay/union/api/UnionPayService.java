@@ -17,6 +17,7 @@ import com.egzosn.pay.common.util.sign.encrypt.RSA;
 import com.egzosn.pay.common.util.sign.encrypt.RSA2;
 import com.egzosn.pay.common.util.str.StringUtils;
 import com.egzosn.pay.union.bean.SDKConstants;
+import com.egzosn.pay.union.bean.UnionPayMessage;
 import com.egzosn.pay.union.bean.UnionTransactionType;
 
 import java.awt.image.BufferedImage;
@@ -688,6 +689,14 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
     }
 
 
-
-
+    /**
+     * 创建消息
+     *
+     * @param message 支付平台返回的消息
+     * @return 支付消息对象
+     */
+    @Override
+    public PayMessage createMessage(Map<String, Object> message) {
+        return UnionPayMessage.create(message);
+    }
 }

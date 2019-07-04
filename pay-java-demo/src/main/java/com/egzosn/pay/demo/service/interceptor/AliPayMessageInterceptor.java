@@ -1,6 +1,8 @@
 
 package com.egzosn.pay.demo.service.interceptor;
 
+import com.egzosn.pay.ali.api.AliPayService;
+import com.egzosn.pay.ali.bean.AliPayMessage;
 import com.egzosn.pay.common.api.PayMessageHandler;
 import com.egzosn.pay.common.api.PayMessageInterceptor;
 import com.egzosn.pay.common.api.PayService;
@@ -15,7 +17,7 @@ import java.util.Map;
  * email egzosn@gmail.com
  * date 2017/1/18 19:28
  */
-public class AliPayMessageInterceptor implements PayMessageInterceptor {
+public class AliPayMessageInterceptor implements PayMessageInterceptor<AliPayMessage, AliPayService> {
 
     /**
      * 拦截支付消息
@@ -28,7 +30,7 @@ public class AliPayMessageInterceptor implements PayMessageInterceptor {
      * @throws PayErrorException PayErrorException*
      */
     @Override
-    public boolean intercept(PayMessage payMessage, Map<String, Object> context, PayService payService) throws PayErrorException {
+    public boolean intercept(AliPayMessage payMessage, Map<String, Object> context, AliPayService payService) throws PayErrorException {
 
         //这里进行拦截器处理，自行实现
         String outTradeNo = payMessage.getOutTradeNo();

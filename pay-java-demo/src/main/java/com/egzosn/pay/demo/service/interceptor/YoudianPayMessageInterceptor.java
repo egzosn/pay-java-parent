@@ -6,6 +6,7 @@ import com.egzosn.pay.common.api.PayMessageInterceptor;
 import com.egzosn.pay.common.api.PayService;
 import com.egzosn.pay.common.bean.PayMessage;
 import com.egzosn.pay.common.exception.PayErrorException;
+import com.egzosn.pay.wx.youdian.bean.WxYoudianPayMessage;
 
 import java.util.Map;
 
@@ -15,7 +16,7 @@ import java.util.Map;
  * email egzosn@gmail.com
  * date 2017/1/18 19:28
  */
-public class YoudianPayMessageInterceptor implements PayMessageInterceptor {
+public class YoudianPayMessageInterceptor implements PayMessageInterceptor<WxYoudianPayMessage, PayService> {
 
 //    @Autowired
 //    private AmtApplyService amtApplyService;
@@ -31,7 +32,7 @@ public class YoudianPayMessageInterceptor implements PayMessageInterceptor {
      * @throws PayErrorException PayErrorException
      */
     @Override
-    public boolean intercept(PayMessage payMessage, Map<String, Object> context, PayService payService) throws PayErrorException {
+    public boolean intercept(WxYoudianPayMessage payMessage, Map<String, Object> context, PayService payService) throws PayErrorException {
 
         //这里进行拦截器处理，自行实现
 

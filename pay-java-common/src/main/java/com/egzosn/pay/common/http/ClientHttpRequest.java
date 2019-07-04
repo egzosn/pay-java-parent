@@ -2,6 +2,7 @@ package com.egzosn.pay.common.http;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
+import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.bean.MethodType;
 import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
@@ -29,13 +30,14 @@ import static com.egzosn.pay.common.http.UriVariables.getMapToParameters;
 
 /**
  * 一个HTTP请求的客户端
+ *
  * @author: egan
- *  <pre>
+ * <pre>
  * email egzosn@gmail.com
  * date 2017/3/4 17:56
  *  </pre>
  */
-public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase implements  org.apache.http.client.ResponseHandler<T>{
+public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase implements org.apache.http.client.ResponseHandler<T> {
     protected static final Log LOG = LogFactory.getLog(ClientHttpRequest.class);
     public static final ContentType APPLICATION_FORM_URLENCODED_UTF_8 = ContentType.create("application/x-www-form-urlencoded", Consts.UTF_8);
 
@@ -49,7 +51,7 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
      */
     private Charset defaultCharset;
     /**
-     *  响应类型
+     * 响应类型
      */
     private Class<T> responseType;
 
@@ -66,25 +68,28 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
     }
 
     /**
-     *  根据请求地址 请求方法，请求内容对象
-     * @param uri 请求地址
-     * @param method  请求方法
-     * @param request 请求内容
+     * 根据请求地址 请求方法，请求内容对象
+     *
+     * @param uri            请求地址
+     * @param method         请求方法
+     * @param request        请求内容
      * @param defaultCharset 默认使用的响应编码
      */
     public ClientHttpRequest(URI uri, MethodType method, Object request, String defaultCharset) {
-       this(uri, method);
+        this(uri, method);
         setParameters(request);
-        if (StringUtils.isNotEmpty(defaultCharset)){
-            setDefaultCharset( Charset.forName(defaultCharset));
+        if (StringUtils.isNotEmpty(defaultCharset)) {
+            setDefaultCharset(Charset.forName(defaultCharset));
         }
 
     }
+
     /**
-     *  根据请求地址 请求方法，请求内容对象
-     * @param uri 请求地址
-     * @param method  请求方法
-     * @param request 请求内容
+     * 根据请求地址 请求方法，请求内容对象
+     *
+     * @param uri            请求地址
+     * @param method         请求方法
+     * @param request        请求内容
      * @param defaultCharset 默认使用的响应编码
      */
     public ClientHttpRequest(URI uri, MethodType method, Object request, Charset defaultCharset) {
@@ -92,20 +97,24 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
         setParameters(request);
         setDefaultCharset(defaultCharset);
     }
+
     /**
-     *  根据请求地址 请求方法，请求内容对象
-     * @param uri 请求地址
+     * 根据请求地址 请求方法，请求内容对象
+     *
+     * @param uri     请求地址
      * @param method  请求方法
      * @param request 请求内容
      */
     public ClientHttpRequest(URI uri, MethodType method, Object request) {
-       this(uri, method);
+        this(uri, method);
         setParameters(request);
     }
+
     /**
      * 根据请求地址 请求方法
-     * @param uri 请求地址
-     * @param method  请求方法
+     *
+     * @param uri    请求地址
+     * @param method 请求方法
      */
     public ClientHttpRequest(URI uri, MethodType method) {
         this.setURI(uri);
@@ -114,30 +123,37 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
 
     /**
      * 根据请求地址
-     * @param uri  请求地址
+     *
+     * @param uri 请求地址
      */
     public ClientHttpRequest(URI uri) {
         this.setURI(uri);
     }
+
     /**
      * 根据请求地址
-     * @param uri  请求地址
+     *
+     * @param uri 请求地址
      */
     public ClientHttpRequest(String uri) {
         this.setURI(URI.create(uri));
     }
+
     /**
      * 根据请求地址 请求方法
-     * @param uri 请求地址
-     * @param method  请求方法
+     *
+     * @param uri    请求地址
+     * @param method 请求方法
      */
     public ClientHttpRequest(String uri, MethodType method) {
         this.setURI(URI.create(uri));
         this.method = method;
     }
+
     /**
-     *  根据请求地址 请求方法，请求内容对象
-     * @param uri 请求地址
+     * 根据请求地址 请求方法，请求内容对象
+     *
+     * @param uri     请求地址
      * @param method  请求方法
      * @param request 请求内容
      */
@@ -150,7 +166,7 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
      * 设置请求方式
      *
      * @param method 请求方式
-     * {@link com.egzosn.pay.common.bean.MethodType} 请求方式
+     *               {@link com.egzosn.pay.common.bean.MethodType} 请求方式
      */
     public void setMethod(MethodType method) {
         this.method = method;
@@ -158,6 +174,7 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
 
     /**
      * 获取请求方式
+     *
      * @return 请求方式
      */
     @Override
@@ -178,10 +195,11 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
 
     /**
      * 设置代理
+     *
      * @param httpProxy http代理配置信息
      * @return 当前HTTP请求的客户端
      */
-    public ClientHttpRequest setProxy(HttpHost httpProxy){
+    public ClientHttpRequest setProxy(HttpHost httpProxy) {
         if (httpProxy != null) {
             RequestConfig config = RequestConfig.custom().setProxy(httpProxy).build();
             setConfig(config);
@@ -197,34 +215,34 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
      * @return 当前HTTP请求的客户端
      */
     public ClientHttpRequest setParameters(Object request) {
-        if (null == request){
+        if (null == request) {
             return this;
         }
-        if (request instanceof HttpHeader){
-            HttpHeader entity = (HttpHeader)request;
-            if (null != entity.getHeaders() ){
+        if (request instanceof HttpHeader) {
+            HttpHeader entity = (HttpHeader) request;
+            if (null != entity.getHeaders()) {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("header : " + JSON.toJSONString(entity.getHeaders()));
                 }
-                for (Header header : entity.getHeaders()){
+                for (Header header : entity.getHeaders()) {
                     addHeader(header);
                 }
             }
-        }else if (request instanceof HttpStringEntity){
-            HttpStringEntity entity = (HttpStringEntity)request;
-            if (!entity.isEmpty()){
+        } else if (request instanceof HttpStringEntity) {
+            HttpStringEntity entity = (HttpStringEntity) request;
+            if (!entity.isEmpty()) {
                 setEntity(entity);
             }
-            if (null != entity.getHeaders() ){
+            if (null != entity.getHeaders()) {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("header : " + JSON.toJSONString(entity.getHeaders()));
                 }
-                for (Header header : entity.getHeaders()){
+                for (Header header : entity.getHeaders()) {
                     addHeader(header);
                 }
             }
-        } else if (request instanceof HttpEntity){
-            setEntity((HttpEntity)request);
+        } else if (request instanceof HttpEntity) {
+            setEntity((HttpEntity) request);
         } else if (request instanceof Map) {
             String parameters = getMapToParameters((Map) request);
             if (LOG.isDebugEnabled()) {
@@ -236,7 +254,7 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Parameter : " + request);
             }
-            StringEntity entity = new StringEntity((String) request,  APPLICATION_FORM_URLENCODED_UTF_8);
+            StringEntity entity = new StringEntity((String) request, APPLICATION_FORM_URLENCODED_UTF_8);
             setEntity(entity);
         } else {
             String body = JSON.toJSONString(request);
@@ -258,21 +276,21 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
         final HttpEntity entity = response.getEntity();
 
         String[] value = null;
-        if (null == entity.getContentType()){
+        if (null == entity.getContentType()) {
             value = new String[]{"application/x-www-form-urlencoded"};
-        }else {
+        } else {
             value = entity.getContentType().getValue().split(";");
         }
         //这里进行特殊处理，如果状态码非正常状态，但内容类型匹配至对应的结果也进行对应的响应类型转换
         if (statusLine.getStatusCode() >= 300 && statusLine.getStatusCode() != 304) {
-            if (isJson(value[0], "") || isXml(value[0], "") ){
+            if (isJson(value[0], "") || isXml(value[0], "")) {
                 return toBean(entity, value);
             }
 
             EntityUtils.consume(entity);
             throw new HttpResponseException(statusLine.getStatusCode(), statusLine.getReasonPhrase());
         }
-        if (null == responseType){
+        if (null == responseType) {
             responseType = (Class<T>) String.class;
         }
 
@@ -283,7 +301,8 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
 
     /**
      * 对请求进行转化至对应的可转化类型
-     * @param entity 响应实体
+     *
+     * @param entity      响应实体
      * @param contentType 内容类型编码数组，第一个值为内容类型，第二个值为编码类型
      * @return 对应的响应对象
      * @throws IOException 响应类型文本转换时抛出异常
@@ -298,7 +317,7 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
 
             //获取响应的文本内容
             String result = EntityUtils.toString(entity, getDefaultCharset());
-            if (LOG.isDebugEnabled()){
+            if (LOG.isDebugEnabled()) {
                 LOG.debug("请求响应内容：\r\n" + result);
             }
             if (responseType.isAssignableFrom(String.class)) {
@@ -309,6 +328,9 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
             //json类型
             if (isJson(contentType[0], first)) {
                 try {
+                    if (responseType.isAssignableFrom(JSONObject.class)) {
+                        return (T)JSON.parseObject(result);
+                    }
                     return JSON.parseObject(result, responseType);
                 } catch (JSONException e) {
                     throw new PayErrorException(new PayException("failure", String.format("类型转化异常,contentType: %s\n%s", entity.getContentType().getValue(), e.getMessage()), result));
@@ -317,8 +339,11 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
             //xml类型
             if (isXml(contentType[0], first)) {
                 try {
+                    if (responseType.isAssignableFrom(JSONObject.class)) {
+                        return (T) XML.toJSONObject(result, getDefaultCharset());
+                    }
                     return XML.toJSONObject(result, getDefaultCharset()).toJavaObject(responseType);
-                }catch (Exception e){
+                } catch (Exception e) {
                     ;
                 }
             }
@@ -346,30 +371,34 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
 
     /**
      * 检测响应类型是否为json
+     *
      * @param contentType 内容类型
-     * @param textFirst 文本第一个字符
+     * @param textFirst   文本第一个字符
      * @return 布尔型， true为json内容类型
      */
-    private boolean isJson(String contentType, String textFirst){
-        return( ContentType.APPLICATION_JSON.getMimeType().equals(contentType) || "{[".indexOf(textFirst) >= 0 );
+    private boolean isJson(String contentType, String textFirst) {
+        return (ContentType.APPLICATION_JSON.getMimeType().equals(contentType) || "{[".indexOf(textFirst) >= 0);
     }
+
     /**
      * 检测响应类型是否为文本类型
+     *
      * @param contentType 内容类型
      * @return 布尔型， true为文本内容类型
      */
-    private boolean isText(String contentType){
-        return contentType.contains("xml") || contentType.contains("json") || contentType.contains("text") || contentType.contains("form-data")|| contentType.contains("x-www-form-urlencoded");
+    private boolean isText(String contentType) {
+        return contentType.contains("xml") || contentType.contains("json") || contentType.contains("text") || contentType.contains("form-data") || contentType.contains("x-www-form-urlencoded");
     }
 
     /**
      * 检测响应类型是否为xml
+     *
      * @param contentType 内容类型
-     * @param textFirst 文本第一个字符
+     * @param textFirst   文本第一个字符
      * @return 布尔型， true为xml内容类型
      */
-    private boolean isXml(String contentType, String textFirst){
-        return( ContentType.APPLICATION_XML.getMimeType().equals(contentType) || "<".indexOf(textFirst) >= 0 );
+    private boolean isXml(String contentType, String textFirst) {
+        return (ContentType.APPLICATION_XML.getMimeType().equals(contentType) || "<".indexOf(textFirst) >= 0);
     }
 
 
