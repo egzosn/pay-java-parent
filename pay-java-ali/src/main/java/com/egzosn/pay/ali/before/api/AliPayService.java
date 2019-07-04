@@ -508,6 +508,17 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
         return null;
     }
 
+    /**
+     * 获取支付请求地址
+     *
+     * @param transactionType 交易类型
+     * @return 请求地址
+     */
+    @Override
+    public String getReqUrl(TransactionType transactionType) {
+        return null;
+    }
+
 
     /**
      *  获取biz_content。请求参数的集合 不包含下载账单

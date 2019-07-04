@@ -17,10 +17,12 @@ import com.egzosn.pay.common.util.sign.encrypt.RSA;
 import com.egzosn.pay.common.util.sign.encrypt.RSA2;
 import com.egzosn.pay.common.util.str.StringUtils;
 import com.egzosn.pay.union.bean.SDKConstants;
+import com.egzosn.pay.union.bean.UnionPayMessage;
 import com.egzosn.pay.union.bean.UnionTransactionType;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.security.cert.*;
@@ -55,7 +57,10 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
     private static final String FILE_TRANS_URL = "https://filedownload.%s/";
     private static final String APP_TRANS_URL = "https://gateway.%s/gateway/api/appTransReq.do";
     private static final String CARD_TRANS_URL = "https://gateway.%s/gateway/api/cardTransReq.do";
-
+    /**
+     * 证书解释器
+     */
+    private CertDescriptor certDescriptor = null;
     /**
      * 构造函数
      *
@@ -78,28 +83,39 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
     @Override
     public UnionPayService setPayConfigStorage(UnionPayConfigStorage payConfigStorage) {
         super.setPayConfigStorage(payConfigStorage);
-        if (!payConfigStorage.isCertSign()) {
+        if (!payConfigStorage.isCertSign() || null != certDescriptor) {
             return this;
         }
-        CertDescriptor certDescriptor = payConfigStorage.getCertDescriptor();
-        if (!payConfigStorage.isKeyPrivateInit()) {
-            certDescriptor.initPrivateSignCert(payConfigStorage.getKeyPrivate(), payConfigStorage.getKeyPrivateCertPwd(), "PKCS12");
+
+        certDescriptor = new CertDescriptor();
+        try {
+            certDescriptor.initPrivateSignCert(payConfigStorage.getKeyPrivateCertInputStream(), payConfigStorage.getKeyPrivateCertPwd(), "PKCS12");
+            certDescriptor.initPublicCert(payConfigStorage.getAcpMiddleCertInputStream());
+            certDescriptor.initRootCert(payConfigStorage.getAcpRootCertInputStream());
+        } catch (IOException e) {
+            LOG.error(e);
         }
-        if (!payConfigStorage.isKeyPublicInit()) {
-            certDescriptor.initPublicCert(payConfigStorage.getAcpMiddleCert());
-            certDescriptor.initRootCert(payConfigStorage.getAcpRootCert());
-        }
+
 
         return this;
     }
-
+    /**
+     * 获取支付请求地址
+     *
+     * @param transactionType 交易类型
+     * @return 请求地址
+     */
+    @Override
+    public String getReqUrl(TransactionType transactionType) {
+        return (payConfigStorage.isTest() ? TEST_BASE_DOMAIN : RELEASE_BASE_DOMAIN);
+    }
     /**
      * 根据是否为沙箱环境进行获取请求地址
      *
      * @return 请求地址
      */
     public String getReqUrl() {
-        return (payConfigStorage.isTest() ? TEST_BASE_DOMAIN : RELEASE_BASE_DOMAIN);
+        return getReqUrl(null);
     }
 
     public String getFrontTransUrl() {
@@ -127,7 +143,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
      */
     private Map<String, Object> getCommonParam() {
         Map<String, Object> params = new TreeMap<>();
-        UnionPayConfigStorage configStorage = (UnionPayConfigStorage) payConfigStorage;
+        UnionPayConfigStorage configStorage = payConfigStorage;
         //银联接口版本
         params.put(SDKConstants.param_version, configStorage.getVersion());
         //编码方式
@@ -291,15 +307,15 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
         switch (signUtils) {
             case RSA:
                 parameters.put(SDKConstants.param_signMethod, SDKConstants.SIGNMETHOD_RSA);
-                parameters.put(SDKConstants.param_certId, payConfigStorage.getCertDescriptor().getSignCertId());
+                parameters.put(SDKConstants.param_certId, certDescriptor.getSignCertId());
                 signStr = SignUtils.SHA1.createSign(SignUtils.parameterText(parameters, "&", "signature"), "", payConfigStorage.getInputCharset());
-                parameters.put(SDKConstants.param_signature, RSA.sign(signStr, payConfigStorage.getCertDescriptor().getSignCertPrivateKey(payConfigStorage.getKeyPrivateCertPwd()), payConfigStorage.getInputCharset()));
+                parameters.put(SDKConstants.param_signature, RSA.sign(signStr, certDescriptor.getSignCertPrivateKey(payConfigStorage.getKeyPrivateCertPwd()), payConfigStorage.getInputCharset()));
                 break;
             case RSA2:
                 parameters.put(SDKConstants.param_signMethod, SDKConstants.SIGNMETHOD_RSA);
-                parameters.put(SDKConstants.param_certId, payConfigStorage.getCertDescriptor().getSignCertId());
+                parameters.put(SDKConstants.param_certId, certDescriptor.getSignCertId());
                 signStr = SignUtils.SHA256.createSign(SignUtils.parameterText(parameters, "&", "signature"), "", payConfigStorage.getInputCharset());
-                parameters.put(SDKConstants.param_signature, RSA2.sign(signStr, payConfigStorage.getCertDescriptor().getSignCertPrivateKey(payConfigStorage.getKeyPrivateCertPwd()), payConfigStorage.getInputCharset()));
+                parameters.put(SDKConstants.param_signature, RSA2.sign(signStr, certDescriptor.getSignCertPrivateKey(payConfigStorage.getKeyPrivateCertPwd()), payConfigStorage.getInputCharset()));
                 break;
             case SHA1:
             case SHA256:
@@ -326,8 +342,8 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
     private X509Certificate verifyCertificate(X509Certificate cert) {
         try {
             cert.checkValidity();//验证有效期
-            X509Certificate middleCert = payConfigStorage.getCertDescriptor().getPublicCert();
-            X509Certificate rootCert = payConfigStorage.getCertDescriptor().getRootCert();
+            X509Certificate middleCert = certDescriptor.getPublicCert();
+            X509Certificate rootCert = certDescriptor.getRootCert();
 
             X509CertSelector selector = new X509CertSelector();
             selector.setCertificate(cert);
@@ -673,4 +689,14 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
     }
 
 
+    /**
+     * 创建消息
+     *
+     * @param message 支付平台返回的消息
+     * @return 支付消息对象
+     */
+    @Override
+    public PayMessage createMessage(Map<String, Object> message) {
+        return UnionPayMessage.create(message);
+    }
 }

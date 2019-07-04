@@ -24,7 +24,7 @@ public class PayTest {
 
         AliPayConfigStorage aliPayConfigStorage = new AliPayConfigStorage();
         aliPayConfigStorage.setPid("合作者id");
-        aliPayConfigStorage.setAppId("应用id");
+        aliPayConfigStorage.setAppid("应用id");
         aliPayConfigStorage.setKeyPublic("支付宝公钥");
         aliPayConfigStorage.setKeyPrivate("应用私钥");
         aliPayConfigStorage.setNotifyUrl("异步回调地址");

@@ -9,7 +9,7 @@
 
         AliPayConfigStorage aliPayConfigStorage = new AliPayConfigStorage();
         aliPayConfigStorage.setPid("合作者id");
-        aliPayConfigStorage.setAppId("应用id");
+        aliPayConfigStorage.setAppid("应用id");
         aliPayConfigStorage.setKeyPublic("支付宝公钥");
         aliPayConfigStorage.setKeyPrivate("应用私钥");
         aliPayConfigStorage.setNotifyUrl("异步回调地址");
@@ -34,16 +34,19 @@
         //代理端口
         httpConfigStorage.setHttpProxyPort(3308);
         //代理用户名
-        httpConfigStorage.setHttpProxyUsername("user");
+        httpConfigStorage.setAuthUsername("user");
         //代理密码
-        httpConfigStorage.setHttpProxyPassword("password");
+        httpConfigStorage.setAuthPassword("password");
         /* /网路代理配置 根据需求进行设置**/
     
          /* 网络请求ssl证书 根据需求进行设置**/
-        //设置ssl证书路径
-        httpConfigStorage.setKeystorePath("证书绝对路径");
+        //设置ssl证书路径 跟着setCertStoreType 进行对应
+        httpConfigStorage.setKeystore("证书文件流，证书字符串信息或证书绝对地址");
         //设置ssl证书对应的密码
         httpConfigStorage.setStorePassword("证书对应的密码");
+        //设置ssl证书对应的存储方式
+        httpConfigStorage.setCertStoreType(CertStoreType.PATH);
+        
         /* /网络请求ssl证书**/
         
       /* /网络请求连接池**/
@@ -60,7 +63,7 @@
 
 ```java
     //支付服务
-     PayService service = new AliPayService(aliPayConfigStorage);
+     AliPayService service = new AliPayService(aliPayConfigStorage);
 
      //设置网络请求配置根据需求进行设置
      //service.setRequestTemplateConfigStorage(httpConfigStorage)
@@ -174,6 +177,19 @@
 
 ```
 
+
+
+#### 统一收单交易结算接口
+
+```java
+        OrderSettle order = new OrderSettle();
+        order.setTradeNo("支付宝单号");
+        order.setOutRequestNo("商户单号");
+        order.setAmount(new BigDecimal(100));
+        order.setDesc("线下转账");
+        Map result = service.settle(order);
+
+```
 
 
 #### 支付订单查询

@@ -1,39 +1,22 @@
 package com.egzosn.pay.common.bean;
 
 /**
- * 货币类型
- * @author Actinia
- *  <pre>
- * email hayesfu@qq.com
- * create 2017 2017/1/16
- * </pre>
+ * 基础货币类型
+ * @author egan
+ *         email egzosn@gmail.com
+ *         date 2019/4/16.20:55
  */
-public enum CurType {
-
-    CNY("人民币"),
-    USD("美元"),
-    HKD("港币"),
-    MOP("澳门元"),
-    EUR("欧元"),
-    TWD("新台币"),
-    KRW("韩元"),
-    JPY("日元"),
-    SGD("新加坡元"),
-    AUD("澳大利亚元");
+public interface CurType {
     /**
-     * 币种名称
+     * 获取货币类型
+     * @return 货币类型
      */
-    private String name;
-    //索引
-    private int index;
+    String getType();
 
     /**
-     * 构造函数
-     * @param name
+     * 货币名称
+     * @return 货币名称
      */
-    CurType(String name) {
-        this.name = name;
-    }
-
+    String getName();
 
 }

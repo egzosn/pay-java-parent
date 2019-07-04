@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original huodull or egan.
+ * Copyright 2002-2017 the original egan or egan.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

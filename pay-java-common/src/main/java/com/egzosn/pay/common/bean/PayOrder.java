@@ -30,6 +30,10 @@ public class PayOrder {
      */
     private BigDecimal price;
     /**
+     * 支付平台订单号,交易号
+     */
+    private String tradeNo;
+    /**
      * 商户订单号
      */
     private String outTradeNo;
@@ -46,7 +50,7 @@ public class PayOrder {
      */
     private String spbillCreateIp;
     /**
-     * 付款条码串  与设备号类似？？？
+     * 付款条码串,人脸凭证，有关支付代码相关的，
      */
     private String authCode;
     /**
@@ -122,24 +126,18 @@ public class PayOrder {
     }
 
     /**
-     * 获取商户订单号
-     * @return 商户订单号
-     * @see  #getOutTradeNo()
+     * 支付平台订单号,交易号
+     * @return 支付平台订单号,交易号
      */
-    @Deprecated
     public String getTradeNo() {
-        return outTradeNo;
+        return tradeNo;
     }
-
-
     /**
-     *
-     * @param tradeNo 商户订单号
-     * @see  #setOutTradeNo(String)
+     * 支付平台订单号,交易号
+     * @param tradeNo 支付平台订单号,交易号
      */
-    @Deprecated
     public void setTradeNo(String tradeNo) {
-        this.outTradeNo = tradeNo;
+        this.tradeNo = tradeNo;
     }
 
     /**

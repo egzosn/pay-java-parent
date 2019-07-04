@@ -9,7 +9,7 @@ import java.util.Map;
 
 /**
  * @author Fuzx
- * @create 2017 2017/1/24 0024
+ * create 2017 2017/1/24 0024
  */
 public class FuiouPayMessageHandler extends BasePayMessageHandler {
 
@@ -21,7 +21,7 @@ public class FuiouPayMessageHandler extends BasePayMessageHandler {
     }
 
     @Override
-    public PayOutMessage handle(PayMessage payMessage, Map<String, Object> context, PayService payService) throws PayErrorException {
+    public PayOutMessage handle(PayMessage payMessage, Map context, PayService payService) throws PayErrorException {
         //交易状态
         if ("0000".equals(payMessage.getPayMessage().get("order_pay_code"))){
             /////这里进行成功的处理

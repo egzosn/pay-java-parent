@@ -6,6 +6,7 @@ import com.egzosn.pay.ali.api.AliPayConfigStorage;
 import com.egzosn.pay.ali.api.AliPayService;
 import com.egzosn.pay.ali.bean.AliTransactionType;
 import com.egzosn.pay.ali.bean.AliTransferType;
+import com.egzosn.pay.ali.bean.OrderSettle;
 import com.egzosn.pay.common.api.PayService;
 import com.egzosn.pay.common.bean.*;
 import com.egzosn.pay.common.http.HttpConfigStorage;
@@ -33,14 +34,14 @@ import java.util.UUID;
  * 发起支付入口
  *
  * @author: egan
- * @email egzosn@gmail.com
- * @date 2016/11/18 0:25
+ * email egzosn@gmail.com
+ * date 2016/11/18 0:25
  */
 @RestController
 @RequestMapping("ali")
 public class AliPayController {
 
-    private PayService service = null;
+    private AliPayService service = null;
     @Resource
     private AutowireCapableBeanFactory spring;
 
@@ -48,7 +49,7 @@ public class AliPayController {
     public void init() {
         AliPayConfigStorage aliPayConfigStorage = new AliPayConfigStorage();
         aliPayConfigStorage.setPid("2088102169916436");
-        aliPayConfigStorage.setAppId("2016080400165436");
+        aliPayConfigStorage.setAppid("2016080400165436");
         aliPayConfigStorage.setKeyPublic("MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDIgHnOn7LLILlKETd6BFRJ0GqgS2Y3mn1wMQmyh9zEyWlz5p1zrahRahbXAfCfSqshSNfqOmAQzSHRVjCqjsAw1jyqrXaPdKBmr90DIpIxmIyKXv4GGAkPyJ/6FTFY99uhpiq0qadD/uSzQsefWo0aTvP/65zi3eof7TcZ32oWpwIDAQAB");
         aliPayConfigStorage.setKeyPrivate("MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBAKroe/8h5vC4L6T+B2WdXiVwGsMvUKgb2XsKix6VY3m2wcf6tyzpNRDCNykbIwGtaeo7FshN+qZxdXHLiIam9goYncBit/8ojfLGy2gLxO/PXfzGxYGs0KsDZ+ryVPPmE34ZZ8jiJpR0ygzCFl8pN3QJPJRGTJn5+FTT9EF/9zyZAgMBAAECgYAktngcYC35u7cQXDk+jMVyiVhWYU2ULxdSpPspgLGzrZyG1saOcTIi/XVX8Spd6+B6nmLQeF/FbU3rOeuD8U2clzul2Z2YMbJ0FYay9oVZFfp5gTEFpFRTVfzqUaZQBIjJe/xHL9kQVqc5xHlE/LVA27/Kx3dbC35Y7B4EVBDYAQJBAOhsX8ZreWLKPhXiXHTyLmNKhOHJc+0tFH7Ktise/0rNspojU7o9prOatKpNylp9v6kux7migcMRdVUWWiVe+4ECQQC8PqsuEz7B0yqirQchRg1DbHjh64bw9Kj82EN1/NzOUd53tP9tg+SO97EzsibK1F7tOcuwqsa7n2aY48mQ+y0ZAkBndA2xcRcnvOOjtAz5VO8G7R12rse181HjGfG6AeMadbKg30aeaGCyIxN1loiSfNR5xsPJwibGIBg81mUrqzqBAkB+K6rkaPXJR9XtzvdWb/N3235yPkDlw7Z4MiOVM3RzvR/VMDV7m8lXoeDde2zQyeMOMYy6ztwA6WgE1bhGOnQRAkEAouUBv1sVdSBlsexX15qphOmAevzYrpufKgJIRLFWQxroXMS7FTesj+f+FmGrpPCxIde1dqJ8lqYLTyJmbzMPYw==");
         aliPayConfigStorage.setNotifyUrl("http://pay.egzosn.com/payBack.json");
@@ -88,8 +89,10 @@ public class AliPayController {
         //WAP
 //        PayOrder order = new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), AliTransactionType.WAP);
 
-        Map orderInfo = service.orderInfo(order);
-        return service.buildRequest(orderInfo, MethodType.POST);
+//        Map orderInfo = service.orderInfo(order);
+//        return service.buildRequest(orderInfo, MethodType.POST);
+
+        return service.toPay(order);
     }
 
 
@@ -116,6 +119,7 @@ public class AliPayController {
      * 二维码支付
      * @param price       金额
      * @return 二维码图像
+     * @throws IOException IOException
      */
     @RequestMapping(value = "toQrPay.jpg", produces = "image/jpeg;charset=UTF-8")
     public byte[] toWxQrPay( BigDecimal price) throws IOException {
@@ -133,12 +137,12 @@ public class AliPayController {
      * @return 支付结果
      */
     @RequestMapping(value = "microPay")
-    public Map<String, Object> microPay(BigDecimal price, String authCode) throws IOException {
+    public Map<String, Object> microPay(BigDecimal price, String authCode) {
         //获取对应的支付账户操作工具（可根据账户id）
         //条码付
-        PayOrder order = new PayOrder("huodull order", "huodull order", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), AliTransactionType.BAR_CODE);
+        PayOrder order = new PayOrder("egan order", "egan order", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), AliTransactionType.BAR_CODE);
            //声波付
-//        PayOrder order = new PayOrder("huodull order", "huodull order", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), AliTransactionType.WAVE_CODE);
+//        PayOrder order = new PayOrder("egan order", "egan order", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), AliTransactionType.WAVE_CODE);
         //设置授权码，条码等
         order.setAuthCode(authCode);
         //支付结果
@@ -165,6 +169,7 @@ public class AliPayController {
      *
      * @return 返回对应的响应码
      * @see #payBack(HttpServletRequest)
+     * @throws IOException IOException
      */
     @Deprecated
     @RequestMapping(value = "payBackBefore.json")
@@ -195,7 +200,7 @@ public class AliPayController {
      * 业务处理在对应的PayMessageHandler里面处理，在哪里设置PayMessageHandler，详情查看{@link com.egzosn.pay.common.api.PayService#setPayMessageHandler(com.egzosn.pay.common.api.PayMessageHandler)}
      *
      * 如果未设置 {@link com.egzosn.pay.common.api.PayMessageHandler} 那么会使用默认的 {@link com.egzosn.pay.common.api.DefaultPayMessageHandler}
-     *
+     * @throws IOException IOException
      */
     @RequestMapping(value = "payBack.json")
     public String payBack(HttpServletRequest request) throws IOException {
@@ -213,6 +218,22 @@ public class AliPayController {
     @RequestMapping("query")
     public Map<String, Object> query(QueryOrder order) {
         return service.query(order.getTradeNo(), order.getOutTradeNo());
+    }
+
+    /**
+     * 统一收单交易结算接口
+     *
+     * @param order 订单的请求体
+     * @return 返回查询回来的结果集，支付方原值返回
+     */
+    @RequestMapping("settle")
+    public Map<String, Object> settle(OrderSettle order) {
+       /* OrderSettle order = new OrderSettle();
+        order.setTradeNo("支付宝单号");
+        order.setOutRequestNo("商户单号");
+        order.setAmount(new BigDecimal(100));
+        order.setDesc("线下转账");*/
+        return service.settle(order);
     }
 
 

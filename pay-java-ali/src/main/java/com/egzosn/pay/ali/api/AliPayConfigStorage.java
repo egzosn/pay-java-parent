@@ -15,7 +15,7 @@ public class AliPayConfigStorage extends BasePayConfigStorage {
     /**
      * 商户应用id
      */
-    private String appId;
+    private String appid;
     /**
      * 商户签约拿到的pid,partner_id的简称，合作伙伴身份等同于 partner
      */
@@ -27,13 +27,13 @@ public class AliPayConfigStorage extends BasePayConfigStorage {
     private String seller;
 
 
-    public void setAppId(String appId) {
-        this.appId = appId;
+    public void setAppid(String appid) {
+        this.appid = appid;
     }
 
     @Override
     public String getAppid() {
-        return appId;
+        return appid;
     }
 
 

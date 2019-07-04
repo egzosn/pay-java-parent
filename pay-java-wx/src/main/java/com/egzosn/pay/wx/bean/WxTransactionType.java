@@ -48,6 +48,17 @@ public enum  WxTransactionType implements TransactionType {
      */
     APP("pay/unifiedorder"),
     /**
+     * 刷
+     脸支付
+     */
+    FACEPAY("pay/facepay"){
+        @Override
+        public void setAttribute(Map<String, Object> parameters, PayOrder order) {
+            parameters.put("openid", order.getOpenid());
+            parameters.put("face_code", order.getAuthCode());
+        }
+    },
+    /**
      * H5支付
      */
     MWEB("pay/unifiedorder"){
@@ -120,15 +131,10 @@ public enum  WxTransactionType implements TransactionType {
      */
     DOWNLOADBILL("pay/downloadbill"),
     /**
-     * 银行卡转账
+     * 获取验签秘钥，沙箱使用
      */
-    @Deprecated
-    BANK("mmpaysptrans/pay_bank"),
-    /**
-     *  转账查询
-     */
-    @Deprecated
-    QUERY_BANK("mmpaysptrans/query_bank")
+    GETSIGNKEY("pay/getsignkey"),
+
     ;
 
     WxTransactionType(String method) {

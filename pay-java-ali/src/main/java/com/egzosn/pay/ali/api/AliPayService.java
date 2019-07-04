@@ -2,7 +2,9 @@ package com.egzosn.pay.ali.api;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.egzosn.pay.ali.bean.AliPayMessage;
 import com.egzosn.pay.ali.bean.AliTransactionType;
+import com.egzosn.pay.ali.bean.OrderSettle;
 import com.egzosn.pay.common.api.BasePayService;
 import com.egzosn.pay.common.bean.*;
 import com.egzosn.pay.common.bean.result.PayException;
@@ -65,8 +67,16 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
      *
      * @return 请求地址
      */
-    public String getReqUrl() {
+    public String getReqUrl(TransactionType transactionType) {
         return payConfigStorage.isTest() ? DEV_REQ_URL : HTTPS_REQ_URL;
+    }
+    /**
+     * 获取对应的请求地址
+     *
+     * @return 请求地址
+     */
+    public String getReqUrl() {
+        return getReqUrl(null);
     }
 
 
@@ -78,10 +88,6 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
         super(payConfigStorage);
     }
 
-
-    public String getHttpsVerifyUrl() {
-        return getReqUrl() + "?service=notify_verify";
-    }
 
     /**
      * 回调校验
@@ -278,7 +284,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
         String bizContent = (String) orderInfo.remove(BIZ_CONTENT);
         formHtml.append(getReqUrl()).append("?").append(UriVariables.getMapToParameters(orderInfo))
                 .append("\" method=\"").append(method.name().toLowerCase()).append("\">");
-        formHtml.append("<input type=\"hidden\" name=\"biz_content\" value=\'" + bizContent + "\'/>");
+        formHtml.append("<input type=\"hidden\" name=\"biz_content\" value=\'" ).append( bizContent ).append( "\'/>");
         formHtml.append("</form>");
         formHtml.append("<script>document.forms['_alipaysubmit_'].submit();</script>");
 
@@ -323,6 +329,21 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
             LOG.info("收款失败");
         }
         return result;
+    }
+
+
+    /**
+     * 统一收单交易结算接口
+     * @param order 交易结算信息
+     * @return 结算结果
+     */
+    public Map<String, Object> settle(OrderSettle order){
+        //获取公共参数
+        Map<String, Object> parameters = getPublicParameters(AliTransactionType.SETTLE);
+        parameters.put(BIZ_CONTENT, JSON.toJSONString(order.toBizContent()));
+        //设置签名
+        setSign(parameters);
+        return getHttpRequestTemplate().postForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(parameters), null, JSONObject.class);
     }
 
     /**
@@ -588,4 +609,14 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
         return JSON.toJSONString(getBizContent(tradeNo, outTradeNo, null));
     }
 
+    /**
+     * 创建消息
+     *
+     * @param message 支付平台返回的消息
+     * @return 支付消息对象
+     */
+    @Override
+    public PayMessage createMessage(Map<String, Object> message) {
+        return AliPayMessage.create(message);
+    }
 }
