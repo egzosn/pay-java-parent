@@ -19,7 +19,7 @@ import java.util.Map;
  *     date 2018-10-29 17:31:05
  * </pre>
  */
-public class DefaultPayMessageHandler implements PayMessageHandler {
+public class DefaultPayMessageHandler implements PayMessageHandler<PayMessage, PayService> {
 
     protected final Log LOG = LogFactory.getLog(DefaultPayMessageHandler.class);
     /**
