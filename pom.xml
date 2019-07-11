@@ -61,7 +61,7 @@
         <pay.version>2.12.8-SNAPSHOT</pay.version>
         <httpmime.version>4.5.4</httpmime.version>
         <log4j.version>1.2.17</log4j.version>
-        <fastjson.version>1.2.41</fastjson.version>
+        <fastjson.version>1.2.58</fastjson.version>
         <zxing.version>3.3.1</zxing.version>
     </properties>
 
