@@ -332,7 +332,7 @@ public class HttpRequestTemplate {
         }
         ClientHttpRequest<T> httpRequest = new ClientHttpRequest(uri ,method, request, null == configStorage ? null : configStorage.getCharset());
         //判断是否有代理设置
-        if (null == httpProxy){
+        if (null != httpProxy){
             httpRequest.setProxy(httpProxy);
         }
         httpRequest.setResponseType(responseType);

@@ -526,6 +526,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
         parameters.put("total_fee", Util.conversionCentAmount(refundOrder.getTotalAmount()));
         parameters.put("refund_fee", Util.conversionCentAmount(refundOrder.getRefundAmount()));
         parameters.put("op_user_id", payConfigStorage.getPid());
+        setParameters(parameters, "notify_url",  payConfigStorage.getNotifyUrl());
 
         //设置签名
         setSign(parameters);
