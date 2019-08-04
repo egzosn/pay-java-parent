@@ -10,6 +10,7 @@ import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
@@ -43,7 +44,7 @@ import java.util.Map;
  */
 public class HttpRequestTemplate {
 
-    protected final Log LOG = LogFactory.getLog(HttpRequestTemplate.class);
+    protected static final Log LOG = LogFactory.getLog(HttpRequestTemplate.class);
 
     protected CloseableHttpClient httpClient;
 
@@ -75,6 +76,7 @@ public class HttpRequestTemplate {
                 //设置httpclient的SSLSocketFactory
                 .setSSLSocketFactory(createSSL(configStorage))
                 .setConnectionManager(connectionManager(configStorage))
+                .setDefaultRequestConfig(createRequestConfig(configStorage))
                 .build();
         if (null == connectionManager) {
             return this.httpClient = httpClient;
@@ -82,6 +84,15 @@ public class HttpRequestTemplate {
 
         return httpClient;
 
+    }
+
+    private RequestConfig createRequestConfig(HttpConfigStorage configStorage) {
+        RequestConfig requestConfig = RequestConfig.custom()
+                .setSocketTimeout(configStorage.getSocketTimeout())
+                .setConnectTimeout(configStorage.getConnectTimeout())
+// .setConnectionRequestTimeout(1000)
+                .build();
+        return requestConfig;
     }
 
     /**
