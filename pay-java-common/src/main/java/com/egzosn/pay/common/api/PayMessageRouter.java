@@ -129,7 +129,7 @@ public class PayMessageRouter {
     public PayOutMessage route(Map<String, Object> payMessage, PayConfigStorage storage) {
         PayMessage message = payService.createMessage(payMessage);
         message.setPayType(storage.getPayType());
-        if (null == storage.getMsgType()){
+        if (null != storage.getMsgType()){
             message.setMsgType(storage.getMsgType().name());
         }
         return route(message);
