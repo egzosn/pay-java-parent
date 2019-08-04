@@ -249,7 +249,7 @@ public class YiJiPayService extends BasePayService<YiJiPayConfigStorage> {
      * @return 返回图片信息，支付时需要的
      */
     @Override
-    public BufferedImage genQrPay(PayOrder order) {
+    public String getQrPay(PayOrder order) {
 
         return null;
     }

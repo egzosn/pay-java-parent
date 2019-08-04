@@ -291,23 +291,22 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
         return formHtml.toString();
     }
 
+
+
     /**
-     * 生成二维码支付
+     * 获取输出二维码信息,
      *
      * @param order 发起支付的订单信息
-     * @return 返回图片信息，支付时需要的
+     * @return 返回二维码信息,，支付时需要的
      */
     @Override
-    public BufferedImage genQrPay(PayOrder order) {
-
+    public String getQrPay(PayOrder order){
         Map<String, Object> orderInfo = orderInfo(order);
-
-
         //预订单
         JSONObject result = getHttpRequestTemplate().postForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(orderInfo), null, JSONObject.class);
         JSONObject response = result.getJSONObject("alipay_trade_precreate_response");
         if (SUCCESS_CODE.equals(response.getString(CODE))) {
-            return MatrixToImageWriter.writeInfoToJpgBuff(response.getString("qr_code"));
+            return response.getString("qr_code");
         }
         throw new PayErrorException(new PayException(response.getString(CODE), response.getString("msg"), result.toJSONString()));
 

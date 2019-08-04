@@ -288,7 +288,7 @@ public class FuiouPayService extends BasePayService<FuiouPayConfigStorage> {
      * @return 空
      */
     @Override
-    public BufferedImage genQrPay (PayOrder order) {
+    public String getQrPay (PayOrder order) {
         throw new UnsupportedOperationException();
     }
 
