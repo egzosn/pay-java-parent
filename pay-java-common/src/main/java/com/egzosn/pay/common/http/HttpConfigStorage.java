@@ -60,6 +60,10 @@ public class HttpConfigStorage {
      */
     private String charset;
 
+    private int socketTimeout;
+
+    private int connectTimeout;
+
     /**
      * http代理地址
      * @return http代理地址
@@ -192,5 +196,21 @@ public class HttpConfigStorage {
 
     public void setCharset(String charset) {
         this.charset = charset;
+    }
+
+    public int getSocketTimeout() {
+        return socketTimeout;
+    }
+
+    public void setSocketTimeout(int socketTimeout) {
+        this.socketTimeout = socketTimeout;
+    }
+
+    public int getConnectTimeout() {
+        return connectTimeout;
+    }
+
+    public void setConnectTimeout(int connectTimeout) {
+        this.connectTimeout = connectTimeout;
     }
 }
