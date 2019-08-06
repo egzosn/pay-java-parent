@@ -307,7 +307,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
      * @return 返回图片信息，支付时需要的
      */
     @Override
-    public BufferedImage genQrPay(PayOrder orderInfo) {
+    public String getQrPay(PayOrder orderInfo) {
         throw new UnsupportedOperationException();
     }
 

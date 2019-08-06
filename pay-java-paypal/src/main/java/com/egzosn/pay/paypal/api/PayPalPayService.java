@@ -209,7 +209,7 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage>{
     }
 
     @Override
-    public BufferedImage genQrPay(PayOrder order) {
+    public String getQrPay(PayOrder order) {
         return null;
     }
 

@@ -250,7 +250,7 @@ public class PayoneerPayService extends BasePayService<PayoneerConfigStorage> im
      * @return 返回图片信息，支付时需要的
      */
     @Override
-    public BufferedImage genQrPay(PayOrder order) {
+    public String getQrPay(PayOrder order) {
         throw new UnsupportedOperationException();
     }
 

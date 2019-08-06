@@ -334,9 +334,9 @@ public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorag
 
 
     @Override
-    public BufferedImage genQrPay(PayOrder order) {
+    public String getQrPay(PayOrder order) {
         JSONObject orderInfo = orderInfo(order);
-        return  MatrixToImageWriter.writeInfoToJpgBuff((String) orderInfo.get("code_url"));
+        return (String) orderInfo.get("code_url");
     }
 
     /**

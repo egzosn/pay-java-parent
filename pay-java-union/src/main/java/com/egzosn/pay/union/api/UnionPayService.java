@@ -386,7 +386,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
      * @return 返回图片信息，支付时需要的
      */
     @Override
-    public BufferedImage genQrPay(PayOrder order) {
+    public String getQrPay(PayOrder order) {
         Map<String, Object> params = orderInfo(order);
         String responseStr = getHttpRequestTemplate().postForObject(this.getBackTransUrl(), params, String.class);
         Map<String, Object> response = UriVariables.getParametersToMap(responseStr);
@@ -396,7 +396,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
         if (this.verify(response)) {
             if (SDKConstants.OK_RESP_CODE.equals(response.get(SDKConstants.param_respCode))) {
                 //成功
-                return MatrixToImageWriter.writeInfoToJpgBuff((String) response.get(SDKConstants.param_qrCode));
+                return (String) response.get(SDKConstants.param_qrCode);
             }
             throw new PayErrorException(new PayException((String) response.get(SDKConstants.param_respCode), (String) response.get(SDKConstants.param_respMsg), responseStr));
         }
