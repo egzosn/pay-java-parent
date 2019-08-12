@@ -60,9 +60,9 @@ public class HttpConfigStorage {
      */
     private String charset;
 
-    private int socketTimeout;
+    private int socketTimeout = -1;
 
-    private int connectTimeout;
+    private int connectTimeout = -1;
 
     /**
      * http代理地址

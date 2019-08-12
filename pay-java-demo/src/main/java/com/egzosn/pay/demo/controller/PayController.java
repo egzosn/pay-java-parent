@@ -228,7 +228,20 @@ public class PayController {
         ImageIO.write(payResponse.getService().genQrPay(new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, System.currentTimeMillis() + "", PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType))), "JPEG", baos);
         return baos.toByteArray();
     }
-
+    /**
+     * 获取二维码地址
+     * 二维码支付
+     * @param price       金额
+     * @return 二维码图像
+     * @throws IOException IOException
+     */
+    @RequestMapping(value = "getQrPay.json")
+    public String getQrPay(Integer payId, String transactionType, BigDecimal price) throws IOException {
+        //获取对应的支付账户操作工具（可根据账户id）
+        //获取对应的支付账户操作工具（可根据账户id）
+        PayResponse payResponse = service.getPayResponse(payId);
+        return payResponse.getService().getQrPay( new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, System.currentTimeMillis() + "", PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType)));
+    }
     /**
      * 获取一码付二维码图像
      * 二维码支付

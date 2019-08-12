@@ -62,6 +62,7 @@
         /*-----------扫码付-------------------*/
         payOrder.setTransactionType(YoudianTransactionType.NATIVE);
         //获取扫码付的二维码
+//        String image = service.getQrPay(payOrder);
         BufferedImage image = service.genQrPay(payOrder);
         /*-----------/扫码付-------------------*/
         
