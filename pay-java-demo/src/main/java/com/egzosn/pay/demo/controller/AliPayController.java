@@ -7,7 +7,6 @@ import com.egzosn.pay.ali.api.AliPayService;
 import com.egzosn.pay.ali.bean.AliTransactionType;
 import com.egzosn.pay.ali.bean.AliTransferType;
 import com.egzosn.pay.ali.bean.OrderSettle;
-import com.egzosn.pay.common.api.PayService;
 import com.egzosn.pay.common.bean.*;
 import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.common.http.UriVariables;
@@ -122,11 +121,23 @@ public class AliPayController {
      * @throws IOException IOException
      */
     @RequestMapping(value = "toQrPay.jpg", produces = "image/jpeg;charset=UTF-8")
-    public byte[] toWxQrPay( BigDecimal price) throws IOException {
+    public byte[] toQrPay( BigDecimal price) throws IOException {
         //获取对应的支付账户操作工具（可根据账户id）
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ImageIO.write(service.genQrPay( new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, System.currentTimeMillis()+"", AliTransactionType.SWEEPPAY)), "JPEG", baos);
         return baos.toByteArray();
+    }
+    /**
+     * 获取二维码地址
+     * 二维码支付
+     * @param price       金额
+     * @return 二维码图像
+     * @throws IOException IOException
+     */
+    @RequestMapping(value = "getQrPay.json")
+    public String getQrPay(BigDecimal price) throws IOException {
+        //获取对应的支付账户操作工具（可根据账户id）
+        return service.getQrPay( new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, System.currentTimeMillis()+"", AliTransactionType.SWEEPPAY));
     }
 
 

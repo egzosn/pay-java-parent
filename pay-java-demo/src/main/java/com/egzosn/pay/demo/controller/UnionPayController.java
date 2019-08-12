@@ -157,7 +157,18 @@ public class UnionPayController {
         ImageIO.write(service.genQrPay( new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, System.currentTimeMillis()+"", UnionTransactionType.APPLY_QR_CODE)), "JPEG", baos);
         return baos.toByteArray();
     }
-
+    /**
+     * 获取二维码地址
+     * 二维码支付
+     * @param price       金额
+     * @return 二维码图像
+     * @throws IOException IOException
+     */
+    @RequestMapping(value = "getQrPay.json")
+    public String getQrPay(BigDecimal price) throws IOException {
+        //获取对应的支付账户操作工具（可根据账户id）
+        return service.getQrPay( new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, System.currentTimeMillis()+"", UnionTransactionType.APPLY_QR_CODE));
+    }
 
     /**
      * 刷卡付,pos主动扫码付款(条码付)  CONSUME
