@@ -29,7 +29,7 @@
 * 码云：https://gitee.com/egzosn/pay-java-parent
 * GitHub：https://github.com/egzosn/pay-java-parent
 
-#### spring-boot-starter-pay 是一个基于spring-boot实现自动化配置的支付对接，让你可以不用理解支付怎么对接，只需要专注你的业务
+#### 基于spring-boot实现自动化配置的支付对接，让你真正做到一行代码实现支付聚合，让你可以不用理解支付怎么对接，只需要专注你的业务  全能第三方支付对接spring-boot-starter-pay开发工具包
 * 码云：https://gitee.com/egzosn/pay-spring-boot-starter-parent
 * GitHub：https://github.com/egzosn/pay-spring-boot-starter-parent
 
