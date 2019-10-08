@@ -185,7 +185,7 @@ public class PayoneerPayService extends BasePayService<PayoneerConfigStorage> im
         params.put("currency", order.getCurType());
         params.put("description", order.getSubject());
 
-        return params;
+        return preOrderHandler(params, order);
     }
 
     /**

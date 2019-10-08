@@ -44,6 +44,7 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage>{
      * 获取对应的请求地址
      * @return 请求地址
      */
+    @Override
     public String getReqUrl(TransactionType transactionType){
         return (payConfigStorage.isTest() ? SANDBOX_REQ_URL : REQ_URL) + transactionType.getMethod();
     }
@@ -182,7 +183,7 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage>{
         if ("created".equals(resp.getString("state")) && StringUtils.isNotEmpty(resp.getString("id"))){
             order.setOutTradeNo(resp.getString("id"));
         }
-        return resp;
+        return preOrderHandler(resp, order);
     }
 
     @Override

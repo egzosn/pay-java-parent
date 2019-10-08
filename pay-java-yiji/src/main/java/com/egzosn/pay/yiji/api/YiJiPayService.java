@@ -53,6 +53,7 @@ public class YiJiPayService extends BasePayService<YiJiPayConfigStorage> {
      *
      * @return 请求地址
      */
+    @Override
     public String getReqUrl(TransactionType transactionType) {
         if (payConfigStorage.isTest()){
             return DEV_REQ_URL;
@@ -175,7 +176,7 @@ public class YiJiPayService extends BasePayService<YiJiPayConfigStorage> {
             orderInfo.put("currency", order.getCurType());
         }
 
-        return orderInfo;
+        return preOrderHandler(orderInfo, order);
     }
 
     /**
