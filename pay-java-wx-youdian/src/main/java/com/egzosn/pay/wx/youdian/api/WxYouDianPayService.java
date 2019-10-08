@@ -224,9 +224,10 @@ public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorag
      */
     @Override
     public JSONObject orderInfo(PayOrder order) {
-        TreeMap<String, String> data = new TreeMap<>();
+        Map<String, Object> data = new TreeMap<>();
         data.put("access_token",  getAccessToken());
         data.put("paymoney", Util.conversionAmount(order.getPrice()).toString());
+        data =  preOrderHandler(data, order);
         String apbNonce = SignUtils.randomStr();
         String sign = createSign(SignUtils.parameterText(data, "") + apbNonce, payConfigStorage.getInputCharset());
         data.put("PayMoney", data.remove("paymoney"));
@@ -460,6 +461,7 @@ public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorag
      * @param type 交易类型
      * @return 请求地址
      */
+    @Override
     public String getReqUrl(TransactionType type){
         return URL + type.getMethod();
 

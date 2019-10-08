@@ -101,6 +101,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
      * @param transactionType 交易类型
      * @return 请求url
      */
+    @Override
     public String getReqUrl(TransactionType transactionType) {
 
         return URI + (payConfigStorage.isTest() ? SANDBOXNEW : "") + transactionType.getMethod();
@@ -221,13 +222,14 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
             parameters.put("time_expire", DateUtils.formatDate(order.getExpirationTime(), DateUtils.YYYYMMDDHHMMSS));
         }
         ((WxTransactionType) order.getTransactionType()).setAttribute(parameters, order);
-
+        parameters =  preOrderHandler(parameters, order);
         setSign(parameters);
 
         String requestXML = XML.getMap2Xml(parameters);
         if (LOG.isDebugEnabled()) {
             LOG.debug("requestXML：" + requestXML);
         }
+
         //调起支付的参数列表
         JSONObject result = requestTemplate.postForObject(getReqUrl(order.getTransactionType()), requestXML, JSONObject.class);
 
@@ -250,15 +252,14 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
 
         ////统一下单
         JSONObject result = unifiedOrder(order);
-
         // 对微信返回的数据进行校验
-        if (verify(result)) {
+        if (verify(preOrderHandler(result, order))) {
             //如果是扫码支付或者刷卡付无需处理，直接返回
             if (((WxTransactionType) order.getTransactionType()).isReturn()) {
                 return result;
             }
 
-            SortedMap<String, Object> params = new TreeMap<String, Object>();
+            Map<String, Object> params = new TreeMap<String, Object>();
 
             if (WxTransactionType.JSAPI == order.getTransactionType()) {
                 params.put("signType", payConfigStorage.getSignType());
@@ -274,6 +275,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
                 params.put("noncestr", result.get(NONCE_STR));
                 params.put("package", "Sign=WXPay");
             }
+            params =  preOrderHandler(params, order);
             String paySign = createSign(SignUtils.parameterText(params), payConfigStorage.getInputCharset());
             params.put(SIGN, paySign);
             return params;
