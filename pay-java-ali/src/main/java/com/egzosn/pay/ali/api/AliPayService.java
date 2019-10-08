@@ -67,6 +67,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
      *
      * @return 请求地址
      */
+    @Override
     public String getReqUrl(TransactionType transactionType) {
         return payConfigStorage.isTest() ? DEV_REQ_URL : HTTPS_REQ_URL;
     }
@@ -214,7 +215,6 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
             case APP:
                 bizContent.put(PASSBACK_PARAMS, order.getAddition());
                 bizContent.put(PRODUCT_CODE, "QUICK_MSECURITY_PAY");
-                orderInfo.put(RETURN_URL, payConfigStorage.getReturnUrl());
                 break;
             case BAR_CODE:
             case WAVE_CODE:
@@ -228,7 +228,8 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
             bizContent.put("timeout_express", DateUtils.minutesRemaining(order.getExpirationTime()) + "m");
         }
         orderInfo.put(BIZ_CONTENT, JSON.toJSONString(bizContent));
-        return orderInfo;
+
+        return  preOrderHandler(orderInfo, order);
     }
 
     /**
