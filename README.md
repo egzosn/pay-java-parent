@@ -33,9 +33,10 @@
 * 码云：https://gitee.com/egzosn/pay-spring-boot-starter-parent
 * GitHub：https://github.com/egzosn/pay-spring-boot-starter-parent
 
-### 使用
-这里不多说直接上代码 
-
+##### 开源中国项目地址
+如果你觉得项目对你有帮助，也点击下进入后点击收藏呗
+* 基础支付聚合组件[pay-java-parent](https://www.oschina.net/p/pay-java-parent)
+* spring-boot-starter自动化配置支付聚合组件 [pay-spring-boot-starter](https://www.oschina.net/p/spring-boot-starter-pay)
 
 ###### 支付教程 
 

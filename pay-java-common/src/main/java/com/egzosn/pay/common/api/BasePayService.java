@@ -454,4 +454,17 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
     public PayMessage createMessage(Map<String, Object> message) {
         return new PayMessage(message);
     }
+
+    /**
+     * 预订单回调处理器，用于订单信息的扩展
+     * 签名之前使用
+     *  如果需要进行扩展请重写该方法即可
+     * @param orderInfo 预订单信息
+     * @param orderInfo 订单信息
+     * @return 处理后订单信息
+     */
+    public Map<String, Object> preOrderHandler(Map<String, Object> orderInfo, PayOrder payOrder){
+        return orderInfo;
+    }
+
 }
