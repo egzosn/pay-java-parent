@@ -12,6 +12,11 @@
 
 
     <dependencies>
+        <dependency>
+            <groupId>com.alipay.sdk</groupId>
+            <artifactId>alipay-sdk-java</artifactId>
+            <version>4.8.10.ALL</version>
+        </dependency>
 
         <!-- pay-java  -->
         <dependency>
@@ -19,6 +24,11 @@
             <artifactId>pay-java-common</artifactId>
         </dependency>
         <!-- /pay-java  -->
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15on</artifactId>
+            <version>1.54</version>
+        </dependency>
 
     </dependencies>
 
