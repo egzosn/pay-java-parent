@@ -67,5 +67,5 @@ E-Mail：egzosn@gmail.com
 
 QQ群：542193977
 
-微信群: ![wx](https://images.gitee.com/uploads/images/2019/1107/113350_43cf64ef_1221178.jpeg "wx.jpg")
+微信群: ![微信群](https://images.gitee.com/uploads/images/2019/1107/121546_6dbab7f7_1221178.jpeg "wx.jpg")
 
