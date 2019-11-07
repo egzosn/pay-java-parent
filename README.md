@@ -67,3 +67,4 @@ E-Mail：egzosn@gmail.com
 
 QQ群：542193977
 
+微信群: ![image](https://gitee.com/egzosn/sqlFilter-tool/blob/master/wx.jpg?raw=true)
