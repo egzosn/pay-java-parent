@@ -42,6 +42,7 @@ public class BaiduPayConfigStorage extends BasePayConfigStorage {
         return super.getKeyPrivate();
     }
     
+    @Override
     public void setKeyPublic(String keyPublic) {
         super.setKeyPublic(keyPublic);
     }

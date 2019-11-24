@@ -35,6 +35,7 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
     public static final String ORDER_ID = "orderId";
     public static final String USER_ID = "userId";
     public static final String SITE_ID = "siteId";
+    public static final String SIGN = "sign";
     public static final String METHOD = "method";
     public static final String TYPE = "type";
     
@@ -63,7 +64,7 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
     public boolean signVerify(Map<String, Object> params, String sign) {
         String keyPrivate = payConfigStorage.getKeyPrivate();
         String rsaSign = String.valueOf(params.get(RSA_SIGN));
-        String targetRsaSign = getRsaSign(params, keyPrivate, RSA_SIGN);
+        String targetRsaSign = getRsaSign(params, RSA_SIGN);
         LOG.debug("百度返回的签名: " + rsaSign + " 本地产生的签名: " + targetRsaSign);
         return StringUtils.equals(rsaSign, targetRsaSign);
     }
@@ -89,11 +90,11 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
      *
      * @return
      */
-    public NoNullMap<String, Object> getUseQueryPay() {
+    public Map<String, Object> getUseQueryPay() {
         String appKey = payConfigStorage.getAppKey();
-        NoNullMap<String, Object> result = new NoNullMap<>();
-        result.putIfNoNull(APP_KEY, appKey)
-                .putIfNoNull(APP_ID, payConfigStorage.getAppid());
+        Map<String, Object> result = new HashMap<>();
+        result.put(APP_KEY, appKey);
+        result.put(APP_ID, payConfigStorage.getAppid());
         return result;
     }
     
@@ -273,18 +274,18 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
     }
     
     public Map<String, Object> refundUseBaidu(BaiduRefundOrder refundOrder) {
-        NoNullMap<String, Object> parameters = getUseQueryPay();
+        Map<String, Object> parameters = getUseQueryPay();
         BaiduTransactionType transactionType = BaiduTransactionType.APPLY_REFUND;
-        parameters.putIfNoNull(METHOD, transactionType.getMethod())
-                .putIfNoNull(ORDER_ID, refundOrder.getTradeNo())
-                .putIfNoNull(USER_ID, refundOrder.getUserId())
-                .putIfNoNull("refundType", refundOrder.getRefundType())
-                .putIfNoNull("refundReason", String.valueOf(refundOrder.getRefundReason()))
-                .putIfNoNull(TP_ORDER_ID, refundOrder.getTpOrderId())
-                .putIfNoNull("applyRefundMoney", refundOrder.getApplyRefundMoney())
-                .putIfNoNull("bizRefundBatchId", refundOrder.getBizRefundBatchId())
-                .putIfNoNull(APP_KEY, payConfigStorage.getAppKey())
-                .putIfNoNull(RSA_SIGN, getRsaSign(parameters, payConfigStorage.getKeyPrivate()));
+        parameters.put(METHOD, transactionType.getMethod());
+        parameters.put(ORDER_ID, refundOrder.getTradeNo());
+        parameters.put(USER_ID, refundOrder.getUserId());
+        parameters.put("refundType", refundOrder.getRefundType());
+        parameters.put("refundReason", String.valueOf(refundOrder.getRefundReason()));
+        parameters.put(TP_ORDER_ID, refundOrder.getTpOrderId());
+        parameters.put("applyRefundMoney", refundOrder.getApplyRefundMoney());
+        parameters.put("bizRefundBatchId", refundOrder.getBizRefundBatchId());
+        parameters.put(APP_KEY, payConfigStorage.getAppKey());
+        parameters.put(RSA_SIGN, getRsaSign(parameters, RSA_SIGN));
         return requestTemplate.getForObject(String.format("%s?%s", getReqUrl(transactionType), UriVariables.getMapToParameters(parameters)), JSONObject.class);
     }
     
@@ -296,14 +297,14 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
     @Override
     public Map<String, Object> refundquery(String orderId,
                                            String userId) {
-        NoNullMap<String, Object> parameters = getUseQueryPay();
+        Map<String, Object> parameters = getUseQueryPay();
         BaiduTransactionType transactionType = BaiduTransactionType.REFUND_QUERY;
-        parameters.putIfNoNull(METHOD, transactionType.getMethod())
-                .putIfNoNull(TYPE, 3)
-                .putIfNoNull(ORDER_ID, orderId)
-                .putIfNoNull(USER_ID, userId)
-                .putIfNoNull(APP_KEY, payConfigStorage.getAppKey())
-                .putIfNoNull(RSA_SIGN, getRsaSign(parameters, payConfigStorage.getKeyPrivate()));
+        parameters.put(METHOD, transactionType.getMethod());
+        parameters.put(TYPE, 3);
+        parameters.put(ORDER_ID, orderId);
+        parameters.put(USER_ID, userId);
+        parameters.put(APP_KEY, payConfigStorage.getAppKey());
+        parameters.put(RSA_SIGN, getRsaSign(parameters, RSA_SIGN));
         return requestTemplate.getForObject(String.format("%s?%s", getReqUrl(transactionType), UriVariables.getMapToParameters(parameters)), JSONObject.class);
     }
     
@@ -337,10 +338,10 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
             throw new UnsupportedOperationException("不支持该操作");
         }
         
-        NoNullMap<String, Object> parameters = getUseQueryPay();
-        parameters.putIfNoNull(ORDER_ID, orderId)
-                .putIfNoNull(SITE_ID, siteId)
-                .putIfNoNull("sign", getRsaSignUsePayQuery(parameters, payConfigStorage.getKeyPrivate()));
+        Map<String, Object> parameters = getUseQueryPay();
+        parameters.put(ORDER_ID, orderId);
+        parameters.put(SITE_ID, siteId);
+        parameters.put(SIGN, getRsaSign(parameters, SIGN));
         return requestTemplate.getForObject(String.format("%s?%s", getReqUrl(transactionType), UriVariables.getMapToParameters(parameters)), JSONObject.class);
     }
     
@@ -362,39 +363,8 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
         return SignUtils.RSA.sign(params, privateKey, "UTF-8");
     }
     
-    /**
-     * "支付状态查询" 使用的签名
-     *
-     * @param params
-     * @param privateKey
-     * @return
-     */
-    private String getRsaSignUsePayQuery(Map<String, Object> params, String privateKey) {
-        Map<String, String> signParams = new HashMap<>();
-        signParams.put(APP_KEY, String.valueOf(params.get(APP_KEY)));
-        signParams.put(APP_ID, String.valueOf(params.get(APP_ID)));
-        signParams.put(ORDER_ID, String.valueOf(params.get(ORDER_ID)));
-        signParams.put(SITE_ID, String.valueOf(params.get(SITE_ID)));
-        if (signParams.containsValue(null)) {
-            throw new IllegalArgumentException("参数 " + signParams.keySet().toString() + " 均为必填");
-        }
-        
-        return SignUtils.RSA.sign(params, privateKey, "UTF-8");
-    }
-    
-    private String getRsaSign(Map<String, Object> params, String privateKey) {
-        Map<String, String> signParams = new HashMap<>();
-        signParams.put(APP_KEY, String.valueOf(params.get(APP_KEY)));
-        signParams.put(USER_ID, String.valueOf(params.get(USER_ID)));
-        signParams.put(ORDER_ID, String.valueOf(params.get(ORDER_ID)));
-        if (signParams.containsValue(null)) {
-            throw new IllegalArgumentException("参数 " + signParams.keySet().toString() + " 均为必填");
-        }
-        
-        return SignUtils.RSA.sign(params, privateKey, "UTF-8");
-    }
-    
     private String getRsaSign(Map<String, Object> params, String... ignoreKeys) {
-        return SignUtils.RSA.createSign(SignUtils.parameterText(params, "&", ignoreKeys), payConfigStorage.getKeyPrivate(), "UTF-8");
+        String waitSignVal = SignUtils.parameterText(params, "&", false, ignoreKeys);
+        return SignUtils.RSA.createSign(waitSignVal, payConfigStorage.getKeyPrivate(), "UTF-8");
     }
 }
