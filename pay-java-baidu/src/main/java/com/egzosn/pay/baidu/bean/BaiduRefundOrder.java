@@ -5,9 +5,21 @@ import com.egzosn.pay.common.bean.RefundOrder;
 import java.math.BigDecimal;
 
 public class BaiduRefundOrder extends RefundOrder {
+    /**
+     * 平台用户ID
+     */
     private Long userId;
+    /**
+     * 退款类型
+     */
     private Integer refundType;
+    /**
+     * 退款原因
+     */
     private String refundReason;
+    /**
+     * 平台订单ID
+     */
     private String tpOrderId;
     /**
      * 退款金额，单位：分，发起部分退款时必传

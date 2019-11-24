@@ -3,15 +3,25 @@ package com.egzosn.pay.baidu.bean;
 import com.egzosn.pay.common.bean.TransactionType;
 
 public enum BaiduTransactionType implements TransactionType {
-    // 查询支付状态
+    /**
+     * 查询支付状态
+     */
     PAY_QUERY("https://dianshang.baidu.com/platform/entity/openapi/queryorderdetail", "PAY_QUERY"),
-    // 取消核销
+    /**
+     * 取消核销
+     */
     REFUND_QUERY("https://nop.nuomi.com/nop/server/rest", "nuomi.cashier.syncorderstatus"),
-    // 下载资金账单
+    /**
+     * 下载资金账单
+     */
     DOWNLOAD_BILL("https://openapi.baidu.com/rest/2.0/smartapp/pay/paymentservice/capitaBill", "DOWNLOAD_BILL"),
-    // 下载订单对账单
+    /**
+     * 下载订单对账单
+     */
     DOWNLOAD_ORDER_BILL("https://openapi.baidu.com/rest/2.0/smartapp/pay/paymentservice/orderBill", "DOWNLOAD_ORDER_BILL"),
-    // 申请退款
+    /**
+     * 申请退款
+     */
     APPLY_REFUND("https://nop.nuomi.com/nop/server/rest", "nuomi.cashier.applyorderrefund");
     private final String method;
     private final String url;
