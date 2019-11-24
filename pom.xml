@@ -64,6 +64,7 @@
         <log4j.version>1.2.17</log4j.version>
         <fastjson.version>1.2.58</fastjson.version>
         <zxing.version>3.3.1</zxing.version>
+        <junit.version>5.5.1</junit.version>
     </properties>
 
 
@@ -103,6 +104,12 @@
                 <groupId>com.google.zxing</groupId>
                 <artifactId>core</artifactId>
                 <version>${zxing.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter</artifactId>
+                <version>${junit.version}</version>
             </dependency>
 
         </dependencies>

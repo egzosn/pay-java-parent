@@ -2,12 +2,6 @@ package com.egzosn.pay.baidu.api;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.egzosn.pay.baidu.bean.BaiduPayOrder;
-import com.egzosn.pay.baidu.bean.BaiduRefundOrder;
-import com.egzosn.pay.baidu.bean.BaiduTransactionType;
-import com.egzosn.pay.baidu.bean.type.AuditStatus;
-import com.egzosn.pay.baidu.util.Asserts;
-import com.egzosn.pay.baidu.util.NoNullMap;
 import com.egzosn.pay.common.api.BasePayService;
 import com.egzosn.pay.common.bean.*;
 import com.egzosn.pay.common.http.HttpConfigStorage;
@@ -15,6 +9,12 @@ import com.egzosn.pay.common.http.UriVariables;
 import com.egzosn.pay.common.util.DateUtils;
 import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.str.StringUtils;
+import com.egzosn.pay.baidu.bean.BaiduPayOrder;
+import com.egzosn.pay.baidu.bean.BaiduRefundOrder;
+import com.egzosn.pay.baidu.bean.BaiduTransactionType;
+import com.egzosn.pay.baidu.bean.type.AuditStatus;
+import com.egzosn.pay.baidu.util.Asserts;
+import com.egzosn.pay.baidu.util.NoNullMap;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
+public class BaiduPayService extends BasePayService<com.egzosn.pay.baidu.api.BaiduPayConfigStorage> {
     public static final String APP_KEY = "appKey";
     public static final String APP_ID = "appId";
     public static final String DEAL_ID = "dealId";
@@ -43,11 +43,11 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
     public static final String RESPONSE_STATUS = "status";
     
     
-    public BaiduPayService(BaiduPayConfigStorage payConfigStorage) {
+    public BaiduPayService(com.egzosn.pay.baidu.api.BaiduPayConfigStorage payConfigStorage) {
         super(payConfigStorage);
     }
     
-    public BaiduPayService(BaiduPayConfigStorage payConfigStorage,
+    public BaiduPayService(com.egzosn.pay.baidu.api.BaiduPayConfigStorage payConfigStorage,
                            HttpConfigStorage configStorage) {
         super(payConfigStorage, configStorage);
     }
@@ -226,17 +226,20 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
     }
     
     @Override
+    @Deprecated
     public String buildRequest(Map<String, Object> orderInfo,
                                MethodType method) {
         throw new UnsupportedOperationException("百度不支持PC支付");
     }
     
     @Override
+    @Deprecated
     public String getQrPay(PayOrder order) {
         throw new UnsupportedOperationException("百度不支持扫码付");
     }
     
     @Override
+    @Deprecated
     public Map<String, Object> microPay(PayOrder order) {
         throw new UnsupportedOperationException("百度不支持刷卡付");
     }
@@ -247,6 +250,7 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
     }
     
     @Override
+    @Deprecated
     public Map<String, Object> close(String tradeNo, String outTradeNo) {
         throw new UnsupportedOperationException("不支持该操作");
     }
@@ -269,6 +273,7 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
     }
     
     @Override
+    @Deprecated
     public Map<String, Object> refund(RefundOrder refundOrder) {
         throw new UnsupportedOperationException("请使用 " + getClass().getName() + "#refundUseBaidu");
     }

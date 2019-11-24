@@ -17,6 +17,11 @@
             <artifactId>pay-java-common</artifactId>
         </dependency>
         <!-- /pay-java  -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 
