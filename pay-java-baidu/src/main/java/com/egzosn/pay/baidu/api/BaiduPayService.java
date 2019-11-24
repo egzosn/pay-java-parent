@@ -7,7 +7,6 @@ import com.egzosn.pay.baidu.bean.BaiduRefundOrder;
 import com.egzosn.pay.baidu.bean.BaiduTransactionType;
 import com.egzosn.pay.baidu.bean.type.AuditStatus;
 import com.egzosn.pay.baidu.util.Asserts;
-import com.egzosn.pay.baidu.util.NoNullMap;
 import com.egzosn.pay.common.api.BasePayService;
 import com.egzosn.pay.common.bean.*;
 import com.egzosn.pay.common.http.HttpConfigStorage;
@@ -22,7 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class BaiduPayService extends BasePayService<com.egzosn.pay.baidu.api.BaiduPayConfigStorage> {
+public class BaiduPayService extends BasePayService<BaiduPayConfigStorage, BaiduPayOrder> {
     public static final String APP_KEY = "appKey";
     public static final String APP_ID = "appId";
     public static final String DEAL_ID = "dealId";
@@ -43,11 +42,11 @@ public class BaiduPayService extends BasePayService<com.egzosn.pay.baidu.api.Bai
     public static final String RESPONSE_STATUS = "status";
     
     
-    public BaiduPayService(com.egzosn.pay.baidu.api.BaiduPayConfigStorage payConfigStorage) {
+    public BaiduPayService(BaiduPayConfigStorage payConfigStorage) {
         super(payConfigStorage);
     }
     
-    public BaiduPayService(com.egzosn.pay.baidu.api.BaiduPayConfigStorage payConfigStorage,
+    public BaiduPayService(BaiduPayConfigStorage payConfigStorage,
                            HttpConfigStorage configStorage) {
         super(payConfigStorage, configStorage);
     }
@@ -93,13 +92,10 @@ public class BaiduPayService extends BasePayService<com.egzosn.pay.baidu.api.Bai
      * @return
      */
     @Override
-    public Map<String, Object> orderInfo(PayOrder order) {
-        if (!(order instanceof BaiduPayOrder)) {
-            throw new UnsupportedOperationException("请使用 " + BaiduPayOrder.class.getName());
-        }
-        NoNullMap<String, Object> params = getUseOrderInfoParams(order);
+    public Map<String, Object> orderInfo(BaiduPayOrder order) {
+        Map<String, Object> params = getUseOrderInfoParams(order);
         String rsaSign = getRsaSign(params, RSA_SIGN);
-        params.putIfNoNull(RSA_SIGN, rsaSign);
+        params.put(RSA_SIGN, rsaSign);
         return params;
     }
     
@@ -122,18 +118,19 @@ public class BaiduPayService extends BasePayService<com.egzosn.pay.baidu.api.Bai
      * @param order
      * @return
      */
-    private NoNullMap<String, Object> getUseOrderInfoParams(PayOrder order) {
+    private Map<String, Object> getUseOrderInfoParams(PayOrder order) {
         BaiduPayOrder payOrder = (BaiduPayOrder) order;
-        NoNullMap<String, Object> result = new NoNullMap<>();
+        Map<String, Object> result = new HashMap<>();
         String appKey = payConfigStorage.getAppKey();
         String dealId = payConfigStorage.getDealId();
-        result.putIfNoNull(APP_KEY, appKey)
-                .putIfNoNull(TP_ORDER_ID, payOrder.getTradeNo())
-                .putIfNoNull(DEAL_ID, dealId)
-                .putIfNoNull(DEAL_TITLE, payOrder.getSubject())
-                .putIfNoNull(SIGN_FIELDS_RANGE, payOrder.getSignFieldsRange())
-                .putIfNoNull(BIZ_INFO, JSON.toJSONString(payOrder.getBizInfo()))
-                .putIfNoNull(TOTAL_AMOUNT, String.valueOf(order.getPrice()));
+        result.put(APP_KEY, appKey);
+        result.put(TP_ORDER_ID, payOrder.getTradeNo());
+        result.put(DEAL_ID, dealId);
+        result.put(DEAL_TITLE, payOrder.getSubject());
+        result.put(SIGN_FIELDS_RANGE, payOrder.getSignFieldsRange());
+        result.put(BIZ_INFO, JSON.toJSONString(payOrder.getBizInfo()));
+        result.put(TOTAL_AMOUNT, String.valueOf(order.getPrice()));
+        
         return result;
     }
     
@@ -272,7 +269,7 @@ public class BaiduPayService extends BasePayService<com.egzosn.pay.baidu.api.Bai
      */
     @Override
     @Deprecated
-    public String getQrPay(PayOrder order) {
+    public String getQrPay(BaiduPayOrder order) {
         throw new UnsupportedOperationException("百度不支持扫码付");
     }
     
@@ -284,7 +281,7 @@ public class BaiduPayService extends BasePayService<com.egzosn.pay.baidu.api.Bai
      */
     @Override
     @Deprecated
-    public Map<String, Object> microPay(PayOrder order) {
+    public Map<String, Object> microPay(BaiduPayOrder order) {
         throw new UnsupportedOperationException("百度不支持刷卡付");
     }
     
