@@ -6,7 +6,7 @@ public enum BaiduTransactionType implements TransactionType {
     /**
      * 查询支付状态
      */
-    PAY_QUERY("https://dianshang.baidu.com/platform/entity/openapi/queryorderdetail", "PAY_QUERY"),
+    PAY_QUERY("https://dianshang.baidu.com/platform/entity/openapi/queryorderdetail", null),
     /**
      * 取消核销
      */
@@ -14,11 +14,11 @@ public enum BaiduTransactionType implements TransactionType {
     /**
      * 下载资金账单
      */
-    DOWNLOAD_BILL("https://openapi.baidu.com/rest/2.0/smartapp/pay/paymentservice/capitaBill", "DOWNLOAD_BILL"),
+    DOWNLOAD_BILL("https://openapi.baidu.com/rest/2.0/smartapp/pay/paymentservice/capitaBill", null),
     /**
      * 下载订单对账单
      */
-    DOWNLOAD_ORDER_BILL("https://openapi.baidu.com/rest/2.0/smartapp/pay/paymentservice/orderBill", "DOWNLOAD_ORDER_BILL"),
+    DOWNLOAD_ORDER_BILL("https://openapi.baidu.com/rest/2.0/smartapp/pay/paymentservice/orderBill", null),
     /**
      * 申请退款
      */
