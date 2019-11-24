@@ -216,6 +216,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage, PayOrder>
                 break;
             case BAR_CODE:
             case WAVE_CODE:
+            case SECURITY_CODE:
                 bizContent.put("scene", order.getTransactionType().toString().toLowerCase());
                 bizContent.put(PRODUCT_CODE, "FACE_TO_FACE_PAYMENT");
                 bizContent.put("auth_code", order.getAuthCode());
