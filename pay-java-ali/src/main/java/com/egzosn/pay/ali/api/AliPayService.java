@@ -12,11 +12,9 @@ import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.common.http.UriVariables;
 import com.egzosn.pay.common.util.DateUtils;
-import com.egzosn.pay.common.util.MatrixToImageWriter;
 import com.egzosn.pay.common.util.Util;
 import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.str.StringUtils;
-import java.awt.image.BufferedImage;
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -28,7 +26,7 @@ import java.util.*;
  *         email egzosn@gmail.com
  *         date 2017-2-22 20:09
  */
-public class AliPayService extends BasePayService<AliPayConfigStorage> {
+public class AliPayService extends BasePayService<AliPayConfigStorage, PayOrder> {
     
     /**
      * 正式测试环境
@@ -218,6 +216,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
                 break;
             case BAR_CODE:
             case WAVE_CODE:
+            case SECURITY_CODE:
                 bizContent.put("scene", order.getTransactionType().toString().toLowerCase());
                 bizContent.put(PRODUCT_CODE, "FACE_TO_FACE_PAYMENT");
                 bizContent.put("auth_code", order.getAuthCode());
