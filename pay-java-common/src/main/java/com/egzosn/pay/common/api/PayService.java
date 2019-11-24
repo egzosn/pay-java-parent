@@ -171,7 +171,7 @@ public interface PayService<PC extends PayConfigStorage, O extends PayOrder> {
 
     /**
      * 刷卡付,pos主动扫码付款(条码付)
-     *
+     * 刷脸付
      * @param order 发起支付的订单信息
      * @return 返回支付结果
      */
