@@ -33,7 +33,7 @@ import java.util.*;
  *         create 2018-01-19
  *                 </pre>
  */
-public class PayoneerPayService extends BasePayService<PayoneerConfigStorage> implements AdvancedPayService {
+public class PayoneerPayService extends BasePayService<PayoneerConfigStorage, PayOrder> implements AdvancedPayService {
     /**
      * 测试地址
      */
