@@ -4,11 +4,11 @@ import com.egzosn.pay.common.util.Util;
 import com.egzosn.pay.common.util.str.StringUtils;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
 /**
+ * 交易结算信息
  * @author egan
  *         email egzosn@gmail.com
  *         date 2019/4/28.20:29

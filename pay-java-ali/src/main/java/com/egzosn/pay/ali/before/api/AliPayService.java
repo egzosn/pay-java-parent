@@ -35,7 +35,7 @@ import static com.egzosn.pay.ali.api.AliPayService.SIGN;
  * @see com.egzosn.pay.ali.api.AliPayService
  */
 @Deprecated
-public class AliPayService extends BasePayService<AliPayConfigStorage> {
+public class AliPayService extends BasePayService<AliPayConfigStorage, PayOrder> {
 
 
 

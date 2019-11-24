@@ -20,7 +20,7 @@ import java.util.Map;
  *         date 2016-5-18 14:09:01
  *         </pre>
  */
-public interface PayService<PC extends PayConfigStorage> {
+public interface PayService<PC extends PayConfigStorage, O extends PayOrder> {
 
 
     /**
@@ -88,7 +88,7 @@ public interface PayService<PC extends PayConfigStorage> {
      * @return 订单信息
      * @see PayOrder 支付订单信息
      */
-    Map<String, Object> orderInfo(PayOrder order);
+    Map<String, Object> orderInfo(O order);
 
     /**
      * 页面转跳支付， 返回对应页面重定向信息
@@ -96,7 +96,7 @@ public interface PayService<PC extends PayConfigStorage> {
      * @param order 订单信息
      * @return 对应页面重定向信息
      */
-    String toPay(PayOrder order);
+    String toPay(O order);
 
     /**
      * 创建签名
@@ -160,14 +160,14 @@ public interface PayService<PC extends PayConfigStorage> {
      * @param order 发起支付的订单信息
      * @return 返回图片信息，支付时需要的
      */
-    BufferedImage genQrPay(PayOrder order);
+    BufferedImage genQrPay(O order);
     /**
      * 获取输出二维码信息,
      *
      * @param order 发起支付的订单信息
      * @return 返回二维码信息,，支付时需要的
      */
-    String getQrPay(PayOrder order);
+    String getQrPay(O order);
 
     /**
      * 刷卡付,pos主动扫码付款(条码付)
@@ -175,7 +175,7 @@ public interface PayService<PC extends PayConfigStorage> {
      * @param order 发起支付的订单信息
      * @return 返回支付结果
      */
-    Map<String, Object> microPay(PayOrder order);
+    Map<String, Object> microPay(O order);
 
     /**
      * 交易查询接口
@@ -453,4 +453,15 @@ public interface PayService<PC extends PayConfigStorage> {
      * @return 支付消息对象
      */
     PayMessage createMessage(Map<String, Object> message);
+
+    /**
+     * 预订单回调处理器，用于订单信息的扩展
+     * 签名之前使用
+     *  如果需要进行扩展请重写该方法即可
+     * @param orderInfo 商户平台预订单信息
+     * @param payOrder 订单信息
+     * @return 处理后订单信息
+     */
+    Map<String, Object> preOrderHandler(Map<String, Object> orderInfo, O payOrder);
+
 }
