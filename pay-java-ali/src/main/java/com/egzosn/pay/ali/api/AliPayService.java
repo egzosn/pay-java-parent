@@ -26,7 +26,7 @@ import java.util.*;
  *         email egzosn@gmail.com
  *         date 2017-2-22 20:09
  */
-public class AliPayService extends BasePayService<AliPayConfigStorage, PayOrder> {
+public class AliPayService extends BasePayService<AliPayConfigStorage> {
     
     /**
      * 正式测试环境

@@ -21,7 +21,7 @@ import java.util.*;
  * create 2017 2017/1/16 0016
  * </pre>
  */
-public class FuiouPayService extends BasePayService<FuiouPayConfigStorage, PayOrder> {
+public class FuiouPayService extends BasePayService<FuiouPayConfigStorage> {
 
     /**
      * 正式域名

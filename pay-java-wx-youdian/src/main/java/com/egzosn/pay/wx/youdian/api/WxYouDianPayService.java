@@ -27,7 +27,7 @@ import java.util.concurrent.locks.Lock;
  * email egzosn@gmail.com
  * date 2017/01/12 22:58
  */
-public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorage, PayOrder> {
+public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorage> {
 
     private final static String URL = "http://life.51youdian.com/Api/CheckoutCounter/";
 

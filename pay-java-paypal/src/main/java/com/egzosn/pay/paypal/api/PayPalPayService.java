@@ -29,7 +29,7 @@ import java.util.concurrent.locks.Lock;
  * email egzosn@gmail.com
  * date 2018-4-8 ‏‎22:15:09
  */
-public class PayPalPayService extends BasePayService<PayPalConfigStorage, PayOrder>{
+public class PayPalPayService extends BasePayService<PayPalConfigStorage>{
 
     /**
      * 沙箱环境

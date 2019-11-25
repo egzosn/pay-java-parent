@@ -38,7 +38,7 @@ import java.util.*;
  *         create 2017 2017/11/5
  *         </pre>
  */
-public class UnionPayService extends BasePayService<UnionPayConfigStorage, PayOrder> {
+public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
     /**
      * 测试域名
      */
