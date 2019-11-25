@@ -36,7 +36,7 @@ import static com.egzosn.pay.wx.bean.WxTransferType.*;
  *                 date 2016-5-18 14:09:01
  *                 </pre>
  */
-public class WxPayService extends BasePayService<WxPayConfigStorage, PayOrder> {
+public class WxPayService extends BasePayService<WxPayConfigStorage> {
 
 
     /**

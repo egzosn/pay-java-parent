@@ -52,7 +52,9 @@ public class HttpRequestTemplate {
 
     protected HttpHost httpProxy;
 
-    HttpConfigStorage configStorage;
+    protected HttpConfigStorage configStorage;
+
+    private SSLConnectionSocketFactory sslsf;
     /**
      *  获取代理带代理地址的 HttpHost
      * @return 获取代理带代理地址的 HttpHost
@@ -73,9 +75,9 @@ public class HttpRequestTemplate {
                 .custom()
                 //网络提供者
                 .setDefaultCredentialsProvider(createCredentialsProvider(configStorage))
+                .setConnectionManager(connectionManager(configStorage))
                 //设置httpclient的SSLSocketFactory
                 .setSSLSocketFactory(createSSL(configStorage))
-                .setConnectionManager(connectionManager(configStorage))
                 .setDefaultRequestConfig(createRequestConfig(configStorage))
                 .build();
         if (null == connectionManager) {
@@ -114,36 +116,38 @@ public class HttpRequestTemplate {
      * @return SSLConnectionSocketFactory  Layered socket factory for TLS/SSL connections.
      */
     public SSLConnectionSocketFactory createSSL( HttpConfigStorage configStorage){
-
+        if (null != sslsf){
+            return sslsf;
+        }
         if (null == configStorage.getKeystore()){
             try {
-                return new SSLConnectionSocketFactory(SSLContext.getDefault());
+                return sslsf = new SSLConnectionSocketFactory(SSLContext.getDefault());
             } catch (NoSuchAlgorithmException e) {
                 LOG.error(e);
             }
         }
 
-            //读取本机存放的PKCS12证书文件
+        //读取本机存放的PKCS12证书文件
         try(InputStream instream = configStorage.getKeystoreInputStream()){
-                //指定读取证书格式为PKCS12
-                KeyStore keyStore = KeyStore.getInstance("PKCS12");
+            //指定读取证书格式为PKCS12
+            KeyStore keyStore = KeyStore.getInstance("PKCS12");
 
-                char[] password = configStorage.getStorePassword().toCharArray();
-                //指定PKCS12的密码
-                keyStore.load(instream, password);
-                // 实例化密钥库 & 初始化密钥工厂
-                KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-                kmf.init(keyStore, password);
-                // 创建 SSLContext
-                SSLContext sslcontext = SSLContexts.custom()
-                        .loadKeyMaterial(keyStore, password).build();
+            char[] password = configStorage.getStorePassword().toCharArray();
+            //指定PKCS12的密码
+            keyStore.load(instream, password);
+            // 实例化密钥库 & 初始化密钥工厂
+            KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+            kmf.init(keyStore, password);
+            // 创建 SSLContext
+            SSLContext sslcontext = SSLContexts.custom()
+                    .loadKeyMaterial(keyStore, password).build();
 
-                //指定TLS版本
-                SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
-                        sslcontext, new String[]{"TLSv1"}, null,
-                        new DefaultHostnameVerifier());
+            //指定TLS版本
+            sslsf = new SSLConnectionSocketFactory(
+                    sslcontext, new String[]{"TLSv1"}, null,
+                    new DefaultHostnameVerifier());
 
-                return sslsf;
+            return sslsf;
         } catch (IOException e) {
             LOG.error(e);
         } catch (GeneralSecurityException e) {
@@ -168,7 +172,7 @@ public class HttpRequestTemplate {
         // 需要用户认证的代理服务器
         CredentialsProvider credsProvider = new BasicCredentialsProvider();
         credsProvider.setCredentials(
-                 AuthScope.ANY,
+                AuthScope.ANY,
                 new UsernamePasswordCredentials(configStorage.getAuthUsername(), configStorage.getAuthPassword()));
 
 
@@ -348,9 +352,9 @@ public class HttpRequestTemplate {
         }
         httpRequest.setResponseType(responseType);
         try (CloseableHttpResponse response = getHttpClient().execute(httpRequest)) {
-          return httpRequest.handleResponse(response);
+            return httpRequest.handleResponse(response);
         }catch (IOException e){
-           throw new PayErrorException(new PayException("IOException", e.getLocalizedMessage()));
+            throw new PayErrorException(new PayException("IOException", e.getLocalizedMessage()));
         }finally {
             httpRequest.releaseConnection();
         }
@@ -368,6 +372,6 @@ public class HttpRequestTemplate {
      * @return 类型对象
      */
     public <T>T doExecute(String uri, Object request, Class<T> responseType, MethodType method){
-       return doExecute(URI.create(uri), request, responseType, method);
+        return doExecute(URI.create(uri), request, responseType, method);
     }
 }

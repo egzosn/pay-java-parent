@@ -26,7 +26,7 @@ import java.util.*;
  *      date 2017/3/5 20:36
  *   </pre>
  */
-public abstract class BasePayService<PC extends PayConfigStorage, O extends PayOrder> implements PayService<PC, O> {
+public abstract class BasePayService<PC extends PayConfigStorage> implements PayService<PC> {
     protected final Log LOG = LogFactory.getLog(getClass());
     protected PC payConfigStorage;
 
@@ -138,7 +138,7 @@ public abstract class BasePayService<PC extends PayConfigStorage, O extends PayO
      * @return 对应页面重定向信息
      */
     @Override
-    public String toPay(O order) {
+    public <O extends PayOrder> String toPay(O order) {
         Map orderInfo = orderInfo(order);
         return buildRequest(orderInfo, MethodType.POST);
     }
@@ -150,7 +150,7 @@ public abstract class BasePayService<PC extends PayConfigStorage, O extends PayO
      * @return 返回图片信息，支付时需要的
      */
     @Override
-    public BufferedImage genQrPay(O order) {
+    public <O extends PayOrder> BufferedImage genQrPay(O order) {
        return MatrixToImageWriter.writeInfoToJpgBuff(getQrPay(order));
     }
 
@@ -463,7 +463,7 @@ public abstract class BasePayService<PC extends PayConfigStorage, O extends PayO
      * @param orderInfo 订单信息
      * @return 处理后订单信息
      */
-    public Map<String, Object> preOrderHandler(Map<String, Object> orderInfo, O payOrder){
+    public <O extends PayOrder> Map<String, Object> preOrderHandler(Map<String, Object> orderInfo, O payOrder){
         return orderInfo;
     }
 
