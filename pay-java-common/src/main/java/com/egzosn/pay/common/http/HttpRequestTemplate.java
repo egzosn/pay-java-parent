@@ -52,7 +52,9 @@ public class HttpRequestTemplate {
 
     protected HttpHost httpProxy;
 
-    HttpConfigStorage configStorage;
+    protected HttpConfigStorage configStorage;
+
+    private SSLConnectionSocketFactory sslsf;
     /**
      *  获取代理带代理地址的 HttpHost
      * @return 获取代理带代理地址的 HttpHost
@@ -73,9 +75,9 @@ public class HttpRequestTemplate {
                 .custom()
                 //网络提供者
                 .setDefaultCredentialsProvider(createCredentialsProvider(configStorage))
+                .setConnectionManager(connectionManager(configStorage))
                 //设置httpclient的SSLSocketFactory
                 .setSSLSocketFactory(createSSL(configStorage))
-                .setConnectionManager(connectionManager(configStorage))
                 .setDefaultRequestConfig(createRequestConfig(configStorage))
                 .build();
         if (null == connectionManager) {
@@ -114,10 +116,12 @@ public class HttpRequestTemplate {
      * @return SSLConnectionSocketFactory  Layered socket factory for TLS/SSL connections.
      */
     public SSLConnectionSocketFactory createSSL( HttpConfigStorage configStorage){
-
+        if (null != sslsf){
+            return sslsf;
+        }
         if (null == configStorage.getKeystore()){
             try {
-                return new SSLConnectionSocketFactory(SSLContext.getDefault());
+                return sslsf = new SSLConnectionSocketFactory(SSLContext.getDefault());
             } catch (NoSuchAlgorithmException e) {
                 LOG.error(e);
             }
@@ -139,7 +143,7 @@ public class HttpRequestTemplate {
                         .loadKeyMaterial(keyStore, password).build();
 
                 //指定TLS版本
-                SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
+                 sslsf = new SSLConnectionSocketFactory(
                         sslcontext, new String[]{"TLSv1"}, null,
                         new DefaultHostnameVerifier());
 
