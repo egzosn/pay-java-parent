@@ -49,6 +49,16 @@ public enum  AliTransactionType implements TransactionType {
      * 声波付
      */
     WAVE_CODE("alipay.trade.pay"),
+    /**
+     * 刷脸付
+     */
+    SECURITY_CODE("alipay.trade.pay"),
+    /**
+     * 人脸初始化刷脸付
+     * 暂时未接入
+     *
+     */
+    SMILEPAY("zoloz.authentication.customer.smilepay.initialize"),
     //交易辅助接口
 
     /**
@@ -86,7 +96,12 @@ public enum  AliTransactionType implements TransactionType {
     /**
      * 转账查询
      */
-    TRANS_QUERY("alipay.fund.trans.order.query")
+    TRANS_QUERY("alipay.fund.trans.order.query"),
+    /**
+     * 查询刷脸结果信息
+     * 暂时未接入
+     */
+    FTOKEN_QUERY("zoloz.authentication.customer.ftoken.query")
     ;
 
 

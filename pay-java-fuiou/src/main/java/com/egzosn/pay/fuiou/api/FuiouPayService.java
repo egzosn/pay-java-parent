@@ -21,7 +21,7 @@ import java.util.*;
  * create 2017 2017/1/16 0016
  * </pre>
  */
-public class FuiouPayService extends BasePayService<FuiouPayConfigStorage> {
+public class FuiouPayService extends BasePayService<FuiouPayConfigStorage, PayOrder> {
 
     /**
      * 正式域名
@@ -129,14 +129,14 @@ public class FuiouPayService extends BasePayService<FuiouPayConfigStorage> {
     /**
      * 校验回调数据来源是否合法
      *
-     * @param order_id 业务id, 数据的真实性.
+     * @param orderId 业务id, 数据的真实性.
      * @return 返回校验结果
      */
     @Override
-    public boolean verifySource(String order_id) {
+    public boolean verifySource(String orderId) {
         LinkedHashMap<String, Object> params = new LinkedHashMap<>();
         params.put("mchnt_cd", payConfigStorage.getPid());
-        params.put("order_id", order_id);
+        params.put("order_id", orderId);
         params.put("md5", createSign(SignUtils.parameters2MD5Str(params, "|"), payConfigStorage.getInputCharset()));
         JSONObject resultJson = getHttpRequestTemplate().postForObject(getReqUrl() + URL_FuiouSmpAQueryGate + "?" + UriVariables.getMapToParameters(params), null, JSONObject.class);
         if (null == resultJson){

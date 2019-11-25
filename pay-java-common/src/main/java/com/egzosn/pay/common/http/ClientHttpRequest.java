@@ -19,9 +19,7 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.Map;
@@ -352,14 +350,27 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
 
         //是否为 输入流
         if (InputStream.class.isAssignableFrom(responseType)) {
-            return (T) entity.getContent();
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            entity.writeTo(os);
+            return (T) new ByteArrayInputStream(os.toByteArray());
+        }
+        //是否为 字节数数组
+        if (byte[].class.isAssignableFrom(responseType)) {
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            entity.writeTo(os);
+            return (T) os.toByteArray();
         }
         //输出流
         if (OutputStream.class.isAssignableFrom(responseType)) {
             try {
-                T t = responseType.newInstance();
-                entity.writeTo((OutputStream) t);
-                return t;
+                OutputStream t;
+                if (responseType == OutputStream.class){
+                    t= new ByteArrayOutputStream();
+                }else {
+                 t = (OutputStream) responseType.newInstance();
+                }
+                entity.writeTo( t);
+                return (T) t;
             } catch (InstantiationException e) {
                 throw new PayErrorException(new PayException("InstantiationException", e.getMessage()));
             } catch (IllegalAccessException e) {

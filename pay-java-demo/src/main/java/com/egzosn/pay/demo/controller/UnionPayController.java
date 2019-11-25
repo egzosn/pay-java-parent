@@ -48,15 +48,15 @@ public class UnionPayController {
         //是否为证书签名
         unionPayConfigStorage.setCertSign(true);
         //中级证书路径
-        unionPayConfigStorage.setAcpMiddleCert("D:/certs/acp_test_middle.cer");
+        unionPayConfigStorage.setAcpMiddleCert("http://www.egzosn.com/certs/acp_test_middle.cer");
         //根证书路径
-        unionPayConfigStorage.setAcpRootCert("D:/certs/acp_test_root.cer");
+        unionPayConfigStorage.setAcpRootCert("http://www.egzosn.com/certs/acp_test_root.cer");
         // 私钥证书路径
-        unionPayConfigStorage.setKeyPrivateCert("D:/certs/acp_test_sign.pfx");
+        unionPayConfigStorage.setKeyPrivateCert("http://www.egzosn.com/certs/acp_test_sign.pfx");
         //私钥证书对应的密码
         unionPayConfigStorage.setKeyPrivateCertPwd("000000");
         //设置证书对应的存储方式，这里默认为文件地址
-        unionPayConfigStorage.setCertStoreType(CertStoreType.PATH);
+        unionPayConfigStorage.setCertStoreType(CertStoreType.URL);
 
 
 
