@@ -86,6 +86,7 @@ public interface PayService<PC extends PayConfigStorage> {
      *
      * @param order 支付订单
      * @return 订单信息
+     * @param <O> 预订单类型
      * @see PayOrder 支付订单信息
      */
     <O extends PayOrder>Map<String, Object> orderInfo(O order);
@@ -94,6 +95,7 @@ public interface PayService<PC extends PayConfigStorage> {
      * 页面转跳支付， 返回对应页面重定向信息
      *
      * @param order 订单信息
+     * @param <O> 预订单类型
      * @return 对应页面重定向信息
      */
     <O extends PayOrder>String toPay(O order);
@@ -158,6 +160,7 @@ public interface PayService<PC extends PayConfigStorage> {
      * 获取输出二维码，用户返回给支付端,
      *
      * @param order 发起支付的订单信息
+     * @param <O> 预订单类型
      * @return 返回图片信息，支付时需要的
      */
     <O extends PayOrder>BufferedImage genQrPay(O order);
@@ -165,6 +168,7 @@ public interface PayService<PC extends PayConfigStorage> {
      * 获取输出二维码信息,
      *
      * @param order 发起支付的订单信息
+     * @param <O> 预订单类型
      * @return 返回二维码信息,，支付时需要的
      */
     <O extends PayOrder>String getQrPay(O order);
@@ -173,6 +177,7 @@ public interface PayService<PC extends PayConfigStorage> {
      * 刷卡付,pos主动扫码付款(条码付)
      * 刷脸付
      * @param order 发起支付的订单信息
+     * @param <O> 预订单类型
      * @return 返回支付结果
      */
     <O extends PayOrder>Map<String, Object> microPay(O order);
@@ -460,6 +465,7 @@ public interface PayService<PC extends PayConfigStorage> {
      *  如果需要进行扩展请重写该方法即可
      * @param orderInfo 商户平台预订单信息
      * @param payOrder 订单信息
+     * @param <O> 预订单类型
      * @return 处理后订单信息
      */
     <O extends PayOrder>Map<String, Object> preOrderHandler(Map<String, Object> orderInfo, O payOrder);
