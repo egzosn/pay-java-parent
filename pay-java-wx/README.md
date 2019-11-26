@@ -194,7 +194,7 @@
 
 ```java
         
-      Map result = service..query("微信单号", "我方系统单号");
+      Map result = service.query("微信单号", "我方系统单号");
 
 ```
 
