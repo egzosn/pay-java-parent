@@ -67,4 +67,4 @@ E-Mail：egzosn@gmail.com
 
 QQ群：542193977
 
-微信群: ![微信群](https://www.egzosn.com/images/wx.jpeg "wx.jpg")
+微信群: ![微信群](https://www.egzosn.com/images/wx.jpg "wx.jpg")
