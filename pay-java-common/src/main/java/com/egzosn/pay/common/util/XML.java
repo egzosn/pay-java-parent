@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.nio.charset.Charset;
+import java.util.List;
 import java.util.Map;
 
 
@@ -232,10 +233,11 @@ public class XML {
             for (int idx = 0; idx < children.getLength(); ++idx) {
                 Node node = children.item(idx);
                 NodeList nodeList = node.getChildNodes();
-                if (node.getNodeType() == Node.ELEMENT_NODE && nodeList.getLength() <= 1) {
-                    m.put(node.getNodeName(), node.getTextContent());
-                } else if (node.getNodeType() == Node.ELEMENT_NODE && nodeList.getLength() > 1) {
+                int length = nodeList.getLength();
+                if (node.getNodeType() == Node.ELEMENT_NODE && length >= 1 && nodeList.item(0).hasChildNodes()) {
                     m.put(node.getNodeName(), getChildren(nodeList));
+                } else if (node.getNodeType() == Node.ELEMENT_NODE ) {
+                    m.put(node.getNodeName(), node.getTextContent());
                 }
             }
         } catch (Exception e) {
@@ -323,13 +325,47 @@ public class XML {
                 value = "";
             }
             org.w3c.dom.Element filed = document.createElement(entry.getKey());
-            if (value instanceof Map){
+           /* if (value instanceof Map){
+                map2Xml((Map)value, document, filed);
+            }else if (value instanceof List){
+                List vs = (List)value;
+                for (Object  v : vs ){
+                    if (value instanceof Map){
+                        map2Xml((Map)value, document, filed);
+                    }
+                }
                 map2Xml((Map)value, document, filed);
             }else {
                 value = value.toString().trim();
                 filed.appendChild(document.createTextNode(value.toString()));
-            }
+            }*/
+            object2Xml(value, document, filed);
             element.appendChild(filed);
         }
+    }
+
+    private static void object2Xml(Object value, Document document, org.w3c.dom.Element element){
+
+        if (value instanceof Map){
+            map2Xml((Map)value, document, element);
+        }else if (value instanceof List){
+            List vs = (List)value;
+            for (Object  v : vs ){
+                object2Xml(v, document, element);
+            }
+//            map2Xml((Map)value, document, element);
+        }else {
+            value = value.toString().trim();
+            element.appendChild(document.createTextNode(value.toString()));
+        }
+
+
+    }
+
+
+    public static void main(String[] args) {
+        String text = "<data><code>0</code><users><user><id>1</id><name>张三</name></user><user><id>2</id><name>张4</name></user></users></data>";
+        System.out.println( getMap2Xml(toJSONObject(text), "data", "utf-8"));
+
     }
 }
