@@ -1,6 +1,7 @@
 package com.egzosn.pay.common.util.sign;
 
 
+import com.egzosn.pay.common.bean.SignType;
 import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.util.str.StringUtils;
@@ -22,7 +23,7 @@ import java.util.*;
  * date 2016/11/9 17:45
  * </pre>
  */
-public enum SignUtils {
+public enum SignUtils implements SignType {
 
     MD5 {
         /**
@@ -51,6 +52,11 @@ public enum SignUtils {
             return com.egzosn.pay.common.util.sign.encrypt.MD5.verify(text, sign, key, characterEncoding);
         }
     },HMACSHA256{
+        @Override
+        public String getName() {
+            return "HMAC-SHA256";
+        }
+
         /**
          * 签名
          *
@@ -279,6 +285,11 @@ public enum SignUtils {
         return UUID.randomUUID().toString().replace("-", "");
     }
 
+    @Override
+    public String getName() {
+        return this.name();
+    }
+
     /**
      * 签名
      *
@@ -305,15 +316,6 @@ public enum SignUtils {
 
     }
 
-    /**
-     * 签名
-     *
-     * @param content           需要签名的内容
-     * @param key               密钥
-     * @param characterEncoding 字符编码
-     * @return 签名值
-     */
-    public abstract String createSign(String content, String key, String characterEncoding);
 
     /**
      * 签名字符串
@@ -329,17 +331,6 @@ public enum SignUtils {
         return this.verify(parameterText(params), sign, key, characterEncoding);
     }
 
-
-    /**
-     * 签名字符串
-     *
-     * @param text              需要签名的字符串
-     * @param sign              签名结果
-     * @param key               密钥
-     * @param characterEncoding 编码格式
-     * @return 签名结果
-     */
-    public abstract boolean verify(String text, String sign, String key, String characterEncoding);
 
 
 }
