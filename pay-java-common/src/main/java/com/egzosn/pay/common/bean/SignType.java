@@ -1,7 +1,5 @@
 package com.egzosn.pay.common.bean;
 
-import com.egzosn.pay.common.util.str.StringUtils;
-import org.apache.http.message.BasicNameValuePair;
 
 import java.util.*;
 
