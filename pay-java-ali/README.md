@@ -122,7 +122,7 @@
         /*-----------即时到帐 WAP 网页支付-------------------*/
 //        payOrder.setTransactionType(AliTransactionType.WAP); //WAP支付
 
-        payOrder.setTransactionType(AliTransactionType.DIRECT); // 即时到帐 PC网页支付
+        payOrder.setTransactionType(AliTransactionType.PAGE); // 即时到帐 PC网页支付
         //获取支付所需的信息
         Map directOrderInfo = service.orderInfo(payOrder);
         //获取表单提交对应的字符串，将其序列化到页面即可,
