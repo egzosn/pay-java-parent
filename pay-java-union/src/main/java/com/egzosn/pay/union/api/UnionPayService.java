@@ -38,7 +38,7 @@ import java.util.*;
  *         create 2017 2017/11/5
  *         </pre>
  */
-public class UnionPayService extends BasePayService<UnionPayConfigStorage, PayOrder> {
+public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
     /**
      * 测试域名
      */
@@ -379,6 +379,18 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage, PayOr
         return null;
     }
 
+    @Override
+    public String toPay(PayOrder order) {
+
+        if (null == order.getTransactionType()){
+            order.setTransactionType(UnionTransactionType.WEB);
+        }else if (UnionTransactionType.WEB != order.getTransactionType() && UnionTransactionType.WAP != order.getTransactionType() && UnionTransactionType.B2B != order.getTransactionType()){
+            throw new PayErrorException(new PayException("-1", "错误的交易类型:" + order.getTransactionType()));
+        }
+
+        return super.toPay(order);
+    }
+
     /**
      * 获取输出二维码，用户返回给支付端,
      *
@@ -387,6 +399,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage, PayOr
      */
     @Override
     public String getQrPay(PayOrder order) {
+        order.setTransactionType(UnionTransactionType.APPLY_QR_CODE);
         Map<String, Object> params = orderInfo(order);
         String responseStr = getHttpRequestTemplate().postForObject(this.getBackTransUrl(), params, String.class);
         Map<String, Object> response = UriVariables.getParametersToMap(responseStr);
@@ -411,6 +424,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage, PayOr
      */
     @Override
     public Map<String, Object> microPay(PayOrder order) {
+        order.setTransactionType(UnionTransactionType.CONSUME);
         Map<String, Object> params = orderInfo(order);
         String responseStr = getHttpRequestTemplate().postForObject(this.getBackTransUrl(), params, String.class);
         return UriVariables.getParametersToMap(responseStr);

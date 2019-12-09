@@ -27,7 +27,7 @@ import java.util.TreeMap;
  *         email egzosn@gmail.com
  *          * date 2019/04/15 22:51
  */
-public class YiJiPayService extends BasePayService<YiJiPayConfigStorage, PayOrder> {
+public class YiJiPayService extends BasePayService<YiJiPayConfigStorage> {
 
     /**
      * 正式测试环境

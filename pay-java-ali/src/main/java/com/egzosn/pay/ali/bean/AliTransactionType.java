@@ -18,12 +18,7 @@ import com.egzosn.pay.common.bean.TransactionType;
  * date 2016/10/19 22:58
  */
 public enum  AliTransactionType implements TransactionType {
-    /**
-     * 即时到帐
-     * 过时的名称，请换至 {@link #PAGE}
-     */
-    @Deprecated
-    DIRECT("alipay.trade.page.pay"),
+
     /**
      * 网页支付
      */

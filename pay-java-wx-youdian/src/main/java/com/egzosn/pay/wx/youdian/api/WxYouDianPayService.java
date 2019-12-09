@@ -27,7 +27,7 @@ import java.util.concurrent.locks.Lock;
  * email egzosn@gmail.com
  * date 2017/01/12 22:58
  */
-public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorage, PayOrder> {
+public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorage> {
 
     private final static String URL = "http://life.51youdian.com/Api/CheckoutCounter/";
 
@@ -336,6 +336,7 @@ public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorag
 
     @Override
     public String getQrPay(PayOrder order) {
+        order.setTransactionType(YoudianTransactionType.NATIVE);
         JSONObject orderInfo = orderInfo(order);
         return (String) orderInfo.get("code_url");
     }
@@ -347,6 +348,7 @@ public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorag
      */
     @Override
     public Map<String, Object> microPay(PayOrder order) {
+        order.setTransactionType(YoudianTransactionType.MICROPAY);
         JSONObject orderInfo = orderInfo(order);
         return orderInfo;
     }

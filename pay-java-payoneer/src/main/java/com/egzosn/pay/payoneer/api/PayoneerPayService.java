@@ -33,7 +33,7 @@ import java.util.*;
  *         create 2018-01-19
  *                 </pre>
  */
-public class PayoneerPayService extends BasePayService<PayoneerConfigStorage, PayOrder> implements AdvancedPayService {
+public class PayoneerPayService extends BasePayService<PayoneerConfigStorage> implements AdvancedPayService {
     /**
      * 测试地址
      */
@@ -263,6 +263,8 @@ public class PayoneerPayService extends BasePayService<PayoneerConfigStorage, Pa
      */
     @Override
     public Map<String, Object> microPay(PayOrder order) {
+        order.setTransactionType(PayoneerTransactionType.CHARGE);
+
         HttpStringEntity entity = new HttpStringEntity(JSON.toJSONString(orderInfo(order)), ContentType.APPLICATION_JSON);
         //设置 base atuh
         entity.setHeaders(authHeader());

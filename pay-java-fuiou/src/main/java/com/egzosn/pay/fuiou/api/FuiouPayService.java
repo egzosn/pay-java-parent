@@ -9,6 +9,8 @@ import com.egzosn.pay.common.util.DateUtils;
 import com.egzosn.pay.common.util.Util;
 import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.str.StringUtils;
+import com.egzosn.pay.fuiou.bean.FuiouTransactionType;
+
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -21,7 +23,7 @@ import java.util.*;
  * create 2017 2017/1/16 0016
  * </pre>
  */
-public class FuiouPayService extends BasePayService<FuiouPayConfigStorage, PayOrder> {
+public class FuiouPayService extends BasePayService<FuiouPayConfigStorage> {
 
     /**
      * 正式域名
@@ -134,7 +136,7 @@ public class FuiouPayService extends BasePayService<FuiouPayConfigStorage, PayOr
      */
     @Override
     public boolean verifySource(String orderId) {
-        LinkedHashMap<String, Object> params = new LinkedHashMap<>();
+        LinkedHashMap<String, Object> params = new LinkedHashMap<String, Object>(3);
         params.put("mchnt_cd", payConfigStorage.getPid());
         params.put("order_id", orderId);
         params.put("md5", createSign(SignUtils.parameters2MD5Str(params, "|"), payConfigStorage.getInputCharset()));
@@ -153,6 +155,10 @@ public class FuiouPayService extends BasePayService<FuiouPayConfigStorage, PayOr
      */
     @Override
     public Map<String, Object> orderInfo(PayOrder order) {
+        if (null == order.getTransactionType()){
+            order.setTransactionType(FuiouTransactionType.B2C);
+        }
+
         Map<String, Object> parameters = getOrderInfo(order);
         String sign = createSign(SignUtils.parameters2MD5Str(parameters, "|"), payConfigStorage.getInputCharset());
         parameters.put("md5", sign);
@@ -165,6 +171,7 @@ public class FuiouPayService extends BasePayService<FuiouPayConfigStorage, PayOr
      * @return 返回支付请求参数集合
      */
     private Map<String, Object> getOrderInfo(PayOrder order) {
+
         LinkedHashMap<String, Object> parameters = new LinkedHashMap<String, Object>();
         //商户代码
         parameters.put("mchnt_cd", payConfigStorage.getPid());

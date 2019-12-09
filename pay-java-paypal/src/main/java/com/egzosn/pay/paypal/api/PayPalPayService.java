@@ -29,7 +29,7 @@ import java.util.concurrent.locks.Lock;
  * email egzosn@gmail.com
  * date 2018-4-8 ‏‎22:15:09
  */
-public class PayPalPayService extends BasePayService<PayPalConfigStorage, PayOrder>{
+public class PayPalPayService extends BasePayService<PayPalConfigStorage>{
 
     /**
      * 沙箱环境
@@ -146,6 +146,10 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage, PayOrd
      */
     @Override
     public Map<String, Object> orderInfo(PayOrder order) {
+        if (null == order.getTransactionType()){
+            order.setTransactionType(PayPalTransactionType.sale);
+        }
+
         Amount amount = new Amount();
         if (null == order.getCurType()){
             order.setCurType(DefaultCurType.USD);
