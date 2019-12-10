@@ -124,6 +124,7 @@ public class PayMessageRouter {
      * 处理支付消息
      *
      * @param payMessage 支付消息
+     * @param storage 支付配置
      * @return 支付输出结果
      */
     public PayOutMessage route(Map<String, Object> payMessage, PayConfigStorage storage) {

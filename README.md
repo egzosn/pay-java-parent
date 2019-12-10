@@ -21,7 +21,7 @@
 <dependency>
     <groupId>com.egzosn</groupId>
     <artifactId>{module-name}</artifactId>
-    <version>2.12.8</version>
+    <version>2.12.9</version>
 </dependency>
 
 ```
@@ -67,3 +67,4 @@ E-Mail：egzosn@gmail.com
 
 QQ群：542193977
 
+微信群: ![微信群](https://www.egzosn.com/images/wx.jpg "wx.jpg")

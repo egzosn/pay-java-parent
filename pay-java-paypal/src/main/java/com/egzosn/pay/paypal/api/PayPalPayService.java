@@ -146,6 +146,10 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage>{
      */
     @Override
     public Map<String, Object> orderInfo(PayOrder order) {
+        if (null == order.getTransactionType()){
+            order.setTransactionType(PayPalTransactionType.sale);
+        }
+
         Amount amount = new Amount();
         if (null == order.getCurType()){
             order.setCurType(DefaultCurType.USD);

@@ -336,6 +336,7 @@ public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorag
 
     @Override
     public String getQrPay(PayOrder order) {
+        order.setTransactionType(YoudianTransactionType.NATIVE);
         JSONObject orderInfo = orderInfo(order);
         return (String) orderInfo.get("code_url");
     }
@@ -347,6 +348,7 @@ public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorag
      */
     @Override
     public Map<String, Object> microPay(PayOrder order) {
+        order.setTransactionType(YoudianTransactionType.MICROPAY);
         JSONObject orderInfo = orderInfo(order);
         return orderInfo;
     }

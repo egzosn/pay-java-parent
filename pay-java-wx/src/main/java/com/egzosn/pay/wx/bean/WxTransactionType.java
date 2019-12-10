@@ -48,8 +48,7 @@ public enum  WxTransactionType implements TransactionType {
      */
     APP("pay/unifiedorder"),
     /**
-     * 刷
-     脸支付
+     * 刷脸支付
      */
     FACEPAY("pay/facepay"){
         @Override

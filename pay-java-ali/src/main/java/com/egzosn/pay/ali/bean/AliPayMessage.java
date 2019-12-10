@@ -254,6 +254,111 @@ public class AliPayMessage extends PayMessage {
         this.receiptAmount = receiptAmount;
     }
 
+    public BigDecimal getInvoiceAmount() {
+        return invoiceAmount;
+    }
+
+    public void setInvoiceAmount(BigDecimal invoiceAmount) {
+        this.invoiceAmount = invoiceAmount;
+    }
+
+    public BigDecimal getBuyerPayAmount() {
+        return buyerPayAmount;
+    }
+
+    public void setBuyerPayAmount(BigDecimal buyerPayAmount) {
+        this.buyerPayAmount = buyerPayAmount;
+    }
+
+    public BigDecimal getPointAmount() {
+        return pointAmount;
+    }
+
+    public void setPointAmount(BigDecimal pointAmount) {
+        this.pointAmount = pointAmount;
+    }
+
+    public BigDecimal getRefundFee() {
+        return refundFee;
+    }
+
+    public void setRefundFee(BigDecimal refundFee) {
+        this.refundFee = refundFee;
+    }
+
+    @Override
+    public String getSubject() {
+        return subject;
+    }
+
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
+
+    public String getBody() {
+        return body;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
+    }
+
+    public Date getGmtCreate() {
+        return gmtCreate;
+    }
+
+    public void setGmtCreate(Date gmtCreate) {
+        this.gmtCreate = gmtCreate;
+    }
+
+    public Date getGmtPayment() {
+        return gmtPayment;
+    }
+
+    public void setGmtPayment(Date gmtPayment) {
+        this.gmtPayment = gmtPayment;
+    }
+
+    public Date getGmtRefund() {
+        return gmtRefund;
+    }
+
+    public void setGmtRefund(Date gmtRefund) {
+        this.gmtRefund = gmtRefund;
+    }
+
+    public Date getGmtClose() {
+        return gmtClose;
+    }
+
+    public void setGmtClose(Date gmtClose) {
+        this.gmtClose = gmtClose;
+    }
+
+    public String getFundBillList() {
+        return fundBillList;
+    }
+
+    public void setFundBillList(String fundBillList) {
+        this.fundBillList = fundBillList;
+    }
+
+    public String getPassbackParams() {
+        return passbackParams;
+    }
+
+    public void setPassbackParams(String passbackParams) {
+        this.passbackParams = passbackParams;
+    }
+
+    public String getVoucherDetailList() {
+        return voucherDetailList;
+    }
+
+    public void setVoucherDetailList(String voucherDetailList) {
+        this.voucherDetailList = voucherDetailList;
+    }
+
     public static final AliPayMessage create(Map<String, Object> message){
         AliPayMessage payMessage = new JSONObject(message).toJavaObject(AliPayMessage.class);
         payMessage.setPayMessage(message);

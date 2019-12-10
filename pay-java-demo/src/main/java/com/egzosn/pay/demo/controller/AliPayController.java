@@ -84,7 +84,7 @@ public class AliPayController {
     @RequestMapping(value = "toPay.html", produces = "text/html;charset=UTF-8")
     public String toPay( BigDecimal price) {
         //及时收款
-        PayOrder order = new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), AliTransactionType.DIRECT);
+        PayOrder order = new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), AliTransactionType.PAGE);
         //WAP
 //        PayOrder order = new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), AliTransactionType.WAP);
 

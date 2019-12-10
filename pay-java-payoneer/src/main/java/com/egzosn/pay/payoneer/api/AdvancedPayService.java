@@ -1,6 +1,7 @@
 package com.egzosn.pay.payoneer.api;
 
 import com.egzosn.pay.common.api.PayService;
+import com.egzosn.pay.common.bean.PayOrder;
 
 import java.util.Map;
 
