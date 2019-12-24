@@ -536,9 +536,11 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
         setParameters(parameters, "out_refund_no", refundOrder.getRefundNo());
         parameters.put("total_fee", Util.conversionCentAmount(refundOrder.getTotalAmount()));
         parameters.put("refund_fee", Util.conversionCentAmount(refundOrder.getRefundAmount()));
-        parameters.put("op_user_id", payConfigStorage.getPid());
         setParameters(parameters, "notify_url", payConfigStorage.getNotifyUrl());
-
+        if (null != refundOrder.getCurType()){
+            parameters.put("refund_fee_type", refundOrder.getCurType().getType());
+        }
+        setParameters(parameters, "refund_desc", refundOrder.getDescription());
         //设置签名
         setSign(parameters);
         return requestTemplate.postForObject(getReqUrl(WxTransactionType.REFUND), XML.getMap2Xml(parameters), JSONObject.class);
