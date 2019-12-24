@@ -142,12 +142,9 @@ public class XML {
         for (int idx = 0; idx < children.getLength(); ++idx) {
             Node node = children.item(idx);
             NodeList nodeList = node.getChildNodes();
-            if (node.getNodeType() == Node.ELEMENT_NODE && nodeList.getLength() <= 1) {
-                if (null == json) {
-                    json = new JSONObject();
-                }
-                ((JSONObject) json).put(node.getNodeName(), node.getTextContent());
-            } else if (node.getNodeType() == Node.ELEMENT_NODE && nodeList.getLength() > 1) {
+            int length = nodeList.getLength();
+
+            if (node.getNodeType() == Node.ELEMENT_NODE && length >= 1 && nodeList.item(0).hasChildNodes()) {
                 if (null == json) {
                     json = new JSONObject();
                 }
@@ -167,6 +164,11 @@ public class XML {
                     c.put(node.getNodeName(), getChildren(nodeList));
                     ((JSONArray) json).add(c);
                 }
+            } else if (node.getNodeType() == Node.ELEMENT_NODE ) {
+                if (null == json) {
+                    json = new JSONObject();
+                }
+                ((JSONObject) json).put(node.getNodeName(), node.getTextContent());
             }
         }
 
@@ -199,20 +201,8 @@ public class XML {
      * @throws IOException  xml io转化异常
      */
     public static <T> T inputStream2Bean(InputStream in, Class<T> clazz) throws IOException {
-        try {
-
-            DocumentBuilder documentBuilder = newDocumentBuilder();
-            org.w3c.dom.Document doc = documentBuilder.parse(in);
-            doc.getDocumentElement().normalize();
-            NodeList children = doc.getDocumentElement().getChildNodes();
-            JSON json = getChildren(children);
-            return json.toJavaObject(clazz);
-        } catch (Exception e) {
-            throw new PayErrorException(new PayException("XML failure", "XML解析失败\n" + e.getMessage()));
-        } finally {
-            in.close();
-        }
-
+        JSON json = toJSONObject(in);
+        return json.toJavaObject(clazz);
     }
 
     /**
@@ -234,14 +224,13 @@ public class XML {
                 Node node = children.item(idx);
                 NodeList nodeList = node.getChildNodes();
                 int length = nodeList.getLength();
-                if (node.getNodeType() == Node.ELEMENT_NODE && length >= 1 && nodeList.item(0).hasChildNodes()) {
+                if (node.getNodeType() == Node.ELEMENT_NODE && (length >1 || length==1 && nodeList.item(0).hasChildNodes())) {
                     m.put(node.getNodeName(), getChildren(nodeList));
                 } else if (node.getNodeType() == Node.ELEMENT_NODE ) {
                     m.put(node.getNodeName(), node.getTextContent());
                 }
             }
         } catch (Exception e) {
-//            e.printStackTrace();
             throw new PayErrorException(new PayException("XML failure", "XML解析失败\n" + e.getMessage()));
         } finally {
             in.close();
@@ -364,8 +353,8 @@ public class XML {
 
 
     public static void main(String[] args) {
-        String text = "<data><code>0</code><users><user><id>1</id><name>张三</name></user><user><id>2</id><name>张4</name></user></users></data>";
-        System.out.println( getMap2Xml(toJSONObject(text), "data", "utf-8"));
+        String text = "<datas><data><code>0</code><users><user><id>1</id><name>张三</name></user><user><id>2</id><name>张4</name></user></users></data></datas>";
+        System.out.println( getMap2Xml(toJSONObject(text), "datas", "utf-8"));
 
     }
 }
