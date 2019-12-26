@@ -529,7 +529,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
         //获取公共参数
         Map<String, Object> parameters = getPublicParameters(transactionType);
         //设置请求参数的集合
-        parameters.put(BIZ_CONTENT, getContentToJson(tradeNoOrBillDate.toString(), outTradeNoBillType));
+        parameters.put(BIZ_CONTENT, getContentToJson((String) tradeNoOrBillDate, outTradeNoBillType));
         //设置签名
         setSign(parameters);
         return requestTemplate.getForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(parameters), JSONObject.class);
