@@ -2,6 +2,8 @@ package com.egzosn.pay.common.bean;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 支付订单信息
@@ -12,7 +14,7 @@ import java.util.Date;
  *      date 2016/10/19 22:34
  *  </pre>
  */
-public class PayOrder {
+public class PayOrder implements Order {
     /**
      * 商品名称
      */
@@ -81,6 +83,11 @@ public class PayOrder {
      * 订单过期时间
      */
     private Date expirationTime;
+
+    /**
+     * 订单附加信息，可用于预设未提供的参数，这里会覆盖以上所有的订单信息，
+     */
+    private Map<String, Object> attr;
 
 
     public PayOrder() {
@@ -247,6 +254,24 @@ public class PayOrder {
     public void setExpirationTime(Date expirationTime) {
         this.expirationTime = expirationTime;
     }
+
+    @Override
+    public Map<String, Object> getAttr() {
+        if (null == attr){
+            attr = new HashMap<>();
+        }
+        return attr;
+    }
+
+    /**
+     * 添加订单信息
+     * @param key key
+     * @param value 值
+     */
+    public void addAttr(String key, Object value) {
+         getAttr().put(key, value);
+    }
+
 
     /**
      * 对 subject body 进行 trim 运算，

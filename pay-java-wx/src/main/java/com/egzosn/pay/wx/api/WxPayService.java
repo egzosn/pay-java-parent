@@ -222,6 +222,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
         }
 
         ((WxTransactionType) order.getTransactionType()).setAttribute(parameters, order);
+        parameters.putAll(order.getAttr());
         parameters = preOrderHandler(parameters, order);
         setSign(parameters);
 
