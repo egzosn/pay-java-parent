@@ -5,6 +5,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.egzosn.pay.common.util.str.StringUtils;
+
 /**
  * 支付订单信息
  *
@@ -99,10 +101,10 @@ public class PayOrder implements Order {
     }
 
     public PayOrder(String subject, String body, BigDecimal price, String outTradeNo, TransactionType transactionType) {
-        this.subject = tryTrim(subject);
-        this.body = tryTrim(body);
+        this.subject = StringUtils.tryTrim(subject);
+        this.body = StringUtils.tryTrim(body);
         this.price = price;
-        this.outTradeNo = tryTrim(outTradeNo);
+        this.outTradeNo = StringUtils.tryTrim(outTradeNo);
         this.transactionType = transactionType;
     }
 
@@ -273,15 +275,6 @@ public class PayOrder implements Order {
     }
 
 
-    /**
-     * 对 subject body 进行 trim 运算，
-     * 以防止在签名是可能造成的签名错误问题
-     * @param str
-     * @return
-     */
-    private static String tryTrim(String str) {
-        return str == null ? null : str.trim();
-    }
 
     @Override
     public String toString() {
