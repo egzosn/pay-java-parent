@@ -246,11 +246,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
     @Override
     public Map<String, Object> orderInfo(PayOrder order) {
         Map<String, Object> params = this.getCommonParam();
-//        if(order instanceof  UnionPayOrder){
-//            UnionPayOrder unionPayOrder = (UnionPayOrder)order;
-//            //todo 其他参数
-////            params.put();
-//        }
+
         UnionTransactionType type = (UnionTransactionType) order.getTransactionType();
 
 
@@ -288,6 +284,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
                 params.put(SDKConstants.param_payTimeout, getPayTimeout(order.getExpirationTime()));
                 params.put("orderDesc", order.getSubject());
         }
+        params.putAll(order.getAttr());
         params =  preOrderHandler(params, order);
         return setSign(params);
     }

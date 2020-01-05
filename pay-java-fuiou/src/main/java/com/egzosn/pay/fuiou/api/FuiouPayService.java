@@ -203,6 +203,7 @@ public class FuiouPayService extends BasePayService<FuiouPayConfigStorage> {
         parameters.put("rem", "");
         //版本号
         parameters.put("ver", "1.0.1");
+        parameters.putAll(order.getAttr());
         return preOrderHandler(parameters, order);
     }
 
