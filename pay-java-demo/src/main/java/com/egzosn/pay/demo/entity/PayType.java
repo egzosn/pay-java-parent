@@ -43,7 +43,7 @@ public enum PayType implements BasePayType {
 
     aliPay{
         /**
-         *  @see com.egzosn.pay.ali.api.AliPayService 17年更新的版本,旧版本请自行切换
+         *  @see com.egzosn.pay.ali.api.AliPayService
          * @param apyAccount
          * @return
          */

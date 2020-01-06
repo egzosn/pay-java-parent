@@ -125,5 +125,14 @@ public class StringUtils {
             throw new RuntimeException("转码过程中出现错误,指定的编码集不对,您目前指定的编码集是:" + charset);
         }
     }
+    /**
+     * 对 subject body 进行 trim 运算，
+     * 以防止在签名是可能造成的签名错误问题
+     * @param str 字符
+     * @return 去除空格之后的字符
+     */
+    public static String tryTrim(String str) {
+        return str == null ? null : str.trim();
+    }
 
 }
