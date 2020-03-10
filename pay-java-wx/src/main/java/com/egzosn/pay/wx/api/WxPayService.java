@@ -8,6 +8,7 @@ import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.common.util.DateUtils;
+import com.egzosn.pay.common.util.MatrixToImageWriter;
 import com.egzosn.pay.common.util.Util;
 import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.sign.encrypt.RSA2;
@@ -17,13 +18,13 @@ import com.egzosn.pay.wx.bean.WxPayMessage;
 import com.egzosn.pay.wx.bean.WxTransactionType;
 import com.egzosn.pay.common.util.XML;
 import com.egzosn.pay.wx.bean.WxTransferType;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.util.*;
 
-import static com.egzosn.pay.wx.api.WxConst.*;
 import static com.egzosn.pay.wx.bean.WxTransferType.*;
 
 /**
@@ -38,6 +39,27 @@ import static com.egzosn.pay.wx.bean.WxTransferType.*;
 public class WxPayService extends BasePayService<WxPayConfigStorage> {
 
 
+    /**
+     * 微信请求地址
+     */
+    public static final String URI = "https://api.mch.weixin.qq.com/";
+    /**
+     * 沙箱
+     */
+    public static final String SANDBOXNEW = "sandboxnew/";
+
+    public static final String SUCCESS = "SUCCESS";
+    public static final String RETURN_CODE = "return_code";
+    public static final String SIGN = "sign";
+    public static final String CIPHER_ALGORITHM = "RSA/ECB/OAEPWITHSHA-1ANDMGF1PADDING";
+    public static final String FAILURE = "failure";
+    public static final String APPID = "appid";
+    private static final String HMAC_SHA256 = "HMAC-SHA256";
+    private static final String HMACSHA256 = "HMACSHA256";
+    private static final String RETURN_MSG_CODE = "return_msg";
+    private static final String RESULT_CODE = "result_code";
+    private static final String MCH_ID = "mch_id";
+    private static final String NONCE_STR = "nonce_str";
 
 
     /**
@@ -96,21 +118,17 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
     public boolean verify(Map<String, Object> params) {
 
         if (!(SUCCESS.equals(params.get(RETURN_CODE)) && SUCCESS.equals(params.get(RESULT_CODE)))) {
-            if (LOG.isErrorEnabled()){
-                LOG.error(String.format("微信支付异常：return_code=%s,参数集=%s", params.get(RETURN_CODE), params));
-            }
+            LOG.debug(String.format("微信支付异常：return_code=%s,参数集=%s", params.get(RETURN_CODE), params));
             return false;
         }
 
         if (null == params.get(SIGN)) {
-            if (LOG.isDebugEnabled()){
-                LOG.debug(String.format("微信支付异常：签名为空！%s=%s", OUT_TRADE_NO, params.get(OUT_TRADE_NO)));
-            }
+            LOG.debug("微信支付异常：签名为空！out_trade_no=" + params.get("out_trade_no"));
             return false;
         }
 
         try {
-            return signVerify(params, (String) params.get(SIGN)) && verifySource((String) params.get(OUT_TRADE_NO));
+            return signVerify(params, (String) params.get(SIGN)) && verifySource((String) params.get("out_trade_no"));
         } catch (PayErrorException e) {
             LOG.error(e);
         }
@@ -185,9 +203,9 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
         // 购买支付信息
         parameters.put("body", order.getSubject());
         // 购买支付信息
-        setParameters(parameters, "detail", order);
+//        parameters.put("detail", order.getBody());
         // 订单号
-        parameters.put(OUT_TRADE_NO, order.getOutTradeNo());
+        parameters.put("out_trade_no", order.getOutTradeNo());
         parameters.put("spbill_create_ip", StringUtils.isEmpty(order.getSpbillCreateIp()) ? "192.168.1.150" : order.getSpbillCreateIp());
         // 总金额单位为分
         parameters.put("total_fee", Util.conversionCentAmount(order.getPrice()));
@@ -204,12 +222,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
         }
 
         ((WxTransactionType) order.getTransactionType()).setAttribute(parameters, order);
-        //可覆盖参数
-        setParameters(parameters, "notify_url", order);
-        setParameters(parameters, "goods_tag", order);
-        setParameters(parameters, "limit_pay", order);
-        setParameters(parameters, "receipt", order);
-        setParameters(parameters, "product_id", order);
+        parameters.putAll(order.getAttr());
         parameters = preOrderHandler(parameters, order);
         setSign(parameters);
 
@@ -263,6 +276,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
                 params.put("noncestr", result.get(NONCE_STR));
                 params.put("package", "Sign=WXPay");
             }
+            params = preOrderHandler(params, order);
             String paySign = createSign(SignUtils.parameterText(params), payConfigStorage.getInputCharset());
             params.put(SIGN, paySign);
             return params;
@@ -499,7 +513,12 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
     }
 
 
-
+    private Map<String, Object> setParameters(Map<String, Object> parameters, String key, String value) {
+        if (StringUtils.isNotEmpty(value)) {
+            parameters.put(key, value);
+        }
+        return parameters;
+    }
 
     /**
      * 申请退款接口
@@ -513,7 +532,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
         Map<String, Object> parameters = getPublicParameters();
 
         setParameters(parameters, "transaction_id", refundOrder.getTradeNo());
-        setParameters(parameters, OUT_TRADE_NO, refundOrder.getOutTradeNo());
+        setParameters(parameters, "out_trade_no", refundOrder.getOutTradeNo());
         setParameters(parameters, "out_refund_no", refundOrder.getRefundNo());
         parameters.put("total_fee", Util.conversionCentAmount(refundOrder.getTotalAmount()));
         parameters.put("refund_fee", Util.conversionCentAmount(refundOrder.getRefundAmount()));
@@ -552,7 +571,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
         //获取公共参数
         Map<String, Object> parameters = getPublicParameters();
         setParameters(parameters, "transaction_id", refundOrder.getTradeNo());
-        setParameters(parameters, OUT_TRADE_NO, refundOrder.getOutTradeNo());
+        setParameters(parameters, "out_trade_no", refundOrder.getOutTradeNo());
         setParameters(parameters, "out_refund_no", refundOrder.getRefundNo());
         //设置签名
         setSign(parameters);
@@ -619,7 +638,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
 
         //获取公共参数
         Map<String, Object> parameters = getPublicParameters();
-        setParameters(parameters, OUT_TRADE_NO, outTradeNoBillType);
+        setParameters(parameters, "out_trade_no", outTradeNoBillType);
         setParameters(parameters, "transaction_id", (String) transactionIdOrBillDate);
         //设置签名
         setSign(parameters);

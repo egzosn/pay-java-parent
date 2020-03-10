@@ -284,7 +284,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
                 params.put(SDKConstants.param_payTimeout, getPayTimeout(order.getExpirationTime()));
                 params.put("orderDesc", order.getSubject());
         }
-        params.putAll(order.getAttrs());
+        params.putAll(order.getAttr());
         params =  preOrderHandler(params, order);
         return setSign(params);
     }

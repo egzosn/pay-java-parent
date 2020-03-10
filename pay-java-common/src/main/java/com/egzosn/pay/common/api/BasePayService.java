@@ -467,20 +467,4 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
         return orderInfo;
     }
 
-    protected Map<String, Object> setParameters(Map<String, Object> parameters, String key, String value) {
-        if (StringUtils.isNotEmpty(value)) {
-            parameters.put(key, value);
-        }
-        return parameters;
-    }
-
-    protected Map<String, Object> setParameters(Map<String, Object> parameters, String key, Order order) {
-        Object attr = order.getAttr(key);
-        if (null != attr && !"".equals(attr)) {
-            parameters.put(key, attr);
-        }
-        return parameters;
-    }
-
-
 }
