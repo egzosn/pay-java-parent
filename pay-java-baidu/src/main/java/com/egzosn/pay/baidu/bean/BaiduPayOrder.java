@@ -62,7 +62,6 @@ public class BaiduPayOrder extends PayOrder {
     
     public void setBannedChannels(List<TransactionType> bannedChannels) {
         this.bannedChannels = bannedChannels;
-        addAttr("bannedChannels", bannedChannels);
     }
     
     public String getSignFieldsRange() {
