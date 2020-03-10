@@ -175,7 +175,7 @@ public class YiJiPayService extends BasePayService<YiJiPayConfigStorage> {
         if (null != order.getCurType()){
             orderInfo.put("currency", order.getCurType());
         }
-        orderInfo.putAll(order.getAttr());
+        orderInfo.putAll(order.getAttrs());
         return preOrderHandler(orderInfo, order);
     }
 

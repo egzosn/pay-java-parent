@@ -227,7 +227,7 @@ public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorag
         Map<String, Object> data = new TreeMap<>();
         data.put("access_token",  getAccessToken());
         data.put("paymoney", Util.conversionAmount(order.getPrice()).toString());
-        data.putAll(order.getAttr());
+        data.putAll(order.getAttrs());
         data =  preOrderHandler(data, order);
         String apbNonce = SignUtils.randomStr();
         String sign = createSign(SignUtils.parameterText(data, "") + apbNonce, payConfigStorage.getInputCharset());

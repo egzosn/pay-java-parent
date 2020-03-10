@@ -258,12 +258,18 @@ public class PayOrder implements Order {
     }
 
     @Override
-    public Map<String, Object> getAttr() {
+    public Map<String, Object> getAttrs() {
         if (null == attr){
             attr = new HashMap<>();
         }
         return attr;
     }
+
+    @Override
+    public Object getAttr(String key) {
+        return getAttrs().get(key);
+    }
+
 
     /**
      * 添加订单信息
@@ -271,7 +277,7 @@ public class PayOrder implements Order {
      * @param value 值
      */
     public void addAttr(String key, Object value) {
-         getAttr().put(key, value);
+        getAttrs().put(key, value);
     }
 
 
