@@ -12,6 +12,7 @@ import com.egzosn.pay.common.bean.*;
 import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.common.http.UriVariables;
 import com.egzosn.pay.common.util.DateUtils;
+import com.egzosn.pay.common.util.Util;
 import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.str.StringUtils;
 
@@ -21,7 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class BaiduPayService extends BasePayService<BaiduPayConfigStorage, BaiduPayOrder> {
+public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
     public static final String APP_KEY = "appKey";
     public static final String APP_ID = "appId";
     public static final String DEAL_ID = "dealId";
@@ -84,7 +85,7 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage, Baidu
     public boolean verifySource(String id) {
         return true;
     }
-    
+
     /**
      * 返回创建的订单信息
      *
@@ -92,7 +93,7 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage, Baidu
      * @return
      */
     @Override
-    public Map<String, Object> orderInfo(BaiduPayOrder order) {
+    public Map<String, Object> orderInfo(PayOrder order) {
         Map<String, Object> params = getUseOrderInfoParams(order);
         String rsaSign = getRsaSign(params, RSA_SIGN);
         params.put(RSA_SIGN, rsaSign);
@@ -129,7 +130,7 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage, Baidu
         result.put(DEAL_TITLE, payOrder.getSubject());
         result.put(SIGN_FIELDS_RANGE, payOrder.getSignFieldsRange());
         result.put(BIZ_INFO, JSON.toJSONString(payOrder.getBizInfo()));
-        result.put(TOTAL_AMOUNT, String.valueOf(order.getPrice()));
+        result.put(TOTAL_AMOUNT, String.valueOf(Util.conversionAmount(order.getPrice())));
         
         return result;
     }
@@ -260,7 +261,9 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage, Baidu
                                MethodType method) {
         throw new UnsupportedOperationException("百度不支持PC支付");
     }
-    
+
+
+
     /**
      * 百度不支持扫码付
      *
@@ -268,8 +271,7 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage, Baidu
      * @return
      */
     @Override
-    @Deprecated
-    public String getQrPay(BaiduPayOrder order) {
+    public String getQrPay(PayOrder order) {
         throw new UnsupportedOperationException("百度不支持扫码付");
     }
     
@@ -280,8 +282,7 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage, Baidu
      * @return
      */
     @Override
-    @Deprecated
-    public Map<String, Object> microPay(BaiduPayOrder order) {
+    public Map<String, Object> microPay(PayOrder order) {
         throw new UnsupportedOperationException("百度不支持刷卡付");
     }
     

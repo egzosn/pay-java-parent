@@ -8,6 +8,9 @@ import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 
+import static com.egzosn.pay.baidu.api.BaiduPayService.BIZ_INFO;
+import static com.egzosn.pay.baidu.api.BaiduPayService.SIGN_FIELDS_RANGE;
+
 public class BaiduPayOrder extends PayOrder {
     
     /**
@@ -50,6 +53,7 @@ public class BaiduPayOrder extends PayOrder {
     
     public void setBizInfo(JSONObject bizInfo) {
         this.bizInfo = bizInfo;
+        addAttr(BIZ_INFO, bizInfo);
     }
     
     public List<TransactionType> getBannedChannels() {
@@ -58,6 +62,7 @@ public class BaiduPayOrder extends PayOrder {
     
     public void setBannedChannels(List<TransactionType> bannedChannels) {
         this.bannedChannels = bannedChannels;
+        addAttr("bannedChannels", bannedChannels);
     }
     
     public String getSignFieldsRange() {
@@ -66,6 +71,7 @@ public class BaiduPayOrder extends PayOrder {
     
     public void setSignFieldsRange(String signFieldsRange) {
         this.signFieldsRange = signFieldsRange;
+        addAttr(SIGN_FIELDS_RANGE, signFieldsRange);
     }
     
 }

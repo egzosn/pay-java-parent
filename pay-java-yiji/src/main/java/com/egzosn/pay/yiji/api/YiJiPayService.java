@@ -10,8 +10,6 @@ import com.egzosn.pay.common.util.Util;
 import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.str.StringUtils;
 import com.egzosn.pay.yiji.bean.YiJiTransactionType;
-
-import java.awt.image.BufferedImage;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Date;
@@ -175,7 +173,7 @@ public class YiJiPayService extends BasePayService<YiJiPayConfigStorage> {
         if (null != order.getCurType()){
             orderInfo.put("currency", order.getCurType());
         }
-        orderInfo.putAll(order.getAttr());
+        orderInfo.putAll(order.getAttrs());
         return preOrderHandler(orderInfo, order);
     }
 

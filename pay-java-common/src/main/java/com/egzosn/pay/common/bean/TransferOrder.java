@@ -1,6 +1,8 @@
 package com.egzosn.pay.common.bean;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 转账订单
@@ -10,7 +12,7 @@ import java.math.BigDecimal;
  * date 2018/1/31
  * </pre>
  */
-public class TransferOrder {
+public class TransferOrder implements Order {
 
     /**
      * 转账批次订单单号
@@ -78,6 +80,12 @@ public class TransferOrder {
      * 操作者ip，根据支付平台所需进行设置
      */
     private String ip;
+
+
+    /**
+     * 订单附加信息，可用于预设未提供的参数，这里会覆盖以上所有的订单信息，
+     */
+    private Map<String, Object> attr;
 
     public String getBatchNo() {
         return batchNo;
@@ -190,4 +198,28 @@ public class TransferOrder {
     public void setIp(String ip) {
         this.ip = ip;
     }
+    @Override
+    public Map<String, Object> getAttrs() {
+        if (null == attr){
+            attr = new HashMap<>();
+        }
+        return attr;
+    }
+
+    @Override
+    public Object getAttr(String key) {
+        return getAttrs().get(key);
+    }
+
+
+    /**
+     * 添加订单信息
+     * @param key key
+     * @param value 值
+     */
+    public void addAttr(String key, Object value) {
+        getAttrs().put(key, value);
+    }
+
+
 }

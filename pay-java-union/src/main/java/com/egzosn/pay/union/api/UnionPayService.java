@@ -20,7 +20,6 @@ import com.egzosn.pay.union.bean.SDKConstants;
 import com.egzosn.pay.union.bean.UnionPayMessage;
 import com.egzosn.pay.union.bean.UnionTransactionType;
 
-import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -284,7 +283,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
                 params.put(SDKConstants.param_payTimeout, getPayTimeout(order.getExpirationTime()));
                 params.put("orderDesc", order.getSubject());
         }
-        params.putAll(order.getAttr());
+        params.putAll(order.getAttrs());
         params =  preOrderHandler(params, order);
         return setSign(params);
     }
