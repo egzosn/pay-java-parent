@@ -18,7 +18,6 @@ import org.apache.http.Header;
 import org.apache.http.entity.ContentType;
 import org.apache.http.message.BasicHeader;
 
-import java.awt.image.BufferedImage;
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -184,7 +183,7 @@ public class PayoneerPayService extends BasePayService<PayoneerConfigStorage> im
         }
         params.put("currency", order.getCurType());
         params.put("description", order.getSubject());
-        params.putAll(order.getAttr());
+        params.putAll(order.getAttrs());
         return preOrderHandler(params, order);
     }
 

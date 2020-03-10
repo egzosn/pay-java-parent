@@ -226,7 +226,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
             bizContent.put("timeout_express", DateUtils.minutesRemaining(order.getExpirationTime()) + "m");
         }
         orderInfo.put(BIZ_CONTENT, JSON.toJSONString(bizContent));
-        orderInfo.putAll(order.getAttr());
+        orderInfo.putAll(order.getAttrs());
         return  preOrderHandler(orderInfo, order);
     }
 

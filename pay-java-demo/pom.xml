@@ -90,39 +90,7 @@
         </dependency>
 
     </dependencies>
-    <profiles>
-        <profile>
-            <id>port8080</id>
-            <properties>
-                <port>8080</port>
-            </properties>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-        </profile>
 
-        <profile>
-            <id>port9096</id>
-            <properties>
-                <port>9096</port>
-            </properties>
-        </profile>
-        <profile>
-            <id>local</id>
-            <properties>
-                <env>local</env>
-            </properties>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-        </profile>
-        <profile>
-            <id>proc</id>
-            <properties>
-                <env>proc</env>
-            </properties>
-        </profile>
-    </profiles>
     <build>
         <finalName>pay-java-demo</finalName>
         <plugins>
@@ -140,7 +108,7 @@
                 <artifactId>tomcat7-maven-plugin</artifactId>
                 <version>2.0</version>
                 <configuration>
-                    <port>${port}</port>
+                    <port>8080</port>
                     <path>/</path>
                     <uriEncoding>UTF-8</uriEncoding>
                 </configuration>
