@@ -205,11 +205,12 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
 
         ((WxTransactionType) order.getTransactionType()).setAttribute(parameters, order);
         //可覆盖参数
-        setParameters(parameters, "notify_url", order);
+/*        setParameters(parameters, "notify_url", order);
         setParameters(parameters, "goods_tag", order);
         setParameters(parameters, "limit_pay", order);
         setParameters(parameters, "receipt", order);
-        setParameters(parameters, "product_id", order);
+        setParameters(parameters, "product_id", order);*/
+        parameters.putAll(order.getAttrs());
         parameters = preOrderHandler(parameters, order);
         setSign(parameters);
 
