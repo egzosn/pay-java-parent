@@ -45,6 +45,10 @@ public enum  AliTransactionType implements TransactionType {
      */
     WAVE_CODE("alipay.trade.pay"),
     /**
+     * 小程序
+     */
+    MINAPP("alipay.trade.create"),
+    /**
      * 刷脸付
      */
     SECURITY_CODE("alipay.trade.pay"),
