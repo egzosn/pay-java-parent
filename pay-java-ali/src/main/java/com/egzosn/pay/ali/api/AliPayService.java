@@ -213,6 +213,11 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
                 bizContent.put(PASSBACK_PARAMS, order.getAddition());
                 bizContent.put(PRODUCT_CODE, "QUICK_MSECURITY_PAY");
                 break;
+            case MINAPP:
+                bizContent.put("extend_params", order.getAddition());
+                bizContent.put("buyer_id", order.getOpenid());
+                bizContent.put(PRODUCT_CODE, "FACE_TO_FACE_PAYMENT");
+                break;
             case BAR_CODE:
             case WAVE_CODE:
             case SECURITY_CODE:
@@ -223,7 +228,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
 
         }
         if (null != order.getExpirationTime()) {
-            bizContent.put("timeout_express", DateUtils.minutesRemaining(order.getExpirationTime()) + "m");
+            bizContent.put(order.getTransactionType() == AliTransactionType.SWEEPPAY ? "qr_code_timeout_express" : "timeout_express", DateUtils.minutesRemaining(order.getExpirationTime()) + "m");
         }
         orderInfo.put(BIZ_CONTENT, JSON.toJSONString(bizContent));
         orderInfo.putAll(order.getAttrs());

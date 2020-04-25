@@ -71,6 +71,7 @@ public class PayOrder implements Order {
     /**
      * 用户唯一标识
      * 微信含 sub_openid 字段
+     * 支付宝 buyer_id
      */
     private String openid;
     /**
