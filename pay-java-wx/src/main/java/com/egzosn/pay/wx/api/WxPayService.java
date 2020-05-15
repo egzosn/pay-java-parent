@@ -12,11 +12,9 @@ import com.egzosn.pay.common.util.Util;
 import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.sign.encrypt.RSA2;
 import com.egzosn.pay.common.util.str.StringUtils;
-import com.egzosn.pay.wx.bean.WxPayError;
-import com.egzosn.pay.wx.bean.WxPayMessage;
-import com.egzosn.pay.wx.bean.WxTransactionType;
+import com.egzosn.pay.wx.bean.*;
 import com.egzosn.pay.common.util.XML;
-import com.egzosn.pay.wx.bean.WxTransferType;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -756,5 +754,59 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
     @Override
     public PayMessage createMessage(Map<String, Object> message) {
         return WxPayMessage.create(message);
+    }
+
+  /**
+     * 发放裂变红包
+     * 裂变红包：一次可以发放一组红包。首先领取的用户为种子用户，种子用户领取一组红包当中的一个，并可以通过社交分享将剩下的红包给其他用户。裂变红包充分利用了人际传播的优势。
+     *
+     * @author: faymanwang 1057438332@qq.com
+     * @param redpackOrder 红包实体
+     * @return 返回发红包实体后的结果
+     */
+    public Map<String, Object> sendgroupredpack(RedpackOrder redpackOrder) {
+        Map<String, Object> parameters = new TreeMap<String, Object>();
+        redpackParam(redpackOrder, parameters);
+        parameters.put("amt_type", "ALL_RAND");
+        parameters.put(SIGN, createSign(SignUtils.parameterText(parameters, "&", SIGN), payConfigStorage.getInputCharset()));
+        return  requestTemplate.postForObject(getReqUrl( WxSendredpackType.SENDGROUPREDPACK), XML.getMap2Xml(parameters) , JSONObject.class);
+    }
+
+    /**
+     * 查询红包记录
+     * 用于商户对已发放的红包进行查询红包的具体信息，可支持普通红包和裂变包
+     * 查询红包记录API只支持查询30天内的红包订单，30天之前的红包订单请登录商户平台查询。
+     *
+     * @author: faymanwang 1057438332@qq.com
+     * @param mchBillno 商户发放红包的商户订单号
+     * @return 返回查询结果
+     */
+    public Map<String, Object> gethbinfo (String mchBillno) {
+        Map<String, Object> parameters = this.getPublicParameters();
+        parameters.put("mch_billno", mchBillno);
+        parameters.put("bill_type", "MCHT");
+        parameters.put(SIGN, createSign(SignUtils.parameterText(parameters, "&", SIGN), payConfigStorage.getInputCharset()));
+        return  requestTemplate.postForObject(getReqUrl( WxSendredpackType.GETHBINFO), XML.getMap2Xml(parameters) , JSONObject.class);
+    }
+
+    /**
+     * 微信红包构造参数方法
+     * @param redpackOrder 红包实体
+     * @param parameters
+     */
+    private void redpackParam(RedpackOrder redpackOrder, Map<String, Object> parameters) {
+        parameters.put(NONCE_STR, SignUtils.randomStr());
+        parameters.put(MCH_ID, payConfigStorage.getPid());
+        parameters.put("wxappid", payConfigStorage.getAppid());
+        parameters.put("send_name", redpackOrder.getSendName());
+        parameters.put("re_openid", redpackOrder.getReOpenid());
+        parameters.put("mch_billno", redpackOrder.getMchBillno());
+        parameters.put("total_amount", Util.conversionCentAmount(redpackOrder.getTotalAmount()));
+        parameters.put("total_num", redpackOrder.getTotalNum() > 0 ? redpackOrder.getTotalNum() : 1);
+        parameters.put("wishing", redpackOrder.getWishing());
+        parameters.put("client_ip", StringUtils.isNotEmpty(redpackOrder.getIp()) ? redpackOrder.getIp() : "192.168.0.1");
+        parameters.put("act_name", redpackOrder.getActName());
+        parameters.put("remark", redpackOrder.getRemark());
+        parameters.put("scene_id", redpackOrder.getSceneId());
     }
 }
