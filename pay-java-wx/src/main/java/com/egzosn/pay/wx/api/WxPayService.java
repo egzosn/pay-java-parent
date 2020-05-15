@@ -756,7 +756,20 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
         return WxPayMessage.create(message);
     }
 
-  /**
+    /**
+     * 微信发红包
+     * @author: faymanwang 1057438332@qq.com
+     * @param redpackOrder 红包实体
+     * @return 返回发红包实体后的结果
+     */
+    public Map<String, Object> sendredpack(RedpackOrder redpackOrder) {
+        Map<String, Object> parameters = new TreeMap<String, Object>();
+        redpackParam(redpackOrder, parameters);
+        parameters.put(SIGN, createSign(SignUtils.parameterText(parameters, "&", SIGN), payConfigStorage.getInputCharset()));
+        return  requestTemplate.postForObject(getReqUrl( WxSendredpackType.SENDREDPACK), XML.getMap2Xml(parameters) , JSONObject.class);
+    }
+
+     /**
      * 发放裂变红包
      * 裂变红包：一次可以发放一组红包。首先领取的用户为种子用户，种子用户领取一组红包当中的一个，并可以通过社交分享将剩下的红包给其他用户。裂变红包充分利用了人际传播的优势。
      *
@@ -770,6 +783,20 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
         parameters.put("amt_type", "ALL_RAND");
         parameters.put(SIGN, createSign(SignUtils.parameterText(parameters, "&", SIGN), payConfigStorage.getInputCharset()));
         return  requestTemplate.postForObject(getReqUrl( WxSendredpackType.SENDGROUPREDPACK), XML.getMap2Xml(parameters) , JSONObject.class);
+    }
+
+    /**
+     * 小程序发红包
+     * @author: faymanwang 1057438332@qq.com
+     * @param redpackOrder 红包实体
+     * @return 返回发红包实体后的结果
+     */
+    public Map<String, Object> sendminiprogramhb(RedpackOrder redpackOrder) {
+        Map<String, Object> parameters = new TreeMap<String, Object>();
+        redpackParam(redpackOrder, parameters);
+        parameters.put("notify_way", "MINI_PROGRAM_JSAPI");
+        parameters.put(SIGN, createSign(SignUtils.parameterText(parameters, "&", SIGN), payConfigStorage.getInputCharset()));
+        return  requestTemplate.postForObject(getReqUrl( WxSendredpackType.SENDMINIPROGRAMHB), XML.getMap2Xml(parameters) , JSONObject.class);
     }
 
     /**
@@ -807,6 +834,8 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
         parameters.put("client_ip", StringUtils.isNotEmpty(redpackOrder.getIp()) ? redpackOrder.getIp() : "192.168.0.1");
         parameters.put("act_name", redpackOrder.getActName());
         parameters.put("remark", redpackOrder.getRemark());
-        parameters.put("scene_id", redpackOrder.getSceneId());
+        if(StringUtils.isNotEmpty(redpackOrder.getSceneId())){
+            parameters.put("scene_id", redpackOrder.getSceneId());
+        }
     }
 }
