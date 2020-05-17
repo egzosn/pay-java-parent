@@ -7,8 +7,9 @@ import java.util.Map;
 
 /**
  * 退款订单信息
- * @author  egan
- *  <pre>
+ *
+ * @author egan
+ * <pre>
  *      email egzosn@gmail.com
  *      date 2018/1/15 21:40
  *   </pre>
@@ -156,7 +157,7 @@ public class RefundOrder implements Order {
 
     @Override
     public Map<String, Object> getAttrs() {
-        if (null == attr){
+        if (null == attr) {
             attr = new HashMap<>();
         }
         return attr;
@@ -170,7 +171,8 @@ public class RefundOrder implements Order {
 
     /**
      * 添加订单信息
-     * @param key key
+     *
+     * @param key   key
      * @param value 值
      */
     @Override

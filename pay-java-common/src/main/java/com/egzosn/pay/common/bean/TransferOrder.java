@@ -6,6 +6,7 @@ import java.util.Map;
 
 /**
  * 转账订单
+ *
  * @author egan
  * <pre>
  * email egzosn@gmail.com
@@ -27,12 +28,12 @@ public class TransferOrder implements Order {
     /**
      * 收款方账户, 用户openid,卡号等等
      */
-    private String  payeeAccount ;
+    private String payeeAccount;
 
     /**
      * 转账金额
      */
-    private BigDecimal amount ;
+    private BigDecimal amount;
 
     /**
      * 付款人名称
@@ -55,11 +56,11 @@ public class TransferOrder implements Order {
 
     /**
      * 收款开户行
-      */
+     */
     private Bank bank;
 
     /**
-     *  收款开户行地址
+     * 收款开户行地址
      */
     private String payeeBankAddress;
 
@@ -198,9 +199,10 @@ public class TransferOrder implements Order {
     public void setIp(String ip) {
         this.ip = ip;
     }
+
     @Override
     public Map<String, Object> getAttrs() {
-        if (null == attr){
+        if (null == attr) {
             attr = new HashMap<>();
         }
         return attr;
@@ -214,7 +216,8 @@ public class TransferOrder implements Order {
 
     /**
      * 添加订单信息
-     * @param key key
+     *
+     * @param key   key
      * @param value 值
      */
     @Override

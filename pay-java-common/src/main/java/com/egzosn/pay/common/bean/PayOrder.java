@@ -1,11 +1,11 @@
 package com.egzosn.pay.common.bean;
 
+import com.egzosn.pay.common.util.str.StringUtils;
+
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-
-import com.egzosn.pay.common.util.str.StringUtils;
 
 /**
  * 支付订单信息
