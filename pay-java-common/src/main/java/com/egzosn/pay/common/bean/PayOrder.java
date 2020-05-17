@@ -277,6 +277,7 @@ public class PayOrder implements Order {
      * @param key key
      * @param value 值
      */
+    @Override
     public void addAttr(String key, Object value) {
         getAttrs().put(key, value);
     }

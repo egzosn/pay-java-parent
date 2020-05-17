@@ -25,4 +25,12 @@ public interface Order {
      */
     Object getAttr(String key);
 
+
+    /**
+     * 添加订单信息
+     * @param key key
+     * @param value 值
+     */
+    void addAttr(String key, Object value);
+
 }
