@@ -92,14 +92,14 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
 
         if (!(SUCCESS.equals(params.get(RETURN_CODE)) && SUCCESS.equals(params.get(RESULT_CODE)))) {
             if (LOG.isErrorEnabled()) {
-LOG.error(String.format("微信支付异常：return_code=%s,参数集=%s", params.get(RETURN_CODE), params));
+                LOG.error(String.format("微信支付异常：return_code=%s,参数集=%s", params.get(RETURN_CODE), params));
             }
             return false;
         }
 
         if (null == params.get(SIGN)) {
             if (LOG.isDebugEnabled()) {
-LOG.debug(String.format("微信支付异常：签名为空！%s=%s", OUT_TRADE_NO, params.get(OUT_TRADE_NO)));
+                LOG.debug(String.format("微信支付异常：签名为空！%s=%s", OUT_TRADE_NO, params.get(OUT_TRADE_NO)));
             }
             return false;
         }
@@ -240,24 +240,24 @@ LOG.debug(String.format("微信支付异常：签名为空！%s=%s", OUT_TRADE_N
         if (verify(preOrderHandler(result, order))) {
             //如果是扫码支付或者刷卡付无需处理，直接返回
             if (((WxTransactionType) order.getTransactionType()).isReturn()) {
-return result;
+                return result;
             }
 
             Map<String, Object> params = new TreeMap<String, Object>();
 
             if (WxTransactionType.JSAPI == order.getTransactionType()) {
-params.put("signType", payConfigStorage.getSignType());
-params.put("appId", payConfigStorage.getAppid());
-params.put("timeStamp", System.currentTimeMillis() / 1000);
-params.put("nonceStr", result.get(NONCE_STR));
-params.put("package", "prepay_id=" + result.get("prepay_id"));
+                params.put("signType", payConfigStorage.getSignType());
+                params.put("appId", payConfigStorage.getAppid());
+                params.put("timeStamp", System.currentTimeMillis() / 1000);
+                params.put("nonceStr", result.get(NONCE_STR));
+                params.put("package", "prepay_id=" + result.get("prepay_id"));
             } else if (WxTransactionType.APP == order.getTransactionType()) {
-params.put("partnerid", payConfigStorage.getPid());
-params.put(APPID, payConfigStorage.getAppid());
-params.put("prepayid", result.get("prepay_id"));
-params.put("timestamp", System.currentTimeMillis() / 1000);
-params.put("noncestr", result.get(NONCE_STR));
-params.put("package", "Sign=WXPay");
+                params.put("partnerid", payConfigStorage.getPid());
+                params.put(APPID, payConfigStorage.getAppid());
+                params.put("prepayid", result.get("prepay_id"));
+                params.put("timestamp", System.currentTimeMillis() / 1000);
+                params.put("noncestr", result.get(NONCE_STR));
+                params.put("package", "Sign=WXPay");
             }
             String paySign = createSign(SignUtils.parameterText(params), payConfigStorage.getInputCharset());
             params.put(SIGN, paySign);
@@ -478,8 +478,6 @@ params.put("package", "Sign=WXPay");
     }
 
 
-
-
     /**
      * 申请退款接口
      *
@@ -575,7 +573,7 @@ params.put("package", "Sign=WXPay");
 
         if (transactionType == WxTransactionType.DOWNLOADBILL) {
             if (transactionIdOrBillDate instanceof Date) {
-return downloadbill((Date) transactionIdOrBillDate, outTradeNoBillType);
+                return downloadbill((Date) transactionIdOrBillDate, outTradeNoBillType);
             }
             throw new PayErrorException(new PayException(FAILURE, "非法类型异常:" + transactionIdOrBillDate.getClass()));
         }
@@ -599,12 +597,12 @@ return downloadbill((Date) transactionIdOrBillDate, outTradeNoBillType);
      * @param order 转账订单
      *              <pre>
      *
-     *注意事项：
-     *◆ 当返回错误码为“SYSTEMERROR”时，请不要更换商户订单号，一定要使用原商户订单号重试，否则可能造成重复支付等资金风险。
-     *◆ XML具有可扩展性，因此返回参数可能会有新增，而且顺序可能不完全遵循此文档规范，如果在解析回包的时候发生错误，请商户务必不要换单重试，请商户联系客服确认付款情况。如果有新回包字段，会更新到此API文档中。
-     *◆ 因为错误代码字段err_code的值后续可能会增加，所以商户如果遇到回包返回新的错误码，请商户务必不要换单重试，请商户联系客服确认付款情况。如果有新的错误码，会更新到此API文档中。
-     *◆ 错误代码描述字段err_code_des只供人工定位问题时做参考，系统实现时请不要依赖这个字段来做自动化处理。
-     *</pre>
+     *              注意事项：
+     *              ◆ 当返回错误码为“SYSTEMERROR”时，请不要更换商户订单号，一定要使用原商户订单号重试，否则可能造成重复支付等资金风险。
+     *              ◆ XML具有可扩展性，因此返回参数可能会有新增，而且顺序可能不完全遵循此文档规范，如果在解析回包的时候发生错误，请商户务必不要换单重试，请商户联系客服确认付款情况。如果有新回包字段，会更新到此API文档中。
+     *              ◆ 因为错误代码字段err_code的值后续可能会增加，所以商户如果遇到回包返回新的错误码，请商户务必不要换单重试，请商户联系客服确认付款情况。如果有新的错误码，会更新到此API文档中。
+     *              ◆ 错误代码描述字段err_code_des只供人工定位问题时做参考，系统实现时请不要依赖这个字段来做自动化处理。
+     *              </pre>
      * @return 对应的转账结果
      */
     @Override
@@ -678,11 +676,11 @@ return downloadbill((Date) transactionIdOrBillDate, outTradeNoBillType);
      *
      * @param outNo          商户转账订单号
      * @param wxTransferType 微信转账类型，.....这里没办法了只能这样写(┬＿┬)，请见谅 {@link com.egzosn.pay.wx.bean.WxTransferType}
-     *       <p>
-     *       <p>
-     *       <a href="https://pay.weixin.qq.com/wiki/doc/api/tools/mch_pay.php?chapter=14_3">企业付款到零钱</a>
-     *       <a href="https://pay.weixin.qq.com/wiki/doc/api/tools/mch_pay.php?chapter=24_3">商户企业付款到银行卡</a>
-     *       </p>
+     *                       <p>
+     *                       <p>
+     *                       <a href="https://pay.weixin.qq.com/wiki/doc/api/tools/mch_pay.php?chapter=14_3">企业付款到零钱</a>
+     *                       <a href="https://pay.weixin.qq.com/wiki/doc/api/tools/mch_pay.php?chapter=24_3">商户企业付款到银行卡</a>
+     *                       </p>
      * @return 对应的转账订单
      */
     @Override
@@ -734,8 +732,10 @@ return downloadbill((Date) transactionIdOrBillDate, outTradeNoBillType);
     public Map<String, Object> sendredpack(RedpackOrder redpackOrder) {
         Map<String, Object> parameters = new TreeMap<String, Object>();
         redPackParam(redpackOrder, parameters);
+        parameters.put("total_num", 1);
         if (WxSendredpackType.SENDGROUPREDPACK == redpackOrder.getTransferType()) {
             parameters.put("amt_type", "ALL_RAND");
+            parameters.remove("total_num");
         } else if (WxSendredpackType.SENDMINIPROGRAMHB == redpackOrder.getTransferType()) {
             parameters.put("notify_way", "MINI_PROGRAM_JSAPI");
         }
@@ -767,7 +767,7 @@ return downloadbill((Date) transactionIdOrBillDate, outTradeNoBillType);
      * 微信红包构造参数方法
      *
      * @param redpackOrder 红包实体
-     * @param parameters 接收参数
+     * @param parameters   接收参数
      */
     private void redPackParam(RedpackOrder redpackOrder, Map<String, Object> parameters) {
         parameters.put(NONCE_STR, SignUtils.randomStr());
