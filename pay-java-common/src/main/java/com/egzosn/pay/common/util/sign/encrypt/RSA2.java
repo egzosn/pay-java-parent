@@ -1,6 +1,8 @@
 
 package com.egzosn.pay.common.util.sign.encrypt;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 
@@ -63,11 +65,11 @@ public class RSA2 {
 	* @return 解密后的字符串
 	 * @throws Exception 解密异常
 	*/
-	public static String decrypt(String content, String privateKey, String characterEncoding) throws Exception {
+	public static String decrypt(String content, String privateKey, String characterEncoding) throws GeneralSecurityException, IOException {
         return RSA.decrypt(content, privateKey, characterEncoding);
     }
 
-	
+
 	/**
 	* 得到私钥
 	* @param key 密钥字符串（经过base64编码）
@@ -79,7 +81,7 @@ public class RSA2 {
 	}
 
 
-	public static String encrypt(String content, String publicKey, String cipherAlgorithm, String characterEncoding ) throws Exception {
-		return Base64.encode(RSA.encrypt(content.getBytes(characterEncoding), RSA.getPublicKey(publicKey),2048, 11, cipherAlgorithm));
+	public static String encrypt(String content, String publicKey, String cipherAlgorithm, String characterEncoding ) throws GeneralSecurityException, IOException {
+		return Base64.encode(RSA.encrypt(content.getBytes(characterEncoding), RSA.getPublicKey(publicKey), 2048, 11, cipherAlgorithm));
 	}
 }
