@@ -3,7 +3,7 @@ package com.egzosn.pay.wx.bean;
 import com.egzosn.pay.common.bean.TransferType;
 
 /**
- * @description:
+ * @description: 红包交易类型
  * @author: faymanwang
  * @time: 2020/5/14 20:11
  */

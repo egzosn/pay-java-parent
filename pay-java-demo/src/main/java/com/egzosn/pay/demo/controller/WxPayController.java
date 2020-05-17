@@ -2,27 +2,16 @@
 package com.egzosn.pay.demo.controller;
 
 
-import com.egzosn.pay.common.api.Callback;
-import com.egzosn.pay.common.api.PayService;
 import com.egzosn.pay.common.bean.*;
 import com.egzosn.pay.common.http.HttpConfigStorage;
-import com.egzosn.pay.common.http.UriVariables;
-import com.egzosn.pay.demo.entity.PayType;
 import com.egzosn.pay.demo.request.QueryOrder;
-import com.egzosn.pay.demo.service.PayResponse;
-import com.egzosn.pay.demo.service.handler.AliPayMessageHandler;
-import com.egzosn.pay.demo.service.handler.WxPayMessageHandler;
 import com.egzosn.pay.wx.api.WxPayConfigStorage;
 import com.egzosn.pay.wx.api.WxPayService;
-import com.egzosn.pay.wx.bean.WxBank;
-import com.egzosn.pay.wx.bean.WxTransactionType;
-import com.egzosn.pay.wx.bean.WxTransferType;
-import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import com.egzosn.pay.wx.bean.*;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 import java.io.ByteArrayOutputStream;
@@ -43,7 +32,7 @@ import java.util.UUID;
 @RequestMapping("wx")
 public class WxPayController {
 
-    private PayService service = null;
+    private WxPayService service = null;
 
 
 
@@ -334,8 +323,8 @@ public class WxPayController {
      * @return 返回支付方查询退款后的结果
      */
     @RequestMapping("refundquery")
-    public Map<String, Object> refundquery(QueryOrder order) {
-        return service.refundquery(order.getTradeNo(), order.getOutTradeNo());
+    public Map<String, Object> refundquery(RefundOrder order) {
+        return service.refundquery(order);
     }
 
     /**
@@ -428,4 +417,51 @@ public class WxPayController {
        //默认查询银行卡的记录 com.egzosn.pay.wx.bean.WxTransferType#QUERY_BANK
         return service.transferQuery(outNo, wxTransferType);
     }
+
+    /**
+     * 微信发红包
+     * @param redpackOrder 红包订单
+     * @return 结果
+     */
+    public Map<String, Object> sendredpack(RedpackOrder redpackOrder) {
+        redpackOrder.setTransferType(WxSendredpackType.SENDREDPACK);
+        return service.sendredpack(redpackOrder);
+    }
+
+    /**
+     * 发放裂变红包
+     * @param redpackOrder 红包订单
+     * @return 结果
+     */
+    public Map<String, Object> sendgroupredpack(RedpackOrder redpackOrder) {
+        redpackOrder.setTransferType(WxSendredpackType.SENDGROUPREDPACK);
+        return service.sendredpack(redpackOrder);
+    }
+
+
+    /**
+     * 小程序发红包
+     * @param redpackOrder 红包订单
+     * @return 结果
+     */
+    public Map<String, Object> sendminiprogramhb(RedpackOrder redpackOrder) {
+        redpackOrder.setTransferType(WxSendredpackType.SENDMINIPROGRAMHB);
+        return service.sendredpack(redpackOrder);
+    }
+
+
+    /**
+     * 查询红包记录
+     * 用于商户对已发放的红包进行查询红包的具体信息，可支持普通红包和裂变包
+     * 查询红包记录API只支持查询30天内的红包订单，30天之前的红包订单请登录商户平台查询。
+     *
+     * @param mchBillno 商户发放红包的商户订单号
+     * @return 返回查询结果
+     */
+    public Map<String, Object> gethbinfo(String mchBillno) {
+        return service.gethbinfo(mchBillno);
+    }
+
+
+
 }
