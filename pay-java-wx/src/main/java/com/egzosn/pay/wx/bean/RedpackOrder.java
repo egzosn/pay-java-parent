@@ -25,7 +25,9 @@ public class RedpackOrder {
     private String reOpenid;
 
     /**
-     * 付款金额 每个红包金额必须在默认额度内（默认大于1元，小于200元，可在产品设置中自行申请调高额度）
+     * 付款金额
+     * 每个红包金额必须在默认额度内（默认大于1元，小于200元，可在产品设置中自行申请调高额度）
+     * 可以设置最低每个0.3
      */
     private BigDecimal totalAmount;
 

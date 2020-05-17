@@ -7,6 +7,7 @@ import com.egzosn.pay.common.bean.*;
 import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpConfigStorage;
+import com.egzosn.pay.common.http.HttpRequestTemplate;
 import com.egzosn.pay.common.util.DateUtils;
 import com.egzosn.pay.common.util.Util;
 import com.egzosn.pay.common.util.sign.SignUtils;
@@ -765,8 +766,8 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
     public Map<String, Object> sendredpack(RedpackOrder redpackOrder) {
         Map<String, Object> parameters = new TreeMap<String, Object>();
         redpackParam(redpackOrder, parameters);
-        parameters.put(SIGN, createSign(SignUtils.parameterText(parameters, "&", SIGN), payConfigStorage.getInputCharset()));
-        return  requestTemplate.postForObject(getReqUrl( WxSendredpackType.SENDREDPACK), XML.getMap2Xml(parameters) , JSONObject.class);
+        parameters.put("total_num", 1);
+        return routRedpack(parameters, WxSendredpackType.SENDREDPACK);
     }
 
      /**
@@ -781,8 +782,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
         Map<String, Object> parameters = new TreeMap<String, Object>();
         redpackParam(redpackOrder, parameters);
         parameters.put("amt_type", "ALL_RAND");
-        parameters.put(SIGN, createSign(SignUtils.parameterText(parameters, "&", SIGN), payConfigStorage.getInputCharset()));
-        return  requestTemplate.postForObject(getReqUrl( WxSendredpackType.SENDGROUPREDPACK), XML.getMap2Xml(parameters) , JSONObject.class);
+        return routRedpack(parameters, WxSendredpackType.SENDGROUPREDPACK);
     }
 
     /**
@@ -794,9 +794,9 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
     public Map<String, Object> sendminiprogramhb(RedpackOrder redpackOrder) {
         Map<String, Object> parameters = new TreeMap<String, Object>();
         redpackParam(redpackOrder, parameters);
+        parameters.put("total_num", 1);
         parameters.put("notify_way", "MINI_PROGRAM_JSAPI");
-        parameters.put(SIGN, createSign(SignUtils.parameterText(parameters, "&", SIGN), payConfigStorage.getInputCharset()));
-        return  requestTemplate.postForObject(getReqUrl( WxSendredpackType.SENDMINIPROGRAMHB), XML.getMap2Xml(parameters) , JSONObject.class);
+        return routRedpack(parameters, WxSendredpackType.SENDMINIPROGRAMHB);
     }
 
     /**
@@ -812,12 +812,24 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
         Map<String, Object> parameters = this.getPublicParameters();
         parameters.put("mch_billno", mchBillno);
         parameters.put("bill_type", "MCHT");
+        return routRedpack(parameters, WxSendredpackType.GETHBINFO);
+    }
+
+    /**
+     *
+     * @author: faymanwang 1057438332@qq.com
+     * @param parameters
+     * @param sendredpackType
+     * @return
+     */
+    private Map<String, Object> routRedpack(Map<String, Object> parameters, TransferType sendredpackType) {
         parameters.put(SIGN, createSign(SignUtils.parameterText(parameters, "&", SIGN), payConfigStorage.getInputCharset()));
-        return  requestTemplate.postForObject(getReqUrl( WxSendredpackType.GETHBINFO), XML.getMap2Xml(parameters) , JSONObject.class);
+        return requestTemplate.postForObject(getReqUrl(sendredpackType), XML.getMap2Xml(parameters), JSONObject.class);
     }
 
     /**
      * 微信红包构造参数方法
+     * @author: faymanwang 1057438332@qq.com
      * @param redpackOrder 红包实体
      * @param parameters
      */

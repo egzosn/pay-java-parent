@@ -4,7 +4,7 @@ import com.egzosn.pay.common.bean.TransferType;
 
 /**
  * @description:
- * @author: faymanwang
+ * @author: 保网 faymanwang 1057438332@qq.com
  * @time: 2020/5/14 20:11
  */
 public enum WxSendredpackType  implements TransferType {
@@ -17,7 +17,7 @@ public enum WxSendredpackType  implements TransferType {
      */
     SENDGROUPREDPACK("mmpaymkttransfers/sendgroupredpack"),
     /**
-     * 现金红包-查询红包记录
+     * 现金红包,小程序-查询红包记录
      */
     GETHBINFO ("mmpaymkttransfers/gethbinfo"),
     /**
