@@ -5,7 +5,7 @@ import java.util.Date;
 
 /**
  * 退款订单信息
- * @author: egan
+ * @author  egan
  *  <pre>
  *      email egzosn@gmail.com
  *      date 2018/1/15 21:40
@@ -46,6 +46,10 @@ public class RefundOrder {
      * 退款说明
      */
     private String description;
+    /**
+     * 退款用户
+     */
+    private String userId;
 
     public String getRefundNo() {
         return refundNo;
@@ -109,6 +113,14 @@ public class RefundOrder {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public RefundOrder() {
