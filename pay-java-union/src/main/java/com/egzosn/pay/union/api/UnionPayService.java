@@ -9,7 +9,6 @@ import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.common.http.UriVariables;
 import com.egzosn.pay.common.util.DateUtils;
-import com.egzosn.pay.common.util.MatrixToImageWriter;
 import com.egzosn.pay.common.util.Util;
 import com.egzosn.pay.common.util.sign.CertDescriptor;
 import com.egzosn.pay.common.util.sign.SignUtils;
@@ -609,38 +608,10 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
         return Collections.emptyMap();
     }
 
-    /**
-     * 申请退款接口
-     *
-     * @param tradeNo      支付平台订单号
-     * @param outTradeNo   商户单号
-     * @param refundAmount 退款金额
-     * @param totalAmount  总金额
-     * @return 返回支付方申请退款后的结果
-     * @see #refund(RefundOrder)
-     */
-    @Deprecated
-    @Override
-    public Map<String, Object> refund(String tradeNo, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount) {
-        return refund(new RefundOrder(tradeNo, outTradeNo, refundAmount, totalAmount));
-    }
-
 
     @Override
     public Map<String, Object> refund(RefundOrder refundOrder) {
         return unionRefundOrConsumeUndo(refundOrder, UnionTransactionType.REFUND);
-    }
-
-    /**
-     * 查询退款
-     *
-     * @param tradeNo    支付平台订单号
-     * @param outTradeNo 商户单号
-     * @return 返回支付方查询退款后的结果
-     */
-    @Override
-    public Map<String, Object> refundquery(String tradeNo, String outTradeNo) {
-        return Collections.emptyMap();
     }
 
 

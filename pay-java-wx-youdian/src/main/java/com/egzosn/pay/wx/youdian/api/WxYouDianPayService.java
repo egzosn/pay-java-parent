@@ -385,13 +385,14 @@ public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorag
     }
 
 
-    @Override
-    public Map<String, Object> refund(String tradeNo, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount) {
-        return refund(new RefundOrder(tradeNo, outTradeNo,refundAmount, totalAmount));
-    }
 
 
-
+    /**
+     * 申请退款接口
+     *
+     * @param refundOrder 退款订单信息
+     * @return 返回支付方申请退款后的结果
+     */
     @Override
     public Map<String, Object> refund(RefundOrder refundOrder) {
         String apbNonce = SignUtils.randomStr();
@@ -412,11 +413,6 @@ public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorag
         return jsonObject;
     }
 
-
-    @Override
-    public Map<String, Object> refundquery(String tradeNo, String outTradeNo) {
-        return Collections.emptyMap();
-    }
 
     /**
      * 查询退款

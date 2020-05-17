@@ -310,24 +310,7 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
     public Map<String, Object> close(String tradeNo, String outTradeNo) {
         throw new UnsupportedOperationException("不支持该操作");
     }
-    
-    /**
-     * 退款, 请使用 {@link com.egzosn.pay.baidu.api.BaiduPayService#refundUseBaidu}
-     *
-     * @param orderId
-     * @param userId
-     * @param refundAmount 退款金额
-     * @param totalAmount  总金额
-     * @return
-     */
-    @Override
-    @Deprecated
-    public Map<String, Object> refund(String orderId,
-                                      String userId,
-                                      BigDecimal refundAmount,
-                                      BigDecimal totalAmount) {
-        throw new UnsupportedOperationException("请使用 " + getClass().getName() + "#refundUseBaidu");
-    }
+
     
     /**
      * 退款
@@ -381,26 +364,7 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
         return requestTemplate.getForObject(String.format("%s?%s", getReqUrl(transactionType), UriVariables.getMapToParameters(parameters)), JSONObject.class);
     }
     
-    /**
-     * 退费查询
-     *
-     * @param orderId 百度平台订单ID
-     * @param userId  百度用户ID
-     * @return
-     */
-    @Override
-    public Map<String, Object> refundquery(String orderId,
-                                           String userId) {
-        Map<String, Object> parameters = getUseQueryPay();
-        BaiduTransactionType transactionType = BaiduTransactionType.REFUND_QUERY;
-        parameters.put(METHOD, transactionType.getMethod());
-        parameters.put(TYPE, 3);
-        parameters.put(ORDER_ID, orderId);
-        parameters.put(USER_ID, userId);
-        parameters.put(APP_KEY, payConfigStorage.getAppKey());
-        parameters.put(RSA_SIGN, getRsaSign(parameters, RSA_SIGN));
-        return requestTemplate.getForObject(String.format("%s?%s", getReqUrl(transactionType), UriVariables.getMapToParameters(parameters)), JSONObject.class);
-    }
+
     
     /**
      * 退费查询
@@ -410,7 +374,16 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
      */
     @Override
     public Map<String, Object> refundquery(RefundOrder refundOrder) {
-        return refundquery(refundOrder.getTradeNo(), refundOrder.getOutTradeNo());
+
+        Map<String, Object> parameters = getUseQueryPay();
+        BaiduTransactionType transactionType = BaiduTransactionType.REFUND_QUERY;
+        parameters.put(METHOD, transactionType.getMethod());
+        parameters.put(TYPE, 3);
+        parameters.put(ORDER_ID, refundOrder.getTradeNo());
+        parameters.put(USER_ID, refundOrder.getUserId());
+        parameters.put(APP_KEY, payConfigStorage.getAppKey());
+        parameters.put(RSA_SIGN, getRsaSign(parameters, RSA_SIGN));
+        return requestTemplate.getForObject(String.format("%s?%s", getReqUrl(transactionType), UriVariables.getMapToParameters(parameters)), JSONObject.class);
     }
     
     /**

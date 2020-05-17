@@ -18,7 +18,6 @@ import org.apache.http.Header;
 import org.apache.http.entity.ContentType;
 import org.apache.http.message.BasicHeader;
 
-import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -313,22 +312,7 @@ public class PayoneerPayService extends BasePayService<PayoneerConfigStorage> im
         return secondaryInterface(tradeNo, outTradeNo, PayoneerTransactionType.CHARGE_CANCEL);
     }
 
-    /**
-     * 申请退款接口
-     * 废弃
-     *
-     * @param tradeNo      支付平台订单号
-     * @param outTradeNo   商户单号
-     * @param refundAmount 退款金额
-     * @param totalAmount  总金额
-     *
-     * @return 返回支付方申请退款后的结果
-     * @see #refund(RefundOrder)
-     */
-    @Override
-    public Map<String, Object> refund(String tradeNo, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount) {
-        return close(tradeNo, outTradeNo);
-    }
+
 
 
     /**
@@ -343,18 +327,6 @@ public class PayoneerPayService extends BasePayService<PayoneerConfigStorage> im
         return close(refundOrder.getTradeNo(), refundOrder.getOutTradeNo());
     }
 
-    /**
-     * 查询退款
-     *
-     * @param tradeNo    支付平台订单号
-     * @param outTradeNo 商户单号
-     *
-     * @return 返回支付方查询退款后的结果
-     */
-    @Override
-    public Map<String, Object> refundquery(String tradeNo, String outTradeNo) {
-        return Collections.emptyMap();
-    }
 
     /**
      * 查询退款
