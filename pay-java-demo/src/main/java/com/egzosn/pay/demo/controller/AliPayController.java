@@ -7,7 +7,10 @@ import com.egzosn.pay.ali.api.AliPayService;
 import com.egzosn.pay.ali.bean.AliTransactionType;
 import com.egzosn.pay.ali.bean.AliTransferType;
 import com.egzosn.pay.ali.bean.OrderSettle;
-import com.egzosn.pay.common.bean.*;
+import com.egzosn.pay.common.bean.PayOrder;
+import com.egzosn.pay.common.bean.RefundOrder;
+import com.egzosn.pay.common.bean.TransactionType;
+import com.egzosn.pay.common.bean.TransferOrder;
 import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.common.http.UriVariables;
 import com.egzosn.pay.common.util.sign.SignUtils;
@@ -17,6 +20,7 @@ import com.egzosn.pay.demo.service.interceptor.AliPayMessageInterceptor;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.imageio.ImageIO;
@@ -287,8 +291,8 @@ public class AliPayController {
      * @return 返回支付方查询退款后的结果
      */
     @RequestMapping("refundquery")
-    public Map<String, Object> refundquery(QueryOrder order) {
-        return service.refundquery(order.getTradeNo(), order.getOutTradeNo());
+    public Map<String, Object> refundquery(RefundOrder order) {
+        return service.refundquery(order);
     }
 
     /**

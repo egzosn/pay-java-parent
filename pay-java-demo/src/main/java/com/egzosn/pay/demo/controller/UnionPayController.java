@@ -270,16 +270,6 @@ public class UnionPayController {
         return service.refund(order);
     }
 
-    /**
-     * 查询退款
-     *
-     * @param order 订单的请求体
-     * @return 返回支付方查询退款后的结果
-     */
-    @RequestMapping("refundquery")
-    public Map<String, Object> refundquery(QueryOrder order) {
-        return service.refundquery(order.getTradeNo(), order.getOutTradeNo());
-    }
 
     /**
      * 下载对账单

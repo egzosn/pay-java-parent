@@ -436,9 +436,11 @@ public class PayController {
      * @return 返回支付方查询退款后的结果
      */
     @RequestMapping("refundquery")
-    public Map<String, Object> refundquery(QueryOrder order) {
-        PayResponse payResponse = service.getPayResponse(order.getPayId());
-        return payResponse.getService().refundquery(order.getTradeNo(), order.getOutTradeNo());
+    public Map<String, Object> refundquery(Integer payId, RefundOrder order) {
+        PayResponse payResponse = service.getPayResponse(payId);
+
+
+        return payResponse.getService().refundquery(order);
     }
 
     /**
