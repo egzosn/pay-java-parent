@@ -732,10 +732,10 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
     public Map<String, Object> sendredpack(RedpackOrder redpackOrder) {
         Map<String, Object> parameters = new TreeMap<String, Object>();
         redPackParam(redpackOrder, parameters);
-        parameters.put("total_num", 1);
         if (WxSendredpackType.SENDGROUPREDPACK == redpackOrder.getTransferType()) {
+            //现金红包，小程序红包默认传1.裂变红包取传入值，且需要大于3
+            parameters.put("total_num", Math.max(redpackOrder.getTotalNum(), 3));
             parameters.put("amt_type", "ALL_RAND");
-            parameters.remove("total_num");
         } else if (WxSendredpackType.SENDMINIPROGRAMHB == redpackOrder.getTransferType()) {
             parameters.put("notify_way", "MINI_PROGRAM_JSAPI");
         }
@@ -777,7 +777,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
         parameters.put("re_openid", redpackOrder.getReOpenid());
         parameters.put("mch_billno", redpackOrder.getMchBillno());
         parameters.put("total_amount", Util.conversionCentAmount(redpackOrder.getTotalAmount()));
-        parameters.put("total_num", Math.max(redpackOrder.getTotalNum(), 1));
+        parameters.put("total_num", 1);
         parameters.put("wishing", redpackOrder.getWishing());
         parameters.put("client_ip", StringUtils.isNotEmpty(redpackOrder.getIp()) ? redpackOrder.getIp() : "192.168.0.1");
         parameters.put("act_name", redpackOrder.getActName());
