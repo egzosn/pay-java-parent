@@ -23,6 +23,9 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.security.GeneralSecurityException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.NoSuchAlgorithmException;
 import java.security.cert.*;
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -359,19 +362,33 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
 
             CertPathBuilder builder = CertPathBuilder.getInstance("PKIX");
 
-            @SuppressWarnings("unused")
-            PKIXCertPathBuilderResult result = (PKIXCertPathBuilderResult) builder.build(pkixParams);
+            /*PKIXCertPathBuilderResult result = (PKIXCertPathBuilderResult)*/ builder.build(pkixParams);
             return cert;
         } catch (java.security.cert.CertPathBuilderException e) {
             LOG.error("verify certificate chain fail.", e);
         } catch (CertificateExpiredException e) {
             LOG.error(e);
-        } catch (CertificateNotYetValidException e) {
-            LOG.error(e);
-        } catch (Exception e) {
+        } catch (GeneralSecurityException e) {
             LOG.error(e);
         }
         return null;
+    }
+
+    /**
+     * 发送订单
+     *
+     * @param order 发起支付的订单信息
+     * @return 返回支付结果
+     */
+
+    public JSONObject postOrder(PayOrder order) {
+        Map<String, Object> params = orderInfo(order);
+        String responseStr = getHttpRequestTemplate().postForObject(this.getBackTransUrl(), params, String.class);
+         JSONObject response = UriVariables.getParametersToMap(responseStr);
+        if (response.isEmpty()) {
+            throw new PayErrorException(new PayException("failure", "响应内容有误!", responseStr));
+        }
+        return response;
     }
 
     @Override
@@ -395,20 +412,15 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
     @Override
     public String getQrPay(PayOrder order) {
         order.setTransactionType(UnionTransactionType.APPLY_QR_CODE);
-        Map<String, Object> params = orderInfo(order);
-        String responseStr = getHttpRequestTemplate().postForObject(this.getBackTransUrl(), params, String.class);
-        Map<String, Object> response = UriVariables.getParametersToMap(responseStr);
-        if (response.isEmpty()) {
-            throw new PayErrorException(new PayException("failure", "响应内容有误!", responseStr));
-        }
+        JSONObject response = postOrder(order);
         if (this.verify(response)) {
             if (SDKConstants.OK_RESP_CODE.equals(response.get(SDKConstants.param_respCode))) {
                 //成功
                 return (String) response.get(SDKConstants.param_qrCode);
             }
-            throw new PayErrorException(new PayException((String) response.get(SDKConstants.param_respCode), (String) response.get(SDKConstants.param_respMsg), responseStr));
+            throw new PayErrorException(new PayException((String) response.get(SDKConstants.param_respCode), (String) response.get(SDKConstants.param_respMsg), response.toJSONString()));
         }
-        throw new PayErrorException(new PayException("failure", "验证签名失败", responseStr));
+        throw new PayErrorException(new PayException("failure", "验证签名失败", response.toJSONString()));
     }
 
     /**
@@ -420,9 +432,8 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
     @Override
     public Map<String, Object> microPay(PayOrder order) {
         order.setTransactionType(UnionTransactionType.CONSUME);
-        Map<String, Object> params = orderInfo(order);
-        String responseStr = getHttpRequestTemplate().postForObject(this.getBackTransUrl(), params, String.class);
-        return UriVariables.getParametersToMap(responseStr);
+        JSONObject response = postOrder(order);
+        return response;
     }
 
 
@@ -499,17 +510,14 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
 
     /**
      * 功能：将订单信息进行签名并提交请求
-     * 业务范围：手机控件支付产品(WAP),
+     * 业务范围：手机支付控件（含安卓Pay）
      * @param order         订单信息
      * @return  成功：返回支付结果  失败：返回
      */
-    public Map<String ,Object>  sendHttpRequest(PayOrder order){
-        Map<String, Object> params = orderInfo(order);
-        String responseStr = getHttpRequestTemplate().postForObject(this.getBackTransUrl(), params, String.class);
-        Map<String, Object> response = UriVariables.getParametersToMap(responseStr);
-        if (response.isEmpty()) {
-            throw new PayErrorException(new PayException("failure", "响应内容有误!", responseStr));
-        }
+    @Override
+    public Map<String, Object>  app(PayOrder order){
+        order.setTransactionType(UnionTransactionType.APP);
+        JSONObject response = postOrder(order);
         if (this.verify(response)) {
             if (SDKConstants.OK_RESP_CODE.equals(response.get(SDKConstants.param_respCode))) {
 //                //成功,获取tn号
@@ -517,9 +525,9 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
 //                //TODO
                 return response;
             }
-            throw new PayErrorException(new PayException((String) response.get(SDKConstants.param_respCode), (String) response.get(SDKConstants.param_respMsg), responseStr));
+            throw new PayErrorException(new PayException((String) response.get(SDKConstants.param_respCode), (String) response.get(SDKConstants.param_respMsg), response.toJSONString()));
         }
-        throw new PayErrorException(new PayException("failure", "验证签名失败", responseStr));
+        throw new PayErrorException(new PayException("failure", "验证签名失败", response.toJSONString()));
     }
 
     /**

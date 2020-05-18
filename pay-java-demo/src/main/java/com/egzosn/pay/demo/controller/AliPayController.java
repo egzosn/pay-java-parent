@@ -113,7 +113,7 @@ public class AliPayController {
         PayOrder order = new PayOrder("订单title", "摘要", new BigDecimal(0.01), UUID.randomUUID().toString().replace("-", ""));
         //App支付
         order.setTransactionType(AliTransactionType.APP);
-        data.put("orderInfo", UriVariables.getMapToParameters(service.orderInfo(order)));
+        data.put("orderInfo", UriVariables.getMapToParameters(service.app(order)));
         return data;
     }
 

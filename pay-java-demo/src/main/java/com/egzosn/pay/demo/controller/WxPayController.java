@@ -144,7 +144,7 @@ public class WxPayController {
         PayOrder order = new PayOrder("订单title", "摘要", new BigDecimal(0.01), UUID.randomUUID().toString().replace("-", ""));
         //App支付
         order.setTransactionType(WxTransactionType.APP);
-        data.put("orderInfo", service.orderInfo(order));
+        data.put("orderInfo", service.app(order));
         return data;
     }
 

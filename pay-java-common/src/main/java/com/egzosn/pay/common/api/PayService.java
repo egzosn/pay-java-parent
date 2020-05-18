@@ -98,6 +98,13 @@ public interface PayService<PC extends PayConfigStorage> {
      * @return 对应页面重定向信息
      */
     <O extends PayOrder>String toPay(O order);
+    /**
+     * app支付
+     * @param order 订单信息
+     * @param <O> 预订单类型
+     * @return 对应app所需参数信息
+     */
+    <O extends PayOrder>Map<String, Object> app(O order);
 
     /**
      * 创建签名
@@ -108,14 +115,7 @@ public interface PayService<PC extends PayConfigStorage> {
      */
     String createSign(String content, String characterEncoding);
 
-    /**
-     * 创建签名
-     *
-     * @param content           需要签名的内容
-     * @param characterEncoding 字符编码
-     * @return 签名
-     */
-    String createSign(Map<String, Object> content, String characterEncoding);
+
 
     /**
      * 将请求参数或者请求流转化为 Map

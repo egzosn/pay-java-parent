@@ -125,7 +125,6 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
      * @param characterEncoding 字符编码
      * @return 签名
      */
-    @Override
     public String createSign(Map<String, Object> content, String characterEncoding) {
         return SignUtils.valueOf(payConfigStorage.getSignType()).sign(content, payConfigStorage.getKeyPrivate(), characterEncoding);
     }
@@ -140,6 +139,16 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
     public <O extends PayOrder> String toPay(O order) {
         Map orderInfo = orderInfo(order);
         return buildRequest(orderInfo, MethodType.POST);
+    }
+    /**
+     * app支付
+     * @param order 订单信息
+     * @param <O> 预订单类型
+     * @return 对应app所需参数信息
+     */
+    @Override
+    public <O extends PayOrder> Map<String, Object> app(O order) {
+        return orderInfo(order);
     }
 
     /**
