@@ -38,25 +38,25 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
     public static final String SIGN = "sign";
     public static final String METHOD = "method";
     public static final String TYPE = "type";
-    
+
     public static final Integer RESPONSE_SUCCESS = 2;
     public static final String RESPONSE_STATUS = "status";
-    
-    
+
+
     public BaiduPayService(BaiduPayConfigStorage payConfigStorage) {
         super(payConfigStorage);
     }
-    
+
     public BaiduPayService(BaiduPayConfigStorage payConfigStorage,
                            HttpConfigStorage configStorage) {
         super(payConfigStorage, configStorage);
     }
-    
+
     /**
      * 验证响应
      *
      * @param params 回调回来的参数集
-     * @return
+     * @return 结果
      */
     @Override
     public boolean verify(Map<String, Object> params) {
@@ -65,13 +65,13 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
         }
         return signVerify(params, String.valueOf(params.get(RSA_SIGN))) && verifySource(String.valueOf(params.get(TP_ORDER_ID)));
     }
-    
+
     /**
      * 验证签名
      *
      * @param params 参数集
      * @param sign   签名原文
-     * @return
+     * @return 结果
      */
     @Override
     public boolean signVerify(Map<String, Object> params, String sign) {
@@ -80,7 +80,7 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
         LOG.debug("百度返回的签名: " + rsaSign + " 本地产生的签名: " + targetRsaSign);
         return StringUtils.equals(rsaSign, targetRsaSign);
     }
-    
+
     @Override
     public boolean verifySource(String id) {
         return true;
@@ -90,7 +90,7 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
      * 返回创建的订单信息
      *
      * @param order 支付订单
-     * @return
+     * @return 结果
      */
     @Override
     public Map<String, Object> orderInfo(PayOrder order) {
@@ -99,11 +99,11 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
         params.put(RSA_SIGN, rsaSign);
         return params;
     }
-    
+
     /**
      * 获取"查询支付状态"所需参数
      *
-     * @return
+     * @return 结果
      */
     public Map<String, Object> getUseQueryPay() {
         String appKey = payConfigStorage.getAppKey();
@@ -112,12 +112,12 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
         result.put(APP_ID, payConfigStorage.getAppid());
         return result;
     }
-    
+
     /**
      * 获取"创建订单"所需参数
      *
-     * @param order
-     * @return
+     * @param order 订单信息
+     * @return 结果
      */
     private Map<String, Object> getUseOrderInfoParams(PayOrder order) {
         BaiduPayOrder payOrder = (BaiduPayOrder) order;
@@ -131,32 +131,32 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
         result.put(SIGN_FIELDS_RANGE, payOrder.getSignFieldsRange());
         result.put(BIZ_INFO, JSON.toJSONString(payOrder.getBizInfo()));
         result.put(TOTAL_AMOUNT, String.valueOf(Util.conversionAmount(order.getPrice())));
-        
+
         return result;
     }
-    
+
     /**
      * 获取输出消息，用户返回给支付端
      *
      * @param code    状态
      * @param message 消息
-     * @return
+     * @return 结果
      */
     @Override
     @Deprecated
     public PayOutMessage getPayOutMessage(String code, String message) {
         throw new UnsupportedOperationException("请使用 " + getClass().getName() + "#getPayOutMessageUseBaidu");
     }
-    
+
     /**
      * 请求业务方退款审核/响应处理
      * http://smartprogram.baidu.com/docs/develop/function/tune_up_examine/
      *
-     * @param errno
-     * @param message
-     * @param auditStatus
-     * @param refundPayMoney
-     * @return
+     * @param errno          错误代码
+     * @param message        消息
+     * @param auditStatus    状态
+     * @param refundPayMoney 退款金额
+     * @return 结果
      */
     public PayOutMessage getApplyRefundOutMessageUseBaidu(Integer errno,
                                                           String message,
@@ -172,16 +172,16 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
                 .content("message", message)
                 .content("data", data)
                 .build();
-        
+
     }
-    
+
     /**
      * 通知退款状态/响应处理
      * http://smartprogram.baidu.com/docs/develop/function/tune_up_drawback/
      *
-     * @param errno
-     * @param message
-     * @return
+     * @param errno   错误代码
+     * @param message 消息
+     * @return 结果
      */
     public PayOutMessage getRefundOutMessageUseBaidu(Integer errno,
                                                      String message) {
@@ -190,17 +190,17 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
                 .content("message", message)
                 .content("data", "{}")
                 .build();
-        
+
     }
-    
+
     /**
      * 支付通知/响应处理
      *
-     * @param errno
-     * @param message
-     * @param isConsumed
-     * @param isErrorOrder
-     * @return
+     * @param errno        错误代码
+     * @param message      消息
+     * @param isConsumed   是否消费
+     * @param isErrorOrder 错误订单
+     * @return 结果
      */
     public PayOutMessage getPayOutMessageUseBaidu(Integer errno,
                                                   String message,
@@ -220,237 +220,178 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
                 .content("data", data)
                 .build();
     }
-    
+
     /**
      * 支付通知/响应处理
      * http://smartprogram.baidu.com/docs/develop/function/tune_up_notice/
      *
-     * @param code
-     * @param message
-     * @param isConsumed
-     * @return
+     * @param code       状态码
+     * @param message    消息
+     * @param isConsumed 是否消费
+     * @return 结果
      */
     public PayOutMessage getPayOutMessageUseBaidu(Integer code,
                                                   String message,
                                                   Integer isConsumed) {
         return getPayOutMessageUseBaidu(code, message, isConsumed, null);
     }
-    
+
     /**
      * 支付通知/响应处理
      * http://smartprogram.baidu.com/docs/develop/function/tune_up_notice/
      *
      * @param payMessage 支付回调消息
-     * @return
+     * @return 结果
      */
     @Override
     public PayOutMessage successPayOutMessage(PayMessage payMessage) {
         return getPayOutMessageUseBaidu(0, "success", 2);
     }
-    
+
     /**
      * 获取输出消息，用户返回给支付端, 针对于web端
      *
      * @param orderInfo 发起支付的订单信息
      * @param method    请求方式  "post" "get",
-     * @return
+     * @return 结果
      */
     @Override
-    @Deprecated
     public String buildRequest(Map<String, Object> orderInfo,
                                MethodType method) {
         throw new UnsupportedOperationException("百度不支持PC支付");
     }
 
 
-
     /**
      * 百度不支持扫码付
      *
      * @param order 发起支付的订单信息
-     * @return
+     * @return 结果
      */
     @Override
     public String getQrPay(PayOrder order) {
         throw new UnsupportedOperationException("百度不支持扫码付");
     }
-    
+
     /**
      * 百度不支持刷卡付
      *
      * @param order 发起支付的订单信息
-     * @return
+     * @return 结果
      */
     @Override
     public Map<String, Object> microPay(PayOrder order) {
         throw new UnsupportedOperationException("百度不支持刷卡付");
     }
-    
+
     /**
      * 查询订单
      *
      * @param tradeNo    支付平台订单号
      * @param outTradeNo 商户单号
-     * @return
+     * @return 结果
      */
     @Override
     public Map<String, Object> query(String tradeNo, String outTradeNo) {
         return secondaryInterface(tradeNo, outTradeNo, BaiduTransactionType.PAY_QUERY);
     }
-    
+
     /**
      * 百度不支持该操作
      *
      * @param tradeNo    支付平台订单号
      * @param outTradeNo 商户单号
-     * @return
+     * @return 结果
      */
     @Override
-    @Deprecated
     public Map<String, Object> close(String tradeNo, String outTradeNo) {
         throw new UnsupportedOperationException("不支持该操作");
     }
-    
-    /**
-     * 退款, 请使用 {@link com.egzosn.pay.baidu.api.BaiduPayService#refundUseBaidu}
-     *
-     * @param orderId
-     * @param userId
-     * @param refundAmount 退款金额
-     * @param totalAmount  总金额
-     * @return
-     */
-    @Override
-    @Deprecated
-    public Map<String, Object> refund(String orderId,
-                                      String userId,
-                                      BigDecimal refundAmount,
-                                      BigDecimal totalAmount) {
-        throw new UnsupportedOperationException("请使用 " + getClass().getName() + "#refundUseBaidu");
-    }
-    
+
+
     /**
      * 退款
      *
-     * @param orderId
-     * @param userId
-     * @param refundType
-     * @param tpOrderId
-     * @param refundReason
-     * @return
-     */
-    public Map<String, Object> refundUseBaidu(Long orderId,
-                                              Long userId,
-                                              Integer refundType,
-                                              String tpOrderId,
-                                              String refundReason) {
-        return refundUseBaidu(new BaiduRefundOrder(orderId, userId, refundType, refundReason, tpOrderId));
-    }
-    
-    /**
-     * 退款, 请使用 {@link com.egzosn.pay.baidu.api.BaiduPayService#refundUseBaidu}
-     *
      * @param refundOrder 退款订单信息
-     * @return
+     * @return 退款结果
      */
     @Override
-    @Deprecated
     public Map<String, Object> refund(RefundOrder refundOrder) {
-        throw new UnsupportedOperationException("请使用 " + getClass().getName() + "#refundUseBaidu");
-    }
-    
-    /**
-     * 退款, 请使用 {@link com.egzosn.pay.baidu.api.BaiduPayService#refundUseBaidu}
-     *
-     * @param refundOrder
-     * @return
-     */
-    public Map<String, Object> refundUseBaidu(BaiduRefundOrder refundOrder) {
         Map<String, Object> parameters = getUseQueryPay();
         BaiduTransactionType transactionType = BaiduTransactionType.APPLY_REFUND;
         parameters.put(METHOD, transactionType.getMethod());
-        parameters.put(ORDER_ID, refundOrder.getTradeNo());
+        parameters.put(ORDER_ID, refundOrder.getOutTradeNo());
         parameters.put(USER_ID, refundOrder.getUserId());
-        parameters.put("refundType", refundOrder.getRefundType());
-        parameters.put("refundReason", String.valueOf(refundOrder.getRefundReason()));
-        parameters.put(TP_ORDER_ID, refundOrder.getTpOrderId());
-        parameters.put("applyRefundMoney", refundOrder.getApplyRefundMoney());
-        parameters.put("bizRefundBatchId", refundOrder.getBizRefundBatchId());
+        setParameters(parameters, "refundType", refundOrder);
+        parameters.put("refundReason", refundOrder.getDescription());
+        parameters.put(TP_ORDER_ID, refundOrder.getTradeNo());
+        parameters.put("applyRefundMoney", refundOrder.getRefundAmount());
+        parameters.put("bizRefundBatchId", refundOrder.getRefundNo());
         parameters.put(APP_KEY, payConfigStorage.getAppKey());
         parameters.put(RSA_SIGN, getRsaSign(parameters, RSA_SIGN));
         return requestTemplate.getForObject(String.format("%s?%s", getReqUrl(transactionType), UriVariables.getMapToParameters(parameters)), JSONObject.class);
+
     }
-    
-    /**
-     * 退费查询
-     *
-     * @param orderId 百度平台订单ID
-     * @param userId  百度用户ID
-     * @return
-     */
-    @Override
-    public Map<String, Object> refundquery(String orderId,
-                                           String userId) {
-        Map<String, Object> parameters = getUseQueryPay();
-        BaiduTransactionType transactionType = BaiduTransactionType.REFUND_QUERY;
-        parameters.put(METHOD, transactionType.getMethod());
-        parameters.put(TYPE, 3);
-        parameters.put(ORDER_ID, orderId);
-        parameters.put(USER_ID, userId);
-        parameters.put(APP_KEY, payConfigStorage.getAppKey());
-        parameters.put(RSA_SIGN, getRsaSign(parameters, RSA_SIGN));
-        return requestTemplate.getForObject(String.format("%s?%s", getReqUrl(transactionType), UriVariables.getMapToParameters(parameters)), JSONObject.class);
-    }
-    
+
+
     /**
      * 退费查询
      *
      * @param refundOrder 退款订单单号信息
-     * @return
+     * @return 退款查询结果
      */
     @Override
     public Map<String, Object> refundquery(RefundOrder refundOrder) {
-        return refundquery(refundOrder.getTradeNo(), refundOrder.getOutTradeNo());
+
+        Map<String, Object> parameters = getUseQueryPay();
+        BaiduTransactionType transactionType = BaiduTransactionType.REFUND_QUERY;
+        parameters.put(METHOD, transactionType.getMethod());
+        parameters.put(TYPE, 3);
+        parameters.put(ORDER_ID, refundOrder.getTradeNo());
+        parameters.put(USER_ID, refundOrder.getUserId());
+        parameters.put(APP_KEY, payConfigStorage.getAppKey());
+        parameters.put(RSA_SIGN, getRsaSign(parameters, RSA_SIGN));
+        return requestTemplate.getForObject(String.format("%s?%s", getReqUrl(transactionType), UriVariables.getMapToParameters(parameters)), JSONObject.class);
     }
-    
+
     /**
      * 下载资金账单
      *
-     * @param billDate     账单时间：日账单格式为yyyy-MM-dd，月账单格式为yyyy-MM。
-     * @param access_token
-     * @return
+     * @param billDate    账单时间：日账单格式为yyyy-MM-dd
+     * @param accessToken 用户token
+     * @return 对账单
      */
     @Override
-    public Map<String, Object> downloadbill(Date billDate, String access_token) {
+    public Map<String, Object> downloadbill(Date billDate, String accessToken) {
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put("access_token", access_token);
+        parameters.put("access_token", accessToken);
         parameters.put("billTime", DateUtils.formatDay(billDate));
         return requestTemplate.getForObject(String.format("%s?%s", getReqUrl(BaiduTransactionType.DOWNLOAD_BILL),
                 UriVariables.getMapToParameters(parameters)), JSONObject.class);
     }
-    
+
     /**
      * 下载订单对账单
      *
-     * @param billDate
-     * @param access_token
-     * @return
+     * @param billDate    账单时间：日账单格式为yyyy-MM-dd
+     * @param accessToken 用户token
+     * @return 账单结果
      */
-    public Map<String, Object> downloadOrderBill(Date billDate, String access_token) {
+    public Map<String, Object> downloadOrderBill(Date billDate, String accessToken) {
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put("access_token", access_token);
+        parameters.put("access_token", accessToken);
         parameters.put("billTime", DateUtils.formatDay(billDate));
         return requestTemplate.getForObject(String.format("%s?%s", getReqUrl(BaiduTransactionType.DOWNLOAD_ORDER_BILL),
                 UriVariables.getMapToParameters(parameters)), JSONObject.class);
     }
-    
+
     /**
      * 通用查询接口
      *
-     * @param orderId
-     * @param siteId
+     * @param orderId         订单id
+     * @param siteId          用户id
      * @param transactionType 交易类型
-     * @return
+     * @return 结果
      */
     @Override
     public Map<String, Object> secondaryInterface(Object orderId,
@@ -459,34 +400,34 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
         if (!BaiduTransactionType.PAY_QUERY.equals(transactionType)) {
             throw new UnsupportedOperationException("不支持该操作");
         }
-        
+
         Map<String, Object> parameters = getUseQueryPay();
         parameters.put(ORDER_ID, orderId);
         parameters.put(SITE_ID, siteId);
         parameters.put(SIGN, getRsaSign(parameters, SIGN));
         return requestTemplate.getForObject(String.format("%s?%s", getReqUrl(transactionType), UriVariables.getMapToParameters(parameters)), JSONObject.class);
     }
-    
+
     /**
      * 获取支付请求地址
      *
      * @param transactionType 交易类型
-     * @return
+     * @return 请求URL
      */
     @Override
     public String getReqUrl(TransactionType transactionType) {
         return ((BaiduTransactionType) transactionType).getUrl();
     }
-    
+
     /**
      * 签名
      *
-     * @param params
-     * @param ignoreKeys
-     * @return
+     * @param params     参数
+     * @param ignoreKeys 忽略字段
+     * @return 签名结果
      */
     private String getRsaSign(Map<String, Object> params, String... ignoreKeys) {
         String waitSignVal = SignUtils.parameterText(params, "&", false, ignoreKeys);
-        return SignUtils.RSA.createSign(waitSignVal, payConfigStorage.getKeyPrivate(), "UTF-8");
+        return SignUtils.valueOf(payConfigStorage.getSignType()).createSign(waitSignVal, payConfigStorage.getKeyPrivate(), payConfigStorage.getInputCharset());
     }
 }

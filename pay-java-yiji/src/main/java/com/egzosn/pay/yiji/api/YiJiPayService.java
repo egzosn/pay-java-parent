@@ -10,7 +10,7 @@ import com.egzosn.pay.common.util.Util;
 import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.str.StringUtils;
 import com.egzosn.pay.yiji.bean.YiJiTransactionType;
-import java.math.BigDecimal;
+
 import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
@@ -292,24 +292,6 @@ public class YiJiPayService extends BasePayService<YiJiPayConfigStorage> {
 
 
 
-    /**
-     * 申请退款接口
-     * 废弃
-     *
-     * @param tradeNo      支付平台订单号
-     * @param outTradeNo   商户单号
-     * @param refundAmount 退款金额
-     * @param totalAmount  总金额
-     * @return 返回支付方申请退款后的结果
-     * @see #refund(RefundOrder, com.egzosn.pay.common.api.Callback)
-     *  @deprecated 版本替代 {@link #refund(RefundOrder, com.egzosn.pay.common.api.Callback)}
-     */
-    @Deprecated
-    @Override
-    public Map<String, Object> refund(String tradeNo, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount) {
-        return refund(new RefundOrder(tradeNo, outTradeNo, refundAmount, totalAmount));
-    }
-
 
     /**
      * 申请退款接口
@@ -327,18 +309,6 @@ public class YiJiPayService extends BasePayService<YiJiPayConfigStorage> {
         orderInfo.put("refundReason", refundOrder.getDescription());
         setSign(orderInfo);
         return getHttpRequestTemplate().postForObject(getReqUrl(YiJiTransactionType.tradeRefund), orderInfo, JSONObject.class);
-    }
-
-    /**
-     * 查询退款
-     *
-     * @param tradeNo    支付平台订单号
-     * @param outTradeNo 商户单号
-     * @return 返回支付方查询退款后的结果
-     */
-    @Override
-    public Map<String, Object> refundquery(String tradeNo, String outTradeNo) {
-        return Collections.emptyMap();
     }
 
     /**

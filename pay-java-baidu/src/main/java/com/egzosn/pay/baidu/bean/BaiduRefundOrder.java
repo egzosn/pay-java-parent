@@ -5,73 +5,67 @@ import com.egzosn.pay.common.bean.RefundOrder;
 import java.math.BigDecimal;
 
 public class BaiduRefundOrder extends RefundOrder {
-    /**
-     * 平台用户ID
-     */
-    private Long userId;
+
     /**
      * 退款类型
      */
     private Integer refundType;
-    /**
-     * 退款原因
-     */
-    private String refundReason;
-    /**
-     * 平台订单ID
-     */
-    private String tpOrderId;
-    /**
-     * 退款金额，单位：分，发起部分退款时必传
-     */
-    private BigDecimal applyRefundMoney;
-    /**
-     * 业务方退款批次id，退款业务流水唯一编号，发起部分退款时必传
-     */
-    private String bizRefundBatchId;
-    
+
+
     public BaiduRefundOrder(Long orderId,
-                            Long userId,
+                            String userId,
                             Integer refundType,
                             String refundReason,
                             String tpOrderId) {
         super();
-        setTradeNo(String.valueOf(orderId));
-        this.userId = userId;
-        this.refundType = refundType;
-        this.refundReason = refundReason;
-        this.tpOrderId = tpOrderId;
+        setOutTradeNo(String.valueOf(orderId));
+        setUserId(userId);
+        setRefundType(refundType);
+        setDescription(refundReason);
+        setTradeNo(tpOrderId);
     }
-    
+
+    /**
+     * 退款金额，单位：分，发起部分退款时必传
+     *
+     * @return 退款金额
+     */
     public BigDecimal getApplyRefundMoney() {
-        return applyRefundMoney;
+        return getRefundAmount();
     }
-    
+
+    /**
+     * 退款金额，单位：分，发起部分退款时必传
+     *
+     * @param applyRefundMoney 退款金额
+     */
     public void setApplyRefundMoney(BigDecimal applyRefundMoney) {
         setRefundAmount(applyRefundMoney);
     }
-    
+
+    /**
+     * 业务方退款批次id，退款业务流水唯一编号，发起部分退款时必传
+     *
+     * @return 退款业务流水
+     */
     public String getBizRefundBatchId() {
-        return bizRefundBatchId;
+        return getRefundNo();
     }
-    
+
+    /**
+     * 业务方退款批次id，退款业务流水唯一编号，发起部分退款时必传
+     */
     public void setBizRefundBatchId(String bizRefundBatchId) {
-        this.bizRefundBatchId = bizRefundBatchId;
+        setRefundNo(bizRefundBatchId);
     }
-    
-    public Long getUserId() {
-        return userId;
+
+    public void setRefundType(Integer refundType) {
+        this.refundType = refundType;
+        addAttr("refundType", refundType);
     }
-    
+
     public Integer getRefundType() {
         return refundType;
     }
-    
-    public String getRefundReason() {
-        return refundReason;
-    }
-    
-    public String getTpOrderId() {
-        return tpOrderId;
-    }
+
 }
