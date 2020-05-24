@@ -1,9 +1,9 @@
 package com.egzosn.pay.ali.bean;
 
-import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.bean.TransferOrder;
 
 import java.math.BigDecimal;
+import java.util.TreeMap;
 
 /**
  * 支付转账(红包)订单
@@ -14,10 +14,8 @@ import java.math.BigDecimal;
  */
 public class AliTransferOrder extends TransferOrder {
 
-    private String orderTitle;
     private String identity;
     private String identityType;
-    private String businessParams;
 
     /**
      * 商户端的唯一订单号，对于同一笔转账请求，商户需保证该订单号唯一。
@@ -79,13 +77,17 @@ public class AliTransferOrder extends TransferOrder {
      *
      * @return 收款方信息
      */
-    public JSONObject getPayeeinfo() {
-        JSONObject payeeInfo = (JSONObject) getAttr("payee_info");
-        if (null == payeeInfo) {
-            payeeInfo = new JSONObject();
-            addAttr("payee_info", payeeInfo);
+    private TreeMap<String, Object> getPayeeinfo() {
+        Object payeeInfo = getAttr("payee_info");
+        if (null == payeeInfo ){
+            TreeMap<String, Object> payee = new TreeMap<>();
+            addAttr("payee_info", payee);
+            return payee;
+        }else if (payeeInfo instanceof TreeMap){
+            return (TreeMap<String, Object>) payeeInfo;
         }
-        return payeeInfo;
+        return null;
+
     }
 
     /**
@@ -107,7 +109,7 @@ public class AliTransferOrder extends TransferOrder {
      * 1、ALIPAY_USER_ID 支付宝的会员ID
      * 2、ALIPAY_LOGON_ID：支付宝登录号，支持邮箱和手机号格式
      *
-     * @return
+     * @return 参与方的标识类型
      */
     public String getIdentityType() {
         return identityType;
