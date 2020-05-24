@@ -1,6 +1,9 @@
 package com.egzosn.pay.wx.bean;
 
+import com.egzosn.pay.common.bean.TransferOrder;
 import com.egzosn.pay.common.bean.TransferType;
+
+import java.util.Map;
 
 /**
  * 微信转账类型
@@ -40,5 +43,11 @@ public enum WxTransferType implements TransferType{
     @Override
     public String getMethod() {
         return this.method;
+    }
+
+
+    @Override
+    public Map<String, Object> setAttr(Map<String, Object> attr, TransferOrder order) {
+        return attr;
     }
 }
