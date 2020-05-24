@@ -167,14 +167,14 @@ public class PayController {
      * @param price 金额
      * @return 支付预订单信息
      */
-    @RequestMapping("getOrderInfo")
+    @RequestMapping("app")
     public Map<String, Object> getOrderInfo(Integer payId, String transactionType, BigDecimal price) {
         //获取对应的支付账户操作工具（可根据账户id）
         PayResponse payResponse = service.getPayResponse(payId);
         Map<String, Object> data = new HashMap<>();
         data.put("code", 0);
         PayOrder order = new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType));
-        data.put("orderInfo", payResponse.getService().orderInfo(order));
+        data.put("orderInfo", payResponse.getService().app(order));
         return data;
     }
 

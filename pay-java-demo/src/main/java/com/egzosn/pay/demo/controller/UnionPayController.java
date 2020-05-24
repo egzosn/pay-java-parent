@@ -139,7 +139,7 @@ public class UnionPayController {
         //APPLE支付 苹果付
 //        order.setTransactionType(UnionTransactionType.APPLE);
 
-        data.put("orderInfo", service.orderInfo(order));
+        data.put("orderInfo", service.app(order));
         return data;
     }
 
