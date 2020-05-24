@@ -79,14 +79,12 @@ public class AliTransferOrder extends TransferOrder {
      */
     private TreeMap<String, Object> getPayeeinfo() {
         Object payeeInfo = getAttr("payee_info");
-        if (null == payeeInfo ){
-            TreeMap<String, Object> payee = new TreeMap<>();
-            addAttr("payee_info", payee);
-            return payee;
-        }else if (payeeInfo instanceof TreeMap){
+        if (null != payeeInfo && payeeInfo instanceof TreeMap){
             return (TreeMap<String, Object>) payeeInfo;
         }
-        return null;
+        TreeMap<String, Object> payee = new TreeMap<>();
+        addAttr("payee_info", payee);
+        return payee;
 
     }
 
