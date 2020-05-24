@@ -1,15 +1,16 @@
 package com.egzosn.pay.ali.bean;
 
+import com.egzosn.pay.common.bean.TransferOrder;
 import com.egzosn.pay.common.bean.TransferType;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
- *  收款方账户类型
+ * 收款方账户类型
+ *
  * @author egan
- *         email egzosn@gmail.com
- *         date 2018/9/28.20:32
+ * email egzosn@gmail.com
+ * date 2018/9/28.20:32
  */
 public enum AliTransferType implements TransferType {
     /**
@@ -27,8 +28,7 @@ public enum AliTransferType implements TransferType {
     /**
      * 现金红包无线支付接口
      */
-    STD_RED_PACKET_APP("alipay.fund.trans.app.pay", "PERSONAL_PAY"){
-
+    STD_RED_PACKET_APP("alipay.fund.trans.app.pay", "PERSONAL_PAY") {
         /**
          * 获取转账类型
          *
@@ -43,9 +43,7 @@ public enum AliTransferType implements TransferType {
     /**
      * 转账查询
      */
-    TRANS_QUERY("alipay.fund.trans.order.query")
-
-    ;
+    TRANS_QUERY("alipay.fund.trans.order.query");
     /**
      * 接口名称
      */
@@ -90,10 +88,13 @@ public enum AliTransferType implements TransferType {
 
     /**
      * 设置属性
+     *
      * @param attr 已有属性对象
+     * @param order 转账订单
      * @return 属性对象
      */
-    public Map<String, Object> setAttr(Map<String, Object> attr){
+    @Override
+    public Map<String, Object> setAttr(Map<String, Object> attr, TransferOrder order) {
         attr.put("product_code", getType());
         attr.put("biz_scene", getBizScene());
         return attr;
