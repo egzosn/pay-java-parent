@@ -339,18 +339,6 @@ public class WxPayController {
     }
 
 
-    /**
-     * 通用查询接口，根据 WxTransactionType 类型进行实现,此接口不包括退款
-     *
-     * @param order 订单的请求体
-     * @return 返回支付方对应接口的结果
-     */
-    @RequestMapping("secondaryInterface")
-    public Map<String, Object> secondaryInterface(QueryOrder order) {
-        TransactionType type = WxTransactionType.valueOf(order.getTransactionType());
-        return service.secondaryInterface(order.getTradeNoOrBillDate(), order.getOutTradeNoBillType(), type);
-    }
-
 
 
     /**
