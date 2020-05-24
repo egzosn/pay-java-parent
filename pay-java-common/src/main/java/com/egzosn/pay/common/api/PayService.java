@@ -54,10 +54,11 @@ public interface PayService<PC extends PayConfigStorage> {
 
     /**
      * 回调校验
-     *
+     * 后面版本废弃
      * @param params 回调回来的参数集
      * @return 签名校验 true通过
      */
+    @Deprecated
     boolean verify(Map<String, Object> params);
 
     /**
@@ -73,10 +74,11 @@ public interface PayService<PC extends PayConfigStorage> {
     /**
      * 支付宝需要,微信是否也需要再次校验来源，进行订单查询
      * 校验数据来源
-     *
+     *  后面版本废弃
      * @param id 业务id, 数据的真实性.
      * @return true通过
      */
+    @Deprecated
     boolean verifySource(String id);
 
 
@@ -305,18 +307,19 @@ public interface PayService<PC extends PayConfigStorage> {
 
     /**
      * 通用查询接口
-     *
+     *   接下来移除此方法
      * @param tradeNoOrBillDate  支付平台订单号或者账单类型， 具体请
      *                           类型为{@link String }或者 {@link Date }，类型须强制限制，类型不对应则抛出异常{@link PayErrorException}
      * @param outTradeNoBillType 商户单号或者 账单类型
      * @param transactionType    交易类型
      * @return 返回支付方对应接口的结果
      */
+    @Deprecated
     Map<String, Object> secondaryInterface(Object tradeNoOrBillDate, String outTradeNoBillType, TransactionType transactionType);
 
     /**
      * 通用查询接口
-     *
+     * 接下来移除此方法
      * @param tradeNoOrBillDate  支付平台订单号或者账单日期， 具体请 类型为{@link String }或者 {@link Date }，类型须强制限制，类型不对应则抛出异常{@link PayErrorException}
      * @param outTradeNoBillType 商户单号或者 账单类型
      * @param transactionType    交易类型
@@ -324,6 +327,7 @@ public interface PayService<PC extends PayConfigStorage> {
      * @param <T>                返回类型
      * @return 返回支付方对应接口的结果
      */
+    @Deprecated
     <T> T secondaryInterface(Object tradeNoOrBillDate, String outTradeNoBillType, TransactionType transactionType, Callback<T> callback);
 
 
