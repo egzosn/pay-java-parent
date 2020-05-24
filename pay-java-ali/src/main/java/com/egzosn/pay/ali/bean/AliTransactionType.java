@@ -89,14 +89,6 @@ public enum  AliTransactionType implements TransactionType {
      */
     DOWNLOADBILL("alipay.data.dataservice.bill.downloadurl.query"),
     /**
-     * 转账到支付宝
-     */
-    TRANS("alipay.fund.trans.toaccount.transfer"),
-    /**
-     * 转账查询
-     */
-    TRANS_QUERY("alipay.fund.trans.order.query"),
-    /**
      * 查询刷脸结果信息
      * 暂时未接入
      */
