@@ -54,20 +54,20 @@ public interface PayService<PC extends PayConfigStorage> {
 
     /**
      * 回调校验
-     * 后面版本废弃
+     *
      * @param params 回调回来的参数集
      * @return 签名校验 true通过
      */
-    @Deprecated
-    boolean verify(Map<String, Object> params);
 
+    boolean verify(Map<String, Object> params);
     /**
      * 签名校验
-     *
+     * 后面版本废弃
      * @param params 参数集
      * @param sign   签名原文
      * @return 签名校验 true通过
      */
+    @Deprecated
     boolean signVerify(Map<String, Object> params, String sign);
 
 
