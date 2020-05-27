@@ -1,10 +1,13 @@
 package com.egzosn.pay.wx.bean;
 
+import com.egzosn.pay.common.bean.TransferOrder;
 import com.egzosn.pay.common.bean.TransferType;
+
+import java.util.Map;
 
 /**
  * @description: 红包交易类型
- * @author: faymanwang
+ * @author faymanwang
  * @time: 2020/5/14 20:11
  */
 public enum WxSendredpackType  implements TransferType {
@@ -39,5 +42,10 @@ public enum WxSendredpackType  implements TransferType {
     @Override
     public String getMethod() {
         return this.method;
+    }
+
+    @Override
+    public Map<String, Object> setAttr(Map<String, Object> attr, TransferOrder order) {
+        return attr;
     }
 }
