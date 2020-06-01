@@ -118,7 +118,7 @@ public class UnionPayController {
         //手机控件支付产品
         PayOrder order = new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", "")
                 ,UnionTransactionType.WAP);
-        return service.sendHttpRequest(order);
+        return service.app(order);
     }
 
 

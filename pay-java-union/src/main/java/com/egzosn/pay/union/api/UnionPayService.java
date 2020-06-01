@@ -516,7 +516,9 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
      */
     @Override
     public Map<String, Object>  app(PayOrder order){
-        order.setTransactionType(UnionTransactionType.APP);
+        if (null == order.getTransactionType()){
+            order.setTransactionType(UnionTransactionType.APP);
+        }
         JSONObject response = postOrder(order);
         if (this.verify(response)) {
             if (SDKConstants.OK_RESP_CODE.equals(response.get(SDKConstants.param_respCode))) {
