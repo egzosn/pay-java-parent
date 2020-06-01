@@ -1,11 +1,11 @@
 package com.egzosn.pay.common.bean;
 
+import com.egzosn.pay.common.util.str.StringUtils;
+
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-
-import com.egzosn.pay.common.util.str.StringUtils;
 
 /**
  * 支付订单信息
@@ -71,6 +71,7 @@ public class PayOrder implements Order {
     /**
      * 用户唯一标识
      * 微信含 sub_openid 字段
+     * 支付宝 buyer_id
      */
     private String openid;
     /**
@@ -258,20 +259,27 @@ public class PayOrder implements Order {
     }
 
     @Override
-    public Map<String, Object> getAttr() {
+    public Map<String, Object> getAttrs() {
         if (null == attr){
             attr = new HashMap<>();
         }
         return attr;
     }
 
+    @Override
+    public Object getAttr(String key) {
+        return getAttrs().get(key);
+    }
+
+
     /**
      * 添加订单信息
      * @param key key
      * @param value 值
      */
+    @Override
     public void addAttr(String key, Object value) {
-         getAttr().put(key, value);
+        getAttrs().put(key, value);
     }
 
 

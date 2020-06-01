@@ -93,7 +93,7 @@ public class PayTest {
 
         /*-----------退货交易：后台资金类交易，有同步应答和后台通知应答------------------------------*/
         payOrder.setTransactionType(UnionTransactionType.REFUND);
-        params =   service.refund("原交易查询流水号", "订单号", null,new BigDecimal("退款金额" ));
+        params =   service.refund(new RefundOrder("原交易查询流水号", "订单号", null, new BigDecimal("退款金额" )));
         /*-----------退货交易：后台资金类交易，有同步应答和后台通知应答------------------------------*/
 
 

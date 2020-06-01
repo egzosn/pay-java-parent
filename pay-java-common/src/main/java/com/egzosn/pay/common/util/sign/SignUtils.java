@@ -193,7 +193,20 @@ public enum SignUtils implements SignType {
      * @param ignoreKey 需要忽略添加的key
      * @return 去掉空值与签名参数后的新签名，拼接后字符串
      */
-    public static String parameterText(Map parameters, String separator, String... ignoreKey ) {
+    public static String parameterText(Map parameters, String separator, String... ignoreKey) {
+        return parameterText(parameters, separator, true, ignoreKey);
+    }
+    
+    /**
+     *
+     * 把数组所有元素排序，并按照“参数=参数值”的模式用“@param separator”字符拼接成字符串
+     * @param parameters 参数
+     * @param separator 分隔符
+     * @param ignoreNullValue 需要忽略NULL值
+     * @param ignoreKey 需要忽略添加的key
+     * @return 去掉空值与签名参数后的新签名，拼接后字符串
+     */
+    public static String parameterText(Map parameters, String separator, boolean ignoreNullValue, String... ignoreKey ) {
         if(parameters == null){
             return "";
         }
@@ -225,7 +238,7 @@ public enum SignUtils implements SignType {
         for (String k : keys) {
             String valueStr = "";
             Object o = parameters.get(k);
-            if (null == o) {
+            if (ignoreNullValue && null == o) {
                 continue;
             }
             if (o instanceof String[]) {

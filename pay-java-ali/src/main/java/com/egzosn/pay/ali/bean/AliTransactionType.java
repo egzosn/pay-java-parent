@@ -45,6 +45,10 @@ public enum  AliTransactionType implements TransactionType {
      */
     WAVE_CODE("alipay.trade.pay"),
     /**
+     * 小程序
+     */
+    MINAPP("alipay.trade.create"),
+    /**
      * 刷脸付
      */
     SECURITY_CODE("alipay.trade.pay"),
@@ -84,14 +88,6 @@ public enum  AliTransactionType implements TransactionType {
      * 下载对账单
      */
     DOWNLOADBILL("alipay.data.dataservice.bill.downloadurl.query"),
-    /**
-     * 转账到支付宝
-     */
-    TRANS("alipay.fund.trans.toaccount.transfer"),
-    /**
-     * 转账查询
-     */
-    TRANS_QUERY("alipay.fund.trans.order.query"),
     /**
      * 查询刷脸结果信息
      * 暂时未接入

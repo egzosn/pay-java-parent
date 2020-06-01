@@ -13,7 +13,7 @@ import java.util.*;
  * 日期转换运算工具
  *
  * @author egan
- *         <pre>
+ * <pre>
  *         email egzosn@gmail.com
  *         date 2018-11-21 16:43:20
  *         </pre>
@@ -23,6 +23,7 @@ public final class DateUtils {
     }
 
     private static final Log LOG = LogFactory.getLog(DateUtils.class);
+
     static final class DateFormatHolder {
         private static final ThreadLocal<SoftReference<Map<String, SimpleDateFormat>>> THREADLOCAL_FORMATS = new ThreadLocal<SoftReference<Map<String, SimpleDateFormat>>>();
 
@@ -37,7 +38,7 @@ public final class DateUtils {
                 THREADLOCAL_FORMATS.set(new SoftReference(formats));
             }
 
-            SimpleDateFormat format =  formats.get(pattern);
+            SimpleDateFormat format = formats.get(pattern);
 
             if (format == null) {
                 format = new SimpleDateFormat(pattern);
@@ -66,6 +67,7 @@ public final class DateUtils {
         SimpleDateFormat formatFor = DateFormatHolder.formatFor(pattern);
         return formatFor.format(date);
     }
+
     public static Date parseDate(String date, String pattern) {
         Args.notNull(date, "Date");
         Args.notNull(pattern, "Pattern");
@@ -77,9 +79,11 @@ public final class DateUtils {
         }
         return null;
     }
+
     public static Date parse(String date) {
         return parseDate(date, YYYY_MM_DD_HH_MM_SS);
     }
+
     public static final String format(Date date) {
         return formatDate(date, YYYY_MM_DD_HH_MM_SS);
     }
@@ -99,7 +103,7 @@ public final class DateUtils {
      * @return 分钟数
      */
     public static final long minutesRemaining(Date date) {
-        return (date.getTime() - System.currentTimeMillis()) / 1000 / 60;
+        return (date.getTime() / 1000 / 60 - System.currentTimeMillis() / 1000 / 60);
     }
 
     /**

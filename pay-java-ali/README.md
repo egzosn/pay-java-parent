@@ -114,6 +114,18 @@
         /*-----------/APP-------------------*/
 
 ``` 
+#### 小程序支付
+
+```java
+
+        /*-----------APP-------------------*/
+        payOrder.setTransactionType(AliTransactionType.MINAPP);
+        payOrder.setOpenid("支付宝小程序授权登录成功后获取到的支付宝 user_id")
+        //获取小程序支付所需的信息组，直接给小程序网页端就可使用
+        Map appOrderInfo = service.orderInfo(payOrder);
+        /*-----------/APP-------------------*/
+
+``` 
 
 #### 即时到帐 WAP 网页支付
 

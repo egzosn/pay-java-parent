@@ -7,14 +7,13 @@ import com.egzosn.pay.common.bean.*;
 import com.egzosn.pay.common.bean.result.PayError;
 import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpConfigStorage;
-import com.egzosn.pay.common.util.MatrixToImageWriter;
 import com.egzosn.pay.common.util.Util;
 import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.str.StringUtils;
 import com.egzosn.pay.wx.youdian.bean.WxYoudianPayMessage;
 import com.egzosn.pay.wx.youdian.bean.YdPayError;
 import com.egzosn.pay.wx.youdian.bean.YoudianTransactionType;
-import java.awt.image.BufferedImage;
+
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.*;
@@ -227,7 +226,7 @@ public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorag
         Map<String, Object> data = new TreeMap<>();
         data.put("access_token",  getAccessToken());
         data.put("paymoney", Util.conversionAmount(order.getPrice()).toString());
-        data.putAll(order.getAttr());
+        data.putAll(order.getAttrs());
         data =  preOrderHandler(data, order);
         String apbNonce = SignUtils.randomStr();
         String sign = createSign(SignUtils.parameterText(data, "") + apbNonce, payConfigStorage.getInputCharset());
@@ -385,13 +384,14 @@ public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorag
     }
 
 
-    @Override
-    public Map<String, Object> refund(String tradeNo, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount) {
-        return refund(new RefundOrder(tradeNo, outTradeNo,refundAmount, totalAmount));
-    }
 
 
-
+    /**
+     * 申请退款接口
+     *
+     * @param refundOrder 退款订单信息
+     * @return 返回支付方申请退款后的结果
+     */
     @Override
     public Map<String, Object> refund(RefundOrder refundOrder) {
         String apbNonce = SignUtils.randomStr();
@@ -412,11 +412,6 @@ public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorag
         return jsonObject;
     }
 
-
-    @Override
-    public Map<String, Object> refundquery(String tradeNo, String outTradeNo) {
-        return Collections.emptyMap();
-    }
 
     /**
      * 查询退款

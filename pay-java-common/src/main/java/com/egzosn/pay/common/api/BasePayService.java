@@ -14,7 +14,6 @@ import org.apache.commons.logging.LogFactory;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -126,7 +125,6 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
      * @param characterEncoding 字符编码
      * @return 签名
      */
-    @Override
     public String createSign(Map<String, Object> content, String characterEncoding) {
         return SignUtils.valueOf(payConfigStorage.getSignType()).sign(content, payConfigStorage.getKeyPrivate(), characterEncoding);
     }
@@ -141,6 +139,16 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
     public <O extends PayOrder> String toPay(O order) {
         Map orderInfo = orderInfo(order);
         return buildRequest(orderInfo, MethodType.POST);
+    }
+    /**
+     * app支付
+     * @param order 订单信息
+     * @param <O> 预订单类型
+     * @return 对应app所需参数信息
+     */
+    @Override
+    public <O extends PayOrder> Map<String, Object> app(O order) {
+        return orderInfo(order);
     }
 
     /**
@@ -242,24 +250,7 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
         return Collections.EMPTY_MAP;
     }
 
-    /**
-     * 退款
-     *
-     * @param tradeNo      支付平台订单号
-     * @param outTradeNo   商户单号
-     * @param refundAmount 退款金额
-     * @param totalAmount  总金额
-     * @param callback     处理器
-     * @param <T>          返回类型
-     * @return 处理过后的类型对象， 返回支付方申请退款后的结果
-     * @see #refund(RefundOrder, Callback)
-     */
-    @Deprecated
-    @Override
-    public <T> T refund(String tradeNo, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount, Callback<T> callback) {
 
-        return callback.perform(refund(new RefundOrder(tradeNo, outTradeNo, refundAmount, totalAmount)));
-    }
 
     /**
      * 申请退款接口
@@ -276,19 +267,6 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
     }
 
 
-    /**
-     * 查询退款
-     *
-     * @param tradeNo    支付平台订单号
-     * @param outTradeNo 商户单号
-     * @param callback   处理器
-     * @param <T>        返回类型
-     * @return 处理过后的类型对象，返回支付方查询退款后的结果
-     */
-    @Override
-    public <T> T refundquery(String tradeNo, String outTradeNo, Callback<T> callback) {
-        return callback.perform(refundquery(tradeNo, outTradeNo));
-    }
 
     /**
      * 查询退款
@@ -466,5 +444,21 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
     public <O extends PayOrder> Map<String, Object> preOrderHandler(Map<String, Object> orderInfo, O payOrder){
         return orderInfo;
     }
+
+    protected Map<String, Object> setParameters(Map<String, Object> parameters, String key, String value) {
+        if (StringUtils.isNotEmpty(value)) {
+            parameters.put(key, value);
+        }
+        return parameters;
+    }
+
+    protected Map<String, Object> setParameters(Map<String, Object> parameters, String key, Order order) {
+        Object attr = order.getAttr(key);
+        if (null != attr && !"".equals(attr)) {
+            parameters.put(key, attr);
+        }
+        return parameters;
+    }
+
 
 }

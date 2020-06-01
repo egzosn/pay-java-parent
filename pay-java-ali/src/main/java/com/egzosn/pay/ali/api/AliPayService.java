@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.ali.bean.AliPayMessage;
 import com.egzosn.pay.ali.bean.AliTransactionType;
+import com.egzosn.pay.ali.bean.AliTransferType;
 import com.egzosn.pay.ali.bean.OrderSettle;
 import com.egzosn.pay.common.api.BasePayService;
 import com.egzosn.pay.common.bean.*;
@@ -15,7 +16,7 @@ import com.egzosn.pay.common.util.DateUtils;
 import com.egzosn.pay.common.util.Util;
 import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.str.StringUtils;
-import java.math.BigDecimal;
+
 import java.util.*;
 
 /**
@@ -36,29 +37,37 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
      * 沙箱测试环境账号
      */
     private static final String DEV_REQ_URL = "https://openapi.alipaydev.com/gateway.do";
-    
-    public static final String SIGN = "sign";
-    
-    public static final String SUCCESS_CODE = "10000";
-    
-    public static final String CODE = "code";
+
+    private static final String SIGN = "sign";
+
+    private static final String SUCCESS_CODE = "10000";
+
+    private static final String CODE = "code";
     /**
      * 附加参数
      */
-    public static final String PASSBACK_PARAMS = "passback_params";
+    private static final String PASSBACK_PARAMS = "passback_params";
     /**
      * 产品代码
      */
-    public static final String PRODUCT_CODE = "product_code";
+    private static final String PRODUCT_CODE = "product_code";
     /**
      * 返回地址
      */
-    public static final String RETURN_URL = "return_url";
+    private static final String RETURN_URL = "return_url";
 
     /**
      * 请求内容
      */
-    public static final String BIZ_CONTENT = "biz_content";
+    private static final String BIZ_CONTENT = "biz_content";
+    /**
+     * 应用授权概述
+     */
+    private static final String APP_AUTH_TOKEN = "app_auth_token";
+    /**
+     * 收款方信息
+     */
+    private static final String PAYEE_INFO = "payee_info";
 
     /**
      * 获取对应的请求地址
@@ -190,7 +199,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
 
         orderInfo.put("notify_url", payConfigStorage.getNotifyUrl());
         orderInfo.put("format", "json");
-
+        setAppAuthToken(orderInfo, order.getAttrs());
 
         Map<String, Object> bizContent = new TreeMap<>();
         bizContent.put("body", order.getBody());
@@ -213,6 +222,11 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
                 bizContent.put(PASSBACK_PARAMS, order.getAddition());
                 bizContent.put(PRODUCT_CODE, "QUICK_MSECURITY_PAY");
                 break;
+            case MINAPP:
+                bizContent.put("extend_params", order.getAddition());
+                bizContent.put("buyer_id", order.getOpenid());
+                bizContent.put(PRODUCT_CODE, "FACE_TO_FACE_PAYMENT");
+                break;
             case BAR_CODE:
             case WAVE_CODE:
             case SECURITY_CODE:
@@ -223,10 +237,10 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
 
         }
         if (null != order.getExpirationTime()) {
-            bizContent.put("timeout_express", DateUtils.minutesRemaining(order.getExpirationTime()) + "m");
+            bizContent.put(order.getTransactionType() == AliTransactionType.SWEEPPAY ? "qr_code_timeout_express" : "timeout_express", DateUtils.minutesRemaining(order.getExpirationTime()) + "m");
         }
+        bizContent.putAll(order.getAttrs());
         orderInfo.put(BIZ_CONTENT, JSON.toJSONString(bizContent));
-        orderInfo.putAll(order.getAttr());
         return  preOrderHandler(orderInfo, order);
     }
 
@@ -355,7 +369,10 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
     public Map<String, Object> settle(OrderSettle order){
         //获取公共参数
         Map<String, Object> parameters = getPublicParameters(AliTransactionType.SETTLE);
-        parameters.put(BIZ_CONTENT, JSON.toJSONString(order.toBizContent()));
+        setAppAuthToken(parameters, order.getAttrs());
+        final Map<String, Object> bizContent = order.toBizContent();
+        bizContent.putAll(order.getAttrs());
+        parameters.put(BIZ_CONTENT, JSON.toJSONString(bizContent));
         //设置签名
         setSign(parameters);
         return getHttpRequestTemplate().postForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(parameters), null, JSONObject.class);
@@ -403,21 +420,13 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
     }
 
     /**
-     * 申请退款接口
-     * 废弃
-     *
-     * @param tradeNo      支付平台订单号
-     * @param outTradeNo   商户单号
-     * @param refundAmount 退款金额
-     * @param totalAmount  总金额
-     * @return 返回支付方申请退款后的结果
-     * @see #refund(RefundOrder, com.egzosn.pay.common.api.Callback)
-     *  @deprecated 版本替代 {@link #refund(RefundOrder, com.egzosn.pay.common.api.Callback)}
+     * 设置支付宝授权Token
+     * @param parameters 参数
+     * @param attrs 订单属性
+     * @return 参数
      */
-    @Deprecated
-    @Override
-    public Map<String, Object> refund(String tradeNo, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount) {
-        return refund(new RefundOrder(tradeNo, outTradeNo, refundAmount, totalAmount));
+    private void setAppAuthToken(Map<String, Object> parameters, Map<String, Object> attrs) {
+        setParameters(parameters, APP_AUTH_TOKEN, (String) attrs.remove(APP_AUTH_TOKEN));
     }
 
 
@@ -431,12 +440,13 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
     public Map<String, Object> refund(RefundOrder refundOrder) {
         //获取公共参数
         Map<String, Object> parameters = getPublicParameters(AliTransactionType.REFUND);
-
+        setAppAuthToken(parameters, refundOrder.getAttrs());
         Map<String, Object> bizContent = getBizContent(refundOrder.getTradeNo(), refundOrder.getOutTradeNo(), null);
         if (!StringUtils.isEmpty(refundOrder.getRefundNo())) {
             bizContent.put("out_request_no", refundOrder.getRefundNo());
         }
         bizContent.put("refund_amount", Util.conversionAmount(refundOrder.getRefundAmount()));
+        bizContent.putAll(refundOrder.getAttrs());
         //设置请求参数的集合
         parameters.put(BIZ_CONTENT, JSON.toJSONString(bizContent));
         //设置签名
@@ -444,17 +454,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
         return requestTemplate.getForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(parameters), JSONObject.class);
     }
 
-    /**
-     * 查询退款
-     *
-     * @param tradeNo    支付平台订单号
-     * @param outTradeNo 商户单号
-     * @return 返回支付方查询退款后的结果
-     */
-    @Override
-    public Map<String, Object> refundquery(String tradeNo, String outTradeNo) {
-        return secondaryInterface(tradeNo, outTradeNo, AliTransactionType.REFUNDQUERY);
-    }
+
 
     /**
      * 查询退款
@@ -464,17 +464,16 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
      */
     @Override
     public Map<String, Object> refundquery(RefundOrder refundOrder) {
-
         //获取公共参数
         Map<String, Object> parameters = getPublicParameters(AliTransactionType.REFUNDQUERY);
-
+        setAppAuthToken(parameters, refundOrder.getAttrs());
         Map<String, Object> bizContent = getBizContent(refundOrder.getTradeNo(), refundOrder.getOutTradeNo(), null);
         if (!StringUtils.isEmpty(refundOrder.getRefundNo())) {
             bizContent.put("out_request_no", refundOrder.getRefundNo());
         }
+        bizContent.putAll(refundOrder.getAttrs());
         //设置请求参数的集合
         parameters.put(BIZ_CONTENT, JSON.toJSONString(bizContent));
-
         //设置签名
         setSign(parameters);
         return requestTemplate.getForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(parameters), JSONObject.class);
@@ -505,6 +504,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
     }
 
 
+
     /**
      * @param tradeNoOrBillDate  支付平台订单号或者账单类型， 具体请
      *                           类型为{@link String }或者 {@link Date }，类型须强制限制，类型不对应则抛出异常{@link PayErrorException}
@@ -512,6 +512,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
      * @param transactionType    交易类型
      * @return 返回支付方对应接口的结果
      */
+
     @Override
     public Map<String, Object> secondaryInterface(Object tradeNoOrBillDate, String outTradeNoBillType, TransactionType transactionType) {
 
@@ -528,42 +529,62 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
 
         //获取公共参数
         Map<String, Object> parameters = getPublicParameters(transactionType);
+
         //设置请求参数的集合
         parameters.put(BIZ_CONTENT, getContentToJson((String) tradeNoOrBillDate, outTradeNoBillType));
         //设置签名
         setSign(parameters);
+
         return requestTemplate.getForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(parameters), JSONObject.class);
     }
 
     /**
-     * 转账
+     * 新版转账转账
      *
      * @param order 转账订单
      * @return 对应的转账结果
      */
     @Override
     public Map<String, Object> transfer(TransferOrder order) {
+        final TransferType transferType = order.getTransferType();
         //获取公共参数
-        Map<String, Object> parameters = getPublicParameters(AliTransactionType.TRANS);
+        Map<String, Object> parameters = getPublicParameters(transferType);
+        setAppAuthToken(parameters, order.getAttrs());
 
-        Map<String, Object> bizContent = new TreeMap<String, Object>();
+        Map<String, Object> bizContent = new LinkedHashMap<String, Object>();
         bizContent.put("out_biz_no", order.getOutNo());
-        //默认 支付宝登录号，支持邮箱和手机号格式。
-        bizContent.put("payee_type", "ALIPAY_LOGONID");
-        if (null != order.getTransferType()) {
-            bizContent.put("payee_type", order.getTransferType().getType());
-        }
-        bizContent.put("payee_account", order.getPayeeAccount());
-        bizContent.put("amount", Util.conversionAmount(order.getAmount()));
-        bizContent.put("payer_show_name", order.getPayerName());
-        bizContent.put("payee_real_name", order.getPayeeName());
+        bizContent.put("trans_amount", order.getAmount());
+        transferType.setAttr(bizContent, order);
+        setParameters(bizContent, "order_title",  order);
+        setParameters(bizContent, "original_order_id",  order);
+        setPayeeInfo(bizContent, order);
         bizContent.put("remark", order.getRemark());
+        setParameters(bizContent, "business_params",  order);
+
         //设置请求参数的集合
         parameters.put(BIZ_CONTENT, JSON.toJSONString(bizContent));
         //设置签名
         setSign(parameters);
         return getHttpRequestTemplate().postForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(parameters), null, JSONObject.class);
     }
+
+    private Map<String, Object> setPayeeInfo(Map<String, Object> bizContent, Order order){
+        final Object attr = order.getAttr(PAYEE_INFO);
+
+        if (attr instanceof String){
+            bizContent.put(PAYEE_INFO, attr);
+        }
+        if (attr instanceof TreeMap){
+            bizContent.put(PAYEE_INFO, attr);
+        }
+        if (attr instanceof Map){
+            Map<String, Object> payeeInfo = new TreeMap<String, Object>((Map)attr);
+            bizContent.put(PAYEE_INFO, payeeInfo);
+        }
+        return bizContent;
+    }
+
+
 
     /**
      * 转账查询
@@ -575,7 +596,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
     @Override
     public Map<String, Object> transferQuery(String outNo, String tradeNo) {
         //获取公共参数
-        Map<String, Object> parameters = getPublicParameters(AliTransactionType.TRANS_QUERY);
+        Map<String, Object> parameters = getPublicParameters(AliTransferType.TRANS_QUERY);
 
         Map<String, Object> bizContent = new TreeMap<String, Object>();
         if (StringUtils.isEmpty(outNo)) {
