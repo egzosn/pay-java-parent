@@ -10,8 +10,6 @@ import com.egzosn.pay.ali.bean.AliTransferType;
 import com.egzosn.pay.ali.bean.OrderSettle;
 import com.egzosn.pay.common.bean.PayOrder;
 import com.egzosn.pay.common.bean.RefundOrder;
-import com.egzosn.pay.common.bean.TransactionType;
-import com.egzosn.pay.common.bean.TransferOrder;
 import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.common.http.UriVariables;
 import com.egzosn.pay.common.util.sign.SignUtils;
