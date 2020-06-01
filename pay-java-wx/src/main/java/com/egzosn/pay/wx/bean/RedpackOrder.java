@@ -5,9 +5,9 @@ import com.egzosn.pay.common.bean.TransferOrder;
 import java.math.BigDecimal;
 
 /**
- * @description: 发红包订单
- * @author: 保网 faymanwang 1057438332@qq.com
- * @time: 2020/5/15 12:40
+ *  发红包订单
+ * @author 保网 faymanwang 1057438332@qq.com
+ * 2020/5/15 12:40
  */
 public class RedpackOrder extends TransferOrder {
 
@@ -64,6 +64,7 @@ public class RedpackOrder extends TransferOrder {
      * 红包发放总人数
      * 普通红包：1
      * 裂变：必须介于(包括)3到20之间
+     * @return 红包发放总人数
      */
     public int getTotalNum() {
         Object totalNum = getAttr("total_num");
@@ -75,6 +76,7 @@ public class RedpackOrder extends TransferOrder {
     }
     /**
      * 红包祝福语
+     * @return 红包祝福语
      */
     public String getWishing() {
         return (String) getAttr("wishing");
@@ -88,6 +90,7 @@ public class RedpackOrder extends TransferOrder {
 
     /**
      * 活动名称
+     * @return 活动名称
      */
     public String getActName() {
         return (String) getAttr("act_name");
@@ -110,6 +113,7 @@ public class RedpackOrder extends TransferOrder {
      * PRODUCT_6:保险回馈
      * PRODUCT_7:彩票派奖
      * PRODUCT_8:税务刮奖
+     * @param  sceneId 红包使用场景
      */
     public void setSceneId(String sceneId) {
         addAttr("scene_id", sceneId);

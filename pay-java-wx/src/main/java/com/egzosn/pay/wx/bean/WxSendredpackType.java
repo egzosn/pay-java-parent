@@ -6,9 +6,9 @@ import com.egzosn.pay.common.bean.TransferType;
 import java.util.Map;
 
 /**
- * @description: 红包交易类型
+ *  红包交易类型
  * @author faymanwang
- * @time: 2020/5/14 20:11
+ *  2020/5/14 20:11
  */
 public enum WxSendredpackType  implements TransferType {
     /**

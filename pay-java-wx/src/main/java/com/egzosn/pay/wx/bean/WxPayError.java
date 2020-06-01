@@ -21,7 +21,7 @@ import com.egzosn.pay.common.bean.result.PayError;
 
 /**
  * 微信支付异常
- * @author: egan
+ * @author egan
  * <pre>
  *
  * email egzosn@gmail.com

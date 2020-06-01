@@ -175,7 +175,8 @@ public class RSA{
 	* @param privateKey 商户私钥
 	* @param characterEncoding 编码格式
 	* @return 解密后的字符串
-	 * @throws Exception 解密异常
+	 * @throws GeneralSecurityException 解密异常
+	 * @throws IOException IOException
 	*/
 	public static String decrypt(String content, String privateKey, String characterEncoding) throws GeneralSecurityException, IOException {
         PrivateKey prikey = getPrivateKey(privateKey);
