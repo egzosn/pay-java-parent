@@ -391,6 +391,7 @@ public class FuiouPayService extends BasePayService<FuiouPayConfigStorage> {
         params.put("refund_amt", Util.conversionCentAmount(refundOrder.getRefundAmount()));
         //备注
         params.put("rem", "");
+        params.putAll(refundOrder.getAttrs());
         params.put("md5", createSign(SignUtils.parameters2MD5Str(params, "|"), payConfigStorage.getInputCharset()));
         JSONObject resultJson = getHttpRequestTemplate().postForObject(getReqUrl() + URL_FuiouSmpRefundGate, params, JSONObject.class);
         return resultJson;

@@ -499,6 +499,8 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
             parameters.put("refund_fee_type", refundOrder.getCurType().getType());
         }
         setParameters(parameters, "refund_desc", refundOrder.getDescription());
+        //附加参数，这里可进行覆盖前面所有参数
+        parameters.putAll(refundOrder.getAttrs());
         //设置签名
         setSign(parameters);
         return requestTemplate.postForObject(getReqUrl(WxTransactionType.REFUND), XML.getMap2Xml(parameters), JSONObject.class);
