@@ -3,6 +3,7 @@ package com.egzosn.pay.common.util.sign.encrypt;
 
 import javax.crypto.Cipher;
 import java.io.*;
+import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -34,9 +35,9 @@ public class RSA{
 	 */
 	public static String sign(String content, String privateKey, String signAlgorithms, String characterEncoding) {
 		try {
-			PKCS8EncodedKeySpec priPKCS8 = new PKCS8EncodedKeySpec( Base64.decode(privateKey));
-			KeyFactory keyf 			= KeyFactory.getInstance(ALGORITHM);
-			PrivateKey priKey 			= keyf.generatePrivate(priPKCS8);
+			PKCS8EncodedKeySpec priPKCS8 = new PKCS8EncodedKeySpec(Base64.decode(privateKey));
+			KeyFactory keyf = KeyFactory.getInstance(ALGORITHM);
+			PrivateKey priKey = keyf.generatePrivate(priPKCS8);
 
 			java.security.Signature signature = java.security.Signature.getInstance(signAlgorithms);
 
@@ -111,11 +112,11 @@ public class RSA{
 	*/
 	public static boolean verify(String content, String sign, String publicKey, String signAlgorithms, String characterEncoding){
 		try {
-	        PublicKey pubKey 		= getPublicKey(publicKey, ALGORITHM);
+	        PublicKey pubKey = getPublicKey(publicKey, ALGORITHM);
 			java.security.Signature signature = java.security.Signature.getInstance(signAlgorithms);
 			signature.initVerify(pubKey);
-			signature.update( content.getBytes(characterEncoding) );
-			return signature.verify( Base64.decode(sign) );
+			signature.update(content.getBytes(characterEncoding) );
+			return signature.verify(Base64.decode(sign) );
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -135,8 +136,8 @@ public class RSA{
 		try {
 			java.security.Signature signature = java.security.Signature.getInstance(signAlgorithms);
 			signature.initVerify(publicKey);
-			signature.update( content.getBytes(characterEncoding) );
-			return signature.verify( Base64.decode(sign) );
+			signature.update(content.getBytes(characterEncoding) );
+			return signature.verify(Base64.decode(sign) );
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -174,11 +175,12 @@ public class RSA{
 	* @param privateKey 商户私钥
 	* @param characterEncoding 编码格式
 	* @return 解密后的字符串
-	 * @throws Exception 解密异常
+	 * @throws GeneralSecurityException 解密异常
+	 * @throws IOException IOException
 	*/
-	public static String decrypt(String content, String privateKey, String characterEncoding) throws Exception {
-        PrivateKey prikey 	= getPrivateKey(privateKey);
-        Cipher cipher 		= Cipher.getInstance(ALGORITHM);
+	public static String decrypt(String content, String privateKey, String characterEncoding) throws GeneralSecurityException, IOException {
+        PrivateKey prikey = getPrivateKey(privateKey);
+        Cipher cipher = Cipher.getInstance(ALGORITHM);
         cipher.init(Cipher.DECRYPT_MODE, prikey);
        try(InputStream ins 	= new ByteArrayInputStream(Base64.decode(content));   ByteArrayOutputStream writer = new ByteArrayOutputStream();) {
 
@@ -204,14 +206,14 @@ public class RSA{
 	   }
     }
 
-	
+
 	/**
 	* 得到私钥
 	* @param key 密钥字符串（经过base64编码）
-	 * @throws Exception 加密异常
+	 * @throws GeneralSecurityException 加密异常
 	 * @return 私钥
 	*/
-	public static PrivateKey getPrivateKey(String key) throws Exception {
+	public static PrivateKey getPrivateKey(String key) throws GeneralSecurityException {
 
 		byte[] keyBytes;
 		keyBytes = Base64.decode(key);
@@ -225,26 +227,30 @@ public class RSA{
 	* 得到公钥
 	* @param key 密钥字符串（经过base64编码）
 	* @param signAlgorithms 密钥类型
-	 * @throws Exception 加密异常
+	 * @throws GeneralSecurityException 加密异常
+	 * @throws IOException 加密异常
 	 * @return 公钥
 	*/
-	public static PublicKey getPublicKey(String key, String signAlgorithms) throws Exception {
-		return getPublicKey(new ByteArrayInputStream(key.getBytes("ISO8859-1")), signAlgorithms);
+	public static PublicKey getPublicKey(String key, String signAlgorithms) throws GeneralSecurityException, IOException {
+		try (ByteArrayInputStream is = new ByteArrayInputStream(key.getBytes("ISO8859-1"))){
+			return getPublicKey(is, signAlgorithms);
+		}
 	}
 
 
 	/**
 	* 得到公钥
 	* @param key 密钥字符串（经过base64编码）
-	 * @throws Exception 加密异常
+	 * @throws GeneralSecurityException 加密异常
+	 * @throws IOException 加密异常
 	 * @return 公钥
 	*/
-	public static PublicKey getPublicKey(String key) throws Exception {
+	public static PublicKey getPublicKey(String key) throws GeneralSecurityException, IOException {
 
 		return getPublicKey(key, ALGORITHM);
 	}
 
-	public static PublicKey getPublicKey(InputStream inputStream, String keyAlgorithm) throws Exception {
+	public static PublicKey getPublicKey(InputStream inputStream, String keyAlgorithm) throws IOException, GeneralSecurityException {
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));) {
 			StringBuilder sb = new StringBuilder();
 			String readLine = null;
@@ -262,14 +268,14 @@ public class RSA{
 		}
 	}
 
-	public static byte[] encrypt(byte[] plainBytes, PublicKey publicKey, int keyLength, int reserveSize, String cipherAlgorithm) throws Exception {
+	public static byte[] encrypt(byte[] plainBytes, PublicKey publicKey, int keyLength, int reserveSize, String cipherAlgorithm) throws IOException, GeneralSecurityException {
 		int keyByteSize = keyLength / 8;
 		int encryptBlockSize = keyByteSize - reserveSize;
 		int nBlock = plainBytes.length / encryptBlockSize;
 		if ((plainBytes.length % encryptBlockSize) != 0) {
 			nBlock += 1;
 		}
-		try (ByteArrayOutputStream outbuf = new ByteArrayOutputStream(nBlock * keyByteSize);) {
+		try (ByteArrayOutputStream outbuf = new ByteArrayOutputStream(nBlock * keyByteSize)) {
 			Cipher cipher = Cipher.getInstance(cipherAlgorithm);
 			cipher.init(Cipher.ENCRYPT_MODE, publicKey);
 			for (int offset = 0; offset < plainBytes.length; offset += encryptBlockSize) {
@@ -284,7 +290,7 @@ public class RSA{
 			return outbuf.toByteArray();
 		}
 	}
-	public static String encrypt(String content, String publicKey, String cipherAlgorithm, String characterEncoding ) throws Exception {
+	public static String encrypt(String content, String publicKey, String cipherAlgorithm, String characterEncoding ) throws IOException, GeneralSecurityException {
 		return Base64.encode(RSA.encrypt(content.getBytes(characterEncoding), RSA.getPublicKey(publicKey),1024, 11, cipherAlgorithm));
 	}
 

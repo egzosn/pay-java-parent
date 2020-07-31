@@ -371,22 +371,6 @@ public class FuiouPayService extends BasePayService<FuiouPayConfigStorage> {
 
 
 
-    /**
-     * 申请退款接口
-     *
-     * @param tradeNo      支付平台订单号
-     * @param outTradeNo   商户单号
-     * @param refundAmount 退款金额
-     * @param totalAmount  总金额
-     * @return 退款返回结果集
-     */
-    @Override
-    public Map<String, Object> refund (String tradeNo, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount) {
-        return refund(new RefundOrder(tradeNo, outTradeNo, refundAmount, totalAmount));
-    }
-
-
-
 
     /**
      * 申请退款接口
@@ -407,25 +391,12 @@ public class FuiouPayService extends BasePayService<FuiouPayConfigStorage> {
         params.put("refund_amt", Util.conversionCentAmount(refundOrder.getRefundAmount()));
         //备注
         params.put("rem", "");
+        params.putAll(refundOrder.getAttrs());
         params.put("md5", createSign(SignUtils.parameters2MD5Str(params, "|"), payConfigStorage.getInputCharset()));
         JSONObject resultJson = getHttpRequestTemplate().postForObject(getReqUrl() + URL_FuiouSmpRefundGate, params, JSONObject.class);
         return resultJson;
     }
 
-
-
-    /**
-     *  查询退款
-     * @param tradeNo    支付平台订单号
-     * @param outTradeNo 商户单号
-     * @return  空
-     *
-     */
-
-    @Override
-    public Map<String, Object> refundquery(String tradeNo, String outTradeNo) {
-        return Collections.emptyMap();
-    }
 
     /**
      * 查询退款

@@ -1,9 +1,11 @@
 package com.egzosn.pay.ali.bean;
 
+import com.egzosn.pay.common.bean.Order;
 import com.egzosn.pay.common.util.Util;
 import com.egzosn.pay.common.util.str.StringUtils;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -13,7 +15,7 @@ import java.util.TreeMap;
  *         email egzosn@gmail.com
  *         date 2019/4/28.20:29
  */
-public class OrderSettle {
+public class OrderSettle implements Order {
 
     /**
      * 结算请求流水号 开发者自行生成并保证唯一性
@@ -51,6 +53,11 @@ public class OrderSettle {
      * 操作员id
      */
     private String operatorId;
+
+    /**
+     * 订单附加信息，可用于预设未提供的参数，这里会覆盖以上所有的订单信息，
+     */
+    private Map<String, Object> attr;
 
     public String getOutRequestNo() {
         return outRequestNo;
@@ -158,6 +165,28 @@ public class OrderSettle {
         return bizContent;
     }
 
+    @Override
+    public Map<String, Object> getAttrs() {
+        if (null == attr){
+            attr = new HashMap<>();
+        }
+        return attr;
+    }
 
+    @Override
+    public Object getAttr(String key) {
+        return getAttrs().get(key);
+    }
+
+
+    /**
+     * 添加订单信息
+     * @param key key
+     * @param value 值
+     */
+    @Override
+    public void addAttr(String key, Object value) {
+        getAttrs().put(key, value);
+    }
 
 }

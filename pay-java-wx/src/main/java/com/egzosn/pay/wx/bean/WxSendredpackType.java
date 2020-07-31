@@ -1,11 +1,14 @@
 package com.egzosn.pay.wx.bean;
 
+import com.egzosn.pay.common.bean.TransferOrder;
 import com.egzosn.pay.common.bean.TransferType;
 
+import java.util.Map;
+
 /**
- * @description:
- * @author: 保网 faymanwang 1057438332@qq.com
- * @time: 2020/5/14 20:11
+ *  红包交易类型
+ * @author faymanwang
+ *  2020/5/14 20:11
  */
 public enum WxSendredpackType  implements TransferType {
     /**
@@ -17,7 +20,7 @@ public enum WxSendredpackType  implements TransferType {
      */
     SENDGROUPREDPACK("mmpaymkttransfers/sendgroupredpack"),
     /**
-     * 现金红包,小程序-查询红包记录
+     * 现金红包-查询红包记录
      */
     GETHBINFO ("mmpaymkttransfers/gethbinfo"),
     /**
@@ -39,5 +42,10 @@ public enum WxSendredpackType  implements TransferType {
     @Override
     public String getMethod() {
         return this.method;
+    }
+
+    @Override
+    public Map<String, Object> setAttr(Map<String, Object> attr, TransferOrder order) {
+        return attr;
     }
 }

@@ -2,16 +2,19 @@ package com.egzosn.pay.common.bean;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 退款订单信息
- * @author: egan
- *  <pre>
+ *
+ * @author egan
+ * <pre>
  *      email egzosn@gmail.com
  *      date 2018/1/15 21:40
  *   </pre>
  */
-public class RefundOrder {
+public class RefundOrder implements Order {
     /**
      * 退款单号，每次进行退款的单号，此处唯一
      */
@@ -46,6 +49,15 @@ public class RefundOrder {
      * 退款说明
      */
     private String description;
+    /**
+     * 退款用户
+     */
+    private String userId;
+
+    /**
+     * 订单附加信息，可用于预设未提供的参数，这里会覆盖以上所有的订单信息，
+     */
+    private Map<String, Object> attr;
 
     public String getRefundNo() {
         return refundNo;
@@ -111,6 +123,14 @@ public class RefundOrder {
         this.description = description;
     }
 
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
     public RefundOrder() {
     }
 
@@ -135,5 +155,28 @@ public class RefundOrder {
         this.totalAmount = totalAmount;
     }
 
+    @Override
+    public Map<String, Object> getAttrs() {
+        if (null == attr) {
+            attr = new HashMap<>();
+        }
+        return attr;
+    }
 
+    @Override
+    public Object getAttr(String key) {
+        return getAttrs().get(key);
+    }
+
+
+    /**
+     * 添加订单信息
+     *
+     * @param key   key
+     * @param value 值
+     */
+    @Override
+    public void addAttr(String key, Object value) {
+        getAttrs().put(key, value);
+    }
 }

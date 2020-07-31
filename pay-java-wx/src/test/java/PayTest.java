@@ -1,9 +1,12 @@
 
-import com.egzosn.pay.common.api.PayService;
+import com.egzosn.pay.common.bean.CertStoreType;
 import com.egzosn.pay.common.bean.MethodType;
 import com.egzosn.pay.common.bean.PayOrder;
+import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.wx.api.WxPayConfigStorage;
 import com.egzosn.pay.wx.api.WxPayService;
+import com.egzosn.pay.wx.bean.RedpackOrder;
+import com.egzosn.pay.wx.bean.WxSendredpackType;
 import com.egzosn.pay.wx.bean.WxTransactionType;
 
 import java.awt.image.BufferedImage;
@@ -39,7 +42,7 @@ public class PayTest {
         //是否为测试账号，沙箱环境 此处暂未实现
         wxPayConfigStorage.setTest(true);
         //支付服务
-        PayService service =  new WxPayService(wxPayConfigStorage);
+        WxPayService service =  new WxPayService(wxPayConfigStorage);
         //支付订单基础信息
         PayOrder payOrder = new PayOrder("订单title", "摘要",  new BigDecimal(0.01) , UUID.randomUUID().toString().replace("-", ""));
         /*-----------扫码付-------------------*/
@@ -84,5 +87,32 @@ public class PayTest {
 
 
         /*-----------回调处理-------------------*/
+
+       HttpConfigStorage httpConfigStorage = new HttpConfigStorage();
+        //ssl 退款证书相关
+        httpConfigStorage.setKeystore("D:/work/pay/src/main/resources/certificates/1220429901_apiclient_cert.p12");
+        httpConfigStorage.setStorePassword("默认商户号");
+        //设置ssl证书对应的存储方式，这里默认为文件地址
+        httpConfigStorage.setCertStoreType(CertStoreType.PATH);
+        service.setRequestTemplateConfigStorage(httpConfigStorage);
+
+        RedpackOrder redpackOrder = new RedpackOrder();
+
+        redpackOrder.setSendName("测试");
+        //faymanwang- opid
+        redpackOrder.setReOpenid("om3rxjhD1rhGrP6oLydMgLcN5n10");
+        //红包流水
+        redpackOrder.setMchBillno("red202005181");
+        redpackOrder.setTotalAmount(new BigDecimal(1.5));
+        redpackOrder.setSceneId("PRODUCT_1");
+        //现金红包，小程序默认为1  裂变默认为3
+        redpackOrder.setTotalNum(4);
+        redpackOrder.setWishing("请勿领取");
+        redpackOrder.setActName("请勿领取测试红包");
+        redpackOrder.setRemark("测试支付-by fayman");
+        //设置发红包方式
+        redpackOrder.setTransferType(WxSendredpackType.SENDGROUPREDPACK);
+        Map<String, Object> sendredpack = service.sendredpack(redpackOrder);
+        System.out.println(sendredpack);
     }
 }

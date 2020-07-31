@@ -1,11 +1,11 @@
 package com.egzosn.pay.common.bean;
 
+import com.egzosn.pay.common.util.str.StringUtils;
+
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-
-import com.egzosn.pay.common.util.str.StringUtils;
 
 /**
  * 支付订单信息
@@ -277,6 +277,7 @@ public class PayOrder implements Order {
      * @param key key
      * @param value 值
      */
+    @Override
     public void addAttr(String key, Object value) {
         getAttrs().put(key, value);
     }

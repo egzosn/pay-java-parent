@@ -1,6 +1,8 @@
 
 package com.egzosn.pay.common.util.sign.encrypt;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 
@@ -61,25 +63,35 @@ public class RSA2 {
 	* @param privateKey 商户私钥
 	* @param characterEncoding 编码格式
 	* @return 解密后的字符串
-	 * @throws Exception 解密异常
+	 * @throws GeneralSecurityException 解密异常
+	 * @throws IOException 解密异常
 	*/
-	public static String decrypt(String content, String privateKey, String characterEncoding) throws Exception {
+	public static String decrypt(String content, String privateKey, String characterEncoding) throws GeneralSecurityException, IOException {
         return RSA.decrypt(content, privateKey, characterEncoding);
     }
 
-	
+
 	/**
 	* 得到私钥
 	* @param key 密钥字符串（经过base64编码）
-	* @throws Exception 加密异常
+	* @throws GeneralSecurityException 加密异常
 	 * @return 私钥
 	*/
-	public static PrivateKey getPrivateKey(String key) throws Exception {
+	public static PrivateKey getPrivateKey(String key) throws GeneralSecurityException {
 		return RSA.getPrivateKey(key);
 	}
 
-
-	public static String encrypt(String content, String publicKey, String cipherAlgorithm, String characterEncoding ) throws Exception {
-		return Base64.encode(RSA.encrypt(content.getBytes(characterEncoding), RSA.getPublicKey(publicKey),2048, 11, cipherAlgorithm));
+	/**
+	 *
+	 * @param content 加密文本
+	 * @param publicKey 公钥
+	 * @param cipherAlgorithm 算法
+	 * @param characterEncoding 编码类型
+	 * @return 加密后文本
+	 * @throws GeneralSecurityException 加密异常
+	 * @throws IOException IOException
+	 */
+	public static String encrypt(String content, String publicKey, String cipherAlgorithm, String characterEncoding ) throws GeneralSecurityException, IOException {
+		return Base64.encode(RSA.encrypt(content.getBytes(characterEncoding), RSA.getPublicKey(publicKey), 2048, 11, cipherAlgorithm));
 	}
 }

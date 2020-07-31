@@ -1,18 +1,12 @@
 package com.egzosn.pay.wx.api;
 
-import com.egzosn.pay.common.bean.Order;
-import com.egzosn.pay.common.bean.PayOrder;
-
-import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.Map;
-
 /**
+ * 常量
  * @author egan
- * @date 2020/3/10 21:22
- * <a href="mailto:zheng.zaosheng@iwhalecloud.com">郑灶生</a>
- * <br/>
- * email: zheng.zaosheng@iwhalecloud.com
+ * <pre>
+ * email egzosn@gmail.com
+ * date 2020/3/10 21:22
+ * </pre>
  */
 public interface WxConst {
     /**

@@ -5,9 +5,11 @@ package com.egzosn.pay.demo.controller;
 import com.egzosn.pay.ali.api.AliPayConfigStorage;
 import com.egzosn.pay.ali.api.AliPayService;
 import com.egzosn.pay.ali.bean.AliTransactionType;
+import com.egzosn.pay.ali.bean.AliTransferOrder;
 import com.egzosn.pay.ali.bean.AliTransferType;
 import com.egzosn.pay.ali.bean.OrderSettle;
-import com.egzosn.pay.common.bean.*;
+import com.egzosn.pay.common.bean.PayOrder;
+import com.egzosn.pay.common.bean.RefundOrder;
 import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.common.http.UriVariables;
 import com.egzosn.pay.common.util.sign.SignUtils;
@@ -17,6 +19,7 @@ import com.egzosn.pay.demo.service.interceptor.AliPayMessageInterceptor;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.imageio.ImageIO;
@@ -109,7 +112,7 @@ public class AliPayController {
         PayOrder order = new PayOrder("订单title", "摘要", new BigDecimal(0.01), UUID.randomUUID().toString().replace("-", ""));
         //App支付
         order.setTransactionType(AliTransactionType.APP);
-        data.put("orderInfo", UriVariables.getMapToParameters(service.orderInfo(order)));
+        data.put("orderInfo", UriVariables.getMapToParameters(service.app(order)));
         return data;
     }
 
@@ -287,8 +290,8 @@ public class AliPayController {
      * @return 返回支付方查询退款后的结果
      */
     @RequestMapping("refundquery")
-    public Map<String, Object> refundquery(QueryOrder order) {
-        return service.refundquery(order.getTradeNo(), order.getOutTradeNo());
+    public Map<String, Object> refundquery(RefundOrder order) {
+        return service.refundquery(order);
     }
 
     /**
@@ -304,18 +307,6 @@ public class AliPayController {
 
 
     /**
-     * 通用查询接口，根据 AliTransactionType 类型进行实现,此接口不包括退款
-     *
-     * @param order 订单的请求体
-     * @return 返回支付方对应接口的结果
-     */
-    @RequestMapping("secondaryInterface")
-    public Map<String, Object> secondaryInterface(QueryOrder order) {
-        TransactionType type = AliTransactionType.valueOf(order.getTransactionType());
-        return service.secondaryInterface(order.getTradeNoOrBillDate(), order.getOutTradeNoBillType(), type);
-    }
-
-    /**
      * 转账
      *
      * @param order 转账订单
@@ -323,15 +314,18 @@ public class AliPayController {
      * @return 对应的转账结果
      */
     @RequestMapping("transfer")
-    public Map<String, Object> transfer(TransferOrder order) {
-//        order.setOutNo("转账单号");
-//        order.setPayeeAccount("收款方账户,支付宝登录号，支持邮箱和手机号格式");
-//        order.setAmount(new BigDecimal(10));
-//        order.setPayerName("付款方姓名, 非必填");
-//        order.setPayeeName("收款方真实姓名, 非必填");
-//        order.setRemark("转账备注, 非必填");
-        //收款方账户类型 ,默认值 ALIPAY_LOGONID：支付宝登录号，支持邮箱和手机号格式。
-        order.setTransferType(AliTransferType.ALIPAY_LOGONID);
+    public Map<String, Object> transfer(AliTransferOrder order) {
+        order.setOutBizNo("转账单号");
+        order.setTransAmount(new BigDecimal(10));
+        order.setOrderTitle("转账业务的标题");
+        order.setIdentity("参与方的唯一标识");
+        order.setIdentityType("参与方的标识类型，目前支持如下类型：");
+        order.setName("参与方真实姓名");
+        order.setRemark("转账备注, 非必填");
+        //单笔无密转账到支付宝账户
+        order.setTransferType(AliTransferType.TRANS_ACCOUNT_NO_PWD);
+        //单笔无密转账到银行卡
+//        order.setTransferType(AliTransferType.TRANS_BANKCARD_NO_PWD);
         return service.transfer(order);
     }
 

@@ -7,7 +7,6 @@ import com.egzosn.pay.common.http.HttpRequestTemplate;
 
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
-import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Map;
 
@@ -59,25 +58,27 @@ public interface PayService<PC extends PayConfigStorage> {
      * @param params 回调回来的参数集
      * @return 签名校验 true通过
      */
-    boolean verify(Map<String, Object> params);
 
+    boolean verify(Map<String, Object> params);
     /**
      * 签名校验
-     *
+     * 后面版本废弃
      * @param params 参数集
      * @param sign   签名原文
      * @return 签名校验 true通过
      */
+    @Deprecated
     boolean signVerify(Map<String, Object> params, String sign);
 
 
     /**
      * 支付宝需要,微信是否也需要再次校验来源，进行订单查询
      * 校验数据来源
-     *
+     *  后面版本废弃
      * @param id 业务id, 数据的真实性.
      * @return true通过
      */
+    @Deprecated
     boolean verifySource(String id);
 
 
@@ -99,6 +100,13 @@ public interface PayService<PC extends PayConfigStorage> {
      * @return 对应页面重定向信息
      */
     <O extends PayOrder>String toPay(O order);
+    /**
+     * app支付
+     * @param order 订单信息
+     * @param <O> 预订单类型
+     * @return 对应app所需参数信息
+     */
+    <O extends PayOrder>Map<String, Object> app(O order);
 
     /**
      * 创建签名
@@ -109,14 +117,7 @@ public interface PayService<PC extends PayConfigStorage> {
      */
     String createSign(String content, String characterEncoding);
 
-    /**
-     * 创建签名
-     *
-     * @param content           需要签名的内容
-     * @param characterEncoding 字符编码
-     * @return 签名
-     */
-    String createSign(Map<String, Object> content, String characterEncoding);
+
 
     /**
      * 将请求参数或者请求流转化为 Map
@@ -243,35 +244,7 @@ public interface PayService<PC extends PayConfigStorage> {
      */
     <T> T cancel(String tradeNo, String outTradeNo, Callback<T> callback);
 
-    /**
-     * 申请退款接口
-     * 废弃
-     *
-     * @param tradeNo      支付平台订单号
-     * @param outTradeNo   商户单号
-     * @param refundAmount 退款金额
-     * @param totalAmount  总金额
-     * @return 返回支付方申请退款后的结果
-     * @see #refund(RefundOrder)
-     */
-    @Deprecated
-    Map<String, Object> refund(String tradeNo, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount);
 
-    /**
-     * 申请退款接口
-     * 废弃
-     *
-     * @param tradeNo      支付平台订单号
-     * @param outTradeNo   商户单号
-     * @param refundAmount 退款金额
-     * @param totalAmount  总金额
-     * @param callback     处理器
-     * @param <T>          返回类型
-     * @return 返回支付方申请退款后的结果
-     * @see #refund(RefundOrder, Callback)
-     */
-    @Deprecated
-    <T> T refund(String tradeNo, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount, Callback<T> callback);
 
     /**
      * 申请退款接口
@@ -291,27 +264,7 @@ public interface PayService<PC extends PayConfigStorage> {
      */
     <T> T refund(RefundOrder refundOrder, Callback<T> callback);
 
-    /**
-     * 查询退款
-     *
-     * @param tradeNo    支付平台订单号
-     * @param outTradeNo 商户单号
-     * @return 返回支付方查询退款后的结果
-     */
-    @Deprecated
-    Map<String, Object> refundquery(String tradeNo, String outTradeNo);
 
-    /**
-     * 查询退款
-     *
-     * @param tradeNo    支付平台订单号
-     * @param outTradeNo 商户单号
-     * @param callback   处理器
-     * @param <T>        返回类型
-     * @return 返回支付方查询退款后的结果
-     */
-    @Deprecated
-    <T> T refundquery(String tradeNo, String outTradeNo, Callback<T> callback);
 
     /**
      * 查询退款
@@ -354,18 +307,19 @@ public interface PayService<PC extends PayConfigStorage> {
 
     /**
      * 通用查询接口
-     *
+     *   接下来移除此方法
      * @param tradeNoOrBillDate  支付平台订单号或者账单类型， 具体请
      *                           类型为{@link String }或者 {@link Date }，类型须强制限制，类型不对应则抛出异常{@link PayErrorException}
      * @param outTradeNoBillType 商户单号或者 账单类型
      * @param transactionType    交易类型
      * @return 返回支付方对应接口的结果
      */
+    @Deprecated
     Map<String, Object> secondaryInterface(Object tradeNoOrBillDate, String outTradeNoBillType, TransactionType transactionType);
 
     /**
      * 通用查询接口
-     *
+     * 接下来移除此方法
      * @param tradeNoOrBillDate  支付平台订单号或者账单日期， 具体请 类型为{@link String }或者 {@link Date }，类型须强制限制，类型不对应则抛出异常{@link PayErrorException}
      * @param outTradeNoBillType 商户单号或者 账单类型
      * @param transactionType    交易类型
@@ -373,6 +327,7 @@ public interface PayService<PC extends PayConfigStorage> {
      * @param <T>                返回类型
      * @return 返回支付方对应接口的结果
      */
+    @Deprecated
     <T> T secondaryInterface(Object tradeNoOrBillDate, String outTradeNoBillType, TransactionType transactionType, Callback<T> callback);
 
 

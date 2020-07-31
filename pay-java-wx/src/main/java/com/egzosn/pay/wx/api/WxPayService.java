@@ -2,24 +2,22 @@ package com.egzosn.pay.wx.api;
 
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.api.BasePayService;
-import com.egzosn.pay.common.api.Callback;
 import com.egzosn.pay.common.bean.*;
 import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpConfigStorage;
-import com.egzosn.pay.common.http.HttpRequestTemplate;
 import com.egzosn.pay.common.util.DateUtils;
 import com.egzosn.pay.common.util.Util;
+import com.egzosn.pay.common.util.XML;
 import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.sign.encrypt.RSA2;
 import com.egzosn.pay.common.util.str.StringUtils;
 import com.egzosn.pay.wx.bean.*;
-import com.egzosn.pay.common.util.XML;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigDecimal;
 import java.net.URLEncoder;
+import java.security.GeneralSecurityException;
 import java.util.*;
 
 import static com.egzosn.pay.wx.api.WxConst.*;
@@ -30,13 +28,11 @@ import static com.egzosn.pay.wx.bean.WxTransferType.*;
  *
  * @author egan
  * <pre>
- *                 email egzosn@gmail.com
- *                 date 2016-5-18 14:09:01
- *                 </pre>
+ * email egzosn@gmail.com
+ * date 2016-5-18 14:09:01
+ * </pre>
  */
-public class WxPayService extends BasePayService<WxPayConfigStorage> {
-
-
+public class WxPayService extends BasePayService<WxPayConfigStorage> implements WxRedPackService {
 
 
     /**
@@ -95,14 +91,14 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
     public boolean verify(Map<String, Object> params) {
 
         if (!(SUCCESS.equals(params.get(RETURN_CODE)) && SUCCESS.equals(params.get(RESULT_CODE)))) {
-            if (LOG.isErrorEnabled()){
+            if (LOG.isErrorEnabled()) {
                 LOG.error(String.format("微信支付异常：return_code=%s,参数集=%s", params.get(RETURN_CODE), params));
             }
             return false;
         }
 
         if (null == params.get(SIGN)) {
-            if (LOG.isDebugEnabled()){
+            if (LOG.isDebugEnabled()) {
                 LOG.debug(String.format("微信支付异常：签名为空！%s=%s", OUT_TRADE_NO, params.get(OUT_TRADE_NO)));
             }
             return false;
@@ -481,25 +477,6 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
         return secondaryInterface(transactionId, outTradeNo, WxTransactionType.REVERSE);
     }
 
-    /**
-     * 退款
-     *
-     * @param transactionId 微信订单号
-     * @param outTradeNo    商户单号
-     * @param refundAmount  退款金额
-     * @param totalAmount   总金额
-     * @return 返回支付方申请退款后的结果
-     * @see #refund(RefundOrder, Callback)
-     */
-    @Deprecated
-    @Override
-    public Map<String, Object> refund(String transactionId, String outTradeNo, BigDecimal refundAmount, BigDecimal totalAmount) {
-
-        return refund(new RefundOrder(transactionId, outTradeNo, refundAmount, totalAmount));
-    }
-
-
-
 
     /**
      * 申请退款接口
@@ -522,23 +499,13 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
             parameters.put("refund_fee_type", refundOrder.getCurType().getType());
         }
         setParameters(parameters, "refund_desc", refundOrder.getDescription());
+        //附加参数，这里可进行覆盖前面所有参数
+        parameters.putAll(refundOrder.getAttrs());
         //设置签名
         setSign(parameters);
         return requestTemplate.postForObject(getReqUrl(WxTransactionType.REFUND), XML.getMap2Xml(parameters), JSONObject.class);
     }
 
-
-    /**
-     * 查询退款
-     *
-     * @param transactionId 支付平台订单号
-     * @param outTradeNo    商户单号
-     * @return 返回支付方查询退款后的结果
-     */
-    @Override
-    public Map<String, Object> refundquery(String transactionId, String outTradeNo) {
-        return secondaryInterface(transactionId, outTradeNo, WxTransactionType.REFUNDQUERY);
-    }
 
     /**
      * 查询退款
@@ -569,15 +536,16 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
      */
     @Override
     public Map<String, Object> downloadbill(Date billDate, String billType) {
+        Map<String, Object> parameters = getDownloadBillParam(billDate, billType,false);
+        return downBillRet(parameters);
+    }
 
-        //获取公共参数
-        Map<String, Object> parameters = getPublicParameters();
-
-        parameters.put("bill_type", billType);
-        //目前只支持日账单
-
-        parameters.put("bill_date", DateUtils.formatDate(billDate, DateUtils.YYYYMMDD));
-
+    /**
+     * 账单根据参数返回结果
+     * @param parameters
+     * @return
+     */
+    private Map<String, Object> downBillRet(Map<String, Object> parameters) {
         //设置签名
         setSign(parameters);
         String respStr = requestTemplate.postForObject(getReqUrl(WxTransactionType.DOWNLOADBILL), XML.getMap2Xml(parameters), String.class);
@@ -590,6 +558,39 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
         ret.put(RETURN_MSG_CODE, "ok");
         ret.put("data", respStr);
         return ret;
+    }
+
+    /**
+     * 下载账单公共参数
+     * @param billDate 账单类型，商户通过接口或商户经开放平台授权后其所属服务商通过接口可以获取以下账单类型：trade、signcustomer；trade指商户基于支付宝交易收单的业务账单；signcustomer是指基于商户支付宝余额收入及支出等资金变动的帐务账单；
+     * @param billType 账单时间：日账单格式为yyyy-MM-dd，月账单格式为yyyy-MM。
+     * @param tarType 账单返回格式 默认返回流false ，gzip 时候true
+     * @return
+     */
+    private Map<String, Object> getDownloadBillParam(Date billDate, String billType,boolean tarType) {
+        //获取公共参数
+        Map<String, Object> parameters = getPublicParameters();
+        parameters.put("bill_type", billType);
+        //目前只支持日账单
+        parameters.put("bill_date", DateUtils.formatDate(billDate, DateUtils.YYYYMMDD));
+        if(tarType){
+            parameters.put("tar_type", "GZIP");
+        }
+        return parameters;
+    }
+
+    /**
+     * 目前只支持日账单
+     *
+     * @param billDate 账单类型，商户通过接口或商户经开放平台授权后其所属服务商通过接口可以获取以下账单类型：trade、signcustomer；trade指商户基于支付宝交易收单的业务账单；signcustomer是指基于商户支付宝余额收入及支出等资金变动的帐务账单；
+     * @param billType 账单时间：日账单格式为yyyy-MM-dd，月账单格式为yyyy-MM。
+     * @param tarType 账单返回格式 默认返回流false ，gzip 时候true
+     * @return 返回支付方下载对账单的结果
+     */
+    public Map<String, Object> downloadbill(Date billDate, String billType, Boolean tarType) {
+        Map<String, Object> parameters = getDownloadBillParam(billDate, billType,tarType);
+        //设置签名
+        return downBillRet(parameters);
     }
 
 
@@ -632,13 +633,12 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
      * @param order 转账订单
      *              <pre>
      *
-     *                                        注意事项：
-     *                                        ◆ 当返回错误码为“SYSTEMERROR”时，请不要更换商户订单号，一定要使用原商户订单号重试，否则可能造成重复支付等资金风险。
-     *                                        ◆ XML具有可扩展性，因此返回参数可能会有新增，而且顺序可能不完全遵循此文档规范，如果在解析回包的时候发生错误，请商户务必不要换单重试，请商户联系客服确认付款情况。如果有新回包字段，会更新到此API文档中。
-     *                                        ◆ 因为错误代码字段err_code的值后续可能会增加，所以商户如果遇到回包返回新的错误码，请商户务必不要换单重试，请商户联系客服确认付款情况。如果有新的错误码，会更新到此API文档中。
-     *                                        ◆ 错误代码描述字段err_code_des只供人工定位问题时做参考，系统实现时请不要依赖这个字段来做自动化处理。
-     *
-     *                                        </pre>
+     *              注意事项：
+     *              ◆ 当返回错误码为“SYSTEMERROR”时，请不要更换商户订单号，一定要使用原商户订单号重试，否则可能造成重复支付等资金风险。
+     *              ◆ XML具有可扩展性，因此返回参数可能会有新增，而且顺序可能不完全遵循此文档规范，如果在解析回包的时候发生错误，请商户务必不要换单重试，请商户联系客服确认付款情况。如果有新回包字段，会更新到此API文档中。
+     *              ◆ 因为错误代码字段err_code的值后续可能会增加，所以商户如果遇到回包返回新的错误码，请商户务必不要换单重试，请商户联系客服确认付款情况。如果有新的错误码，会更新到此API文档中。
+     *              ◆ 错误代码描述字段err_code_des只供人工定位问题时做参考，系统实现时请不要依赖这个字段来做自动化处理。
+     *              </pre>
      * @return 对应的转账结果
      */
     @Override
@@ -713,7 +713,6 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
      * @param outNo          商户转账订单号
      * @param wxTransferType 微信转账类型，.....这里没办法了只能这样写(┬＿┬)，请见谅 {@link com.egzosn.pay.wx.bean.WxTransferType}
      *                       <p>
-     *                       <p>
      *                       <a href="https://pay.weixin.qq.com/wiki/doc/api/tools/mch_pay.php?chapter=14_3">企业付款到零钱</a>
      *                       <a href="https://pay.weixin.qq.com/wiki/doc/api/tools/mch_pay.php?chapter=24_3">商户企业付款到银行卡</a>
      *                       </p>
@@ -741,7 +740,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
     public String keyPublic(String content) {
         try {
             return RSA2.encrypt(content, payConfigStorage.getKeyPublic(), CIPHER_ALGORITHM, payConfigStorage.getInputCharset());
-        } catch (Exception e) {
+        } catch (GeneralSecurityException | IOException e) {
             throw new PayErrorException(new WxPayError(FAILURE, e.getLocalizedMessage()));
         }
     }
@@ -759,81 +758,53 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
 
     /**
      * 微信发红包
-     * @author: faymanwang 1057438332@qq.com
+     *
      * @param redpackOrder 红包实体
      * @return 返回发红包实体后的结果
+     * @author: faymanwang 1057438332@qq.com
      */
+    @Override
     public Map<String, Object> sendredpack(RedpackOrder redpackOrder) {
         Map<String, Object> parameters = new TreeMap<String, Object>();
-        redpackParam(redpackOrder, parameters);
-        parameters.put("total_num", 1);
-        return routRedpack(parameters, WxSendredpackType.SENDREDPACK);
+        redPackParam(redpackOrder, parameters);
+        if (WxSendredpackType.SENDGROUPREDPACK == redpackOrder.getTransferType()) {
+            //现金红包，小程序红包默认传1.裂变红包取传入值，且需要大于3
+            parameters.put("total_num", Math.max(redpackOrder.getTotalNum(), 3));
+            parameters.put("amt_type", "ALL_RAND");
+        } else if (WxSendredpackType.SENDMINIPROGRAMHB == redpackOrder.getTransferType()) {
+            parameters.put("notify_way", "MINI_PROGRAM_JSAPI");
+        }
+
+        parameters.put(SIGN, createSign(SignUtils.parameterText(parameters, "&", SIGN), payConfigStorage.getInputCharset()));
+        return requestTemplate.postForObject(getReqUrl(redpackOrder.getTransferType()), XML.getMap2Xml(parameters), JSONObject.class);
     }
 
-     /**
-     * 发放裂变红包
-     * 裂变红包：一次可以发放一组红包。首先领取的用户为种子用户，种子用户领取一组红包当中的一个，并可以通过社交分享将剩下的红包给其他用户。裂变红包充分利用了人际传播的优势。
-     *
-     * @author: faymanwang 1057438332@qq.com
-     * @param redpackOrder 红包实体
-     * @return 返回发红包实体后的结果
-     */
-    public Map<String, Object> sendgroupredpack(RedpackOrder redpackOrder) {
-        Map<String, Object> parameters = new TreeMap<String, Object>();
-        redpackParam(redpackOrder, parameters);
-        parameters.put("amt_type", "ALL_RAND");
-        return routRedpack(parameters, WxSendredpackType.SENDGROUPREDPACK);
-    }
-
-    /**
-     * 小程序发红包
-     * @author: faymanwang 1057438332@qq.com
-     * @param redpackOrder 红包实体
-     * @return 返回发红包实体后的结果
-     */
-    public Map<String, Object> sendminiprogramhb(RedpackOrder redpackOrder) {
-        Map<String, Object> parameters = new TreeMap<String, Object>();
-        redpackParam(redpackOrder, parameters);
-        parameters.put("total_num", 1);
-        parameters.put("notify_way", "MINI_PROGRAM_JSAPI");
-        return routRedpack(parameters, WxSendredpackType.SENDMINIPROGRAMHB);
-    }
 
     /**
      * 查询红包记录
      * 用于商户对已发放的红包进行查询红包的具体信息，可支持普通红包和裂变包
      * 查询红包记录API只支持查询30天内的红包订单，30天之前的红包订单请登录商户平台查询。
      *
-     * @author: faymanwang 1057438332@qq.com
      * @param mchBillno 商户发放红包的商户订单号
      * @return 返回查询结果
+     * @author: faymanwang 1057438332@qq.com
      */
-    public Map<String, Object> gethbinfo (String mchBillno) {
+    @Override
+    public Map<String, Object> gethbinfo(String mchBillno) {
         Map<String, Object> parameters = this.getPublicParameters();
         parameters.put("mch_billno", mchBillno);
         parameters.put("bill_type", "MCHT");
-        return routRedpack(parameters, WxSendredpackType.GETHBINFO);
-    }
-
-    /**
-     *
-     * @author: faymanwang 1057438332@qq.com
-     * @param parameters
-     * @param sendredpackType
-     * @return
-     */
-    private Map<String, Object> routRedpack(Map<String, Object> parameters, TransferType sendredpackType) {
         parameters.put(SIGN, createSign(SignUtils.parameterText(parameters, "&", SIGN), payConfigStorage.getInputCharset()));
-        return requestTemplate.postForObject(getReqUrl(sendredpackType), XML.getMap2Xml(parameters), JSONObject.class);
+        return requestTemplate.postForObject(getReqUrl(WxSendredpackType.GETHBINFO), XML.getMap2Xml(parameters), JSONObject.class);
     }
 
     /**
      * 微信红包构造参数方法
-     * @author: faymanwang 1057438332@qq.com
+     *
      * @param redpackOrder 红包实体
-     * @param parameters
+     * @param parameters   接收参数
      */
-    private void redpackParam(RedpackOrder redpackOrder, Map<String, Object> parameters) {
+    private void redPackParam(RedpackOrder redpackOrder, Map<String, Object> parameters) {
         parameters.put(NONCE_STR, SignUtils.randomStr());
         parameters.put(MCH_ID, payConfigStorage.getPid());
         parameters.put("wxappid", payConfigStorage.getAppid());
@@ -841,12 +812,12 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
         parameters.put("re_openid", redpackOrder.getReOpenid());
         parameters.put("mch_billno", redpackOrder.getMchBillno());
         parameters.put("total_amount", Util.conversionCentAmount(redpackOrder.getTotalAmount()));
-        parameters.put("total_num", redpackOrder.getTotalNum() > 0 ? redpackOrder.getTotalNum() : 1);
+        parameters.put("total_num", 1);
         parameters.put("wishing", redpackOrder.getWishing());
         parameters.put("client_ip", StringUtils.isNotEmpty(redpackOrder.getIp()) ? redpackOrder.getIp() : "192.168.0.1");
         parameters.put("act_name", redpackOrder.getActName());
         parameters.put("remark", redpackOrder.getRemark());
-        if(StringUtils.isNotEmpty(redpackOrder.getSceneId())){
+        if (StringUtils.isNotEmpty(redpackOrder.getSceneId())) {
             parameters.put("scene_id", redpackOrder.getSceneId());
         }
     }
