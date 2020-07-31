@@ -32,7 +32,7 @@ import static com.egzosn.pay.wx.bean.WxTransferType.*;
  * date 2016-5-18 14:09:01
  * </pre>
  */
-public class WxPayService extends BasePayService<WxPayConfigStorage> implements WxRedPackService {
+public class WxPayService extends BasePayService<WxPayConfigStorage> implements WxRedPackService,WxBillService {
 
 
     /**
@@ -541,6 +541,21 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
     }
 
     /**
+     * 目前只支持日账单,增加账单返回格式
+     *
+     * @param billDate 账单类型，商户通过接口或商户经开放平台授权后其所属服务商通过接口可以获取以下账单类型：trade、signcustomer；trade指商户基于支付宝交易收单的业务账单；signcustomer是指基于商户支付宝余额收入及支出等资金变动的帐务账单；
+     * @param billType 账单时间：日账单格式为yyyy-MM-dd，月账单格式为yyyy-MM。
+     * @param tarType 账单返回格式 默认返回流false ，gzip 时候true
+     * @return 返回支付方下载对账单的结果
+     */
+    @Override
+    public Map<String, Object> downloadbill(Date billDate, String billType, Boolean tarType) {
+        Map<String, Object> parameters = getDownloadBillParam(billDate, billType,tarType?true:false);
+        //设置签名
+        return downBillRet(parameters);
+    }
+
+    /**
      * 账单根据参数返回结果
      * @param parameters
      * @return
@@ -577,20 +592,6 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
             parameters.put("tar_type", "GZIP");
         }
         return parameters;
-    }
-
-    /**
-     * 目前只支持日账单
-     *
-     * @param billDate 账单类型，商户通过接口或商户经开放平台授权后其所属服务商通过接口可以获取以下账单类型：trade、signcustomer；trade指商户基于支付宝交易收单的业务账单；signcustomer是指基于商户支付宝余额收入及支出等资金变动的帐务账单；
-     * @param billType 账单时间：日账单格式为yyyy-MM-dd，月账单格式为yyyy-MM。
-     * @param tarType 账单返回格式 默认返回流false ，gzip 时候true
-     * @return 返回支付方下载对账单的结果
-     */
-    public Map<String, Object> downloadbill(Date billDate, String billType, Boolean tarType) {
-        Map<String, Object> parameters = getDownloadBillParam(billDate, billType,tarType);
-        //设置签名
-        return downBillRet(parameters);
     }
 
 
