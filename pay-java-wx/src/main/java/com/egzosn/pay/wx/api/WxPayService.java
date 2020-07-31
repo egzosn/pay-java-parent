@@ -536,15 +536,16 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
      */
     @Override
     public Map<String, Object> downloadbill(Date billDate, String billType) {
+        Map<String, Object> parameters = getDownloadBillParam(billDate, billType,false);
+        return downBillRet(parameters);
+    }
 
-        //获取公共参数
-        Map<String, Object> parameters = getPublicParameters();
-
-        parameters.put("bill_type", billType);
-        //目前只支持日账单
-
-        parameters.put("bill_date", DateUtils.formatDate(billDate, DateUtils.YYYYMMDD));
-
+    /**
+     * 账单根据参数返回结果
+     * @param parameters
+     * @return
+     */
+    private Map<String, Object> downBillRet(Map<String, Object> parameters) {
         //设置签名
         setSign(parameters);
         String respStr = requestTemplate.postForObject(getReqUrl(WxTransactionType.DOWNLOADBILL), XML.getMap2Xml(parameters), String.class);
@@ -557,6 +558,39 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
         ret.put(RETURN_MSG_CODE, "ok");
         ret.put("data", respStr);
         return ret;
+    }
+
+    /**
+     * 下载账单公共参数
+     * @param billDate 账单类型，商户通过接口或商户经开放平台授权后其所属服务商通过接口可以获取以下账单类型：trade、signcustomer；trade指商户基于支付宝交易收单的业务账单；signcustomer是指基于商户支付宝余额收入及支出等资金变动的帐务账单；
+     * @param billType 账单时间：日账单格式为yyyy-MM-dd，月账单格式为yyyy-MM。
+     * @param tarType 账单返回格式 默认返回流false ，gzip 时候true
+     * @return
+     */
+    private Map<String, Object> getDownloadBillParam(Date billDate, String billType,boolean tarType) {
+        //获取公共参数
+        Map<String, Object> parameters = getPublicParameters();
+        parameters.put("bill_type", billType);
+        //目前只支持日账单
+        parameters.put("bill_date", DateUtils.formatDate(billDate, DateUtils.YYYYMMDD));
+        if(tarType){
+            parameters.put("tar_type", "GZIP");
+        }
+        return parameters;
+    }
+
+    /**
+     * 目前只支持日账单
+     *
+     * @param billDate 账单类型，商户通过接口或商户经开放平台授权后其所属服务商通过接口可以获取以下账单类型：trade、signcustomer；trade指商户基于支付宝交易收单的业务账单；signcustomer是指基于商户支付宝余额收入及支出等资金变动的帐务账单；
+     * @param billType 账单时间：日账单格式为yyyy-MM-dd，月账单格式为yyyy-MM。
+     * @param tarType 账单返回格式 默认返回流false ，gzip 时候true
+     * @return 返回支付方下载对账单的结果
+     */
+    public Map<String, Object> downloadbill(Date billDate, String billType, Boolean tarType) {
+        Map<String, Object> parameters = getDownloadBillParam(billDate, billType,tarType);
+        //设置签名
+        return downBillRet(parameters);
     }
 
 
