@@ -549,8 +549,8 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
      * @return 返回支付方下载对账单的结果
      */
     @Override
-    public Map<String, Object> downloadbill(Date billDate, String billType, Boolean tarType) {
-        Map<String, Object> parameters = getDownloadBillParam(billDate, billType,tarType?true:false);
+    public Map<String, Object> downloadbill(Date billDate, String billType, boolean tarType) {
+        Map<String, Object> parameters = getDownloadBillParam(billDate, billType,tarType==true?true:false);
         //设置签名
         return downBillRet(parameters);
     }
