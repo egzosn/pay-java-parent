@@ -14,8 +14,7 @@ import com.egzosn.pay.common.util.sign.encrypt.RSA2;
 import com.egzosn.pay.common.util.str.StringUtils;
 import com.egzosn.pay.wx.bean.*;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URLEncoder;
 import java.security.GeneralSecurityException;
 import java.util.*;
@@ -537,30 +536,6 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
     @Override
     public Map<String, Object> downloadbill(Date billDate, String billType) {
         Map<String, Object> parameters = getDownloadBillParam(billDate, billType,false);
-        return downBillRet(parameters);
-    }
-
-    /**
-     * 目前只支持日账单,增加账单返回格式
-     *
-     * @param billDate 账单类型，商户通过接口或商户经开放平台授权后其所属服务商通过接口可以获取以下账单类型：trade、signcustomer；trade指商户基于支付宝交易收单的业务账单；signcustomer是指基于商户支付宝余额收入及支出等资金变动的帐务账单；
-     * @param billType 账单时间：日账单格式为yyyy-MM-dd，月账单格式为yyyy-MM。
-     * @param tarType 账单返回格式 默认返回流false ，gzip 时候true
-     * @return 返回支付方下载对账单的结果
-     */
-    @Override
-    public Map<String, Object> downloadbill(Date billDate, String billType, boolean tarType) {
-        Map<String, Object> parameters = getDownloadBillParam(billDate, billType,tarType==true?true:false);
-        //设置签名
-        return downBillRet(parameters);
-    }
-
-    /**
-     * 账单根据参数返回结果
-     * @param parameters
-     * @return
-     */
-    private Map<String, Object> downBillRet(Map<String, Object> parameters) {
         //设置签名
         setSign(parameters);
         String respStr = requestTemplate.postForObject(getReqUrl(WxTransactionType.DOWNLOADBILL), XML.getMap2Xml(parameters), String.class);
@@ -574,6 +549,72 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
         ret.put("data", respStr);
         return ret;
     }
+
+    /**
+     * 目前只支持日账单,增加账单返回格式
+     *
+     * @param billDate 账单类型，商户通过接口或商户经开放平台授权后其所属服务商通过接口可以获取以下账单类型：trade、signcustomer；trade指商户基于支付宝交易收单的业务账单；signcustomer是指基于商户支付宝余额收入及支出等资金变动的帐务账单；
+     * @param billType 账单时间：日账单格式为yyyy-MM-dd，月账单格式为yyyy-MM。
+     * @param tarType 账单返回格式 默认返回流false ，gzip 时候true
+     * @return 返回支付方下载对账单的结果
+     */
+    @Override
+    public Map<String, Object> downloadbill(Date billDate, String billType, boolean tarType) {
+        Map<String, Object> parameters = getDownloadBillParam(billDate, billType,tarType==true?true:false);
+         //设置签名
+        setSign(parameters);
+        InputStream inputStream = requestTemplate.postForObject(getReqUrl(WxTransactionType.DOWNLOADBILL), XML.getMap2Xml(parameters), InputStream.class);
+
+        //写到本地1.zip 里面有个1文件，用txt打开即可。返回路径，这个类需要抽离到工具类
+        //入参需要文件存放路径，这样四个参数略多，是否需要封装一个实体。或者直接更改第三个参数就是路径，有路径默认传true
+        try {
+            writeToLocal("D:\\1.zip", inputStream);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Map<String, Object> ret = new HashMap<String, Object>(3);
+        ret.put(RETURN_CODE, SUCCESS);
+        ret.put(RETURN_MSG_CODE, "ok");
+//        ret.put("data", hashMap);
+        return ret;
+    }
+
+    /**
+     * 将InputStream写入本地文件
+     * @param destination 写入本地目录
+     * @param inputStream 输入流
+     * @throws IOException IOException
+     */
+    private void writeToLocal(String destination, InputStream inputStream)
+            throws IOException {
+
+            // 判断字节大小
+            if (inputStream.available() != 0) {
+                System.out.println("结果大小:" + inputStream.available());
+                File file = new File(destination);
+                if (!file.getParentFile().exists()) {
+                    boolean result = file.getParentFile().mkdirs();
+                    if (!result) {
+                        System.out.println("创建失败");
+                    }
+                }
+                OutputStream out = new FileOutputStream(file);
+                int size = 0;
+                int len = 0;
+                byte[] buf = new byte[1024];
+                while ((size = inputStream.read(buf)) != -1) {
+                    len += size;
+                    out.write(buf, 0, size);
+                }
+                System.out.println("最终写入字节数大小:" + len);
+                inputStream.close();
+                out.close();
+
+            }
+
+    }
+
 
     /**
      * 下载账单公共参数
