@@ -11,5 +11,5 @@ import java.util.Map;
  */
 public interface WxBillService {
 
-    public Map<String, Object> downloadbill(Date billDate, String billType, boolean tarType);
+    public Map<String, Object> downloadbill(Date billDate, String billType, String path);
 }

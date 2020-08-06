@@ -18,6 +18,10 @@ import java.io.*;
 import java.net.URLEncoder;
 import java.security.GeneralSecurityException;
 import java.util.*;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import static com.egzosn.pay.wx.api.WxConst.*;
 import static com.egzosn.pay.wx.bean.WxTransferType.*;
@@ -555,29 +559,50 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
      *
      * @param billDate 账单类型，商户通过接口或商户经开放平台授权后其所属服务商通过接口可以获取以下账单类型：trade、signcustomer；trade指商户基于支付宝交易收单的业务账单；signcustomer是指基于商户支付宝余额收入及支出等资金变动的帐务账单；
      * @param billType 账单时间：日账单格式为yyyy-MM-dd，月账单格式为yyyy-MM。
-     * @param tarType 账单返回格式 默认返回流false ，gzip 时候true
+     * @param path 账单返回格式 账单存储的基础路径,按月切割
      * @return 返回支付方下载对账单的结果
      */
     @Override
-    public Map<String, Object> downloadbill(Date billDate, String billType, boolean tarType) {
-        Map<String, Object> parameters = getDownloadBillParam(billDate, billType,tarType==true?true:false);
+    public Map<String, Object> downloadbill(Date billDate, String billType, String path) {
+        Map<String, Object> parameters = getDownloadBillParam(billDate, billType,true);
          //设置签名
         setSign(parameters);
         InputStream inputStream = requestTemplate.postForObject(getReqUrl(WxTransactionType.DOWNLOADBILL), XML.getMap2Xml(parameters), InputStream.class);
-
-        //写到本地1.zip 里面有个1文件，用txt打开即可。返回路径，这个类需要抽离到工具类
-        //入参需要文件存放路径，这样四个参数略多，是否需要封装一个实体。或者直接更改第三个参数就是路径，有路径默认传true
         try {
-            writeToLocal("D:\\1.zip", inputStream);
-        } catch (IOException e) {
+            //解压流
+            inputStream = uncompress(inputStream);
+            writeToLocal(path+DateUtils.formatDate(new Date(), DateUtils.YYYYMM)+"/"+DateUtils.formatDate(new Date(), DateUtils.YYYYMMDDHHMMSS)+".txt", inputStream);
+            Map<String, Object> ret = new HashMap<String, Object>(3);
+            ret.put(RETURN_CODE, SUCCESS);
+            ret.put(RETURN_MSG_CODE, "ok");
+            ret.put("data", path);
+            return ret;
+        } catch (Exception e) {
             e.printStackTrace();
+            Map<String, Object> ret = new HashMap<String, Object>(3);
+            ret.put(RETURN_CODE, FAIL);
+            ret.put(RETURN_MSG_CODE, "fail");
+            ret.put("data", e.getMessage());
+            return ret;
         }
+    }
 
-        Map<String, Object> ret = new HashMap<String, Object>(3);
-        ret.put(RETURN_CODE, SUCCESS);
-        ret.put(RETURN_MSG_CODE, "ok");
-//        ret.put("data", hashMap);
-        return ret;
+    /**
+     * GZIP解压缩
+     *
+     * @param input
+     * @return
+     */
+    public static InputStream uncompress(InputStream input) throws IOException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        GZIPInputStream ungzip = new GZIPInputStream(input);
+        byte[] buffer = new byte[1024];
+        int n;
+        while ((n = ungzip.read(buffer)) >= 0) {
+            out.write(buffer, 0, n);
+        }
+        InputStream is = new ByteArrayInputStream(out.toByteArray());
+        return is;
     }
 
     /**
@@ -610,9 +635,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
                 System.out.println("最终写入字节数大小:" + len);
                 inputStream.close();
                 out.close();
-
             }
-
     }
 
 
