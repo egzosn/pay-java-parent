@@ -4,6 +4,7 @@ package com.egzosn.pay.demo.controller;
 
 import com.egzosn.pay.ali.api.AliPayConfigStorage;
 import com.egzosn.pay.ali.api.AliPayService;
+import com.egzosn.pay.ali.bean.AliRefundResult;
 import com.egzosn.pay.ali.bean.AliTransactionType;
 import com.egzosn.pay.ali.bean.AliTransferOrder;
 import com.egzosn.pay.ali.bean.AliTransferType;
@@ -279,7 +280,7 @@ public class AliPayController {
      * @return 返回支付方申请退款后的结果
      */
     @RequestMapping("refund")
-    public Map<String, Object> refund(RefundOrder order) {
+    public AliRefundResult refund(RefundOrder order) {
         return service.refund(order);
     }
 

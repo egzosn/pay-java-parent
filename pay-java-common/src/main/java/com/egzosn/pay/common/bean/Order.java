@@ -1,5 +1,6 @@
 package com.egzosn.pay.common.bean;
 
+import java.io.Serializable;
 import java.util.Map;
 
 /**
@@ -11,7 +12,7 @@ import java.util.Map;
  *      date 2020/01/05 13:34
  *  </pre>
  */
-public interface Order {
+public interface Order  extends Serializable {
 
     /**
      * 获取订单属性 这里可用做覆盖已设置的订单信息属性，订单信息在签名前进行覆盖。

@@ -18,6 +18,7 @@ import org.apache.http.Header;
 import org.apache.http.entity.ContentType;
 import org.apache.http.message.BasicHeader;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -323,8 +324,53 @@ public class PayoneerPayService extends BasePayService<PayoneerConfigStorage> im
      * @return 返回支付方申请退款后的结果
      */
     @Override
-    public Map<String, Object> refund(RefundOrder refundOrder) {
-        return close(refundOrder.getTradeNo(), refundOrder.getOutTradeNo());
+    public RefundResult refund(RefundOrder refundOrder) {
+        return new BaseRefundResult(close(refundOrder.getTradeNo(), refundOrder.getOutTradeNo())) {
+            @Override
+            public String getCode() {
+                return getAttrString(CODE);
+            }
+
+            @Override
+            public String getMsg() {
+                return null;
+            }
+
+            @Override
+            public String getResultCode() {
+                return null;
+            }
+
+            @Override
+            public String getResultMsg() {
+                return null;
+            }
+
+            @Override
+            public BigDecimal getRefundFee() {
+                return null;
+            }
+
+            @Override
+            public CurType getRefundCurrency() {
+                return null;
+            }
+
+            @Override
+            public String getTradeNo() {
+                return null;
+            }
+
+            @Override
+            public String getOutTradeNo() {
+                return null;
+            }
+
+            @Override
+            public String getRefundNo() {
+                return null;
+            }
+        };
     }
 
 

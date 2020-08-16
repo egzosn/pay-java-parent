@@ -95,6 +95,6 @@
         order.setDescription(" description ");
         order.setTradeNo("paypal 平台的单号");
         order.setRefundAmount(new BigDecimal(0.01));
-          Map result =  service.refund(order);
+          RefundResult result =  service.refund(order);
 
 ```

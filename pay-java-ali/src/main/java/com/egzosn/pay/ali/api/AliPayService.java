@@ -3,6 +3,7 @@ package com.egzosn.pay.ali.api;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.ali.bean.AliPayMessage;
+import com.egzosn.pay.ali.bean.AliRefundResult;
 import com.egzosn.pay.ali.bean.AliTransactionType;
 import com.egzosn.pay.ali.bean.AliTransferType;
 import com.egzosn.pay.ali.bean.OrderSettle;
@@ -437,7 +438,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
      * @return 返回支付方申请退款后的结果
      */
     @Override
-    public Map<String, Object> refund(RefundOrder refundOrder) {
+    public AliRefundResult refund(RefundOrder refundOrder) {
         //获取公共参数
         Map<String, Object> parameters = getPublicParameters(AliTransactionType.REFUND);
         setAppAuthToken(parameters, refundOrder.getAttrs());
@@ -451,7 +452,9 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
         parameters.put(BIZ_CONTENT, JSON.toJSONString(bizContent));
         //设置签名
         setSign(parameters);
-        return requestTemplate.getForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(parameters), JSONObject.class);
+        final AliRefundResult refundResult = AliRefundResult.create(requestTemplate.getForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(parameters), JSONObject.class));
+        refundResult.setOutRequestNo(refundOrder.getRefundNo());
+        return refundResult;
     }
 
 
