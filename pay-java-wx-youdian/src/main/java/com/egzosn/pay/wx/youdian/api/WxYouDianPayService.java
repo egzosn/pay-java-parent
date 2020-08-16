@@ -393,7 +393,7 @@ public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorag
      * @return 返回支付方申请退款后的结果
      */
     @Override
-    public Map<String, Object> refund(RefundOrder refundOrder) {
+    public RefundResult refund(RefundOrder refundOrder) {
         String apbNonce = SignUtils.randomStr();
         TreeMap<String, String> data = new TreeMap<>();
         data.put("access_token",  payConfigStorage.getAccessToken());
@@ -408,8 +408,53 @@ public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorag
         data.put("refund_fee", refundOrder.getRefundAmount().setScale(2, BigDecimal.ROUND_HALF_UP).toString());
         String sign = createSign(SignUtils.parameterText(data, "") + apbNonce, payConfigStorage.getInputCharset());
         String queryParam =  SignUtils.parameterText(data) +  "&apb_nonce=" + apbNonce + "&sign=" + sign;
-        JSONObject jsonObject = execute(getReqUrl(YoudianTransactionType.NATIVE_STATUS) + "?"  +  queryParam, MethodType.GET, null);
-        return jsonObject;
+        JSONObject jsonObject = execute(getReqUrl(YoudianTransactionType.REFUND) + "?"  +  queryParam, MethodType.GET, null);
+        return new BaseRefundResult() {
+            @Override
+            public String getCode() {
+                return getAttrString("errorcode");
+            }
+
+            @Override
+            public String getMsg() {
+                return getAttrString("msg");
+            }
+
+            @Override
+            public String getResultCode() {
+                return null;
+            }
+
+            @Override
+            public String getResultMsg() {
+                return null;
+            }
+
+            @Override
+            public BigDecimal getRefundFee() {
+                return null;
+            }
+
+            @Override
+            public CurType getRefundCurrency() {
+                return null;
+            }
+
+            @Override
+            public String getTradeNo() {
+                return null;
+            }
+
+            @Override
+            public String getOutTradeNo() {
+                return null;
+            }
+
+            @Override
+            public String getRefundNo() {
+                return null;
+            }
+        };
     }
 
 

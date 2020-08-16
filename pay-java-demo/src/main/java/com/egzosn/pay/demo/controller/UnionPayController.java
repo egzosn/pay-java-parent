@@ -12,6 +12,7 @@ import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.demo.request.QueryOrder;
 import com.egzosn.pay.union.api.UnionPayConfigStorage;
 import com.egzosn.pay.union.api.UnionPayService;
+import com.egzosn.pay.union.bean.UnionRefundResult;
 import com.egzosn.pay.union.bean.UnionTransactionType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -266,7 +267,7 @@ public class UnionPayController {
      * @return 返回支付方申请退款后的结果
      */
     @RequestMapping("refund")
-    public Map<String, Object> refund(RefundOrder order) {
+    public UnionRefundResult refund(RefundOrder order) {
         return service.refund(order);
     }
 

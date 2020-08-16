@@ -488,7 +488,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
      * @return 返回支付方申请退款后的结果
      */
     @Override
-    public Map<String, Object> refund(RefundOrder refundOrder) {
+    public WxRefundResult refund(RefundOrder refundOrder) {
         //获取公共参数
         Map<String, Object> parameters = getPublicParameters();
 
@@ -506,7 +506,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
         parameters.putAll(refundOrder.getAttrs());
         //设置签名
         setSign(parameters);
-        return requestTemplate.postForObject(getReqUrl(WxTransactionType.REFUND), XML.getMap2Xml(parameters), JSONObject.class);
+        return WxRefundResult.create(requestTemplate.postForObject(getReqUrl(WxTransactionType.REFUND), XML.getMap2Xml(parameters), JSONObject.class));
     }
 
 

@@ -252,7 +252,7 @@ public interface PayService<PC extends PayConfigStorage> {
      * @param refundOrder 退款订单信息
      * @return 返回支付方申请退款后的结果
      */
-    Map<String, Object> refund(RefundOrder refundOrder);
+    RefundResult refund(RefundOrder refundOrder);
 
     /**
      * 申请退款接口

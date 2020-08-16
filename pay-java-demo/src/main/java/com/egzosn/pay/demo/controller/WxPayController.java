@@ -309,7 +309,7 @@ public class WxPayController {
      * @return 返回支付方申请退款后的结果
      */
     @RequestMapping("refund")
-    public Map<String, Object> refund(RefundOrder order) {
+    public WxRefundResult refund(RefundOrder order) {
         if("ssl 退款证书".equals(KEYSTORE)){
            throw new RuntimeException("请设置好SSL退款证书");
         }

@@ -5,6 +5,7 @@ import com.egzosn.pay.common.api.PayService;
 import com.egzosn.pay.common.bean.DefaultCurType;
 import com.egzosn.pay.common.bean.PayOrder;
 import com.egzosn.pay.common.bean.RefundOrder;
+import com.egzosn.pay.common.bean.RefundResult;
 import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.paypal.api.PayPalConfigStorage;
 import com.egzosn.pay.paypal.api.PayPalPayService;
@@ -86,7 +87,7 @@ public class PayPalPayController {
      * @return 返回支付方申请退款后的结果
      */
     @RequestMapping("refund")
-    public Map<String, Object> refund() {
+    public RefundResult refund() {
         // TODO 这里需要  refundAmount， curType， description， tradeNo
         RefundOrder order = new RefundOrder();
         order.setCurType(DefaultCurType.USD);

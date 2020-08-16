@@ -17,6 +17,7 @@ import com.egzosn.pay.common.util.sign.encrypt.RSA2;
 import com.egzosn.pay.common.util.str.StringUtils;
 import com.egzosn.pay.union.bean.SDKConstants;
 import com.egzosn.pay.union.bean.UnionPayMessage;
+import com.egzosn.pay.union.bean.UnionRefundResult;
 import com.egzosn.pay.union.bean.UnionTransactionType;
 
 import java.io.ByteArrayInputStream;
@@ -591,7 +592,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
      * @param type        UnionTransactionType.REFUND  或者UnionTransactionType.CONSUME_UNDO
      * @return 返回支付方申请退款后的结果
      */
-    public Map<String, Object> unionRefundOrConsumeUndo(RefundOrder refundOrder, UnionTransactionType type) {
+    public UnionRefundResult unionRefundOrConsumeUndo(RefundOrder refundOrder, UnionTransactionType type) {
         Map<String, Object> params = this.getCommonParam();
         type.convertMap(params);
         params.put(SDKConstants.param_orderId, refundOrder.getRefundNo());
@@ -601,12 +602,11 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
         this.setSign(params);
         String responseStr = getHttpRequestTemplate().postForObject(this.getBackTransUrl(), params, String.class);
         JSONObject response = UriVariables.getParametersToMap(responseStr);
+
         if (this.verify(response)) {
-            if (SDKConstants.OK_RESP_CODE.equals(response.getString(SDKConstants.param_respCode))) {
-//                String origRespCode = response.getString(SDKConstants.param_origRespCode);
-                //交易成功，更新商户订单状态
-                //TODO
-                return response;
+            final UnionRefundResult refundResult = UnionRefundResult.create(response);
+            if (SDKConstants.OK_RESP_CODE.equals(refundResult.getRespCode())) {
+                return refundResult;
 
             }
             throw new PayErrorException(new PayException(response.getString(SDKConstants.param_respCode), response.getString(SDKConstants.param_respMsg), response.toJSONString()));
@@ -628,7 +628,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
 
 
     @Override
-    public Map<String, Object> refund(RefundOrder refundOrder) {
+    public UnionRefundResult refund(RefundOrder refundOrder) {
         return unionRefundOrConsumeUndo(refundOrder, UnionTransactionType.REFUND);
     }
 

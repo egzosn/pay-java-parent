@@ -263,7 +263,7 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
     @Override
     public <T> T refund(RefundOrder refundOrder, Callback<T> callback) {
 
-        return callback.perform(refund(refundOrder));
+        return callback.perform(refund(refundOrder).getAttrs());
     }
 
 

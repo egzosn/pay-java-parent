@@ -190,6 +190,6 @@
     
          RefundOrder order = new RefundOrder(null, "原交易查询流水号", "退款金额", "订单总金额");
          order.setRefundNo("退款单号")
-         Map result = service.refund(order);
+         UnionRefundResult result = service.refund(order);
 
 ```

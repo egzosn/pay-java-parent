@@ -9,6 +9,7 @@ import com.egzosn.pay.common.util.DateUtils;
 import com.egzosn.pay.common.util.Util;
 import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.str.StringUtils;
+import com.egzosn.pay.fuiou.bean.FuiouRefundResult;
 import com.egzosn.pay.fuiou.bean.FuiouTransactionType;
 
 import java.awt.image.BufferedImage;
@@ -379,7 +380,7 @@ public class FuiouPayService extends BasePayService<FuiouPayConfigStorage> {
      * @return 退款返回结果集
      */
     @Override
-    public Map<String, Object> refund(RefundOrder refundOrder) {
+    public RefundResult refund(RefundOrder refundOrder) {
         Map<String, Object> params = new HashMap<>();
         //商户代码
         params.put("mchnt_cd", payConfigStorage.getPid());
@@ -394,7 +395,7 @@ public class FuiouPayService extends BasePayService<FuiouPayConfigStorage> {
         params.putAll(refundOrder.getAttrs());
         params.put("md5", createSign(SignUtils.parameters2MD5Str(params, "|"), payConfigStorage.getInputCharset()));
         JSONObject resultJson = getHttpRequestTemplate().postForObject(getReqUrl() + URL_FuiouSmpRefundGate, params, JSONObject.class);
-        return resultJson;
+        return FuiouRefundResult.create(resultJson);
     }
 
 
