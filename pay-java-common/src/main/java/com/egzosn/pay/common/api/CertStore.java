@@ -18,5 +18,5 @@ public interface CertStore {
      * @return 输入流
      * @throws IOException 找不到文件异常
      */
-    public abstract InputStream getInputStream(Object cert) throws IOException;
+    InputStream getInputStream(Object cert) throws IOException;
 }

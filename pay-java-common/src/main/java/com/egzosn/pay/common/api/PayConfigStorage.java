@@ -1,5 +1,6 @@
 package com.egzosn.pay.common.api;
 
+import com.egzosn.pay.common.bean.Attrs;
 import com.egzosn.pay.common.bean.MsgType;
 import com.egzosn.pay.common.util.sign.CertDescriptor;
 
@@ -13,7 +14,7 @@ import java.util.concurrent.locks.Lock;
  *     date 2016-5-18 14:09:01
  * </pre>
  */
- public interface PayConfigStorage {
+ public interface PayConfigStorage extends Attrs {
 
     /**
      * 附加支付配置
@@ -21,11 +22,6 @@ import java.util.concurrent.locks.Lock;
      */
      Object getAttach();
 
-    /**
-     * 获取私钥证书密码
-     * @return 私钥证书密码
-     */
-    String getKeyPrivateCertPwd();
     /**
      *  应用id
      *  @return 应用id
@@ -98,35 +94,11 @@ import java.util.concurrent.locks.Lock;
      *  @see MsgType
      * @return "text" 或者 "xml"，json
      */
+    @Deprecated
      MsgType getMsgType();
 
 
-    /**
-     * 获取访问令牌
-     * @return  访问令牌
-     */
-    String getAccessToken();
 
-    /**
-     * 访问令牌是否过期
-     * @return true过期
-     */
-    boolean isAccessTokenExpired();
-    /**
-     * 获取access token锁
-     * @return access token锁
-     */
-    Lock getAccessTokenLock();
-
-    /**
-     * 强制将access token过期掉
-     */
-    void expireAccessToken();
-    /**
-     * 强制将access token过期掉
-     *  @return 过期时间
-     */
-    long getExpiresTime();
 
     /**
      * 应该是线程安全的
@@ -147,7 +119,6 @@ import java.util.concurrent.locks.Lock;
      * @return true测试环境
      */
     boolean isTest();
-
 
 
 

@@ -1,14 +1,40 @@
 package com.egzosn.pay.ali.api;
 
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.TreeMap;
+
+import static com.egzosn.pay.ali.bean.AliPayConst.APP_AUTH_TOKEN;
+import static com.egzosn.pay.ali.bean.AliPayConst.BIZ_CONTENT;
+import static com.egzosn.pay.ali.bean.AliPayConst.CODE;
+import static com.egzosn.pay.ali.bean.AliPayConst.HTTPS_REQ_URL;
+import static com.egzosn.pay.ali.bean.AliPayConst.PASSBACK_PARAMS;
+import static com.egzosn.pay.ali.bean.AliPayConst.PAYEE_INFO;
+import static com.egzosn.pay.ali.bean.AliPayConst.PRODUCT_CODE;
+import static com.egzosn.pay.ali.bean.AliPayConst.RETURN_URL;
+import static com.egzosn.pay.ali.bean.AliPayConst.SIGN;
+import static com.egzosn.pay.ali.bean.AliPayConst.SUCCESS_CODE;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.egzosn.pay.ali.bean.AliPayConst;
 import com.egzosn.pay.ali.bean.AliPayMessage;
 import com.egzosn.pay.ali.bean.AliRefundResult;
 import com.egzosn.pay.ali.bean.AliTransactionType;
 import com.egzosn.pay.ali.bean.AliTransferType;
+import com.egzosn.pay.ali.bean.CertEnvironment;
 import com.egzosn.pay.ali.bean.OrderSettle;
 import com.egzosn.pay.common.api.BasePayService;
-import com.egzosn.pay.common.bean.*;
+import com.egzosn.pay.common.bean.MethodType;
+import com.egzosn.pay.common.bean.Order;
+import com.egzosn.pay.common.bean.PayMessage;
+import com.egzosn.pay.common.bean.PayOrder;
+import com.egzosn.pay.common.bean.PayOutMessage;
+import com.egzosn.pay.common.bean.RefundOrder;
+import com.egzosn.pay.common.bean.TransactionType;
+import com.egzosn.pay.common.bean.TransferOrder;
+import com.egzosn.pay.common.bean.TransferType;
 import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpConfigStorage;
@@ -18,57 +44,17 @@ import com.egzosn.pay.common.util.Util;
 import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.str.StringUtils;
 
-import java.util.*;
-
 /**
  * 支付宝支付服务
  *
  * @author egan
- *         <p>
- *         email egzosn@gmail.com
- *         date 2017-2-22 20:09
+ * <p>
+ * email egzosn@gmail.com
+ * date 2017-2-22 20:09
  */
 public class AliPayService extends BasePayService<AliPayConfigStorage> {
-    
-    /**
-     * 正式测试环境
-     */
-    private static final String HTTPS_REQ_URL = "https://openapi.alipay.com/gateway.do";
-    /**
-     * 沙箱测试环境账号
-     */
-    private static final String DEV_REQ_URL = "https://openapi.alipaydev.com/gateway.do";
 
-    private static final String SIGN = "sign";
 
-    private static final String SUCCESS_CODE = "10000";
-
-    private static final String CODE = "code";
-    /**
-     * 附加参数
-     */
-    private static final String PASSBACK_PARAMS = "passback_params";
-    /**
-     * 产品代码
-     */
-    private static final String PRODUCT_CODE = "product_code";
-    /**
-     * 返回地址
-     */
-    private static final String RETURN_URL = "return_url";
-
-    /**
-     * 请求内容
-     */
-    private static final String BIZ_CONTENT = "biz_content";
-    /**
-     * 应用授权概述
-     */
-    private static final String APP_AUTH_TOKEN = "app_auth_token";
-    /**
-     * 收款方信息
-     */
-    private static final String PAYEE_INFO = "payee_info";
 
     /**
      * 获取对应的请求地址
@@ -77,8 +63,9 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
      */
     @Override
     public String getReqUrl(TransactionType transactionType) {
-        return payConfigStorage.isTest() ? DEV_REQ_URL : HTTPS_REQ_URL;
+        return payConfigStorage.isTest() ? AliPayConst.DEV_REQ_URL : HTTPS_REQ_URL;
     }
+
     /**
      * 获取对应的请求地址
      *
@@ -89,12 +76,25 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
     }
 
 
+    /**
+     * 设置支付配置
+     *
+     * @param payConfigStorage 支付配置
+     */
+    @Override
+    public AliPayService setPayConfigStorage(AliPayConfigStorage payConfigStorage) {
+        payConfigStorage.loadCertEnvironment();
+        super.setPayConfigStorage(payConfigStorage);
+        return this;
+    }
+
     public AliPayService(AliPayConfigStorage payConfigStorage, HttpConfigStorage configStorage) {
         super(payConfigStorage, configStorage);
+
     }
 
     public AliPayService(AliPayConfigStorage payConfigStorage) {
-        super(payConfigStorage);
+        this(payConfigStorage, null);
     }
 
 
@@ -131,18 +131,37 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
                 if (SIGN.equals(entry.getKey())) {
                     continue;
                 }
-                TreeMap<String, Object> response = new TreeMap((Map<String, Object> )entry.getValue());
+                TreeMap<String, Object> response = new TreeMap((Map<String, Object>) entry.getValue());
                 LinkedHashMap<Object, Object> linkedHashMap = new LinkedHashMap<>();
                 linkedHashMap.put(CODE, response.remove(CODE));
                 linkedHashMap.put("msg", response.remove("msg"));
                 linkedHashMap.putAll(response);
-                return SignUtils.valueOf(payConfigStorage.getSignType()).verify(JSON.toJSONString(linkedHashMap), sign, payConfigStorage.getKeyPublic(), payConfigStorage.getInputCharset());
+                return SignUtils.valueOf(payConfigStorage.getSignType()).verify(JSON.toJSONString(linkedHashMap), sign, getKeyPublic(params), payConfigStorage.getInputCharset());
             }
         }
-
-        return SignUtils.valueOf(payConfigStorage.getSignType()).verify(params, sign, payConfigStorage.getKeyPublic(), payConfigStorage.getInputCharset());
+        return SignUtils.valueOf(payConfigStorage.getSignType()).verify(params, sign, getKeyPublic(params), payConfigStorage.getInputCharset());
     }
 
+    /**
+     * 获取公钥信息
+     * @param params 响应参数
+     * @return 公钥信息
+     */
+    private String getKeyPublic(Map<String, Object> params){
+        if (!payConfigStorage.isCertSign()){
+            return payConfigStorage.getKeyPublic();
+        }
+        return payConfigStorage.getCertEnvironment().getAliPayPublicKey(getAliPayCertSN(params));
+    }
+    /**
+     * 从响应Map中提取支付宝公钥证书序列号
+     *
+     * @param respMap 响应Map
+     * @return 支付宝公钥证书序列号
+     */
+    public String getAliPayCertSN(java.util.Map<String, Object> respMap){
+        return (String) respMap.get(AliPayConst.ALIPAY_CERT_SN_FIELD);
+    }
 
     /**
      * 校验数据来源
@@ -200,6 +219,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
 
         orderInfo.put("notify_url", payConfigStorage.getNotifyUrl());
         orderInfo.put("format", "json");
+
         setAppAuthToken(orderInfo, order.getAttrs());
 
         Map<String, Object> bizContent = new TreeMap<>();
@@ -240,9 +260,11 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
         if (null != order.getExpirationTime()) {
             bizContent.put(order.getTransactionType() == AliTransactionType.SWEEPPAY ? "qr_code_timeout_express" : "timeout_express", DateUtils.minutesRemaining(order.getExpirationTime()) + "m");
         }
+
+
         bizContent.putAll(order.getAttrs());
         orderInfo.put(BIZ_CONTENT, JSON.toJSONString(bizContent));
-        return  preOrderHandler(orderInfo, order);
+        return preOrderHandler(orderInfo, order);
     }
 
     /**
@@ -258,7 +280,20 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
         orderInfo.put("charset", payConfigStorage.getInputCharset());
         orderInfo.put("timestamp", DateUtils.format(new Date()));
         orderInfo.put("version", "1.0");
+        loadCertSn(orderInfo);
         return orderInfo;
+    }
+
+    /**
+     * 加载证书序列
+     * @param orderInfo 订单信息
+     */
+    private void loadCertSn(Map<String, Object> orderInfo){
+        if (payConfigStorage.isCertSign()){
+            final CertEnvironment certEnvironment = payConfigStorage.getCertEnvironment();
+            setParameters(orderInfo, "app_cert_sn", certEnvironment.getMerchantCertSN());
+            setParameters(orderInfo, "alipay_root_cert_sn", certEnvironment.getRootCertSN());
+        }
     }
 
 
@@ -308,13 +343,12 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
         String bizContent = (String) orderInfo.remove(BIZ_CONTENT);
         formHtml.append(getReqUrl()).append("?").append(UriVariables.getMapToParameters(orderInfo))
                 .append("\" method=\"").append(method.name().toLowerCase()).append("\">");
-        formHtml.append("<input type=\"hidden\" name=\"biz_content\" value=\'" ).append( bizContent ).append( "\'/>");
+        formHtml.append("<input type=\"hidden\" name=\"biz_content\" value=\'").append(bizContent).append("\'/>");
         formHtml.append("</form>");
         formHtml.append("<script>document.forms['_alipaysubmit_'].submit();</script>");
 
         return formHtml.toString();
     }
-
 
 
     /**
@@ -324,7 +358,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
      * @return 返回二维码信息,，支付时需要的
      */
     @Override
-    public String getQrPay(PayOrder order){
+    public String getQrPay(PayOrder order) {
         order.setTransactionType(AliTransactionType.SWEEPPAY);
         Map<String, Object> orderInfo = orderInfo(order);
         //预订单
@@ -345,9 +379,9 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
      */
     @Override
     public Map<String, Object> microPay(PayOrder order) {
-        if (null == order.getTransactionType()){
+        if (null == order.getTransactionType()) {
             order.setTransactionType(AliTransactionType.BAR_CODE);
-        }else if (order.getTransactionType() != AliTransactionType.BAR_CODE && order.getTransactionType() != AliTransactionType.WAVE_CODE && order.getTransactionType() != AliTransactionType.SECURITY_CODE){
+        } else if (order.getTransactionType() != AliTransactionType.BAR_CODE && order.getTransactionType() != AliTransactionType.WAVE_CODE && order.getTransactionType() != AliTransactionType.SECURITY_CODE) {
             throw new PayErrorException(new PayException("-1", "错误的交易类型:" + order.getTransactionType()));
         }
 
@@ -364,10 +398,11 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
 
     /**
      * 统一收单交易结算接口
+     *
      * @param order 交易结算信息
      * @return 结算结果
      */
-    public Map<String, Object> settle(OrderSettle order){
+    public Map<String, Object> settle(OrderSettle order) {
         //获取公共参数
         Map<String, Object> parameters = getPublicParameters(AliTransactionType.SETTLE);
         setAppAuthToken(parameters, order.getAttrs());
@@ -422,12 +457,23 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
 
     /**
      * 设置支付宝授权Token
+     *
      * @param parameters 参数
-     * @param attrs 订单属性
+     * @param attrs      订单属性
      * @return 参数
      */
     private void setAppAuthToken(Map<String, Object> parameters, Map<String, Object> attrs) {
+        setAppAuthToken(parameters);
         setParameters(parameters, APP_AUTH_TOKEN, (String) attrs.remove(APP_AUTH_TOKEN));
+    }
+    /**
+     * 设置支付宝授权Token
+     *
+     * @param parameters 参数
+     * @return 参数
+     */
+    private void setAppAuthToken(Map<String, Object> parameters) {
+        setParameters(parameters, APP_AUTH_TOKEN, payConfigStorage.getAppAuthToken());
     }
 
 
@@ -456,7 +502,6 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
         refundResult.setOutRequestNo(refundOrder.getRefundNo());
         return refundResult;
     }
-
 
 
     /**
@@ -505,7 +550,6 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
         setSign(parameters);
         return requestTemplate.getForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(parameters), JSONObject.class);
     }
-
 
 
     /**
@@ -558,11 +602,11 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
         bizContent.put("out_biz_no", order.getOutNo());
         bizContent.put("trans_amount", order.getAmount());
         transferType.setAttr(bizContent, order);
-        setParameters(bizContent, "order_title",  order);
-        setParameters(bizContent, "original_order_id",  order);
+        setParameters(bizContent, "order_title", order);
+        setParameters(bizContent, "original_order_id", order);
         setPayeeInfo(bizContent, order);
         bizContent.put("remark", order.getRemark());
-        setParameters(bizContent, "business_params",  order);
+        setParameters(bizContent, "business_params", order);
 
         //设置请求参数的集合
         parameters.put(BIZ_CONTENT, JSON.toJSONString(bizContent));
@@ -571,22 +615,21 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
         return getHttpRequestTemplate().postForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(parameters), null, JSONObject.class);
     }
 
-    private Map<String, Object> setPayeeInfo(Map<String, Object> bizContent, Order order){
+    private Map<String, Object> setPayeeInfo(Map<String, Object> bizContent, Order order) {
         final Object attr = order.getAttr(PAYEE_INFO);
 
-        if (attr instanceof String){
+        if (attr instanceof String) {
             bizContent.put(PAYEE_INFO, attr);
         }
-        if (attr instanceof TreeMap){
+        if (attr instanceof TreeMap) {
             bizContent.put(PAYEE_INFO, attr);
         }
-        if (attr instanceof Map){
-            Map<String, Object> payeeInfo = new TreeMap<String, Object>((Map)attr);
+        if (attr instanceof Map) {
+            Map<String, Object> payeeInfo = new TreeMap<String, Object>((Map) attr);
             bizContent.put(PAYEE_INFO, payeeInfo);
         }
         return bizContent;
     }
-
 
 
     /**

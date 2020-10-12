@@ -3,15 +3,39 @@
 ## 支付宝支付简单例子
 
 #### 支付配置
-
+##### 普通公钥
 ```java
-
-
+    
+        
         AliPayConfigStorage aliPayConfigStorage = new AliPayConfigStorage();
         aliPayConfigStorage.setPid("合作者id");
         aliPayConfigStorage.setAppid("应用id");
         aliPayConfigStorage.setKeyPublic("支付宝公钥");
         aliPayConfigStorage.setKeyPrivate("应用私钥");
+        aliPayConfigStorage.setNotifyUrl("异步回调地址");
+        aliPayConfigStorage.setReturnUrl("同步回调地址");
+        aliPayConfigStorage.setSignType("签名方式");
+        aliPayConfigStorage.setSeller("收款账号");
+        aliPayConfigStorage.setInputCharset("utf-8");
+        //是否为测试账号，沙箱环境
+        aliPayConfigStorage.setTest(true);
+        
+```
+##### 证书公钥
+```java
+    
+        
+        AliPayConfigStorage aliPayConfigStorage = new AliPayConfigStorage();
+        aliPayConfigStorage.setPid("合作者id");
+        aliPayConfigStorage.setAppid("应用id");
+        aliPayConfigStorage.setKeyPrivate("应用私钥");
+        //设置为证书方式
+        aliPayConfigStorage.setCertSign(true);
+        //设置证书存储方式，这里为路径
+        aliPayConfigStorage.setCertStoreType(CertStoreType.PATH);
+        aliPayConfigStorage.setMerchantCert("请填写您的应用公钥证书文件路径，例如：d:/appCertPublicKey_2019051064521003.crt");
+        aliPayConfigStorage.setAliPayCert("请填写您的支付宝公钥证书文件路径，例如：d:/alipayCertPublicKey_RSA2.crt");
+        aliPayConfigStorage.setAliPayRootCert("请填写您的支付宝根证书文件路径，例如：d:/alipayRootCert.crt");
         aliPayConfigStorage.setNotifyUrl("异步回调地址");
         aliPayConfigStorage.setReturnUrl("同步回调地址");
         aliPayConfigStorage.setSignType("签名方式");

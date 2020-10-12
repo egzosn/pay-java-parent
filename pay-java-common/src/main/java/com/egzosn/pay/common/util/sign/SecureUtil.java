@@ -60,7 +60,7 @@ public class SecureUtil {
      */
     public static byte[] sha1X16 (String data, String encoding) {
         try {
-            byte[] bytes = digestByData(data.getBytes(encoding),ALGORITHM_SHA1);
+            byte[] bytes = digestByData(data.getBytes(encoding), ALGORITHM_SHA1);
             StringBuilder sha1StrBuff = new StringBuilder();
             for (int i = 0; i < bytes.length; i++) {
                 if (Integer.toHexString(0xFF & bytes[i]).length() == 1) {
@@ -91,7 +91,7 @@ public class SecureUtil {
     public static String sha256X16Str(String data, String encoding) {
         byte[] bytes =null;
         try {
-            bytes = digestByData(data.getBytes(encoding),ALGORITHM_SHA1);
+            bytes = digestByData(data.getBytes(encoding), ALGORITHM_SHA1);
         } catch (UnsupportedEncodingException e) {
            throw new PayErrorException(new PayException("error", e.getLocalizedMessage()));
         }

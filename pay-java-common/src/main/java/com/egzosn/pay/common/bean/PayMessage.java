@@ -18,6 +18,7 @@ import java.util.Map;
  */
 public class PayMessage implements Serializable {
     private Map<String, Object> payMessage = null;
+    @Deprecated
     private String msgType;
     private String payType;
     private String transactionType;
@@ -50,10 +51,12 @@ public class PayMessage implements Serializable {
         this.payMessage = payMessage;
     }
 
+    @Deprecated
     public String getMsgType() {
         return msgType;
     }
 
+    @Deprecated
     public void setMsgType(String msgType) {
         this.msgType = msgType;
     }
