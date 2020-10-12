@@ -41,6 +41,10 @@ public class UnionPayConfigStorage extends BasePayConfigStorage {
      * 应用私钥证书
      */
     private Object keyPrivateCert;
+    /**
+     * 应用私钥证书，rsa_private pkcs8格式 生成签名时使用
+     */
+    private String keyPrivateCertPwd;
 
     /**
      * 中级证书
@@ -55,6 +59,7 @@ public class UnionPayConfigStorage extends BasePayConfigStorage {
      * 证书存储类型
      */
     private CertStoreType certStoreType;
+
     /**
      * 设置私钥证书
      *
@@ -128,9 +133,17 @@ public class UnionPayConfigStorage extends BasePayConfigStorage {
         return certStoreType.getInputStream(acpRootCert);
     }
 
+    /**
+     * 获取私钥证书密码
+     * @return 私钥证书密码
+     */
+    public String getKeyPrivateCertPwd() {
+        return keyPrivateCertPwd;
+    }
 
-
-
+    public void setKeyPrivateCertPwd(String keyPrivateCertPwd) {
+        this.keyPrivateCertPwd = keyPrivateCertPwd;
+    }
     @Override
     public String getAppid() {
         return null;
