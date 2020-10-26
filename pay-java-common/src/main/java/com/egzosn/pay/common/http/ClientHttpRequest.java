@@ -38,6 +38,7 @@ import static com.egzosn.pay.common.http.UriVariables.getMapToParameters;
 public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase implements org.apache.http.client.ResponseHandler<T> {
     protected static final Log LOG = LogFactory.getLog(ClientHttpRequest.class);
     public static final ContentType APPLICATION_FORM_URLENCODED_UTF_8 = ContentType.create("application/x-www-form-urlencoded", Consts.UTF_8);
+    public static final ContentType APPLICATION_XML_UTF_8 = ContentType.create("application/xml", Consts.UTF_8);
 
 
     /**
