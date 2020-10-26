@@ -38,7 +38,7 @@ import static com.egzosn.pay.common.http.UriVariables.getMapToParameters;
 public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase implements org.apache.http.client.ResponseHandler<T> {
     protected static final Log LOG = LogFactory.getLog(ClientHttpRequest.class);
     public static final ContentType APPLICATION_FORM_URLENCODED_UTF_8 = ContentType.create("application/x-www-form-urlencoded", Consts.UTF_8);
-
+    public static final ContentType APPLICATION_XML_UTF_8 = ContentType.create("application/xml", Consts.UTF_8);
 
     /**
      * http请求方式 get pos
@@ -252,7 +252,10 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Parameter : " + request);
             }
-            StringEntity entity = new StringEntity((String) request, APPLICATION_FORM_URLENCODED_UTF_8);
+            boolean isXMLString = ((String) request).startsWith("<?xml");
+            StringEntity entity = isXMLString ?
+                    new StringEntity((String) request, APPLICATION_XML_UTF_8) :
+                    new StringEntity((String) request, APPLICATION_FORM_URLENCODED_UTF_8);
             setEntity(entity);
         } else {
             String body = JSON.toJSONString(request);
