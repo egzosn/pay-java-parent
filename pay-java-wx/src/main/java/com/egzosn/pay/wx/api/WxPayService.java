@@ -256,8 +256,10 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
             LOG.debug("requestXML：" + requestXML);
         }
 
+        HttpStringEntity entity = new HttpStringEntity(requestXML, ClientHttpRequest.APPLICATION_XML_UTF_8);
+
         //调起支付的参数列表
-        JSONObject result = requestTemplate.postForObject(getReqUrl(order.getTransactionType()), requestXML, JSONObject.class);
+        JSONObject result = requestTemplate.postForObject(getReqUrl(order.getTransactionType()), entity, JSONObject.class);
 
         if (!SUCCESS.equals(result.get(RETURN_CODE)) || !SUCCESS.equals(result.get(RESULT_CODE))) {
             throw new PayErrorException(new WxPayError(result.getString(RESULT_CODE), result.getString(RETURN_MSG_CODE), result.toJSONString()));
