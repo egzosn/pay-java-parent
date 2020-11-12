@@ -1,30 +1,69 @@
 package com.egzosn.pay.wx.api;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URLEncoder;
+import java.security.GeneralSecurityException;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.zip.GZIPInputStream;
+
+import static com.egzosn.pay.wx.api.WxConst.APPID;
+import static com.egzosn.pay.wx.api.WxConst.CIPHER_ALGORITHM;
+import static com.egzosn.pay.wx.api.WxConst.FAIL;
+import static com.egzosn.pay.wx.api.WxConst.FAILURE;
+import static com.egzosn.pay.wx.api.WxConst.HMACSHA256;
+import static com.egzosn.pay.wx.api.WxConst.HMAC_SHA256;
+import static com.egzosn.pay.wx.api.WxConst.MCH_ID;
+import static com.egzosn.pay.wx.api.WxConst.NONCE_STR;
+import static com.egzosn.pay.wx.api.WxConst.OUT_TRADE_NO;
+import static com.egzosn.pay.wx.api.WxConst.RESULT_CODE;
+import static com.egzosn.pay.wx.api.WxConst.RETURN_CODE;
+import static com.egzosn.pay.wx.api.WxConst.RETURN_MSG_CODE;
+import static com.egzosn.pay.wx.api.WxConst.SANDBOXNEW;
+import static com.egzosn.pay.wx.api.WxConst.SIGN;
+import static com.egzosn.pay.wx.api.WxConst.SUCCESS;
+import static com.egzosn.pay.wx.api.WxConst.URI;
+import static com.egzosn.pay.wx.bean.WxTransferType.GETTRANSFERINFO;
+import static com.egzosn.pay.wx.bean.WxTransferType.QUERY_BANK;
+import static com.egzosn.pay.wx.bean.WxTransferType.TRANSFERS;
+
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.api.BasePayService;
-import com.egzosn.pay.common.bean.*;
+import com.egzosn.pay.common.bean.MethodType;
+import com.egzosn.pay.common.bean.PayMessage;
+import com.egzosn.pay.common.bean.PayOrder;
+import com.egzosn.pay.common.bean.PayOutMessage;
+import com.egzosn.pay.common.bean.RefundOrder;
+import com.egzosn.pay.common.bean.SignType;
+import com.egzosn.pay.common.bean.TransactionType;
+import com.egzosn.pay.common.bean.TransferOrder;
 import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
+import com.egzosn.pay.common.http.ClientHttpRequest;
 import com.egzosn.pay.common.http.HttpConfigStorage;
+import com.egzosn.pay.common.http.HttpStringEntity;
 import com.egzosn.pay.common.util.DateUtils;
 import com.egzosn.pay.common.util.Util;
 import com.egzosn.pay.common.util.XML;
 import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.sign.encrypt.RSA2;
 import com.egzosn.pay.common.util.str.StringUtils;
-import com.egzosn.pay.wx.bean.*;
-
-import java.io.*;
-import java.net.URLEncoder;
-import java.security.GeneralSecurityException;
-import java.util.*;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-
-import static com.egzosn.pay.wx.api.WxConst.*;
-import static com.egzosn.pay.wx.bean.WxTransferType.*;
+import com.egzosn.pay.wx.bean.RedpackOrder;
+import com.egzosn.pay.wx.bean.WxPayError;
+import com.egzosn.pay.wx.bean.WxPayMessage;
+import com.egzosn.pay.wx.bean.WxRefundResult;
+import com.egzosn.pay.wx.bean.WxSendredpackType;
+import com.egzosn.pay.wx.bean.WxTransactionType;
+import com.egzosn.pay.wx.bean.WxTransferType;
 
 /**
  * 微信支付服务
@@ -93,16 +132,9 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
     @Override
     public boolean verify(Map<String, Object> params) {
 
-        if (!(SUCCESS.equals(params.get(RETURN_CODE)) && SUCCESS.equals(params.get(RESULT_CODE)))) {
+        if (null == params.get(SIGN) || !(SUCCESS.equals(params.get(RETURN_CODE)) && SUCCESS.equals(params.get(RESULT_CODE))) ) {
             if (LOG.isErrorEnabled()) {
                 LOG.error(String.format("微信支付异常：return_code=%s,参数集=%s", params.get(RETURN_CODE), params));
-            }
-            return false;
-        }
-
-        if (null == params.get(SIGN)) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(String.format("微信支付异常：签名为空！%s=%s", OUT_TRADE_NO, params.get(OUT_TRADE_NO)));
             }
             return false;
         }
@@ -191,6 +223,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
         parameters.put("total_fee", Util.conversionCentAmount(order.getPrice()));
         setParameters(parameters, "attach", order.getAddition());
         parameters.put("notify_url", payConfigStorage.getNotifyUrl());
+        setParameters(parameters, "notify_url", order);
         parameters.put("trade_type", order.getTransactionType().getType());
         if (null != order.getExpirationTime()) {
             parameters.put("time_start", DateUtils.formatDate(new Date(), DateUtils.YYYYMMDDHHMMSS));
@@ -217,8 +250,10 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
             LOG.debug("requestXML：" + requestXML);
         }
 
+        HttpStringEntity entity = new HttpStringEntity(requestXML, ClientHttpRequest.APPLICATION_XML_UTF_8);
+
         //调起支付的参数列表
-        JSONObject result = requestTemplate.postForObject(getReqUrl(order.getTransactionType()), requestXML, JSONObject.class);
+        JSONObject result = requestTemplate.postForObject(getReqUrl(order.getTransactionType()), entity, JSONObject.class);
 
         if (!SUCCESS.equals(result.get(RETURN_CODE)) || !SUCCESS.equals(result.get(RESULT_CODE))) {
             throw new PayErrorException(new WxPayError(result.getString(RESULT_CODE), result.getString(RETURN_MSG_CODE), result.toJSONString()));
@@ -305,7 +340,8 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
         String sign = createSign(SignUtils.parameterText(parameters, "&", SIGN, "appId"), payConfigStorage.getInputCharset(), false);
         parameters.put(SIGN, sign);
 
-        JSONObject result = requestTemplate.postForObject(getReqUrl(WxTransactionType.GETSIGNKEY), XML.getMap2Xml(parameters), JSONObject.class);
+        HttpStringEntity entity = new HttpStringEntity(XML.getMap2Xml(parameters), ClientHttpRequest.APPLICATION_XML_UTF_8);
+        JSONObject result = requestTemplate.postForObject(getReqUrl(WxTransactionType.GETSIGNKEY), entity, JSONObject.class);
         if (SUCCESS.equals(result.get(RETURN_CODE))) {
             return result.getString("sandbox_signkey");
         }
