@@ -90,7 +90,7 @@ public class PayOrder implements Order {
     /**
      * 订单附加信息，可用于预设未提供的参数，这里会覆盖以上所有的订单信息，
      */
-    private Map<String, Object> attr;
+    private volatile Map<String, Object> attr;
 
 
     public PayOrder() {

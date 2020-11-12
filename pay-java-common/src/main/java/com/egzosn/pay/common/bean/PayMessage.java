@@ -2,9 +2,6 @@ package com.egzosn.pay.common.bean;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Map;
 
 /**
@@ -18,6 +15,7 @@ import java.util.Map;
  */
 public class PayMessage implements Serializable {
     private Map<String, Object> payMessage = null;
+    @Deprecated
     private String msgType;
     private String payType;
     private String transactionType;
@@ -50,10 +48,12 @@ public class PayMessage implements Serializable {
         this.payMessage = payMessage;
     }
 
+    @Deprecated
     public String getMsgType() {
         return msgType;
     }
 
+    @Deprecated
     public void setMsgType(String msgType) {
         this.msgType = msgType;
     }
