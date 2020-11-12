@@ -1,11 +1,10 @@
 package com.egzosn.pay.common.api;
 
-import com.egzosn.pay.common.bean.CertStoreType;
-import com.egzosn.pay.common.bean.MsgType;
-import com.egzosn.pay.common.util.sign.CertDescriptor;
-
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+
+import com.egzosn.pay.common.bean.MsgType;
 
 /**
  * 支付基础配置存储
@@ -24,10 +23,7 @@ public abstract class BasePayConfigStorage implements PayConfigStorage {
      * 应用私钥，rsa_private pkcs8格式 生成签名时使用
      */
     private String keyPrivate;
-    /**
-     * 应用私钥证书，rsa_private pkcs8格式 生成签名时使用
-     */
-    private String keyPrivateCertPwd;
+
     /**
      * 支付平台公钥(签名校验使用)
      */
@@ -58,21 +54,22 @@ public abstract class BasePayConfigStorage implements PayConfigStorage {
     /**
      * 消息来源类型
      */
+    @Deprecated
     private MsgType msgType;
 
 
     /**
      * 访问令牌 每次请求其他方法都要传入的值
      */
-    private String accessToken;
+    private volatile String accessToken;
     /**
      * access token 到期时间时间戳
      */
-    private long expiresTime;
+    private volatile long expiresTime;
     /**
      * 授权码锁
      */
-    private Lock accessTokenLock = new ReentrantLock();
+    private Lock accessTokenLock;
     /**
      * 是否为沙箱环境，默认为正式环境
      */
@@ -81,8 +78,12 @@ public abstract class BasePayConfigStorage implements PayConfigStorage {
     /**
      * 是否为证书签名
      */
-    private boolean isCertSign = false;
+    private boolean certSign = false;
 
+    /**
+     * 配置附加信息，可用于预设未提供的参数，这里会覆盖以上所有的配置信息，
+     */
+    private volatile Map<String, Object> attr;
 
     @Override
     public Object getAttach() {
@@ -102,14 +103,6 @@ public abstract class BasePayConfigStorage implements PayConfigStorage {
         this.keyPrivate = keyPrivate;
     }
 
-    @Override
-    public String getKeyPrivateCertPwd() {
-        return keyPrivateCertPwd;
-    }
-
-    public void setKeyPrivateCertPwd(String keyPrivateCertPwd) {
-        this.keyPrivateCertPwd = keyPrivateCertPwd;
-    }
 
     @Override
     public String getKeyPublic() {
@@ -173,23 +166,31 @@ public abstract class BasePayConfigStorage implements PayConfigStorage {
     public void setMsgType(MsgType msgType) {
         this.msgType = msgType;
     }
-
-    @Override
+    /**
+     * 获取访问令牌
+     * @return  访问令牌
+     */
     public String getAccessToken() {
         return this.accessToken;
     }
-
-    @Override
+    /**
+     * 获取access token锁
+     * @return access token锁
+     */
     public Lock getAccessTokenLock() {
         return this.accessTokenLock;
     }
-
-    @Override
+    /**
+     * 强制将access token过期掉
+     *  @return 过期时间
+     */
     public long getExpiresTime() {
         return expiresTime;
     }
-
-    @Override
+    /**
+     * 访问令牌是否过期
+     * @return true过期
+     */
     public boolean isAccessTokenExpired() {
         return System.currentTimeMillis() > this.expiresTime;
     }
@@ -197,8 +198,7 @@ public abstract class BasePayConfigStorage implements PayConfigStorage {
 
     @Override
     public synchronized void updateAccessToken(String accessToken, int expiresInSeconds) {
-        this.accessToken = accessToken;
-        this.expiresTime = System.currentTimeMillis() + (expiresInSeconds - 600) * 1000L;
+        updateAccessToken(accessToken, System.currentTimeMillis() + (expiresInSeconds - 600) * 1000L);
     }
 
     @Override
@@ -207,7 +207,10 @@ public abstract class BasePayConfigStorage implements PayConfigStorage {
         this.expiresTime = expiresTime;
     }
 
-    @Override
+
+    /**
+     * 强制将access token过期掉
+     */
     public void expireAccessToken() {
         this.expiresTime = 0;
     }
@@ -239,12 +242,33 @@ public abstract class BasePayConfigStorage implements PayConfigStorage {
     }
 
     public boolean isCertSign() {
-        return isCertSign;
+        return certSign;
     }
 
     public void setCertSign(boolean certSign) {
-        isCertSign = certSign;
+        this.certSign = certSign;
+    }
+
+    @Override
+    public Map<String, Object> getAttrs() {
+        if (null == attr){
+            attr = new HashMap<>();
+        }
+        return attr;
+    }
+
+    @Override
+    public Object getAttr(String key) {
+        return getAttrs().get(key);
     }
 
 
+    /**
+     * 添加配置信息
+     * @param key key
+     * @param value 值
+     */
+    public void addAttr(String key, Object value) {
+        getAttrs().put(key, value);
+    }
 }
