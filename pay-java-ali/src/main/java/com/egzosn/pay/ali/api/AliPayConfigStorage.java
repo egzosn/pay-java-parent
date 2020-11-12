@@ -41,7 +41,6 @@ public class AliPayConfigStorage extends BasePayConfigStorage {
     private String seller;
 
 
-
     /**
      * 应用公钥证书
      */
@@ -147,16 +146,14 @@ public class AliPayConfigStorage extends BasePayConfigStorage {
      * 初始化证书信息
      */
     public void loadCertEnvironment() {
-        if (isCertSign() && null !=  this.certEnvironment){
+        if (!isCertSign() || null ==  this.certEnvironment){
             return;
         }
-        try (InputStream  merchantCertStream = certStoreType.getInputStream(merchantCert);
-             InputStream  aliPayCertStream = certStoreType.getInputStream(aliPayCert);
-             InputStream  aliPayRootCertStream = certStoreType.getInputStream(aliPayRootCert);
-        ){
+        try (InputStream merchantCertStream = certStoreType.getInputStream(merchantCert);
+             InputStream aliPayCertStream = certStoreType.getInputStream(aliPayCert);
+             InputStream aliPayRootCertStream = certStoreType.getInputStream(aliPayRootCert)) {
             this.certEnvironment = new CertEnvironment(merchantCertStream, aliPayCertStream, aliPayRootCertStream);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new PayErrorException(new PayException("读取证书异常", e.getMessage()));
         }
     }
