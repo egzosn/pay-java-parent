@@ -1,11 +1,15 @@
 package com.egzosn.pay.common.bean;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
 import com.egzosn.pay.common.api.CertStore;
 import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpRequestTemplate;
-
-import java.io.*;
 
 /**
  * 证书存储类型

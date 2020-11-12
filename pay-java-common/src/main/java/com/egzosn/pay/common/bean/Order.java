@@ -1,8 +1,5 @@
 package com.egzosn.pay.common.bean;
 
-import java.io.Serializable;
-import java.util.Map;
-
 /**
  * 支付订单信息
  *

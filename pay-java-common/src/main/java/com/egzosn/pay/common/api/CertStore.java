@@ -5,9 +5,10 @@ import java.io.InputStream;
 
 /**
  * 证书存储方式
+ *
  * @author egan
- *         email egzosn@gmail.com
- *         date 2019/10/13.23:09
+ * email egzosn@gmail.com
+ * date 2019/10/13.23:09
  */
 public interface CertStore {
 

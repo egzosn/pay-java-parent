@@ -3,14 +3,14 @@
  */
 package com.egzosn.pay.ali.bean;
 
+import java.io.InputStream;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import com.egzosn.pay.ali.utils.AntCertificationUtil;
 import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.util.str.StringUtils;
-
-import java.io.InputStream;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 证书模式运行时环境
