@@ -132,16 +132,9 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
     @Override
     public boolean verify(Map<String, Object> params) {
 
-        if (!(SUCCESS.equals(params.get(RETURN_CODE)) && SUCCESS.equals(params.get(RESULT_CODE)))) {
+        if (null == params.get(SIGN) || !(SUCCESS.equals(params.get(RETURN_CODE)) && SUCCESS.equals(params.get(RESULT_CODE))) ) {
             if (LOG.isErrorEnabled()) {
                 LOG.error(String.format("微信支付异常：return_code=%s,参数集=%s", params.get(RETURN_CODE), params));
-            }
-            return false;
-        }
-
-        if (null == params.get(SIGN)) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(String.format("微信支付异常：签名为空！%s=%s", OUT_TRADE_NO, params.get(OUT_TRADE_NO)));
             }
             return false;
         }
@@ -230,6 +223,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
         parameters.put("total_fee", Util.conversionCentAmount(order.getPrice()));
         setParameters(parameters, "attach", order.getAddition());
         parameters.put("notify_url", payConfigStorage.getNotifyUrl());
+        setParameters(parameters, "notify_url", order);
         parameters.put("trade_type", order.getTransactionType().getType());
         if (null != order.getExpirationTime()) {
             parameters.put("time_start", DateUtils.formatDate(new Date(), DateUtils.YYYYMMDDHHMMSS));

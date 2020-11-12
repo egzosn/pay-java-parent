@@ -39,6 +39,10 @@ public final class AliPayConst {
      * 返回地址
      */
     public static final String RETURN_URL = "return_url";
+    /**
+     * 回调地址
+     */
+    public static final String NOTIFY_URL = "notify_url";
 
     /**
      * 请求内容
