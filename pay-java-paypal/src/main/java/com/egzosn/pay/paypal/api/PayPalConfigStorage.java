@@ -1,5 +1,7 @@
 package com.egzosn.pay.paypal.api;
 
+import java.util.concurrent.locks.ReentrantLock;
+
 import com.egzosn.pay.common.api.BasePayConfigStorage;
 
 /**
@@ -62,5 +64,7 @@ public class PayPalConfigStorage extends BasePayConfigStorage {
         return getNotifyUrl();
     }
 
-
+    public PayPalConfigStorage() {
+        setAccessTokenLock(new ReentrantLock());
+    }
 }

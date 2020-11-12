@@ -65,7 +65,7 @@ public class FuiouPayController {
     @RequestMapping(value = "toPay.html", produces = "text/html;charset=UTF-8")
     public String toPay( BigDecimal price) {
         //支付订单基础信息
-        PayOrder order = new PayOrder("订单title", "摘要",  new BigDecimal(0.01) , UUID.randomUUID().toString().replace("-", "").substring(2));
+        PayOrder order = new PayOrder("订单title", "摘要",  BigDecimal.valueOf(0.01) , UUID.randomUUID().toString().replace("-", "").substring(2));
         order.setTransactionType(FuiouTransactionType.B2C);
         //获取支付所需的信息
 //        Map<String, Object> directOrderInfo = service.orderInfo(order);

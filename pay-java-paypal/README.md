@@ -94,7 +94,7 @@
         order.setCurType(CurType.USD);
         order.setDescription(" description ");
         order.setTradeNo("paypal 平台的单号");
-        order.setRefundAmount(new BigDecimal(0.01));
+        order.setRefundAmount(BigDecimal.valueOf(0.01));
           RefundResult result =  service.refund(order);
 
 ```

@@ -334,7 +334,7 @@ public class ApyAccountService {
         //获取对应的支付账户操作工具（可根据账户id）
         PayResponse payResponse =  service.getPayResponse(payId);
 
-        PayOrder order = new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType));
+        PayOrder order = new PayOrder("订单title", "摘要", null == price ? BigDecimal.valueOf(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType));
 
         //此处只有刷卡支付(银行卡支付)时需要
         if (StringUtils.isNotEmpty(bankType)){
@@ -355,7 +355,7 @@ public class ApyAccountService {
         //获取对应的支付账户操作工具（可根据账户id）
         PayResponse payResponse =  service.getPayResponse(payId);
         //获取订单信息
-        Map<String, Object> orderInfo = payResponse.getService().orderInfo(new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType)));
+        Map<String, Object> orderInfo = payResponse.getService().orderInfo(new PayOrder("订单title", "摘要", null == price ? BigDecimal.valueOf(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType)));
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ImageIO.write(payResponse.getService().genQrPay(orderInfo), "JPEG", baos);
@@ -376,7 +376,7 @@ public class ApyAccountService {
         PayResponse payResponse =  service.getPayResponse(payId);
         Map<String, Object> data = new HashMap<>();
         data.put("code", 0);
-        PayOrder order = new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType));
+        PayOrder order = new PayOrder("订单title", "摘要", null == price ? BigDecimal.valueOf(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType));
         data.put("orderInfo",  payResponse.getService().orderInfo(order));
         return data;
     }

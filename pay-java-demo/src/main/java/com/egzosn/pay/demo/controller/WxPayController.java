@@ -38,7 +38,6 @@ public class WxPayController {
 
     //ssl 退款证书相关 不使用可注释
     private static String KEYSTORE = "ssl 退款证书";
-    private static String STORE_PASSWORD = "ssl 证书对应的密码， 默认为商户号";
 
     @PostConstruct
     public void init() {
@@ -67,7 +66,7 @@ public class WxPayController {
             //TODO 这里也支持输入流的入参。
 //            httpConfigStorage.setKeystore(WxPayController.class.getResourceAsStream("/证书文件"));
             httpConfigStorage.setKeystore(KEYSTORE);
-            httpConfigStorage.setStorePassword(STORE_PASSWORD);
+            httpConfigStorage.setStorePassword("ssl 证书对应的密码， 默认为商户号");
             //设置ssl证书对应的存储方式，这里默认为文件地址
             httpConfigStorage.setCertStoreType(CertStoreType.PATH);
         }
@@ -97,7 +96,7 @@ public class WxPayController {
      */
     @RequestMapping(value = "toPay.html", produces = "text/html;charset=UTF-8")
     public String toPay( HttpServletRequest request, BigDecimal price) {
-        PayOrder order = new PayOrder("订单title", "摘要",  null == price ? new BigDecimal(0.01) : price , UUID.randomUUID().toString().replace("-", ""),  WxTransactionType.MWEB);
+        PayOrder order = new PayOrder("订单title", "摘要",  null == price ? BigDecimal.valueOf(0.01) : price , UUID.randomUUID().toString().replace("-", ""),  WxTransactionType.MWEB);
         order.setSpbillCreateIp(request.getHeader("X-Real-IP"));
         StringBuffer requestURL = request.getRequestURL();
         //设置网页地址
@@ -121,7 +120,7 @@ public class WxPayController {
     @RequestMapping(value = "jsapi" )
     public Map toPay(String openid, BigDecimal price) {
 
-        PayOrder order = new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), WxTransactionType.JSAPI);
+        PayOrder order = new PayOrder("订单title", "摘要", null == price ? BigDecimal.valueOf(0.01) : price, UUID.randomUUID().toString().replace("-", ""), WxTransactionType.JSAPI);
         order.setOpenid(openid);
 
         Map orderInfo = service.orderInfo(order);
@@ -141,7 +140,7 @@ public class WxPayController {
     public Map<String, Object> app() {
         Map<String, Object> data = new HashMap<>();
         data.put("code", 0);
-        PayOrder order = new PayOrder("订单title", "摘要", new BigDecimal(0.01), UUID.randomUUID().toString().replace("-", ""));
+        PayOrder order = new PayOrder("订单title", "摘要", BigDecimal.valueOf(0.01), UUID.randomUUID().toString().replace("-", ""));
         //App支付
         order.setTransactionType(WxTransactionType.APP);
         data.put("orderInfo", service.app(order));
@@ -159,7 +158,7 @@ public class WxPayController {
     public byte[] toWxQrPay( BigDecimal price) throws IOException {
         //获取对应的支付账户操作工具（可根据账户id）
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ImageIO.write(service.genQrPay( new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, System.currentTimeMillis()+"", WxTransactionType.NATIVE)), "JPEG", baos);
+        ImageIO.write(service.genQrPay( new PayOrder("订单title", "摘要", null == price ? BigDecimal.valueOf(0.01) : price, System.currentTimeMillis()+"", WxTransactionType.NATIVE)), "JPEG", baos);
         return baos.toByteArray();
     }
 
@@ -173,7 +172,7 @@ public class WxPayController {
     @RequestMapping(value = "getQrPay.json")
     public String getQrPay(BigDecimal price) throws IOException {
         //获取对应的支付账户操作工具（可根据账户id）
-        return service.getQrPay( new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, System.currentTimeMillis()+"", WxTransactionType.NATIVE));
+        return service.getQrPay( new PayOrder("订单title", "摘要", null == price ? BigDecimal.valueOf(0.01) : price, System.currentTimeMillis()+"", WxTransactionType.NATIVE));
     }
     /**
      * 刷卡付,pos主动扫码付款(条码付)
@@ -185,7 +184,7 @@ public class WxPayController {
     public Map<String, Object> microPay( BigDecimal price, String authCode) {
         //获取对应的支付账户操作工具（可根据账户id）
         //条码付
-        PayOrder order = new PayOrder("egan order", "egan order", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), WxTransactionType.MICROPAY);
+        PayOrder order = new PayOrder("egan order", "egan order", null == price ? BigDecimal.valueOf(0.01) : price, UUID.randomUUID().toString().replace("-", ""), WxTransactionType.MICROPAY);
         //设置授权码，条码等
         order.setAuthCode(authCode);
         //支付结果
@@ -212,7 +211,7 @@ public class WxPayController {
     @RequestMapping(value = "facePay")
     public Map<String, Object> facePay(BigDecimal price, String authCode, String openid)  {
         //获取对应的支付账户操作工具（可根据账户id）
-        PayOrder order = new PayOrder("egan order", "egan order", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), WxTransactionType.FACEPAY);
+        PayOrder order = new PayOrder("egan order", "egan order", null == price ? BigDecimal.valueOf(0.01) : price, UUID.randomUUID().toString().replace("-", ""), WxTransactionType.FACEPAY);
         //设置人脸凭证
         order.setAuthCode(authCode);
         //  用户在商户 appid下的唯一标识

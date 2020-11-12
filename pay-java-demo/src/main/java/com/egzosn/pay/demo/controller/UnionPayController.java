@@ -97,10 +97,10 @@ public class UnionPayController {
     @RequestMapping(value = "toPay.html", produces = "text/html;charset=UTF-8")
     public String toPay( BigDecimal price) {
         //网关支付(WEB)/手机网页支付
-        PayOrder order = new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""),
+        PayOrder order = new PayOrder("订单title", "摘要", null == price ? BigDecimal.valueOf(0.01) : price, UUID.randomUUID().toString().replace("-", ""),
                 WEB);
          //企业网银支付（B2B支付）
-//        PayOrder order = new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), UnionTransactionType.B2B);
+//        PayOrder order = new PayOrder("订单title", "摘要", null == price ? BigDecimal.valueOf(0.01) : price, UUID.randomUUID().toString().replace("-", ""), UnionTransactionType.B2B);
 
 //        Map orderInfo = service.orderInfo(order);
 //        return service.buildRequest(orderInfo, MethodType.POST);
@@ -117,7 +117,7 @@ public class UnionPayController {
     @RequestMapping(value = "toPay.json")
     public Map<String, Object> sendHttpRequest( BigDecimal price) {
         //手机控件支付产品
-        PayOrder order = new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", "")
+        PayOrder order = new PayOrder("订单title", "摘要", null == price ? BigDecimal.valueOf(0.01) : price, UUID.randomUUID().toString().replace("-", "")
                 ,UnionTransactionType.WAP);
         return service.app(order);
     }
@@ -133,7 +133,7 @@ public class UnionPayController {
     public Map<String, Object> app() {
         Map<String, Object> data = new HashMap<>();
         data.put("code", 0);
-        PayOrder order = new PayOrder("订单title", "摘要", new BigDecimal(0.01), SignUtils.randomStr());
+        PayOrder order = new PayOrder("订单title", "摘要", BigDecimal.valueOf(0.01), SignUtils.randomStr());
         //App支付
         order.setTransactionType(UnionTransactionType.APP);
 
@@ -155,7 +155,7 @@ public class UnionPayController {
     public byte[] toWxQrPay( BigDecimal price) throws IOException {
         //获取对应的支付账户操作工具（可根据账户id）
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ImageIO.write(service.genQrPay( new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, System.currentTimeMillis()+"", UnionTransactionType.APPLY_QR_CODE)), "JPEG", baos);
+        ImageIO.write(service.genQrPay( new PayOrder("订单title", "摘要", null == price ? BigDecimal.valueOf(0.01) : price, System.currentTimeMillis()+"", UnionTransactionType.APPLY_QR_CODE)), "JPEG", baos);
         return baos.toByteArray();
     }
     /**
@@ -168,7 +168,7 @@ public class UnionPayController {
     @RequestMapping(value = "getQrPay.json")
     public String getQrPay(BigDecimal price) throws IOException {
         //获取对应的支付账户操作工具（可根据账户id）
-        return service.getQrPay( new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, System.currentTimeMillis()+"", UnionTransactionType.APPLY_QR_CODE));
+        return service.getQrPay( new PayOrder("订单title", "摘要", null == price ? BigDecimal.valueOf(0.01) : price, System.currentTimeMillis()+"", UnionTransactionType.APPLY_QR_CODE));
     }
 
     /**
@@ -181,7 +181,7 @@ public class UnionPayController {
     public Map<String, Object> microPay(BigDecimal price, String authCode)  {
         //获取对应的支付账户操作工具（可根据账户id）
         //条码付
-        PayOrder order = new PayOrder("egan order", "egan order", null == price ? new BigDecimal(0.01) : price, SignUtils.randomStr(), UnionTransactionType.CONSUME);
+        PayOrder order = new PayOrder("egan order", "egan order", null == price ? BigDecimal.valueOf(0.01) : price, SignUtils.randomStr(), UnionTransactionType.CONSUME);
         //设置授权码，条码等
         order.setAuthCode(authCode);
         //支付结果

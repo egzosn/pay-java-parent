@@ -70,7 +70,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
      * @param payConfigStorage 支付配置
      */
     public UnionPayService(UnionPayConfigStorage payConfigStorage) {
-        super(payConfigStorage);
+        this(payConfigStorage, null);
     }
 
     public UnionPayService(UnionPayConfigStorage payConfigStorage, HttpConfigStorage configStorage) {
