@@ -88,7 +88,7 @@ public class PayController {
         //获取对应的支付账户操作工具（可根据账户id）
         PayResponse payResponse = service.getPayResponse(payId);
 
-        PayOrder order = new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType));
+        PayOrder order = new PayOrder("订单title", "摘要", null == price ? BigDecimal.valueOf(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType));
         // ------  微信H5使用----
         order.setSpbillCreateIp(request.getHeader("X-Real-IP"));
         StringBuffer requestURL = request.getRequestURL();
@@ -123,7 +123,7 @@ public class PayController {
         //获取对应的支付账户操作工具（可根据账户id）
         PayResponse payResponse = service.getPayResponse(2);
 
-        PayOrder order = new PayOrder("订单title", "摘要", new BigDecimal(0.01), UUID.randomUUID().toString().replace("-", ""), WxTransactionType.MWEB);
+        PayOrder order = new PayOrder("订单title", "摘要", BigDecimal.valueOf(0.01), UUID.randomUUID().toString().replace("-", ""), WxTransactionType.MWEB);
         order.setSpbillCreateIp(request.getHeader("X-Real-IP"));
         StringBuffer requestURL = request.getRequestURL();
         //设置网页地址
@@ -150,7 +150,7 @@ public class PayController {
         //获取对应的支付账户操作工具（可根据账户id）
         PayResponse payResponse = service.getPayResponse(payId);
 
-        PayOrder order = new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType("JSAPI"));
+        PayOrder order = new PayOrder("订单title", "摘要", null == price ? BigDecimal.valueOf(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType("JSAPI"));
         order.setOpenid(openid);
 
         Map orderInfo = payResponse.getService().orderInfo(order);
@@ -173,7 +173,7 @@ public class PayController {
         PayResponse payResponse = service.getPayResponse(payId);
         Map<String, Object> data = new HashMap<>();
         data.put("code", 0);
-        PayOrder order = new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType));
+        PayOrder order = new PayOrder("订单title", "摘要", null == price ? BigDecimal.valueOf(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType));
         data.put("orderInfo", payResponse.getService().app(order));
         return data;
     }
@@ -192,7 +192,7 @@ public class PayController {
         //获取对应的支付账户操作工具（可根据账户id）
         PayResponse payResponse = service.getPayResponse(payId);
 
-        PayOrder order = new PayOrder("egan order", "egan order", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType));
+        PayOrder order = new PayOrder("egan order", "egan order", null == price ? BigDecimal.valueOf(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType));
         //设置授权码，条码等
         order.setAuthCode(authCode);
         //支付结果
@@ -225,7 +225,7 @@ public class PayController {
         PayResponse payResponse = service.getPayResponse(payId);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-        ImageIO.write(payResponse.getService().genQrPay(new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, System.currentTimeMillis() + "", PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType))), "JPEG", baos);
+        ImageIO.write(payResponse.getService().genQrPay(new PayOrder("订单title", "摘要", null == price ? BigDecimal.valueOf(0.01) : price, System.currentTimeMillis() + "", PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType))), "JPEG", baos);
         return baos.toByteArray();
     }
     /**
@@ -240,7 +240,7 @@ public class PayController {
         //获取对应的支付账户操作工具（可根据账户id）
         //获取对应的支付账户操作工具（可根据账户id）
         PayResponse payResponse = service.getPayResponse(payId);
-        return payResponse.getService().getQrPay( new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, System.currentTimeMillis() + "", PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType)));
+        return payResponse.getService().getQrPay( new PayOrder("订单title", "摘要", null == price ? BigDecimal.valueOf(0.01) : price, System.currentTimeMillis() + "", PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType)));
     }
     /**
      * 获取一码付二维码图像
@@ -288,7 +288,7 @@ public class PayController {
         StringBuilder html = new StringBuilder();
 
         //订单
-        PayOrder payOrder = new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, System.currentTimeMillis() + "");
+        PayOrder payOrder = new PayOrder("订单title", "摘要", null == price ? BigDecimal.valueOf(0.01) : price, System.currentTimeMillis() + "");
         String ua = request.getHeader("user-agent");
         if (ua.contains("MicroMessenger")) {
             payOrder.setTransactionType(WxTransactionType.NATIVE);

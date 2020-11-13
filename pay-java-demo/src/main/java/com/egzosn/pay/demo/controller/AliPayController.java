@@ -115,9 +115,9 @@ public class AliPayController {
     @RequestMapping(value = "toPay.html", produces = "text/html;charset=UTF-8")
     public String toPay( BigDecimal price) {
         //及时收款
-        PayOrder order = new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), AliTransactionType.PAGE);
+        PayOrder order = new PayOrder("订单title", "摘要", null == price ? BigDecimal.valueOf(0.01) : price, UUID.randomUUID().toString().replace("-", ""), AliTransactionType.PAGE);
         //WAP
-//        PayOrder order = new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), AliTransactionType.WAP);
+//        PayOrder order = new PayOrder("订单title", "摘要", null == price ? BigDecimal.valueOf(0.01) : price, UUID.randomUUID().toString().replace("-", ""), AliTransactionType.WAP);
 
 //        Map orderInfo = service.orderInfo(order);
 //        return service.buildRequest(orderInfo, MethodType.POST);
@@ -137,7 +137,7 @@ public class AliPayController {
     public Map<String, Object> app() {
         Map<String, Object> data = new HashMap<>();
         data.put("code", 0);
-        PayOrder order = new PayOrder("订单title", "摘要", new BigDecimal(0.01), UUID.randomUUID().toString().replace("-", ""));
+        PayOrder order = new PayOrder("订单title", "摘要", BigDecimal.valueOf(0.01), UUID.randomUUID().toString().replace("-", ""));
         //App支付
         order.setTransactionType(AliTransactionType.APP);
         data.put("orderInfo", UriVariables.getMapToParameters(service.app(order)));
@@ -155,7 +155,7 @@ public class AliPayController {
     public byte[] toQrPay( BigDecimal price) throws IOException {
         //获取对应的支付账户操作工具（可根据账户id）
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ImageIO.write(service.genQrPay( new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, System.currentTimeMillis()+"", AliTransactionType.SWEEPPAY)), "JPEG", baos);
+        ImageIO.write(service.genQrPay( new PayOrder("订单title", "摘要", null == price ? BigDecimal.valueOf(0.01) : price, System.currentTimeMillis()+"", AliTransactionType.SWEEPPAY)), "JPEG", baos);
         return baos.toByteArray();
     }
     /**
@@ -168,7 +168,7 @@ public class AliPayController {
     @RequestMapping(value = "getQrPay.json")
     public String getQrPay(BigDecimal price) throws IOException {
         //获取对应的支付账户操作工具（可根据账户id）
-        return service.getQrPay( new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, System.currentTimeMillis()+"", AliTransactionType.SWEEPPAY));
+        return service.getQrPay( new PayOrder("订单title", "摘要", null == price ? BigDecimal.valueOf(0.01) : price, System.currentTimeMillis()+"", AliTransactionType.SWEEPPAY));
     }
 
 
@@ -182,9 +182,9 @@ public class AliPayController {
     public Map<String, Object> microPay(BigDecimal price, String authCode) {
         //获取对应的支付账户操作工具（可根据账户id）
         //条码付
-        PayOrder order = new PayOrder("egan order", "egan order", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), AliTransactionType.BAR_CODE);
+        PayOrder order = new PayOrder("egan order", "egan order", null == price ? BigDecimal.valueOf(0.01) : price, UUID.randomUUID().toString().replace("-", ""), AliTransactionType.BAR_CODE);
            //声波付
-//        PayOrder order = new PayOrder("egan order", "egan order", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), AliTransactionType.WAVE_CODE);
+//        PayOrder order = new PayOrder("egan order", "egan order", null == price ? BigDecimal.valueOf(0.01) : price, UUID.randomUUID().toString().replace("-", ""), AliTransactionType.WAVE_CODE);
         //设置授权码，条码等
         order.setAuthCode(authCode);
         //支付结果

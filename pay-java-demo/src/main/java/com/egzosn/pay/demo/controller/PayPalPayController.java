@@ -68,7 +68,7 @@ public class PayPalPayController {
     @RequestMapping(value = "toPay.html", produces = "text/html;charset=UTF-8")
     public String toPay(BigDecimal price) {
         //及时收款
-        PayOrder order = new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayPalTransactionType.sale);
+        PayOrder order = new PayOrder("订单title", "摘要", null == price ? BigDecimal.valueOf(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayPalTransactionType.sale);
 
 //        Map orderInfo = service.orderInfo(order);
 //        return service.buildRequest(orderInfo, MethodType.POST);
@@ -93,7 +93,7 @@ public class PayPalPayController {
         order.setCurType(DefaultCurType.USD);
         order.setDescription(" description ");
         order.setTradeNo("paypal 平台的单号");
-        order.setRefundAmount(new BigDecimal(0.01));
+        order.setRefundAmount(BigDecimal.valueOf(0.01));
         return service.refund(order);
     }
 
