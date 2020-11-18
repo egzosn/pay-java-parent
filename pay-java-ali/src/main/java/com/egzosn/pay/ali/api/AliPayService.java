@@ -233,7 +233,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
 
         Map<String, Object> bizContent = new TreeMap<>();
         bizContent.put("body", order.getBody());
-        bizContent.put("seller_id", payConfigStorage.getSeller());
+        setParameters(bizContent, "seller_id", payConfigStorage.getSeller());
         bizContent.put("subject", order.getSubject());
         bizContent.put("out_trade_no", order.getOutTradeNo());
         bizContent.put("total_amount", Util.conversionAmount(order.getPrice()).toString());
