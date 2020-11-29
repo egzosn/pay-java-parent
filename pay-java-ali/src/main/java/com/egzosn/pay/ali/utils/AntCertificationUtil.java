@@ -10,6 +10,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
 import java.security.PublicKey;
+import java.security.Security;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateExpiredException;
@@ -25,6 +26,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
@@ -43,7 +45,10 @@ import com.egzosn.pay.common.util.str.StringUtils;
  */
 public class AntCertificationUtil {
     private static final Log LOGGER = LogFactory.getLog(AntCertificationUtil.class);
-
+    static {
+        Security.removeProvider("SunEC");
+        Security.addProvider(new BouncyCastleProvider());
+    }
     /**
      * 验证证书是否可信
      *

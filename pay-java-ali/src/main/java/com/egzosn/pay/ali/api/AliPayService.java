@@ -90,7 +90,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
 
     public AliPayService(AliPayConfigStorage payConfigStorage, HttpConfigStorage configStorage) {
         super(payConfigStorage, configStorage);
-
+        payConfigStorage.loadCertEnvironment();
     }
 
     public AliPayService(AliPayConfigStorage payConfigStorage) {
@@ -161,7 +161,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
      * @param respMap 响应Map
      * @return 支付宝公钥证书序列号
      */
-    public String getAliPayCertSN(java.util.Map<String, Object> respMap) {
+    public String getAliPayCertSN(Map<String, Object> respMap) {
         return (String) respMap.get(AliPayConst.ALIPAY_CERT_SN_FIELD);
     }
 
@@ -233,7 +233,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
 
         Map<String, Object> bizContent = new TreeMap<>();
         bizContent.put("body", order.getBody());
-        bizContent.put("seller_id", payConfigStorage.getSeller());
+        setParameters(bizContent, "seller_id", payConfigStorage.getSeller());
         bizContent.put("subject", order.getSubject());
         bizContent.put("out_trade_no", order.getOutTradeNo());
         bizContent.put("total_amount", Util.conversionAmount(order.getPrice()).toString());

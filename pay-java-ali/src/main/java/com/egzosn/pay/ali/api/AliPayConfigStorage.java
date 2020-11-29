@@ -16,9 +16,8 @@ import com.egzosn.pay.common.exception.PayErrorException;
  * <p>
  * email egzosn@gmail.com
  * date 2016-5-18 14:09:01
- *
- *
- *  以下证书签名相关触发前提是 {@link BasePayConfigStorage#isCertSign}等于true的情况。不然走的就是普通的方式
+ * </p>
+ * 以下证书签名相关触发前提是 {@link BasePayConfigStorage#isCertSign}等于true的情况。不然走的就是普通的方式
  */
 public class AliPayConfigStorage extends BasePayConfigStorage {
 
@@ -146,7 +145,7 @@ public class AliPayConfigStorage extends BasePayConfigStorage {
      * 初始化证书信息
      */
     public void loadCertEnvironment() {
-        if (!isCertSign() || null ==  this.certEnvironment){
+        if (!isCertSign() || null != this.certEnvironment) {
             return;
         }
         try (InputStream merchantCertStream = certStoreType.getInputStream(merchantCert);
