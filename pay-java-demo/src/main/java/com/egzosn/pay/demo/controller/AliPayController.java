@@ -68,9 +68,9 @@ public class AliPayController {
         aliPayConfigStorage.setCertSign(true);
         //设置证书存储方式，这里为路径
         aliPayConfigStorage.setCertStoreType(CertStoreType.PATH);
-        aliPayConfigStorage.setMerchantCert("请填写您的应用公钥证书文件路径，例如：d:/appCertPublicKey_2019051064521003.crt");
-        aliPayConfigStorage.setAliPayCert("请填写您的支付宝公钥证书文件路径，例如：d:/alipayCertPublicKey_RSA2.crt");
-        aliPayConfigStorage.setAliPayRootCert("请填写您的支付宝根证书文件路径，例如：d:/alipayRootCert.crt");
+        aliPayConfigStorage.setMerchantCert("E:\\Documents\\支付宝开放平台开发助手\\CSR\\appCertPublicKey_2016080400165436.crt");
+        aliPayConfigStorage.setAliPayCert("E:\\Documents\\支付宝开放平台开发助手\\CSR\\alipayCertPublicKey_RSA2.crt");
+        aliPayConfigStorage.setAliPayRootCert("E:\\Documents\\支付宝开放平台开发助手\\CSR\\alipayRootCert.crt");
     }
 
     @PostConstruct
@@ -79,9 +79,10 @@ public class AliPayController {
         aliPayConfigStorage.setPid("2088102169916436");
         aliPayConfigStorage.setAppid("2016080400165436");
         //普通公钥方式与证书公钥方式为两者取其一的方式
-        keyPublic(aliPayConfigStorage);
-//        certKeyPublic(aliPayConfigStorage);
-        aliPayConfigStorage.setKeyPrivate("MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBAKroe/8h5vC4L6T+B2WdXiVwGsMvUKgb2XsKix6VY3m2wcf6tyzpNRDCNykbIwGtaeo7FshN+qZxdXHLiIam9goYncBit/8ojfLGy2gLxO/PXfzGxYGs0KsDZ+ryVPPmE34ZZ8jiJpR0ygzCFl8pN3QJPJRGTJn5+FTT9EF/9zyZAgMBAAECgYAktngcYC35u7cQXDk+jMVyiVhWYU2ULxdSpPspgLGzrZyG1saOcTIi/XVX8Spd6+B6nmLQeF/FbU3rOeuD8U2clzul2Z2YMbJ0FYay9oVZFfp5gTEFpFRTVfzqUaZQBIjJe/xHL9kQVqc5xHlE/LVA27/Kx3dbC35Y7B4EVBDYAQJBAOhsX8ZreWLKPhXiXHTyLmNKhOHJc+0tFH7Ktise/0rNspojU7o9prOatKpNylp9v6kux7migcMRdVUWWiVe+4ECQQC8PqsuEz7B0yqirQchRg1DbHjh64bw9Kj82EN1/NzOUd53tP9tg+SO97EzsibK1F7tOcuwqsa7n2aY48mQ+y0ZAkBndA2xcRcnvOOjtAz5VO8G7R12rse181HjGfG6AeMadbKg30aeaGCyIxN1loiSfNR5xsPJwibGIBg81mUrqzqBAkB+K6rkaPXJR9XtzvdWb/N3235yPkDlw7Z4MiOVM3RzvR/VMDV7m8lXoeDde2zQyeMOMYy6ztwA6WgE1bhGOnQRAkEAouUBv1sVdSBlsexX15qphOmAevzYrpufKgJIRLFWQxroXMS7FTesj+f+FmGrpPCxIde1dqJ8lqYLTyJmbzMPYw==");
+//        keyPublic(aliPayConfigStorage);
+        certKeyPublic(aliPayConfigStorage);
+//        aliPayConfigStorage.setKeyPrivate("MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBAKroe/8h5vC4L6T+B2WdXiVwGsMvUKgb2XsKix6VY3m2wcf6tyzpNRDCNykbIwGtaeo7FshN+qZxdXHLiIam9goYncBit/8ojfLGy2gLxO/PXfzGxYGs0KsDZ+ryVPPmE34ZZ8jiJpR0ygzCFl8pN3QJPJRGTJn5+FTT9EF/9zyZAgMBAAECgYAktngcYC35u7cQXDk+jMVyiVhWYU2ULxdSpPspgLGzrZyG1saOcTIi/XVX8Spd6+B6nmLQeF/FbU3rOeuD8U2clzul2Z2YMbJ0FYay9oVZFfp5gTEFpFRTVfzqUaZQBIjJe/xHL9kQVqc5xHlE/LVA27/Kx3dbC35Y7B4EVBDYAQJBAOhsX8ZreWLKPhXiXHTyLmNKhOHJc+0tFH7Ktise/0rNspojU7o9prOatKpNylp9v6kux7migcMRdVUWWiVe+4ECQQC8PqsuEz7B0yqirQchRg1DbHjh64bw9Kj82EN1/NzOUd53tP9tg+SO97EzsibK1F7tOcuwqsa7n2aY48mQ+y0ZAkBndA2xcRcnvOOjtAz5VO8G7R12rse181HjGfG6AeMadbKg30aeaGCyIxN1loiSfNR5xsPJwibGIBg81mUrqzqBAkB+K6rkaPXJR9XtzvdWb/N3235yPkDlw7Z4MiOVM3RzvR/VMDV7m8lXoeDde2zQyeMOMYy6ztwA6WgE1bhGOnQRAkEAouUBv1sVdSBlsexX15qphOmAevzYrpufKgJIRLFWQxroXMS7FTesj+f+FmGrpPCxIde1dqJ8lqYLTyJmbzMPYw==");
+        aliPayConfigStorage.setKeyPrivate("MIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQCVEtN86O7ueJCaEWOg0cY/S5eXo8dViq/7iLCa9S4rLYJot665vhW2hnP9J5U8p1Zqa0PnTqYC5cH1Rs8pik5d8ebCtSbbvftN8lT1YHO88m1SAYGomQyDHbhwp+DEWor9rciAYNSKnuxV3Vjncv628E7Bf55/5dwP7SZBQox9Qjbjb6kkVWvghabCAsKDtRoc12weD3O1Opyf4iCFo/Ofl84ILH8PCS3W7CTBAhLaEYXGTcqDQGS8lTrPpMtDZyB1GWnBKdIAsfzFRbFkfzvNEJ1kqPvRfY6hcDA0lqgFdsr9Jlc4zGCABunKs+cviQLY4LtkZUXp76PCP1VrJhpJAgMBAAECggEBAJQKdSI3xIfoDVojaLgdeu4CqNG7oMovh2KZNSE92RKiCD7sIsVsou13ippeA9OPLr9SNMXxkeWQu9RT9IkBQ6ACCbNU6PkSKw4WWQ6xMV7ztWLaAiQnkYhoLHEcFpeIfz07psDu6EOdXYBL5+05gwCzltKMZSAIakkaroHij9gXL4w8LXDKfhL3HiUg0fupyQtOMYhTUbHwl3/WdNYpBFZB/peyzMNY5LDpRhWyz+3lyWjI+fPCnsCnC1QgqRRcYuX4MHSrmvAE3MrnGLAsRje9Muq8zGK1sLRtA2q4zoRQZ/dpT4yk08JD3pzRz1JhFPmhIRfAjCLaQGK5y/CFQvECgYEA5ZyMOrea4zycqh+YHyhwdo5A/oMHXPlcdeKK+i0MULVbfUNHCOEz/GabgadoB37JuDBpjhcN8x93RR3XSnGxxGF3vAcU+X9bZltstmUwOd1NkK73+u84uaThCQSEk5+WtEXXCkHkS09+m8cuBBpQ8mlIzgPN9JAIvDwIrjye6vUCgYEApjTAnSNr4ZjdP8Dwr3ItaL5s1y1TG3X5LyLErHpTec43ZznxL3aNNwhozuAXYYQIMrpLQ//eLf4v7oPtVfDP7tb6Qw11Up3LI9hZoQ3h1Vvd7Z275Qh6Xk5vUQJW7v+TJEZ8YMT/ZAfz3nl2KRzzV3mWgiT1J4J2SgKCapT6RYUCgYEAqMBjd4wVc8jKQ2YxAUVRUnC+Z8+ZC8XhJGq5RaDyGicP9IILpQUOlgQ7ahDFLi0KyCocied7wyFvIQcLgZUJ15Di1PhHfA8T96hdv7eiuARjy2AstOo4QIhjM6N0ZKK3ugpSPyGqTYdBP/Ala7KDp4WlknPNXF63bNCaeKPpEDkCgYAUYTuNCR7dVsUqYBojKTjwMwldiS07nMelQ/ohvA4oTWT1v2EXlM3UBa/0Tf4P8wSeU8GO4Pz5XsW51WtwskqM2sdtGWVdcAPMrWawHOeoJc+cp0620sdOcQetQ0AtpiEAvbPamc1HEsKQcQxQFkCwZTRTWPzGj3S5tn0PXJ0jkQKBgQDVkh2ySpk9361zpzSzi3nSKYQ2E0TRecE/98FQY5IXkm75BhT8o1t289pxJaXuhKkOBh4Pwjjc2P1zy0UK6Aih2nuH8FxKYPumNid5dz19AB0uTBR36jriWena0eDFhVRVwePb2u5N80bV8v4kZ0OTLxi4Y8DLggJns67IKuwB5A==");
         aliPayConfigStorage.setNotifyUrl("http://pay.egzosn.com/payBack.json");
         aliPayConfigStorage.setReturnUrl("http://pay.egzosn.com/payBack.html");
         aliPayConfigStorage.setSignType(SignUtils.RSA.name());

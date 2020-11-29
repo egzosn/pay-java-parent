@@ -42,7 +42,7 @@ public class UnionPayController {
 
     private UnionPayService service = null;
 
-    @PostConstruct
+//    @PostConstruct
     public void init() {
         UnionPayConfigStorage unionPayConfigStorage = new UnionPayConfigStorage();
         unionPayConfigStorage.setMerId("700000000000001");
@@ -58,9 +58,6 @@ public class UnionPayController {
         unionPayConfigStorage.setKeyPrivateCertPwd("000000");
         //设置证书对应的存储方式，这里默认为文件地址
         unionPayConfigStorage.setCertStoreType(CertStoreType.URL);
-
-
-
 
         //前台通知网址  即SDKConstants.param_frontUrl
         unionPayConfigStorage.setReturnUrl("http://www.pay.egzosn.com/payBack.json");
