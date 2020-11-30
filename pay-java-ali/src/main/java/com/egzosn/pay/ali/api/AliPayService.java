@@ -90,7 +90,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
 
     public AliPayService(AliPayConfigStorage payConfigStorage, HttpConfigStorage configStorage) {
         super(payConfigStorage, configStorage);
-
+        payConfigStorage.loadCertEnvironment();
     }
 
     public AliPayService(AliPayConfigStorage payConfigStorage) {
