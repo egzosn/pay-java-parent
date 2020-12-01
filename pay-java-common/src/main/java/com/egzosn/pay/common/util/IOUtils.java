@@ -16,37 +16,16 @@
  */
 package com.egzosn.pay.common.util;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.CharArrayWriter;
-import java.io.Closeable;
-import java.io.EOFException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.io.Reader;
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
-import java.net.HttpURLConnection;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.URI;
-import java.net.URL;
-import java.net.URLConnection;
+import org.apache.commons.codec.Charsets;
+
+import java.io.*;
+import java.net.*;
 import java.nio.channels.Selector;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
-import org.apache.commons.codec.Charsets;
 
 /**
  * General IO stream manipulation utilities.
@@ -80,7 +59,6 @@ import org.apache.commons.codec.Charsets;
  * Origin of code: Excalibur.
  *
  * @version $Id: IOUtils.java 1326636 2012-04-16 14:54:53Z ggregory $
- *
  */
 public class IOUtils {
     // NOTE: This class is focussed on InputStream, OutputStream, Reader and
@@ -283,8 +261,7 @@ public class IOUtils {
             if (closeable != null) {
                 closeable.close();
             }
-        }
-        catch (IOException ioe) {
+        } catch (IOException ioe) {
             // ignore
         }
     }
@@ -316,8 +293,7 @@ public class IOUtils {
         if (sock != null) {
             try {
                 sock.close();
-            }
-            catch (IOException ioe) {
+            } catch (IOException ioe) {
                 // ignored
             }
         }
@@ -350,8 +326,7 @@ public class IOUtils {
         if (selector != null) {
             try {
                 selector.close();
-            }
-            catch (IOException ioe) {
+            } catch (IOException ioe) {
                 // ignored
             }
         }
@@ -384,8 +359,7 @@ public class IOUtils {
         if (sock != null) {
             try {
                 sock.close();
-            }
-            catch (IOException ioe) {
+            } catch (IOException ioe) {
                 // ignored
             }
         }
@@ -409,7 +383,6 @@ public class IOUtils {
      *
      * @param input Stream to be fully buffered.
      * @return A fully buffered stream.
-     * @throws IOException if an I/O error occurs
      * @since 2.0
      */
     public static InputStream toBufferedInputStream(InputStream input) {
@@ -612,8 +585,7 @@ public class IOUtils {
         URLConnection conn = url.openConnection();
         try {
             return IOUtils.toByteArray(conn);
-        }
-        finally {
+        } finally {
             close(conn);
         }
     }
@@ -631,8 +603,7 @@ public class IOUtils {
         InputStream inputStream = urlConn.getInputStream();
         try {
             return IOUtils.toByteArray(inputStream);
-        }
-        finally {
+        } finally {
             inputStream.close();
         }
     }
@@ -864,8 +835,7 @@ public class IOUtils {
         InputStream inputStream = url.openStream();
         try {
             return toString(inputStream, encoding);
-        }
-        finally {
+        } finally {
             inputStream.close();
         }
     }
@@ -2252,7 +2222,7 @@ public class IOUtils {
      * @param input  where to read input from
      * @param buffer destination
      * @param offset inital offset into buffer
-     * @param length length to read, must be >= 0
+     * @param length length to read, must
      * @return actual length read; may be less than requested if EOF was reached
      * @throws IOException if a read error occurs
      * @since 2.2
@@ -2298,7 +2268,7 @@ public class IOUtils {
      * @param input  where to read input from
      * @param buffer destination
      * @param offset inital offset into buffer
-     * @param length length to read, must be >= 0
+     * @param length length to read,
      * @return actual length read; may be less than requested if EOF was reached
      * @throws IOException if a read error occurs
      * @since 2.2
@@ -2344,7 +2314,7 @@ public class IOUtils {
      * @param input  where to read input from
      * @param buffer destination
      * @param offset inital offset into buffer
-     * @param length length to read, must be >= 0
+     * @param length length to read, must
      * @throws IOException              if there is a problem reading the file
      * @throws IllegalArgumentException if length is negative
      * @throws EOFException             if the number of characters read was incorrect
@@ -2383,7 +2353,7 @@ public class IOUtils {
      * @param input  where to read input from
      * @param buffer destination
      * @param offset inital offset into buffer
-     * @param length length to read, must be >= 0
+     * @param length length to read
      * @throws IOException              if there is a problem reading the file
      * @throws IllegalArgumentException if length is negative
      * @throws EOFException             if the number of bytes read was incorrect

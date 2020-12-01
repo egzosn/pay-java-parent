@@ -21,7 +21,7 @@
 <dependency>
     <groupId>com.egzosn</groupId>
     <artifactId>{module-name}</artifactId>
-    <version>2.13.2</version>
+    <version>2.13.3</version>
 </dependency>
 
 ```
@@ -70,5 +70,5 @@ E-Mail：egzosn@gmail.com
 
 QQ群：542193977
 
-微信群:
- ![微信群](https://egzosn.gitee.io/pay-java-parent/wx.jpg "wx.jpg")
+微信群: 
+![微信群](https://egzosn.gitee.io/pay-java-parent/wx.jpg "wx.jpg")

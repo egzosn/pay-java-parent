@@ -11,9 +11,10 @@ import com.egzosn.pay.common.bean.CurType;
 /**
  * 微信退款结果
  * @author Egan
- * <pre></pre>
+ * <pre>
  * email egzosn@gmail.com
  * date 2020/8/16 21:29
+ * </pre>
  */
 public class WxRefundResult extends BaseRefundResult {
 
@@ -123,7 +124,7 @@ public class WxRefundResult extends BaseRefundResult {
     private BigDecimal refundFee;
     /**
      * 应结退款金额
-     * 去掉非充值代金券退款金额后的退款金额，退款金额=申请退款金额-非充值代金券退款金额，退款金额<=申请退款金额
+     * 去掉非充值代金券退款金额后的退款金额，退款金额=申请退款金额-非充值代金券退款金额，退款金额&lt;=申请退款金额
      */
     @JSONField(name = "settlement_refund_fee")
     private BigDecimal settlementRefundFee;
@@ -135,7 +136,7 @@ public class WxRefundResult extends BaseRefundResult {
     private BigDecimal totalFee;
     /**
      * 应结订单金额
-     * 去掉非充值代金券金额后的订单总金额，应结订单金额=订单金额-非充值代金券金额，应结订单金额<=订单金额。
+     * 去掉非充值代金券金额后的订单总金额，应结订单金额=订单金额-非充值代金券金额，应结订单金额&lt;=订单金额。
      */
     @JSONField(name = "settlement_total_fee")
     private BigDecimal settlementTotalFee;
@@ -176,13 +177,13 @@ public class WxRefundResult extends BaseRefundResult {
     private String couponType0;
     /**
      * 代金券退款总金额
-     * 代金券退款金额<=退款金额，退款金额-代金券或立减优惠退款金额为现金，说明详见代金券或立减优惠
+     * 代金券退款金额&lt;=退款金额，退款金额-代金券或立减优惠退款金额为现金，说明详见代金券或立减优惠
      */
     @JSONField(name = "coupon_refund_fee")
     private BigDecimal couponRefundFee;
     /**
      * 单个代金券退款金额
-     * 代金券退款金额<=退款金额，退款金额-代金券或立减优惠退款金额为现金，说明详见代金券或立减优惠
+     * 代金券退款金额&lt;=退款金额，退款金额-代金券或立减优惠退款金额为现金，说明详见代金券或立减优惠
      * 这里只接收0的，其余请自行获取
      */
     @JSONField(name = "coupon_refund_fee_0")
