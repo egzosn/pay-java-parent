@@ -5,6 +5,7 @@ import com.egzosn.pay.common.api.PayService;
 import com.egzosn.pay.common.bean.DefaultCurType;
 import com.egzosn.pay.common.bean.PayOrder;
 import com.egzosn.pay.common.bean.RefundOrder;
+import com.egzosn.pay.common.bean.RefundResult;
 import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.paypal.api.PayPalConfigStorage;
 import com.egzosn.pay.paypal.api.PayPalPayService;
@@ -67,7 +68,7 @@ public class PayPalPayController {
     @RequestMapping(value = "toPay.html", produces = "text/html;charset=UTF-8")
     public String toPay(BigDecimal price) {
         //及时收款
-        PayOrder order = new PayOrder("订单title", "摘要", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayPalTransactionType.sale);
+        PayOrder order = new PayOrder("订单title", "摘要", null == price ? BigDecimal.valueOf(0.01) : price, UUID.randomUUID().toString().replace("-", ""), PayPalTransactionType.sale);
 
 //        Map orderInfo = service.orderInfo(order);
 //        return service.buildRequest(orderInfo, MethodType.POST);
@@ -86,13 +87,13 @@ public class PayPalPayController {
      * @return 返回支付方申请退款后的结果
      */
     @RequestMapping("refund")
-    public Map<String, Object> refund() {
+    public RefundResult refund() {
         // TODO 这里需要  refundAmount， curType， description， tradeNo
         RefundOrder order = new RefundOrder();
         order.setCurType(DefaultCurType.USD);
         order.setDescription(" description ");
         order.setTradeNo("paypal 平台的单号");
-        order.setRefundAmount(new BigDecimal(0.01));
+        order.setRefundAmount(BigDecimal.valueOf(0.01));
         return service.refund(order);
     }
 

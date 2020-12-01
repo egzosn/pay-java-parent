@@ -52,7 +52,7 @@ public class PayTest {
         //支付服务
         UnionPayService service = new UnionPayService(unionPayConfigStorage);
         //支付订单基础信息
-        PayOrder payOrder = new PayOrder("订单title", "摘要",  new BigDecimal(0.01) , new SimpleDateFormat("yyyyMMddHHmmss").format(System.currentTimeMillis()));
+        PayOrder payOrder = new PayOrder("订单title", "摘要",  BigDecimal.valueOf(0.01) , new SimpleDateFormat("yyyyMMddHHmmss").format(System.currentTimeMillis()));
 
 
         /*----------- 网页支付-------------------*/

@@ -451,7 +451,7 @@ public class Util {
      * @param algorism 十进制的数字
      * @return String 对应的十六进制字符串
      */
-    public static String algorismToHEXString(int algorism) {
+    public static String algorismToHexString(int algorism) {
         String result = "";
         result = Integer.toHexString(algorism);
 

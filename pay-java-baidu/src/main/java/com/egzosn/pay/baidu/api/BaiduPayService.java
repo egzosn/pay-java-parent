@@ -316,7 +316,7 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
      * @return 退款结果
      */
     @Override
-    public Map<String, Object> refund(RefundOrder refundOrder) {
+    public BaseRefundResult refund(RefundOrder refundOrder) {
         Map<String, Object> parameters = getUseQueryPay();
         BaiduTransactionType transactionType = BaiduTransactionType.APPLY_REFUND;
         parameters.put(METHOD, transactionType.getMethod());
@@ -329,7 +329,53 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
         parameters.put("bizRefundBatchId", refundOrder.getRefundNo());
         parameters.put(APP_KEY, payConfigStorage.getAppKey());
         parameters.put(RSA_SIGN, getRsaSign(parameters, RSA_SIGN));
-        return requestTemplate.getForObject(String.format("%s?%s", getReqUrl(transactionType), UriVariables.getMapToParameters(parameters)), JSONObject.class);
+        final JSONObject result = requestTemplate.getForObject(String.format("%s?%s", getReqUrl(transactionType), UriVariables.getMapToParameters(parameters)), JSONObject.class);
+        return new BaseRefundResult(result) {
+            @Override
+            public String getCode() {
+                return getAttrString(RESPONSE_STATUS);
+            }
+
+            @Override
+            public String getMsg() {
+                return null;
+            }
+
+            @Override
+            public String getResultCode() {
+                return null;
+            }
+
+            @Override
+            public String getResultMsg() {
+                return null;
+            }
+
+            @Override
+            public BigDecimal getRefundFee() {
+                return null;
+            }
+
+            @Override
+            public CurType getRefundCurrency() {
+                return null;
+            }
+
+            @Override
+            public String getTradeNo() {
+                return null;
+            }
+
+            @Override
+            public String getOutTradeNo() {
+                return null;
+            }
+
+            @Override
+            public String getRefundNo() {
+                return null;
+            }
+        };
 
     }
 

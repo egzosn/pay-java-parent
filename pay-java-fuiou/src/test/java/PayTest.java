@@ -37,7 +37,7 @@ public class PayTest {
         //支付服务
         PayService service = new FuiouPayService(fuiouPayConfigStorage);
         //支付订单基础信息
-        PayOrder payOrder = new PayOrder("订单title", "摘要",  new BigDecimal(0.01) , UUID.randomUUID().toString().replace("-", "").substring(2));
+        PayOrder payOrder = new PayOrder("订单title", "摘要",  BigDecimal.valueOf(0.01) , UUID.randomUUID().toString().replace("-", "").substring(2));
 
 
         /*----------- 网页支付-------------------*/

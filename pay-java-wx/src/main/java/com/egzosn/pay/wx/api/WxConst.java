@@ -19,6 +19,7 @@ public interface WxConst {
     String SANDBOXNEW = "sandboxnew/";
 
     String SUCCESS = "SUCCESS";
+    String FAIL = "FAIL";
     String RETURN_CODE = "return_code";
     String SIGN = "sign";
     String CIPHER_ALGORITHM = "RSA/ECB/OAEPWITHSHA-1ANDMGF1PADDING";

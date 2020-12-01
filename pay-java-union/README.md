@@ -80,7 +80,7 @@
 ```java
 
         //支付订单基础信息
-        PayOrder payOrder = new PayOrder("订单title", "摘要",  new BigDecimal(0.01) , UUID.randomUUID().toString().replace("-", ""));
+        PayOrder payOrder = new PayOrder("订单title", "摘要",  BigDecimal.valueOf(0.01) , UUID.randomUUID().toString().replace("-", ""));
   
 ``` 
 
@@ -190,6 +190,6 @@
     
          RefundOrder order = new RefundOrder(null, "原交易查询流水号", "退款金额", "订单总金额");
          order.setRefundNo("退款单号")
-         Map result = service.refund(order);
+         UnionRefundResult result = service.refund(order);
 
 ```

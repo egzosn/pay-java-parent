@@ -249,7 +249,7 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage>{
      * @return 返回支付方申请退款后的结果
      */
     @Override
-    public Map<String, Object> refund(RefundOrder refundOrder) {
+    public RefundResult refund(RefundOrder refundOrder) {
         JSONObject request =  new JSONObject();
 
         if (null != refundOrder.getRefundAmount() && BigDecimal.ZERO.compareTo( refundOrder.getRefundAmount()) == -1){
@@ -267,7 +267,52 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage>{
         HttpStringEntity httpEntity = new HttpStringEntity(request.toJSONString(), ContentType.APPLICATION_JSON);
         httpEntity.setHeaders(authHeader());
         JSONObject resp = getHttpRequestTemplate().postForObject(getReqUrl(PayPalTransactionType.REFUND),  httpEntity, JSONObject.class, refundOrder.getTradeNo());
-        return resp;
+        return new BaseRefundResult(resp) {
+            @Override
+            public String getCode() {
+                return getAttrString("state");
+            }
+
+            @Override
+            public String getMsg() {
+                return null;
+            }
+
+            @Override
+            public String getResultCode() {
+                return null;
+            }
+
+            @Override
+            public String getResultMsg() {
+                return null;
+            }
+
+            @Override
+            public BigDecimal getRefundFee() {
+                return null;
+            }
+
+            @Override
+            public CurType getRefundCurrency() {
+                return null;
+            }
+
+            @Override
+            public String getTradeNo() {
+                return null;
+            }
+
+            @Override
+            public String getOutTradeNo() {
+                return null;
+            }
+
+            @Override
+            public String getRefundNo() {
+                return null;
+            }
+        };
     }
 
     /**

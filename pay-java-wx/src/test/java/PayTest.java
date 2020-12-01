@@ -44,7 +44,7 @@ public class PayTest {
         //支付服务
         WxPayService service =  new WxPayService(wxPayConfigStorage);
         //支付订单基础信息
-        PayOrder payOrder = new PayOrder("订单title", "摘要",  new BigDecimal(0.01) , UUID.randomUUID().toString().replace("-", ""));
+        PayOrder payOrder = new PayOrder("订单title", "摘要",  BigDecimal.valueOf(0.01) , UUID.randomUUID().toString().replace("-", ""));
         /*-----------扫码付-------------------*/
         payOrder.setTransactionType(WxTransactionType.NATIVE);
         //获取扫码付的二维码

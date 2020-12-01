@@ -11,6 +11,7 @@ import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.str.StringUtils;
 import com.egzosn.pay.yiji.bean.YiJiTransactionType;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
@@ -300,7 +301,7 @@ public class YiJiPayService extends BasePayService<YiJiPayConfigStorage> {
      * @return 返回支付方申请退款后的结果
      */
     @Override
-    public Map<String, Object> refund(RefundOrder refundOrder) {
+    public RefundResult refund(RefundOrder refundOrder) {
         Map<String, Object> orderInfo = getPublicParameters(YiJiTransactionType.tradeRefund);
         orderInfo.put("orderNo", refundOrder.getOutTradeNo());
         orderInfo.put("outOrderNo", refundOrder.getOutTradeNo());
@@ -308,7 +309,52 @@ public class YiJiPayService extends BasePayService<YiJiPayConfigStorage> {
         orderInfo.put("refundTime", DateUtils.formatDay(refundOrder.getOrderDate()));
         orderInfo.put("refundReason", refundOrder.getDescription());
         setSign(orderInfo);
-        return getHttpRequestTemplate().postForObject(getReqUrl(YiJiTransactionType.tradeRefund), orderInfo, JSONObject.class);
+        return new BaseRefundResult(getHttpRequestTemplate().postForObject(getReqUrl(YiJiTransactionType.tradeRefund), orderInfo, JSONObject.class)) {
+            @Override
+            public String getCode() {
+                return null;
+            }
+
+            @Override
+            public String getMsg() {
+                return null;
+            }
+
+            @Override
+            public String getResultCode() {
+                return null;
+            }
+
+            @Override
+            public String getResultMsg() {
+                return null;
+            }
+
+            @Override
+            public BigDecimal getRefundFee() {
+                return null;
+            }
+
+            @Override
+            public CurType getRefundCurrency() {
+                return null;
+            }
+
+            @Override
+            public String getTradeNo() {
+                return null;
+            }
+
+            @Override
+            public String getOutTradeNo() {
+                return null;
+            }
+
+            @Override
+            public String getRefundNo() {
+                return null;
+            }
+        };
     }
 
     /**

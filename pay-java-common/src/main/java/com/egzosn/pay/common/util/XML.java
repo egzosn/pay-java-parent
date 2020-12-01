@@ -352,9 +352,4 @@ public class XML {
     }
 
 
-    public static void main(String[] args) {
-        String text = "<datas><data><code>0</code><users><user><id>1</id><name>张三</name></user><user><id>2</id><name>张4</name></user></users></data></datas>";
-        System.out.println( getMap2Xml(toJSONObject(text), "datas", "utf-8"));
-
-    }
 }

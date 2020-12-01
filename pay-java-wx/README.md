@@ -81,7 +81,7 @@
 ```java
 
         //支付订单基础信息
-           PayOrder payOrder = new PayOrder("订单title", "摘要",  new BigDecimal(0.01) , UUID.randomUUID().toString().replace("-", ""));
+           PayOrder payOrder = new PayOrder("订单title", "摘要",  BigDecimal.valueOf(0.01) , UUID.randomUUID().toString().replace("-", ""));
   
 ``` 
 
@@ -146,7 +146,7 @@
 
         /*-----------刷脸付-------------------*/
            //获取对应的支付账户操作工具（可根据账户id）
-              PayOrder order = new PayOrder("egan order", "egan order", null == price ? new BigDecimal(0.01) : price, UUID.randomUUID().toString().replace("-", ""), WxTransactionType.FACEPAY);
+              PayOrder order = new PayOrder("egan order", "egan order", null == price ? BigDecimal.valueOf(0.01) : price, UUID.randomUUID().toString().replace("-", ""), WxTransactionType.FACEPAY);
               //设置人脸凭证
               order.setAuthCode(authCode);
               //  用户在商户 appid下的唯一标识
@@ -215,7 +215,7 @@
          RefundOrder order = new RefundOrder("微信单号", "我方系统单号", "退款金额", "订单总金额");
          //可用于多次退款
          order.setRefundNo("退款单号")
-         Map result = service.refund(order);
+         WxRefundResult result = service.refund(order);
 
 ```
 
