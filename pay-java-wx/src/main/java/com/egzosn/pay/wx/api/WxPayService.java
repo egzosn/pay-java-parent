@@ -626,8 +626,9 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
     /**
      * GZIP解压缩
      *
-     * @param input
-     * @return
+     * @param input 输入流账单
+     * @return  解压后输入流
+     * @throws IOException  IOException
      */
     public static InputStream uncompress(InputStream input) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
