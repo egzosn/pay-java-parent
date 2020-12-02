@@ -380,6 +380,14 @@ public interface PayService<PC extends PayConfigStorage> {
     PayOutMessage payBack(Map<String, String[]> parameterMap, InputStream is);
 
     /**
+     * 使用转换过的参数进行回调处理
+     *
+     * @param data 转化后的参数Map
+     * @return 获得回调响应信息
+     */
+    PayOutMessage payBack(Map<String, Object> data);
+
+    /**
      * 设置支付消息处理器,这里用于处理具体的支付业务
      *
      * @param handler 消息处理器
