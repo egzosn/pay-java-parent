@@ -22,6 +22,9 @@ public class Amount {
 
 	/**
 	 * Parameterized Constructor
+	 *
+	 * @param currency 类型
+	 * @param total 金额
 	 */
 	public Amount(String currency, String total) {
 		this.currency = currency;

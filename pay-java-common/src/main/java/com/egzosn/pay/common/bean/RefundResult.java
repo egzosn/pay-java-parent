@@ -7,7 +7,6 @@ import java.util.Map;
 /**
  * 退款结果
  * <p>
- * 这里继承Map为兼容方案，后续版本进行删除
  *
  * @author Egan
  * <pre>

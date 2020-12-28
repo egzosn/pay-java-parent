@@ -59,6 +59,7 @@ public class PayPalConfigStorage extends BasePayConfigStorage {
 
     /**
      * 获取取消页面的url
+     * @return 取消页面的url
      */
     public String getCancelUrl() {
         return getNotifyUrl();
