@@ -56,6 +56,7 @@ public class CartBase {
 
 	/**
 	 * Parameterized Constructor
+	 * @param amount 金额
 	 */
 	public CartBase(Amount amount) {
 		this.amount = amount;
@@ -63,72 +64,72 @@ public class CartBase {
 
 	/**
 	 * Merchant identifier to the purchase unit. Optional parameter
+	 * @return  identifier
 	 */
-	@SuppressWarnings("all")
 	public String getReferenceId() {
 		return this.referenceId;
 	}
 
 	/**
 	 * Amount being collected.
+	 * @return amount 金额
 	 */
-	@SuppressWarnings("all")
 	public Amount getAmount() {
 		return this.amount;
 	}
 
 	/**
 	 * Recipient of the funds in this transaction.
+	 * @return Recipient
 	 */
-	@SuppressWarnings("all")
 	public Payee getPayee() {
 		return this.payee;
 	}
 
 	/**
 	 * Description of what is being paid for.
+	 * @return Description
 	 */
-	@SuppressWarnings("all")
 	public String getDescription() {
 		return this.description;
 	}
 
 	/**
 	 * Note to the recipient of the funds in this transaction.
+	 * @return Note
 	 */
-	@SuppressWarnings("all")
 	public String getNoteToPayee() {
 		return this.noteToPayee;
 	}
 
 	/**
 	 * free-form field for the use of clients
+	 * @return custom
 	 */
-	@SuppressWarnings("all")
 	public String getCustom() {
 		return this.custom;
 	}
 
 	/**
 	 * invoice number to track this payment
+	 * @return invoice number
 	 */
-	@SuppressWarnings("all")
 	public String getInvoiceNumber() {
 		return this.invoiceNumber;
 	}
 
 	/**
 	 * Soft descriptor used when charging this funding source. If length exceeds max length, the value will be truncated
+	 * @return SoftDescriptor
 	 */
-	@SuppressWarnings("all")
 	public String getSoftDescriptor() {
 		return this.softDescriptor;
 	}
 
 	/**
 	 * Soft descriptor city used when charging this funding source. If length exceeds max length, the value will be truncated. Only supported when the `payment_method` is set to `credit_card`
+	 * @return Soft descriptor
 	 */
-	@SuppressWarnings("all")
 	public String getSoftDescriptorCity() {
 		return this.softDescriptorCity;
 	}
@@ -136,25 +137,25 @@ public class CartBase {
 
 	/**
 	 * URL to send payment notifications
+	 * @return URL
 	 */
-	@SuppressWarnings("all")
 	public String getNotifyUrl() {
 		return this.notifyUrl;
 	}
 
 	/**
 	 * Url on merchant site pertaining to this payment.
+	 * @return URL
 	 */
-	@SuppressWarnings("all")
 	public String getOrderUrl() {
 		return this.orderUrl;
 	}
 
 	/**
 	 * Merchant identifier to the purchase unit. Optional parameter
+	 * @param referenceId identifier
 	 * @return this
 	 */
-	@SuppressWarnings("all")
 	public CartBase setReferenceId(final String referenceId) {
 		this.referenceId = referenceId;
 		return this;
@@ -162,9 +163,9 @@ public class CartBase {
 
 	/**
 	 * Amount being collected.
+	 * @param amount 金额
 	 * @return this
 	 */
-	@SuppressWarnings("all")
 	public CartBase setAmount(final Amount amount) {
 		this.amount = amount;
 		return this;
@@ -172,9 +173,9 @@ public class CartBase {
 
 	/**
 	 * Recipient of the funds in this transaction.
+	 * @param payee Recipient
 	 * @return this
 	 */
-	@SuppressWarnings("all")
 	public CartBase setPayee(final Payee payee) {
 		this.payee = payee;
 		return this;
@@ -182,9 +183,9 @@ public class CartBase {
 
 	/**
 	 * Description of what is being paid for.
+	 * @param description description
 	 * @return this
 	 */
-	@SuppressWarnings("all")
 	public CartBase setDescription(final String description) {
 		this.description = description;
 		return this;
@@ -192,9 +193,9 @@ public class CartBase {
 
 	/**
 	 * Note to the recipient of the funds in this transaction.
+	 * @param noteToPayee noteToPayee
 	 * @return this
 	 */
-	@SuppressWarnings("all")
 	public CartBase setNoteToPayee(final String noteToPayee) {
 		this.noteToPayee = noteToPayee;
 		return this;
@@ -202,9 +203,9 @@ public class CartBase {
 
 	/**
 	 * free-form field for the use of clients
+	 * @param custom custom
 	 * @return this
 	 */
-	@SuppressWarnings("all")
 	public CartBase setCustom(final String custom) {
 		this.custom = custom;
 		return this;
@@ -212,9 +213,9 @@ public class CartBase {
 
 	/**
 	 * invoice number to track this payment
+	 * @param invoiceNumber invoiceNumber
 	 * @return this
 	 */
-	@SuppressWarnings("all")
 	public CartBase setInvoiceNumber(final String invoiceNumber) {
 		this.invoiceNumber = invoiceNumber;
 		return this;
@@ -222,9 +223,9 @@ public class CartBase {
 
 	/**
 	 * Soft descriptor used when charging this funding source. If length exceeds max length, the value will be truncated
+	 * @param softDescriptor softDescriptor
 	 * @return this
 	 */
-	@SuppressWarnings("all")
 	public CartBase setSoftDescriptor(final String softDescriptor) {
 		this.softDescriptor = softDescriptor;
 		return this;
@@ -232,9 +233,9 @@ public class CartBase {
 
 	/**
 	 * Soft descriptor city used when charging this funding source. If length exceeds max length, the value will be truncated. Only supported when the `payment_method` is set to `credit_card`
+	 * @param softDescriptorCity softDescriptorCity
 	 * @return this
 	 */
-	@SuppressWarnings("all")
 	public CartBase setSoftDescriptorCity(final String softDescriptorCity) {
 		this.softDescriptorCity = softDescriptorCity;
 		return this;
@@ -244,9 +245,9 @@ public class CartBase {
 
 	/**
 	 * URL to send payment notifications
+	 * @param notifyUrl notifyUrl
 	 * @return this
 	 */
-	@SuppressWarnings("all")
 	public CartBase setNotifyUrl(final String notifyUrl) {
 		this.notifyUrl = notifyUrl;
 		return this;
@@ -254,9 +255,9 @@ public class CartBase {
 
 	/**
 	 * Url on merchant site pertaining to this payment.
+	 * @param orderUrl orderUrl
 	 * @return this
 	 */
-	@SuppressWarnings("all")
 	public CartBase setOrderUrl(final String orderUrl) {
 		this.orderUrl = orderUrl;
 		return this;

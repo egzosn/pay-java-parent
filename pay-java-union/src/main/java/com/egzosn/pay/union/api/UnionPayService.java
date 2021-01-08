@@ -580,7 +580,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
      * @param type         UnionTransactionType.REFUND  或者UnionTransactionType.CONSUME_UNDO
      * @return 返回支付方申请退款后的结果
      */
-    public Map<String, Object> unionRefundOrConsumeUndo(String origQryId, String orderId, BigDecimal refundAmount, UnionTransactionType type) {
+    public UnionRefundResult unionRefundOrConsumeUndo(String origQryId, String orderId, BigDecimal refundAmount, UnionTransactionType type) {
         return unionRefundOrConsumeUndo(new RefundOrder(orderId, origQryId, refundAmount), type);
 
     }

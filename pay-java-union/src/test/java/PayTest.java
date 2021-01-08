@@ -1,18 +1,18 @@
-import com.egzosn.pay.common.bean.MethodType;
-import com.egzosn.pay.common.bean.PayOrder;
-import com.egzosn.pay.common.bean.RefundOrder;
-import com.egzosn.pay.union.api.UnionPayConfigStorage;
-import com.egzosn.pay.union.api.UnionPayService;
-import com.egzosn.pay.union.bean.UnionTransactionType;
-
 import java.awt.image.BufferedImage;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 
+import com.egzosn.pay.common.bean.MethodType;
+import com.egzosn.pay.common.bean.PayOrder;
+import com.egzosn.pay.common.bean.RefundOrder;
+import com.egzosn.pay.union.api.UnionPayConfigStorage;
+import com.egzosn.pay.union.api.UnionPayService;
+import com.egzosn.pay.union.bean.UnionRefundResult;
+import com.egzosn.pay.union.bean.UnionTransactionType;
+
 /**
- *
  * Descrption:银联支付测试
  * Author:Actinia
  * Date:2017/12/19  21:12
@@ -52,7 +52,7 @@ public class PayTest {
         //支付服务
         UnionPayService service = new UnionPayService(unionPayConfigStorage);
         //支付订单基础信息
-        PayOrder payOrder = new PayOrder("订单title", "摘要",  BigDecimal.valueOf(0.01) , new SimpleDateFormat("yyyyMMddHHmmss").format(System.currentTimeMillis()));
+        PayOrder payOrder = new PayOrder("订单title", "摘要", BigDecimal.valueOf(0.01), new SimpleDateFormat("yyyyMMddHHmmss").format(System.currentTimeMillis()));
 
 
         /*----------- 网页支付-------------------*/
@@ -79,34 +79,34 @@ public class PayTest {
         /*-----------消费(被扫场景)待定------------------------------*/
         payOrder.setTransactionType(UnionTransactionType.CONSUME);
         payOrder.setAuthCode("C2B码(条码号),1-20位数字");
-        params =   service.microPay(payOrder);
+        params = service.microPay(payOrder);
         /*-----------消费(被扫场景)------------------------------*/
 
 //       /*-----------消费撤销------------------------------*/
-        params =   service.unionRefundOrConsumeUndo(new RefundOrder( "订单号", "原交易查询流水号", new BigDecimal("退款金额" )),UnionTransactionType.CONSUME_UNDO);
+        UnionRefundResult refundResult = service.unionRefundOrConsumeUndo(new RefundOrder("订单号", "原交易查询流水号", new BigDecimal("退款金额")), UnionTransactionType.CONSUME_UNDO);
 //       /*-----------消费撤销------------------------------*/
 
         /*-----------交易状态查询交易：只有同步应答------------------------------*/
         payOrder.setTransactionType(UnionTransactionType.QUERY);
-        params =   service.query(null,"商户单号");
+        params = service.query(null, "商户单号");
         /*-----------交易状态查询交易：只有同步应答------------------------------*/
 
         /*-----------退货交易：后台资金类交易，有同步应答和后台通知应答------------------------------*/
         payOrder.setTransactionType(UnionTransactionType.REFUND);
-        params =   service.refund(new RefundOrder("原交易查询流水号", "订单号", null, new BigDecimal("退款金额" )));
+        refundResult = service.refund(new RefundOrder("原交易查询流水号", "订单号", null, new BigDecimal("退款金额")));
         /*-----------退货交易：后台资金类交易，有同步应答和后台通知应答------------------------------*/
 
 
         /*-----------文件传输类接口：后台获取对账文件交易，只有同步应答 ------------------------------*/
-        Map<String, Object> fileConten =   service.downloadbill(new Date(),"文件类型，一般商户填写00即可");      /*-----------退货交易：后台资金类交易，有同步应答和后台通知应答------------------------------*/
+        Map<String, Object> fileConten = service.downloadbill(new Date(), "文件类型，一般商户填写00即可");      /*-----------退货交易：后台资金类交易，有同步应答和后台通知应答------------------------------*/
 
 
-         /*-----------回调处理-------------------*/
+        /*-----------回调处理-------------------*/
 
 
 //        HttpServletRequest request
 //        params = service.getParameter2Map(request.getParameterMap(), request.getInputStream());
-        if (service.verify(params)){
+        if (service.verify(params)) {
             System.out.println("支付成功");
             return;
         }

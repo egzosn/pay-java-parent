@@ -22,44 +22,30 @@ public class RedirectUrls{
 	public RedirectUrls() {
 	}
 
-	/**
-	 * Url where the payer would be redirected to after approving the payment. **Required for PayPal account payments.**
-	 */
-	@SuppressWarnings("all")
+
 	public String getReturnUrl() {
 		return this.returnUrl;
 	}
 
-	/**
-	 * Url where the payer would be redirected to after canceling the payment. **Required for PayPal account payments.**
-	 */
-	@SuppressWarnings("all")
+
 	public String getCancelUrl() {
 		return this.cancelUrl;
 	}
 
-	/**
-	 * Url where the payer would be redirected to after approving the payment. **Required for PayPal account payments.**
-	 * @return this
-	 */
-	@SuppressWarnings("all")
+
 	public RedirectUrls setReturnUrl(final String returnUrl) {
 		this.returnUrl = returnUrl;
 		return this;
 	}
 
-	/**
-	 * Url where the payer would be redirected to after canceling the payment. **Required for PayPal account payments.**
-	 * @return this
-	 */
-	@SuppressWarnings("all")
+
 	public RedirectUrls setCancelUrl(final String cancelUrl) {
 		this.cancelUrl = cancelUrl;
 		return this;
 	}
 
 	@Override
-	@SuppressWarnings("all")
+
 	public boolean equals(final Object o) {
 		if (o == this) return true;
 		if (!(o instanceof RedirectUrls)) return false;
@@ -75,13 +61,11 @@ public class RedirectUrls{
 		return true;
 	}
 
-	@SuppressWarnings("all")
 	protected boolean canEqual(final Object other) {
 		return other instanceof RedirectUrls;
 	}
 
 	@Override
-	@SuppressWarnings("all")
 	public int hashCode() {
 		final int PRIME = 59;
 		int result = 1;

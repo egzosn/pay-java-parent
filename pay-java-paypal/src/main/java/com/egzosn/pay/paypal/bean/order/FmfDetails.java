@@ -19,71 +19,46 @@ public class FmfDetails{
 	 */
 	private String description;
 
-	/**
-	 * Type of filter.
-	 */
+
 	public String getFilterType() {
 		return this.filterType;
 	}
 
-	/**
-	 * Filter Identifier.
-	 */
-	
+
 	public String getFilterId() {
 		return this.filterId;
 	}
 
-	/**
-	 * Name of the filter
-	 */
-	
 	public String getName() {
 		return this.name;
 	}
 
-	/**
-	 * Description of the filter.
-	 */
+
 	
 	public String getDescription() {
 		return this.description;
 	}
 
-	/**
-	 * Type of filter.
-	 * @return this
-	 */
-	
+
 	public FmfDetails setFilterType(final String filterType) {
 		this.filterType = filterType;
 		return this;
 	}
 
-	/**
-	 * Filter Identifier.
-	 * @return this
-	 */
-	
+
 	public FmfDetails setFilterId(final String filterId) {
 		this.filterId = filterId;
 		return this;
 	}
 
-	/**
-	 * Name of the filter
-	 * @return this
-	 */
+
 	
 	public FmfDetails setName(final String name) {
 		this.name = name;
 		return this;
 	}
 
-	/**
-	 * Description of the filter.
-	 * @return this
-	 */
+
 	
 	public FmfDetails setDescription(final String description) {
 		this.description = description;
@@ -119,7 +94,6 @@ public class FmfDetails{
 	}
 
 	@Override
-	
 	public int hashCode() {
 		final int PRIME = 59;
 		int result = 1;
