@@ -6,7 +6,6 @@ import com.egzosn.pay.ali.bean.AliTransactionType;
 import com.egzosn.pay.common.api.PayService;
 import com.egzosn.pay.common.bean.BasePayType;
 import com.egzosn.pay.common.bean.CertStoreType;
-import com.egzosn.pay.common.bean.MsgType;
 import com.egzosn.pay.common.bean.TransactionType;
 import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.demo.service.handler.WxPayMessageHandler;
@@ -30,7 +29,6 @@ import com.egzosn.pay.wx.youdian.api.WxYouDianPayService;
 import com.egzosn.pay.wx.youdian.bean.YoudianTransactionType;
 
 
-
 /**
  * 支付类型
  *
@@ -41,7 +39,7 @@ import com.egzosn.pay.wx.youdian.bean.YoudianTransactionType;
 public enum PayType implements BasePayType {
 
 
-    aliPay{
+    aliPay {
         /**
          *  @see com.egzosn.pay.ali.api.AliPayService
          * @param apyAccount
@@ -61,7 +59,6 @@ public enum PayType implements BasePayType {
             configStorage.setSignType(apyAccount.getSignType());
             configStorage.setSeller(apyAccount.getSeller());
             configStorage.setPayType(apyAccount.getPayType().toString());
-            configStorage.setMsgType(apyAccount.getMsgType());
             configStorage.setInputCharset(apyAccount.getInputCharset());
             configStorage.setTest(apyAccount.isTest());
             //请求连接池配置
@@ -82,7 +79,7 @@ public enum PayType implements BasePayType {
         }
 
 
-    },wxPay {
+    }, wxPay {
         @Override
         public PayService getPayService(ApyAccount apyAccount) {
             WxPayConfigStorage wxPayConfigStorage = new WxPayConfigStorage();
@@ -95,7 +92,6 @@ public enum PayType implements BasePayType {
             wxPayConfigStorage.setReturnUrl(apyAccount.getReturnUrl());
             wxPayConfigStorage.setSignType(apyAccount.getSignType());
             wxPayConfigStorage.setPayType(apyAccount.getPayType().toString());
-            wxPayConfigStorage.setMsgType(apyAccount.getMsgType());
             wxPayConfigStorage.setInputCharset(apyAccount.getInputCharset());
             wxPayConfigStorage.setTest(apyAccount.isTest());
 
@@ -124,7 +120,7 @@ public enum PayType implements BasePayType {
 
             return WxTransactionType.valueOf(transactionType);
         }
-    },youdianPay {
+    }, youdianPay {
         @Override
         public PayService getPayService(ApyAccount apyAccount) {
             // TODO 2017/1/23 14:12 author: egan  集群的话,友店可能会有bug。暂未测试集群环境
@@ -135,11 +131,10 @@ public enum PayType implements BasePayType {
 //            wxPayConfigStorage.setReturnUrl(apyAccount.getReturnUrl());
             wxPayConfigStorage.setSignType(apyAccount.getSignType());
             wxPayConfigStorage.setPayType(apyAccount.getPayType().toString());
-            wxPayConfigStorage.setMsgType(apyAccount.getMsgType());
             wxPayConfigStorage.setSeller(apyAccount.getSeller());
             wxPayConfigStorage.setInputCharset(apyAccount.getInputCharset());
             wxPayConfigStorage.setTest(apyAccount.isTest());
-            return  new WxYouDianPayService(wxPayConfigStorage);
+            return new WxYouDianPayService(wxPayConfigStorage);
         }
 
         /**
@@ -153,8 +148,7 @@ public enum PayType implements BasePayType {
 
             return YoudianTransactionType.valueOf(transactionType);
         }
-    },fuiou{
-
+    }, fuiou {
         @Override
         public PayService getPayService(ApyAccount apyAccount) {
             FuiouPayConfigStorage fuiouPayConfigStorage = new FuiouPayConfigStorage();
@@ -164,7 +158,6 @@ public enum PayType implements BasePayType {
             fuiouPayConfigStorage.setReturnUrl(apyAccount.getReturnUrl());
             fuiouPayConfigStorage.setSignType(apyAccount.getSignType());
             fuiouPayConfigStorage.setPayType(apyAccount.getPayType().toString());
-            fuiouPayConfigStorage.setMsgType(apyAccount.getMsgType());
             fuiouPayConfigStorage.setInputCharset(apyAccount.getInputCharset());
             fuiouPayConfigStorage.setTest(apyAccount.isTest());
             return new FuiouPayService(fuiouPayConfigStorage);
@@ -176,8 +169,7 @@ public enum PayType implements BasePayType {
         }
 
 
-    },unionPay{
-
+    }, unionPay {
         @Override
         public PayService getPayService(ApyAccount apyAccount) {
             UnionPayConfigStorage unionPayConfigStorage = new UnionPayConfigStorage();
@@ -201,7 +193,6 @@ public enum PayType implements BasePayType {
             unionPayConfigStorage.setReturnUrl(apyAccount.getReturnUrl());
             unionPayConfigStorage.setSignType(apyAccount.getSignType());
             unionPayConfigStorage.setPayType(apyAccount.getPayType().toString());
-            unionPayConfigStorage.setMsgType(apyAccount.getMsgType());
             unionPayConfigStorage.setInputCharset(apyAccount.getInputCharset());
             unionPayConfigStorage.setTest(apyAccount.isTest());
             return new UnionPayService(unionPayConfigStorage);
@@ -213,13 +204,12 @@ public enum PayType implements BasePayType {
         }
 
 
-    },payoneer{
+    }, payoneer {
         @Override
         public PayService getPayService(ApyAccount apyAccount) {
             PayoneerConfigStorage configStorage = new PayoneerConfigStorage();
             //设置商户Id
             configStorage.setProgramId(apyAccount.getPartner());
-            configStorage.setMsgType(MsgType.json);
             configStorage.setInputCharset("utf-8");
             //"PayoneerPay 用户名"
             configStorage.setUserName(apyAccount.getSeller());
@@ -243,7 +233,7 @@ public enum PayType implements BasePayType {
         }
 
 
-    },payPal{
+    }, payPal {
         @Override
         public PayService getPayService(ApyAccount apyAccount) {
             PayPalConfigStorage storage = new PayPalConfigStorage();

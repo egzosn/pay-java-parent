@@ -26,6 +26,17 @@ public class WxYouDianPayConfigStorage extends BasePayConfigStorage {
         return null;
     }
 
+    /**
+     * 应用id
+     * 纠正名称
+     *
+     * @return 应用id
+     */
+    @Override
+    public String getAppId() {
+        return null;
+    }
+
 
     @Override
     public String getPid() {

@@ -7,6 +7,7 @@ import java.util.Map;
 /**
  * 支付回调消息
  * 基础实现，具体可根据具体支付回调的消息去实现
+ *
  * @author egan
  * <pre>
  *     email egzosn@gmail.com
@@ -15,8 +16,6 @@ import java.util.Map;
  */
 public class PayMessage implements Serializable {
     private Map<String, Object> payMessage = null;
-    @Deprecated
-    private String msgType;
     private String payType;
     private String transactionType;
     private String fromPay;
@@ -30,32 +29,20 @@ public class PayMessage implements Serializable {
         this.payMessage = payMessage;
     }
 
-    public PayMessage(Map<String, Object> payMessage, String payType, String msgType) {
+    public PayMessage(Map<String, Object> payMessage, String payType) {
         this.payMessage = payMessage;
         this.payType = payType;
-        this.msgType = msgType;
     }
 
 
-    public PayMessage(Map<String, Object> payMessage, String msgType, String payType, String transactionType) {
+    public PayMessage(Map<String, Object> payMessage, String payType, String transactionType) {
         this.payMessage = payMessage;
-        this.msgType = msgType;
         this.payType = payType;
         this.transactionType = transactionType;
     }
 
     protected void setPayMessage(Map<String, Object> payMessage) {
         this.payMessage = payMessage;
-    }
-
-    @Deprecated
-    public String getMsgType() {
-        return msgType;
-    }
-
-    @Deprecated
-    public void setMsgType(String msgType) {
-        this.msgType = msgType;
     }
 
 
@@ -72,7 +59,7 @@ public class PayMessage implements Serializable {
     }
 
     public void setTransactionType(String transactionType) {
-            this.transactionType = transactionType;
+        this.transactionType = transactionType;
     }
 
     public String getFromPay() {
@@ -90,28 +77,31 @@ public class PayMessage implements Serializable {
     public void setDescribe(String describe) {
         this.describe = describe;
     }
-    public String getDiscount(){
+
+    public String getDiscount() {
         return (String) payMessage.get("discount");
     }
-    public String getSubject(){
+
+    public String getSubject() {
         return (String) payMessage.get("subject");
     }
 
 
-
     /////////微信与支付宝共用
-    public String getOutTradeNo(){
+    public String getOutTradeNo() {
         return (String) payMessage.get("out_trade_no");
     }
 
-    public String getSign(){
+    public String getSign() {
         return (String) payMessage.get("sign");
     }
 
-    public Number getTotalFee(){
+    public Number getTotalFee() {
         String totalFee = (String) payMessage.get("total_fee");
-        if (null == totalFee || "".equals(totalFee)){    return 0;      }
-        if (isNumber(totalFee)){
+        if (null == totalFee || "".equals(totalFee)) {
+            return 0;
+        }
+        if (isNumber(totalFee)) {
             return new BigDecimal(totalFee);
         }
         return 0;
@@ -120,11 +110,9 @@ public class PayMessage implements Serializable {
     /////////微信与支付宝共用
 
 
-
-    public boolean isNumber(String str){
+    public boolean isNumber(String str) {
         return str.matches("^(-?[1-9]\\d*\\.?\\d*)|(-?0\\.\\d*[1-9])|(-?[0])|(-?[0]\\.\\d*)$");
     }
-
 
 
     @Override
@@ -135,7 +123,6 @@ public class PayMessage implements Serializable {
     public Map<String, Object> getPayMessage() {
         return payMessage;
     }
-
 
 
 }

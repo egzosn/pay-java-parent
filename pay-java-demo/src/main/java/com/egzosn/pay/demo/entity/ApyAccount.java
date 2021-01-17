@@ -2,12 +2,11 @@
 
 package com.egzosn.pay.demo.entity;
 
-import com.egzosn.pay.common.bean.MsgType;
-
 //import javax.persistence.*;
 
 /**
  * 支付账户
+ *
  * @author: egan
  * email egzosn@gmail.com
  * date 2016/11/18 0:36
@@ -59,12 +58,9 @@ public class ApyAccount {
 //    @Enumerated(EnumType.STRING)
 //    @Column(name = "pay_type")
     private PayType payType;
-    // 消息类型，text,xml,json
-//    @Enumerated(EnumType.STRING)
-//    @Column(name = "msg_type")
-    private MsgType msgType;
     //是否为测试环境
     private boolean isTest = false;
+
     public Integer getPayId() {
         return payId;
     }
@@ -145,14 +141,6 @@ public class ApyAccount {
         this.payType = payType;
     }
 
-    public MsgType getMsgType() {
-        return msgType;
-    }
-
-    public void setMsgType(MsgType msgType) {
-        this.msgType = msgType;
-    }
-
     public String getInputCharset() {
         return inputCharset;
     }
@@ -199,7 +187,6 @@ public class ApyAccount {
                 ", signType='" + signType + '\'' +
                 ", inputCharset='" + inputCharset + '\'' +
                 ", payType=" + payType +
-                ", msgType=" + msgType +
                 '}';
     }
 }

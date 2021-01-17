@@ -1,6 +1,18 @@
 package com.egzosn.pay.demo.controller;
 
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigDecimal;
+import java.util.UUID;
+
+import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.egzosn.pay.common.api.PayService;
 import com.egzosn.pay.common.bean.DefaultCurType;
 import com.egzosn.pay.common.bean.PayOrder;
@@ -10,17 +22,6 @@ import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.paypal.api.PayPalConfigStorage;
 import com.egzosn.pay.paypal.api.PayPalPayService;
 import com.egzosn.pay.paypal.bean.PayPalTransactionType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.io.InputStream;
-import java.math.BigDecimal;
-import java.util.Map;
-import java.util.UUID;
 
 /**
  * 发起支付入口
@@ -39,13 +40,13 @@ public class PayPalPayController {
     @PostConstruct
     public void init() {
         PayPalConfigStorage storage = new PayPalConfigStorage();
-        storage.setClientID("AZ7HTcvrEAxYbzYx_iDZAi06GdqbjhqqQzFgPBFLxm2VUMzwlmiNUBk_y_5QNP4zWKblTuM6ZBAmxScd");
-        storage.setClientSecret("EBMIjAag6NiRdXZxteTv0amEsmKN345xJv3bN7f_HRXSqcRJlW7PXhYXjI9sk5I4nKYOHgeqzhXCXKFo");
+        storage.setClientID("AZDS0IhUZvJTO99unlvSDMfbZIP-p-UecYXZdJoweha9LFuqKXKcQIGZgfVaX6oGiAOJAUuJD7JwyTl1");
+        storage.setClientSecret("EK2YaOrw3oLSDWIRzvb9BWGTjiPPhY1fFUu5ylhUsGYLc_h_dlpJ0hr_LDEkbO9MyKP2P83YcywbPaem");
         storage.setTest(true);
         //发起付款后的页面转跳地址
         storage.setReturnUrl("http://www.egzosn.com/payPal/payBack.json");
         //取消按钮转跳地址,这里用异步通知地址的兼容的做法
-        storage.setNotifyUrl("http://www.egzosn.com/pay/cancel");
+        storage.setCancelUrl("http://www.egzosn.com/pay/cancel");
         service = new PayPalPayService(storage);
 
         //请求连接池配置
@@ -76,11 +77,12 @@ public class PayPalPayController {
         String toPayHtml = service.toPay(order);
 
         //某些支付下单时无法设置单号，通过下单后返回对应单号，如 paypal，友店。
-        String outTradeNo = order.getOutTradeNo();
-        System.out.println("支付订单号：" + outTradeNo + "  这里可以进行回存");
+        String tradeNo = order.getTradeNo();
+        System.out.println("支付订单号：" + tradeNo + "  这里可以进行回存");
 
         return toPayHtml;
     }
+
     /**
      * 申请退款接口
      *
@@ -98,10 +100,13 @@ public class PayPalPayController {
     }
 
 
+    /*    */
+
     /**
      * return url
      * PayPal确认付款调用的接口
      * 用户确认付款后，paypal调用的这个方法执行付款
+     *
      * @param request 请求
      * @return 付款成功信息
      * @throws IOException IOException
@@ -118,17 +123,17 @@ public class PayPalPayController {
         return "failure";
     }
 
+    /*   */
+
     /**
      * 支付回调地址
      *
-     * @param request  请求
-     *
+     * @param request 请求
      * @return 结果
      * @throws IOException IOException
-     * 业务处理在对应的PayMessageHandler里面处理，在哪里设置PayMessageHandler，详情查看{@link com.egzosn.pay.common.api.PayService#setPayMessageHandler(com.egzosn.pay.common.api.PayMessageHandler)}
-     *
-     * 如果未设置 {@link com.egzosn.pay.common.api.PayMessageHandler} 那么会使用默认的 {@link com.egzosn.pay.common.api.DefaultPayMessageHandler}
-     *
+     *                     业务处理在对应的PayMessageHandler里面处理，在哪里设置PayMessageHandler，详情查看{@link com.egzosn.pay.common.api.PayService#setPayMessageHandler(com.egzosn.pay.common.api.PayMessageHandler)}
+     *                     <p>
+     *                     如果未设置 {@link com.egzosn.pay.common.api.PayMessageHandler} 那么会使用默认的 {@link com.egzosn.pay.common.api.DefaultPayMessageHandler}
      */
     @RequestMapping(value = "payBack.json")
     public String payBack(HttpServletRequest request) throws IOException {

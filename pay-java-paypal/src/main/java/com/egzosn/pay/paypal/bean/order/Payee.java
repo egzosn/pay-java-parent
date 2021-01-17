@@ -40,116 +40,73 @@ public class Payee  {
 	public Payee() {
 	}
 
-	/**
-	 * Email Address associated with the Payee's PayPal Account. If the provided email address is not associated with any PayPal Account, the payee can only receive PayPal Wallet Payments. Direct Credit Card Payments will be denied due to card compliance requirements.
-	 */
-	@SuppressWarnings("all")
+
 	public String getEmail() {
 		return this.email;
 	}
 
-	/**
-	 * Encrypted PayPal account identifier for the Payee.
-	 */
-	@SuppressWarnings("all")
+
 	public String getMerchantId() {
 		return this.merchantId;
 	}
 
-	/**
-	 * First Name of the Payee.
-	 */
-	@SuppressWarnings("all")
+
 	public String getFirstName() {
 		return this.firstName;
 	}
 
-	/**
-	 * Last Name of the Payee.
-	 */
-	@SuppressWarnings("all")
+
 	public String getLastName() {
 		return this.lastName;
 	}
 
-	/**
-	 * Unencrypted PayPal account Number of the Payee
-	 */
-	@SuppressWarnings("all")
+
 	public String getAccountNumber() {
 		return this.accountNumber;
 	}
 
-	/**
-	 * Information related to the Payee.
-	 */
-	@SuppressWarnings("all")
+
 	public Phone getPhone() {
 		return this.phone;
 	}
 
-	/**
-	 * Email Address associated with the Payee's PayPal Account. If the provided email address is not associated with any PayPal Account, the payee can only receive PayPal Wallet Payments. Direct Credit Card Payments will be denied due to card compliance requirements.
-	 * @return this
-	 */
-	@SuppressWarnings("all")
+
 	public Payee setEmail(final String email) {
 		this.email = email;
 		return this;
 	}
 
-	/**
-	 * Encrypted PayPal account identifier for the Payee.
-	 * @return this
-	 */
-	@SuppressWarnings("all")
+
 	public Payee setMerchantId(final String merchantId) {
 		this.merchantId = merchantId;
 		return this;
 	}
 
-	/**
-	 * First Name of the Payee.
-	 * @return this
-	 */
-	@SuppressWarnings("all")
+
 	public Payee setFirstName(final String firstName) {
 		this.firstName = firstName;
 		return this;
 	}
 
-	/**
-	 * Last Name of the Payee.
-	 * @return this
-	 */
-	@SuppressWarnings("all")
+
 	public Payee setLastName(final String lastName) {
 		this.lastName = lastName;
 		return this;
 	}
 
-	/**
-	 * Unencrypted PayPal account Number of the Payee
-	 * @return this
-	 */
-	@SuppressWarnings("all")
+
 	public Payee setAccountNumber(final String accountNumber) {
 		this.accountNumber = accountNumber;
 		return this;
 	}
 
-	/**
-	 * Information related to the Payee.
-	 * @return this
-	 */
-	@SuppressWarnings("all")
+
 	public Payee setPhone(final Phone phone) {
 		this.phone = phone;
 		return this;
 	}
 
-	@Override
-	@SuppressWarnings("all")
+
 	public boolean equals(final Object o) {
 		if (o == this) return true;
 		if (!(o instanceof Payee)) return false;
@@ -177,13 +134,12 @@ public class Payee  {
 		return true;
 	}
 
-	@SuppressWarnings("all")
+
 	protected boolean canEqual(final Object other) {
 		return other instanceof Payee;
 	}
 
 	@Override
-	@SuppressWarnings("all")
 	public int hashCode() {
 		final int PRIME = 59;
 		int result = 1;

@@ -1,6 +1,5 @@
 package com.egzosn.pay.common.bean.outbuilder;
 
-import com.egzosn.pay.common.bean.MsgType;
 import com.egzosn.pay.common.bean.PayOutMessage;
 
 /**
@@ -15,7 +14,6 @@ public class PayXmlOutMessage extends PayOutMessage{
     private String code;
 
     public PayXmlOutMessage() {
-        this.msgType = MsgType.xml.name();
     }
 
     public String getCode() {

@@ -1,7 +1,6 @@
 package com.egzosn.pay.common.api;
 
 import com.egzosn.pay.common.bean.Attrs;
-import com.egzosn.pay.common.bean.MsgType;
 
 /**
  * 支付客户端配置存储
@@ -23,10 +22,21 @@ public interface PayConfigStorage extends Attrs {
 
     /**
      * 应用id
+     * 纠正名称
+     *
+     * @return 应用id
+     * @see #getAppId()
+     */
+    @Deprecated
+    String getAppid();
+
+    /**
+     * 应用id
+     * 纠正名称
      *
      * @return 应用id
      */
-    String getAppid();
+    String getAppId();
 
     /**
      * 合作商唯一标识
@@ -99,17 +109,6 @@ public interface PayConfigStorage extends Attrs {
      * @return 支付类型
      */
     String getPayType();
-
-    /**
-     * 消息类型
-     *
-     * @return "text" 或者 "xml"，json
-     * @see #getMsgType
-     * @see MsgType
-     */
-    @Deprecated
-    MsgType getMsgType();
-
 
     /**
      * 应该是线程安全的

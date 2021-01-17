@@ -1,11 +1,5 @@
 package com.egzosn.pay.common.api;
 
-import com.egzosn.pay.common.bean.PayMessage;
-import com.egzosn.pay.common.bean.PayOutMessage;
-import com.egzosn.pay.common.util.LogExceptionHandler;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +7,13 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.egzosn.pay.common.bean.PayMessage;
+import com.egzosn.pay.common.bean.PayOutMessage;
+import com.egzosn.pay.common.util.LogExceptionHandler;
 
 /**
  * <pre>
@@ -124,15 +125,13 @@ public class PayMessageRouter {
      * 处理支付消息
      *
      * @param payMessage 支付消息
-     * @param storage 支付配置
+     * @param storage    支付配置
      * @return 支付输出结果
      */
     public PayOutMessage route(Map<String, Object> payMessage, PayConfigStorage storage) {
         PayMessage message = payService.createMessage(payMessage);
         message.setPayType(storage.getPayType());
-        if (null != storage.getMsgType()){
-            message.setMsgType(storage.getMsgType().name());
-        }
+
         return route(message);
     }
 
@@ -172,7 +171,8 @@ public class PayMessageRouter {
                             }
                         })
                 );
-            } else {
+            }
+            else {
                 res = rule.service(payMessage, payService, exceptionHandler);
                 // 在同步操作结束，session访问结束
                 if (LOG.isDebugEnabled()) {
@@ -190,9 +190,11 @@ public class PayMessageRouter {
                             future.get();
                             LOG.debug("End session access: async=true, fromPay=" + payMessage.getFromPay());
 
-                        } catch (InterruptedException e) {
+                        }
+                        catch (InterruptedException e) {
                             LOG.error("Error happened when wait task finish", e);
-                        } catch (ExecutionException e) {
+                        }
+                        catch (ExecutionException e) {
                             LOG.error("Error happened when wait task finish", e);
                         }
                     }

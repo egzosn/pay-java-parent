@@ -112,6 +112,21 @@
 
 ``` 
 
+
+#### JSAPI支付
+
+```java
+
+        /*-----------JSAPI-------------------*/
+        //公众号支付
+        payOrder.setTransactionType(WxTransactionType.JSAPI);
+        //微信公众号对应微信付款用户的唯一标识
+        payOrder.setOpenid(openid);
+          Map appOrderInfo = service.orderInfo(payOrder);
+        /*-----------/JSAPI-------------------*/
+
+``` 
+
 #### 网页支付
 
 ```java

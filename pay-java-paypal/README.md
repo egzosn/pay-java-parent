@@ -13,7 +13,7 @@
         //发起付款后的页面转跳地址
         storage.setReturnUrl("http://127.0.0.1:8088/pay/success");
         //取消按钮转跳地址,这里用异步通知地址的兼容的做法
-        storage.setCancelUrl("http://127.0.0.1:8088/pay/cancel");
+        storage.setNotifyUrl("http://127.0.0.1:8088/pay/cancel");
            
         
 ```

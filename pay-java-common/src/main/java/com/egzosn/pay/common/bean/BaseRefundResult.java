@@ -1,9 +1,7 @@
 package com.egzosn.pay.common.bean;
 
 import java.math.BigDecimal;
-import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * 基础的退款结果对象

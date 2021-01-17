@@ -26,70 +26,46 @@ public class Phone{
 	public Phone() {
 	}
 
-	/**
-	 * Parameterized Constructor
-	 */
+
 	public Phone(String countryCode, String nationalNumber) {
 		this.countryCode = countryCode;
 		this.nationalNumber = nationalNumber;
 	}
 
-	/**
-	 * Country code (from in E.164 format)
-	 */
-	@SuppressWarnings("all")
+
 	public String getCountryCode() {
 		return this.countryCode;
 	}
 
-	/**
-	 * In-country phone number (from in E.164 format)
-	 */
-	@SuppressWarnings("all")
+
 	public String getNationalNumber() {
 		return this.nationalNumber;
 	}
 
-	/**
-	 * Phone extension
-	 */
-	@SuppressWarnings("all")
+
 	public String getExtension() {
 		return this.extension;
 	}
 
-	/**
-	 * Country code (from in E.164 format)
-	 * @return this
-	 */
-	@SuppressWarnings("all")
+
 	public Phone setCountryCode(final String countryCode) {
 		this.countryCode = countryCode;
 		return this;
 	}
 
-	/**
-	 * In-country phone number (from in E.164 format)
-	 * @return this
-	 */
-	@SuppressWarnings("all")
+
 	public Phone setNationalNumber(final String nationalNumber) {
 		this.nationalNumber = nationalNumber;
 		return this;
 	}
 
-	/**
-	 * Phone extension
-	 * @return this
-	 */
-	@SuppressWarnings("all")
+
 	public Phone setExtension(final String extension) {
 		this.extension = extension;
 		return this;
 	}
 
 	@Override
-	@SuppressWarnings("all")
 	public boolean equals(final Object o) {
 		if (o == this) return true;
 		if (!(o instanceof Phone)) return false;
@@ -108,13 +84,11 @@ public class Phone{
 		return true;
 	}
 
-	@SuppressWarnings("all")
 	protected boolean canEqual(final Object other) {
 		return other instanceof Phone;
 	}
 
 	@Override
-	@SuppressWarnings("all")
 	public int hashCode() {
 		final int PRIME = 59;
 		int result = 1;
