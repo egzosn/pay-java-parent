@@ -1,20 +1,21 @@
 package com.egzosn.pay.common.api;
 
 
-import com.egzosn.pay.common.bean.PayMessage;
-import com.egzosn.pay.common.bean.PayOutMessage;
-import com.egzosn.pay.common.exception.PayErrorException;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import com.egzosn.pay.common.bean.PayMessage;
+import com.egzosn.pay.common.bean.PayOutMessage;
+import com.egzosn.pay.common.exception.PayErrorException;
+
 
 /**
  * Route规则 路由
- * @author  egan
+ *
+ * @author egan
  * <pre>
  *  email egzosn@gmail.com
  *  date 2016-6-1 11:28:01
@@ -32,10 +33,6 @@ public class PayMessageRouterRule {
      */
     private boolean async = false;
 
-    /**
-     * 消息类型
-     */
-    private String msgType;
     /**
      * 支付类型
      */
@@ -74,7 +71,7 @@ public class PayMessageRouterRule {
     /**
      * 设置是否异步执行，默认是true
      *
-     * @param async  是否异步执行，默认是true
+     * @param async 是否异步执行，默认是true
      * @return Route规则
      */
     public PayMessageRouterRule async(boolean async) {
@@ -82,21 +79,11 @@ public class PayMessageRouterRule {
         return this;
     }
 
-    /**
-     * 如果msgType等于某值
-     *
-     * @param msgType 消息类型
-     * @return Route规则
-     */
-    public PayMessageRouterRule msgType(String msgType) {
-        this.msgType = msgType;
-        return this;
-    }
 
     /**
      * 如果payType等于某值
      *
-     * @param payType  支付类型
+     * @param payType 支付类型
      * @return Route规则
      */
     public PayMessageRouterRule payType(String payType) {
@@ -110,11 +97,10 @@ public class PayMessageRouterRule {
      * @param transactionType 交易类型
      * @return Route规则
      */
-    public PayMessageRouterRule transactionType(String ... transactionType) {
+    public PayMessageRouterRule transactionType(String... transactionType) {
         this.transactionType = transactionType;
         return this;
     }
-
 
 
     /**
@@ -138,10 +124,11 @@ public class PayMessageRouterRule {
         this.rSubject = regex;
         return this;
     }
+
     /**
      * 如果subject匹配该正则表达式
      *
-     * @param key 需要匹配支付消息内键的名字
+     * @param key   需要匹配支付消息内键的名字
      * @param regex key值对应的正则
      * @return Route规则
      */
@@ -165,7 +152,7 @@ public class PayMessageRouterRule {
     /**
      * 设置消息拦截器
      *
-     * @param interceptor 消息拦截器
+     * @param interceptor       消息拦截器
      * @param otherInterceptors 其他消息拦截器
      * @return Route规则
      */
@@ -192,7 +179,7 @@ public class PayMessageRouterRule {
     /**
      * 设置消息处理器
      *
-     * @param handler 消息处理器
+     * @param handler       消息处理器
      * @param otherHandlers 其他消息处理器
      * @return Route规则
      */
@@ -229,41 +216,41 @@ public class PayMessageRouterRule {
     /**
      * 将支付事件修正为不区分大小写,
      * 比如框架定义的事件常量为
+     *
      * @param payMessage 支付消息
      * @return 是否匹配通过
      */
     protected boolean test(PayMessage payMessage) {
         return (
-                       (this.msgType == null || this.msgType.toLowerCase().equals((payMessage.getMsgType() ==null?null:payMessage.getMsgType().toLowerCase())))
-                        &&
-                        (this.payType == null || this.payType.equals((payMessage.getPayType() == null ? null : payMessage.getPayType())))
+                (this.payType == null || this.payType.equals((payMessage.getPayType() == null ? null : payMessage.getPayType())))
                         &&
                         (this.transactionType == null || equalsTransactionType(payMessage.getTransactionType()))
                         &&
-                        (this.key == null ||this.rValue == null || Pattern
+                        (this.key == null || this.rValue == null || Pattern
                                 .matches(this.rValue, payMessage.getPayMessage().get(key) == null ? "" : payMessage.getPayMessage().get(key).toString().trim()))
-                         &&
+                        &&
                         (this.subject == null || this.subject
                                 .equals(payMessage.getSubject() == null ? null : payMessage.getSubject().trim()))
                         &&
                         (this.rSubject == null || Pattern
                                 .matches(this.rSubject, payMessage.getSubject() == null ? "" : payMessage.getSubject().trim()))
-                )
+        )
                 ;
     }
 
     /**
      * 匹配交易类型
+     *
      * @param transactionType 交易类型
      * @return 匹配交易类型
      */
     public boolean equalsTransactionType(String transactionType) {
-        if (null == transactionType){
+        if (null == transactionType) {
             return false;
         }
 
-        for (String type :this.getTransactionType()){
-            if (type.toLowerCase().equals((transactionType.toLowerCase()))){
+        for (String type : this.getTransactionType()) {
+            if (type.toLowerCase().equals((transactionType.toLowerCase()))) {
                 return true;
             }
         }
@@ -273,15 +260,16 @@ public class PayMessageRouterRule {
 
 
     /**
-     *  返回支付响应消息
-     * @param payMessage 支付消息
-     * @param payService 支付服务
+     * 返回支付响应消息
+     *
+     * @param payMessage       支付消息
+     * @param payService       支付服务
      * @param exceptionHandler 异常处理器
      * @return 支付响应消息
      */
     protected PayOutMessage service(PayMessage payMessage,
-                                        PayService payService,
-                                        PayErrorExceptionHandler exceptionHandler) {
+                                    PayService payService,
+                                    PayErrorExceptionHandler exceptionHandler) {
 
         try {
 
@@ -301,7 +289,8 @@ public class PayMessageRouterRule {
                 res = handler.handle(payMessage, context, payService);
             }
             return res;
-        } catch (PayErrorException e) {
+        }
+        catch (PayErrorException e) {
             exceptionHandler.handle(e);
         }
         return null;
@@ -318,15 +307,6 @@ public class PayMessageRouterRule {
 
     public void setAsync(boolean async) {
         this.async = async;
-    }
-
-
-    public String getMsgType() {
-        return msgType;
-    }
-
-    public void setMsgType(String msgType) {
-        this.msgType = msgType;
     }
 
     public String getPayType() {

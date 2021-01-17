@@ -4,7 +4,8 @@ import com.egzosn.pay.common.api.BasePayConfigStorage;
 
 /**
  * 易极付配置存储
- * @author  egan
+ *
+ * @author egan
  *
  * <pre>
  * email egzosn@gmail.com
@@ -15,14 +16,14 @@ public class YiJiPayConfigStorage extends BasePayConfigStorage {
 
 
     /**
-     *  	易极付分配的商户号 合作者id
+     * 易极付分配的商户号 合作者id
      */
     private String partnerId;
 
     /**
      * 卖家id
      */
-    private String  sellerUserId;
+    private String sellerUserId;
 
     public String getPartnerId() {
         return partnerId;
@@ -37,6 +38,17 @@ public class YiJiPayConfigStorage extends BasePayConfigStorage {
         return null;
     }
 
+    /**
+     * 应用id
+     * 纠正名称
+     *
+     * @return 应用id
+     */
+    @Override
+    public String getAppId() {
+        return null;
+    }
+
 
     /**
      * 合作商唯一标识
@@ -45,8 +57,6 @@ public class YiJiPayConfigStorage extends BasePayConfigStorage {
     public String getPid() {
         return partnerId;
     }
-
-
 
 
     @Override
@@ -63,7 +73,8 @@ public class YiJiPayConfigStorage extends BasePayConfigStorage {
     }
 
     /**
-     *  为商户平台设置的密钥key
+     * 为商户平台设置的密钥key
+     *
      * @return 密钥
      */
     public String getSecretKey() {
@@ -71,7 +82,7 @@ public class YiJiPayConfigStorage extends BasePayConfigStorage {
     }
 
     public void setSecretKey(String secretKey) {
-         setKeyPrivate(secretKey);
+        setKeyPrivate(secretKey);
     }
 
 

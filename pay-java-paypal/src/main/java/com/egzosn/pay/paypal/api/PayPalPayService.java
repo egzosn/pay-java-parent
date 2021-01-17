@@ -1,10 +1,34 @@
 package com.egzosn.pay.paypal.api;
 
 
+import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.locks.Lock;
+
+import org.apache.http.Header;
+import org.apache.http.entity.ContentType;
+import org.apache.http.message.BasicHeader;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.api.BasePayService;
-import com.egzosn.pay.common.bean.*;
+import com.egzosn.pay.common.bean.BaseRefundResult;
+import com.egzosn.pay.common.bean.CurType;
+import com.egzosn.pay.common.bean.DefaultCurType;
+import com.egzosn.pay.common.bean.MethodType;
+import com.egzosn.pay.common.bean.PayMessage;
+import com.egzosn.pay.common.bean.PayOrder;
+import com.egzosn.pay.common.bean.PayOutMessage;
+import com.egzosn.pay.common.bean.RefundOrder;
+import com.egzosn.pay.common.bean.RefundResult;
+import com.egzosn.pay.common.bean.TransactionType;
 import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpHeader;
@@ -12,24 +36,22 @@ import com.egzosn.pay.common.http.HttpStringEntity;
 import com.egzosn.pay.common.util.Util;
 import com.egzosn.pay.common.util.str.StringUtils;
 import com.egzosn.pay.paypal.bean.PayPalTransactionType;
-import com.egzosn.pay.paypal.bean.order.*;
-import org.apache.http.Header;
-import org.apache.http.entity.ContentType;
-import org.apache.http.message.BasicHeader;
-
-import java.io.UnsupportedEncodingException;
-import java.math.BigDecimal;
-import java.util.*;
-import java.util.concurrent.locks.Lock;
+import com.egzosn.pay.paypal.bean.order.Amount;
+import com.egzosn.pay.paypal.bean.order.Links;
+import com.egzosn.pay.paypal.bean.order.Payer;
+import com.egzosn.pay.paypal.bean.order.Payment;
+import com.egzosn.pay.paypal.bean.order.RedirectUrls;
+import com.egzosn.pay.paypal.bean.order.Transaction;
 
 /**
  * 贝宝支付配置存储
- * @author  egan
  *
+ * @author egan
+ * <p>
  * email egzosn@gmail.com
  * date 2018-4-8 ‏‎22:15:09
  */
-public class PayPalPayService extends BasePayService<PayPalConfigStorage>{
+public class PayPalPayService extends BasePayService<PayPalConfigStorage> {
 
     /**
      * 沙箱环境
@@ -42,10 +64,11 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage>{
 
     /**
      * 获取对应的请求地址
+     *
      * @return 请求地址
      */
     @Override
-    public String getReqUrl(TransactionType transactionType){
+    public String getReqUrl(TransactionType transactionType) {
         return (payConfigStorage.isTest() ? SANDBOX_REQ_URL : REQ_URL) + transactionType.getMethod();
     }
 
@@ -55,21 +78,23 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage>{
     }
 
 
-
     /**
      * 获取请求token
+     *
      * @return 授权令牌
      */
-    public String getAccessToken()  {
+    public String getAccessToken() {
         try {
             return getAccessToken(false);
-        } catch (PayErrorException e) {
+        }
+        catch (PayErrorException e) {
             throw e;
         }
     }
 
     /**
-     *  获取授权令牌
+     * 获取授权令牌
+     *
      * @param forceRefresh 是否重新获取， true重新获取
      * @return 新的授权令牌
      * @throws PayErrorException 支付异常
@@ -84,21 +109,23 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage>{
             }
 
             if (payConfigStorage.isAccessTokenExpired()) {
-                    Map<String, String> header = new HashMap<>();
-                    header.put("Authorization", "Basic " + authorizationString(getPayConfigStorage().getAppid(), getPayConfigStorage().getKeyPrivate()));
-                    header.put("Accept", "application/json");
-                    header.put("Content-Type", "application/x-www-form-urlencoded");
-                    try {
-                        HttpStringEntity entity = new HttpStringEntity("grant_type=client_credentials", header);
-                        JSONObject resp = getHttpRequestTemplate().postForObject(getReqUrl(PayPalTransactionType.AUTHORIZE), entity, JSONObject.class);
-                        payConfigStorage.updateAccessToken(String.format("%s %s", resp.getString("token_type" ), resp.getString("access_token" )),  resp.getIntValue("expires_in" ));
+                Map<String, String> header = new HashMap<>();
+                header.put("Authorization", "Basic " + authorizationString(getPayConfigStorage().getAppid(), getPayConfigStorage().getKeyPrivate()));
+                header.put("Accept", "application/json");
+                header.put("Content-Type", "application/x-www-form-urlencoded");
+                try {
+                    HttpStringEntity entity = new HttpStringEntity("grant_type=client_credentials", header);
+                    JSONObject resp = getHttpRequestTemplate().postForObject(getReqUrl(PayPalTransactionType.AUTHORIZE), entity, JSONObject.class);
+                    payConfigStorage.updateAccessToken(String.format("%s %s", resp.getString("token_type"), resp.getString("access_token")), resp.getIntValue("expires_in"));
 
-                    } catch (UnsupportedEncodingException e) {
-                        throw new PayErrorException(new PayException("failure", e.getMessage()));
-                    }
+                }
+                catch (UnsupportedEncodingException e) {
+                    throw new PayErrorException(new PayException("failure", e.getMessage()));
+                }
                 return payConfigStorage.getAccessToken();
             }
-        } finally {
+        }
+        finally {
             lock.unlock();
         }
         return payConfigStorage.getAccessToken();
@@ -108,28 +135,19 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage>{
     @Override
     public boolean verify(Map<String, Object> params) {
 
-        HttpStringEntity httpEntity = new HttpStringEntity("{\"payer_id\":\""+(String)params.get("PayerID")+"\"}", ContentType.APPLICATION_JSON);
+        HttpStringEntity httpEntity = new HttpStringEntity("{\"payer_id\":\"" + (String) params.get("PayerID") + "\"}", ContentType.APPLICATION_JSON);
         httpEntity.setHeaders(authHeader());
         JSONObject resp = getHttpRequestTemplate().postForObject(getReqUrl(PayPalTransactionType.EXECUTE), httpEntity, JSONObject.class, (String) params.get("paymentId"));
-        return  "approved".equals(resp.getString("state"));
+        return "approved".equals(resp.getString("state"));
 
-    }
-
-    @Override
-    public boolean signVerify(Map<String, Object> params, String sign) {
-        return true;
-    }
-
-    @Override
-    public boolean verifySource(String id) {
-        return true;
     }
 
     /**
      * 获取授权请求头
+     *
      * @return 授权请求头
      */
-    private HttpHeader authHeader(){
+    private HttpHeader authHeader() {
 
         List<Header> headers = new ArrayList<>();
         headers.add(new BasicHeader("Authorization", getAccessToken()));
@@ -137,6 +155,7 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage>{
 
         return new HttpHeader(headers);
     }
+
     /**
      * 返回创建的订单信息
      *
@@ -146,21 +165,22 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage>{
      */
     @Override
     public Map<String, Object> orderInfo(PayOrder order) {
-        if (null == order.getTransactionType()){
+        if (null == order.getTransactionType()) {
             order.setTransactionType(PayPalTransactionType.sale);
         }
 
         Amount amount = new Amount();
-        if (null == order.getCurType()){
+        if (null == order.getCurType()) {
             order.setCurType(DefaultCurType.USD);
         }
         amount.setCurrency(order.getCurType().getType());
         amount.setTotal(Util.conversionAmount(order.getPrice()).toString());
 
         Transaction transaction = new Transaction();
-        if (!StringUtils.isEmpty(order.getSubject())){
+        if (!StringUtils.isEmpty(order.getSubject())) {
             transaction.setDescription(order.getSubject());
-        }else {
+        }
+        else {
             transaction.setDescription(order.getBody());
         }
         transaction.setAmount(amount);
@@ -181,11 +201,11 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage>{
         //发起付款后的页面转跳地址
         redirectUrls.setReturnUrl(payConfigStorage.getReturnUrl());
         payment.setRedirectUrls(redirectUrls);
-        HttpStringEntity entity = new HttpStringEntity(JSON.toJSONString(payment),  ContentType.APPLICATION_JSON);
+        HttpStringEntity entity = new HttpStringEntity(JSON.toJSONString(payment), ContentType.APPLICATION_JSON);
         entity.setHeaders(authHeader());
         JSONObject resp = getHttpRequestTemplate().postForObject(getReqUrl(order.getTransactionType()), entity, JSONObject.class);
-        if ("created".equals(resp.getString("state")) && StringUtils.isNotEmpty(resp.getString("id"))){
-            order.setOutTradeNo(resp.getString("id"));
+        if ("created".equals(resp.getString("state")) && StringUtils.isNotEmpty(resp.getString("id"))) {
+            order.setTradeNo(resp.getString("id"));
         }
         return preOrderHandler(resp, order);
     }
@@ -202,15 +222,15 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage>{
 
     @Override
     public String buildRequest(Map<String, Object> orderInfo, MethodType method) {
-        if (orderInfo instanceof  JSONObject){
+        if (orderInfo instanceof JSONObject) {
             Payment payment = ((JSONObject) orderInfo).toJavaObject(Payment.class);
-            for(Links links : payment.getLinks()){
-                if(links.getRel().equals("approval_url")){
-                    return String.format("<script type=\"text/javascript\">location.href=\"%s\"</script>",links.getHref() );
+            for (Links links : payment.getLinks()) {
+                if (links.getRel().equals("approval_url")) {
+                    return String.format("<script type=\"text/javascript\">location.href=\"%s\"</script>", links.getHref());
                 }
             }
         }
-     return "<script type=\"text/javascript\">location.href=\"/\"</script>" ;
+        return "<script type=\"text/javascript\">location.href=\"/\"</script>";
     }
 
     @Override
@@ -222,6 +242,7 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage>{
     public Map<String, Object> microPay(PayOrder order) {
         return null;
     }
+
     /**
      * 交易查询接口
      *
@@ -241,20 +262,19 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage>{
     }
 
 
-
     /**
      * 申请退款接口
      *
-     * @param refundOrder   退款订单信息
+     * @param refundOrder 退款订单信息
      * @return 返回支付方申请退款后的结果
      */
     @Override
     public RefundResult refund(RefundOrder refundOrder) {
-        JSONObject request =  new JSONObject();
+        JSONObject request = new JSONObject();
 
-        if (null != refundOrder.getRefundAmount() && BigDecimal.ZERO.compareTo( refundOrder.getRefundAmount()) == -1){
+        if (null != refundOrder.getRefundAmount() && BigDecimal.ZERO.compareTo(refundOrder.getRefundAmount()) == -1) {
             Amount amount = new Amount();
-            if(null == refundOrder.getCurType()){
+            if (null == refundOrder.getCurType()) {
                 refundOrder.setCurType(DefaultCurType.USD);
             }
 
@@ -266,7 +286,7 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage>{
 
         HttpStringEntity httpEntity = new HttpStringEntity(request.toJSONString(), ContentType.APPLICATION_JSON);
         httpEntity.setHeaders(authHeader());
-        JSONObject resp = getHttpRequestTemplate().postForObject(getReqUrl(PayPalTransactionType.REFUND),  httpEntity, JSONObject.class, refundOrder.getTradeNo());
+        JSONObject resp = getHttpRequestTemplate().postForObject(getReqUrl(PayPalTransactionType.REFUND), httpEntity, JSONObject.class, refundOrder.getTradeNo());
         return new BaseRefundResult(resp) {
             @Override
             public String getCode() {
@@ -329,11 +349,6 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage>{
 
     @Override
     public Map<String, Object> downloadbill(Date billDate, String billType) {
-        return Collections.emptyMap();
-    }
-
-    @Override
-    public Map<String, Object> secondaryInterface(Object tradeNoOrBillDate, String outTradeNoBillType, TransactionType transactionType) {
         return Collections.emptyMap();
     }
 

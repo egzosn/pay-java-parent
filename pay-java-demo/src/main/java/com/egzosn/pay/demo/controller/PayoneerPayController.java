@@ -1,22 +1,29 @@
 package com.egzosn.pay.demo.controller;
 
-import com.egzosn.pay.common.bean.*;
-import com.egzosn.pay.common.http.HttpConfigStorage;
-import com.egzosn.pay.demo.request.QueryOrder;
-import com.egzosn.pay.payoneer.api.PayoneerConfigStorage;
-import com.egzosn.pay.payoneer.api.PayoneerPayService;
-import com.egzosn.pay.payoneer.bean.PayoneerTransactionType;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
-
-import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
+
+import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.egzosn.pay.common.bean.DefaultCurType;
+import com.egzosn.pay.common.bean.PayOrder;
+import com.egzosn.pay.common.bean.RefundOrder;
+import com.egzosn.pay.common.bean.RefundResult;
+import com.egzosn.pay.common.bean.TransactionType;
+import com.egzosn.pay.common.bean.TransferOrder;
+import com.egzosn.pay.common.http.HttpConfigStorage;
+import com.egzosn.pay.demo.request.QueryOrder;
+import com.egzosn.pay.payoneer.api.PayoneerConfigStorage;
+import com.egzosn.pay.payoneer.api.PayoneerPayService;
+import com.egzosn.pay.payoneer.bean.PayoneerTransactionType;
 
 /**
  * @author egan
@@ -34,7 +41,6 @@ public class PayoneerPayController {
     public void init() {
         PayoneerConfigStorage configStorage = new PayoneerConfigStorage();
         configStorage.setProgramId("商户id");
-        configStorage.setMsgType(MsgType.json);
         configStorage.setInputCharset("utf-8");
         configStorage.setUserName("PayoneerPay 用户名");
         configStorage.setApiPassword("PayoneerPay API password");
@@ -63,11 +69,12 @@ public class PayoneerPayController {
 
     /**
      * 获取授权页面
+     *
      * @param payeeId 用户id
      * @return 获取授权页面
      */
     @RequestMapping("getAuthorizationPage.json")
-    public Map<String ,Object> getAuthorizationPage( String payeeId ){
+    public Map<String, Object> getAuthorizationPage(String payeeId) {
 
         Map<String, Object> data = new LinkedHashMap<>();
         data.put("code", 0);
@@ -75,13 +82,14 @@ public class PayoneerPayController {
         return data;
     }
 
-     /**
+    /**
      * 获取授权用户信息，包含用户状态，注册时间，联系人信息，地址信息等等
+     *
      * @param payeeId 用户id
      * @return 获取授权用户信息
      */
     @RequestMapping("getAuthorizationUser.json")
-    public Map<String ,Object> getAuthorizationUser( String payeeId ){
+    public Map<String, Object> getAuthorizationUser(String payeeId) {
 
         Map<String, Object> data = new LinkedHashMap<>();
         data.put("code", 0);
@@ -92,36 +100,36 @@ public class PayoneerPayController {
 
     /**
      * 主动收款
-     * @param price           金额
-     * @param userId          付款用户
+     *
+     * @param price  金额
+     * @param userId 付款用户
      * @return 支付结果
      */
     @ResponseBody
     @RequestMapping(value = "microPay.json")
-    public Map<String, Object> microPay(BigDecimal price, String userId){
+    public Map<String, Object> microPay(BigDecimal price, String userId) {
 
         PayOrder order = new PayOrder("Order_payment:", "Order payment", price, UUID.randomUUID().toString().replace("-", ""), PayoneerTransactionType.CHARGE);
         //币种
         order.setCurType(DefaultCurType.USD);
         //设置授权码，条码等
-        order.setAuthCode( userId);
+        order.setAuthCode(userId);
         //支付结果
         Map<String, Object> params = service.microPay(order);
-        if (10700 == (Integer) params.get(PayoneerPayService.CODE)){
+        if (10700 == (Integer) params.get(PayoneerPayService.CODE)) {
             System.out.println("未授权");
-        }else  if (0 == (Integer) params.get(PayoneerPayService.CODE)){
+        }
+        else if (0 == (Integer) params.get(PayoneerPayService.CODE)) {
             System.out.println("收款成功");
         }
         return params;
     }
 
 
-
     /**
      * 用户授权回调地址
      *
      * @param request 请求
-     *
      * @return 是否成功
      * @throws IOException IOException
      */
@@ -166,6 +174,7 @@ public class PayoneerPayController {
     public Map<String, Object> close(QueryOrder order) {
         return service.close(order.getTradeNo(), order.getOutTradeNo());
     }
+
     /**
      * 申请退款接口
      *
@@ -173,7 +182,7 @@ public class PayoneerPayController {
      * @return 返回支付方申请退款后的结果
      */
     @RequestMapping("refund")
-    public Map<String, Object> refund(RefundOrder order) {
+    public RefundResult refund(RefundOrder order) {
         return service.refund(order);
     }
 
@@ -195,7 +204,6 @@ public class PayoneerPayController {
      * 转账
      *
      * @param order 转账订单
-     *
      * @return 对应的转账结果
      */
     @RequestMapping("transfer")
@@ -213,7 +221,6 @@ public class PayoneerPayController {
      *
      * @param outNo   商户转账订单号
      * @param tradeNo 支付平台转账订单号
-     *
      * @return 对应的转账订单
      */
     @RequestMapping("transferQuery")

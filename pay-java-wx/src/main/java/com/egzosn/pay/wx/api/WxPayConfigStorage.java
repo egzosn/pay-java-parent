@@ -4,7 +4,8 @@ import com.egzosn.pay.common.api.BasePayConfigStorage;
 
 /**
  * 微信配置存储
- * @author  egan
+ *
+ * @author egan
  *
  * <pre>
  * email egzosn@gmail.com
@@ -17,34 +18,32 @@ public class WxPayConfigStorage extends BasePayConfigStorage {
     /**
      * 微信分配的公众账号ID
      */
-    private String appid ;
+    private String appId;
     /**
      * 微信分配的子商户公众账号ID
      */
-    private String subAppid ;
+    private String subAppId;
     /**
-     *  微信支付分配的商户号 合作者id
+     * 微信支付分配的商户号 合作者id
      */
     private String mchId;
     /**
-     *  微信支付分配的子商户号，开发者模式下必填 合作者id
+     * 微信支付分配的子商户号，开发者模式下必填 合作者id
      */
     private String subMchId;
 
 
-
-
-
+    @Deprecated
     @Override
     public String getAppid() {
-        return appid;
-    }
-
-    public void setAppid(String appid) {
-        this.appid = appid;
+        return appId;
     }
 
 
+    @Deprecated
+    public void setAppid(String appId) {
+        this.appId = appId;
+    }
 
 
     /**
@@ -54,8 +53,6 @@ public class WxPayConfigStorage extends BasePayConfigStorage {
     public String getPid() {
         return mchId;
     }
-
-
 
 
     @Override
@@ -73,7 +70,8 @@ public class WxPayConfigStorage extends BasePayConfigStorage {
     }
 
     /**
-     *  为商户平台设置的密钥key
+     * 为商户平台设置的密钥key
+     *
      * @return 微信密钥
      */
     public String getSecretKey() {
@@ -81,16 +79,49 @@ public class WxPayConfigStorage extends BasePayConfigStorage {
     }
 
     public void setSecretKey(String secretKey) {
-         setKeyPrivate(secretKey);
+        setKeyPrivate(secretKey);
     }
 
+    public void setAppId(String appId) {
+        this.appId = appId;
+    }
+
+    /**
+     * 应用id
+     * 纠正名称
+     *
+     * @return 应用id
+     */
+    @Override
+    public String getAppId() {
+        return appId;
+    }
+
+    public String getSubAppId() {
+        return subAppId;
+    }
+
+    public void setSubAppId(String subAppId) {
+        this.subAppId = subAppId;
+    }
+
+    /**
+     * 应用id
+     * 纠正名称
+     *
+     * @return 应用id
+     * @see #getSubAppId()
+     */
+    @Deprecated
     public String getSubAppid() {
-        return subAppid;
+        return subAppId;
     }
 
+    @Deprecated
     public void setSubAppid(String subAppid) {
-        this.subAppid = subAppid;
+        this.subAppId = subAppid;
     }
+
 
     public String getSubMchId() {
         return subMchId;

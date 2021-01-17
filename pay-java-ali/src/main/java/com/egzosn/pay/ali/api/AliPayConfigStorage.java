@@ -28,7 +28,7 @@ public class AliPayConfigStorage extends BasePayConfigStorage {
     /**
      * 商户应用id
      */
-    private String appid;
+    private String appId;
     /**
      * 商户签约拿到的pid,partner_id的简称，合作伙伴身份等同于 partner
      */
@@ -73,15 +73,30 @@ public class AliPayConfigStorage extends BasePayConfigStorage {
         this.appAuthToken = appAuthToken;
     }
 
-    public void setAppid(String appid) {
-        this.appid = appid;
+    public void setAppid(String appId) {
+        this.appId = appId;
     }
 
     @Override
+    @Deprecated
     public String getAppid() {
-        return appid;
+        return appId;
     }
 
+    /**
+     * 应用id
+     * 纠正名称
+     *
+     * @return 应用id
+     */
+    @Override
+    public String getAppId() {
+        return appId;
+    }
+
+    public void setAppId(String appId) {
+        this.appId = appId;
+    }
 
     @Override
     public String getPid() {
@@ -152,7 +167,8 @@ public class AliPayConfigStorage extends BasePayConfigStorage {
              InputStream aliPayCertStream = certStoreType.getInputStream(aliPayCert);
              InputStream aliPayRootCertStream = certStoreType.getInputStream(aliPayRootCert)) {
             this.certEnvironment = new CertEnvironment(merchantCertStream, aliPayCertStream, aliPayRootCertStream);
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new PayErrorException(new PayException("读取证书异常", e.getMessage()));
         }
     }

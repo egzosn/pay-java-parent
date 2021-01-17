@@ -1,9 +1,24 @@
 package com.egzosn.pay.yiji.api;
 
+import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Map;
+import java.util.TreeMap;
+
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.api.BasePayService;
-import com.egzosn.pay.common.bean.*;
-import com.egzosn.pay.common.exception.PayErrorException;
+import com.egzosn.pay.common.bean.BaseRefundResult;
+import com.egzosn.pay.common.bean.CurType;
+import com.egzosn.pay.common.bean.DefaultCurType;
+import com.egzosn.pay.common.bean.MethodType;
+import com.egzosn.pay.common.bean.PayMessage;
+import com.egzosn.pay.common.bean.PayOrder;
+import com.egzosn.pay.common.bean.PayOutMessage;
+import com.egzosn.pay.common.bean.RefundOrder;
+import com.egzosn.pay.common.bean.RefundResult;
+import com.egzosn.pay.common.bean.TransactionType;
+import com.egzosn.pay.common.bean.TransferOrder;
 import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.common.util.DateUtils;
 import com.egzosn.pay.common.util.Util;
@@ -11,20 +26,14 @@ import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.str.StringUtils;
 import com.egzosn.pay.yiji.bean.YiJiTransactionType;
 
-import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Map;
-import java.util.TreeMap;
-
 
 /**
  * 易极付支付服务
  *
  * @author egan
- *         <p>
- *         email egzosn@gmail.com
- *          * date 2019/04/15 22:51
+ * <p>
+ * email egzosn@gmail.com
+ * * date 2019/04/15 22:51
  */
 public class YiJiPayService extends BasePayService<YiJiPayConfigStorage> {
 
@@ -54,11 +63,13 @@ public class YiJiPayService extends BasePayService<YiJiPayConfigStorage> {
      */
     @Override
     public String getReqUrl(TransactionType transactionType) {
-        if (payConfigStorage.isTest()){
+        if (payConfigStorage.isTest()) {
             return DEV_REQ_URL;
-        }else if (/*YiJiTransactionType.corderRemittanceSynOrder == transactionType ||*/ YiJiTransactionType.applyRemittranceWithSynOrder == transactionType){
+        }
+        else if (/*YiJiTransactionType.corderRemittanceSynOrder == transactionType ||*/ YiJiTransactionType.applyRemittranceWithSynOrder == transactionType) {
             return HTTPS_GLOBAL_REQ_URL;
-        }else {
+        }
+        else {
             return HTTPS_REQ_URL;
         }
     }
@@ -70,7 +81,6 @@ public class YiJiPayService extends BasePayService<YiJiPayConfigStorage> {
     public YiJiPayService(YiJiPayConfigStorage payConfigStorage) {
         super(payConfigStorage);
     }
-
 
 
     /**
@@ -98,22 +108,9 @@ public class YiJiPayService extends BasePayService<YiJiPayConfigStorage> {
      * @param sign   比对的签名结果
      * @return 生成的签名结果
      */
-    @Override
     public boolean signVerify(Map<String, Object> params, String sign) {
 
         return SignUtils.valueOf(payConfigStorage.getSignType()).verify(params, sign, payConfigStorage.getKeyPublic(), payConfigStorage.getInputCharset());
-    }
-
-
-    /**
-     * 校验数据来源
-     *
-     * @param id 业务id, 数据的真实性.
-     * @return true通过
-     */
-    @Override
-    public boolean verifySource(String id) {
-        return true;
     }
 
 
@@ -160,18 +157,18 @@ public class YiJiPayService extends BasePayService<YiJiPayConfigStorage> {
         orderInfo.put("orderNo", order.getOutTradeNo());
         orderInfo.put("outOrderNo", order.getOutTradeNo());
 
-        if (StringUtils.isNotEmpty(payConfigStorage.getSeller())){
+        if (StringUtils.isNotEmpty(payConfigStorage.getSeller())) {
             orderInfo.put("sellerUserId", payConfigStorage.getSeller());
         }
 
-        ((YiJiTransactionType)order.getTransactionType()).setAttribute(orderInfo, order);
+        ((YiJiTransactionType) order.getTransactionType()).setAttribute(orderInfo, order);
 
         orderInfo.put("tradeAmount", Util.conversionAmount(order.getPrice()));
         //商品条款信息                商品名称
         orderInfo.put("goodsClauses", String.format("[{'name':'%s'}]", order.getBody()));
         //交易名称
         orderInfo.put("tradeName", order.getSubject());
-        if (null != order.getCurType()){
+        if (null != order.getCurType()) {
             orderInfo.put("currency", order.getCurType());
         }
         orderInfo.putAll(order.getAttrs());
@@ -292,8 +289,6 @@ public class YiJiPayService extends BasePayService<YiJiPayConfigStorage> {
     }
 
 
-
-
     /**
      * 申请退款接口
      *
@@ -385,20 +380,6 @@ public class YiJiPayService extends BasePayService<YiJiPayConfigStorage> {
 
 
     /**
-     * @param tradeNoOrBillDate  支付平台订单号或者账单类型， 具体请
-     *                           类型为{@link String }或者 {@link Date }，类型须强制限制，类型不对应则抛出异常{@link PayErrorException}
-     * @param outTradeNoBillType 商户单号或者 账单类型
-     * @param transactionType    交易类型
-     * @return 返回支付方对应接口的结果
-     */
-    @Override
-    public Map<String, Object> secondaryInterface(Object tradeNoOrBillDate, String outTradeNoBillType, TransactionType transactionType) {
-
-
-        return Collections.emptyMap();
-    }
-
-    /**
      * 转账 这里外部进行调用{@link #buildRequest(Map, MethodType)}
      *
      * @param order 转账订单
@@ -409,10 +390,10 @@ public class YiJiPayService extends BasePayService<YiJiPayConfigStorage> {
         Map<String, Object> data = getPublicParameters(YiJiTransactionType.applyRemittranceWithSynOrder);
         data.put("remittranceBatchNo", order.getBatchNo());
         data.put("outOrderNo", order.getOutNo());
-        data.put("payAmount", Util.conversionAmount(order.getAmount()) );
+        data.put("payAmount", Util.conversionAmount(order.getAmount()));
         data.put("payCurrency", order.getCurType().getType());
         data.put("withdrawCurrency", DefaultCurType.CNY.getType());
-        data.put("payMemo",order.getRemark());
+        data.put("payMemo", order.getRemark());
         data.put("toCountryCode", order.getCountryCode().getCode());
         data.put("tradeUseCode", "326");
         data.put("payeeName", order.getPayeeName());

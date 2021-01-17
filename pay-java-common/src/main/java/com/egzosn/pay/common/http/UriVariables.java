@@ -1,14 +1,13 @@
 package com.egzosn.pay.common.http;
 
-import com.alibaba.fastjson.JSONObject;
-import com.egzosn.pay.common.bean.result.PayException;
-import com.egzosn.pay.common.exception.PayErrorException;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+
+import com.alibaba.fastjson.JSONObject;
+import com.egzosn.pay.common.bean.result.PayException;
+import com.egzosn.pay.common.exception.PayErrorException;
 
 /**
  * URL表达式处理器
@@ -23,22 +22,22 @@ public class UriVariables {
 
     /**
      * 依次匹配
-     * @param uri 匹配的uri，带代表式
+     *
+     * @param uri          匹配的uri，带代表式
      * @param uriVariables 匹配表达式的值
      * @return 匹配完的url
      * <code>
-     *     System.out.println(getUri(&quot;http://egan.in/{a}/ba/{a1}?{bb}={a1}&quot;, &quot;no1&quot;, &quot;no2&quot;, &quot;no3&quot;, &quot;no4&quot;));
-     *    结果 http://egan.in/no1/ba/no2?no3=no4
+     * System.out.println(getUri(&quot;http://egan.in/{a}/ba/{a1}?{bb}={a1}&quot;, &quot;no1&quot;, &quot;no2&quot;, &quot;no3&quot;, &quot;no4&quot;));
+     * 结果 http://egan.in/no1/ba/no2?no3=no4
      * </code>
-     *
      */
     public static String getUri(String uri, Object... uriVariables) {
 
-        if (null == uriVariables){
+        if (null == uriVariables) {
             return uri;
         }
-        for (Object variable : uriVariables){
-            if (null == variable){
+        for (Object variable : uriVariables) {
+            if (null == variable) {
                 continue;
             }
             uri = uri.replaceFirst("\\{\\w+\\}", variable.toString());
@@ -47,29 +46,29 @@ public class UriVariables {
     }
 
 
-
     /**
      * 匹配Map.key
-     * @param uri 匹配的uri，带代表式
+     *
+     * @param uri          匹配的uri，带代表式
      * @param uriVariables 匹配表达式的值
      * @return 匹配完的url
      * <code>
-     *      Map&lt;String, Object&gt;  uriVariable = new HashMap&lt;String, Object&gt;();
-     *      uriVariable.put(&quot;a&quot;, &quot;no1&quot;);
-     *      uriVariable.put(&quot;a1&quot;, &quot;no2&quot;);
-     *      uriVariable.put(&quot;bb&quot;, &quot;no3&quot;);
-     *      System.out.println(getUri(&quot;http://egan.in/{a}/ba/{a1}?{bb}={a1}&quot;, uriVariable));
-     *      结果 http://egan.in/no1/ba/no2?no3=no2
+     * Map&lt;String, Object&gt;  uriVariable = new HashMap&lt;String, Object&gt;();
+     * uriVariable.put(&quot;a&quot;, &quot;no1&quot;);
+     * uriVariable.put(&quot;a1&quot;, &quot;no2&quot;);
+     * uriVariable.put(&quot;bb&quot;, &quot;no3&quot;);
+     * System.out.println(getUri(&quot;http://egan.in/{a}/ba/{a1}?{bb}={a1}&quot;, uriVariable));
+     * 结果 http://egan.in/no1/ba/no2?no3=no2
      * </code>
      */
     public static String getUri(String uri, Map<String, Object> uriVariables) {
 
-        if (null == uriVariables){
+        if (null == uriVariables) {
             return uri;
         }
         for (Map.Entry<String, Object> entry : uriVariables.entrySet()) {
             Object uriVariable = entry.getValue();
-            if (null == uriVariable){
+            if (null == uriVariable) {
                 continue;
             }
 
@@ -79,15 +78,15 @@ public class UriVariables {
     }
 
 
-
     /**
      * Map转化为对应得参数字符串
+     *
      * @param pe 参数
      * @return 参数字符串
      */
-    public static String getMapToParameters(Map pe){
+    public static String getMapToParameters(Map<String, ?> pe) {
         StringBuilder builder = new StringBuilder();
-        for (Map.Entry entry : (Set<Map.Entry>)pe.entrySet()) {
+        for (Map.Entry<String, ?> entry : pe.entrySet()) {
             Object o = entry.getValue();
 
             if (null == o) {
@@ -106,14 +105,15 @@ public class UriVariables {
                             continue;
                         }
                         String value = os[i].toString().trim();
-                        valueStr += (i == len - 1) ?  value :  value + ",";
+                        valueStr += (i == len - 1) ? value : value + ",";
                     }
                     builder.append(entry.getKey()).append("=").append(URLEncoder.encode(valueStr, "utf-8")).append("&");
 
                     continue;
                 }
-                builder.append(entry.getKey()).append("=").append(URLEncoder.encode( entry.getValue().toString(), "utf-8")).append("&");
-            } catch (UnsupportedEncodingException e) {
+                builder.append(entry.getKey()).append("=").append(URLEncoder.encode(entry.getValue().toString(), "utf-8")).append("&");
+            }
+            catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
         }
@@ -129,7 +129,7 @@ public class UriVariables {
      * @param str 需要解析的字符串
      * @return 解析的结果map
      */
-    public static JSONObject getParametersToMap (String str) {
+    public static JSONObject getParametersToMap(String str) {
 
         JSONObject map = new JSONObject();
         int len = str.length();
@@ -148,16 +148,19 @@ public class UriVariables {
                         key = temp.toString();
                         temp.setLength(0);
                         isKey = false;
-                    } else {
+                    }
+                    else {
                         temp.append(curChar);
                     }
-                } else {// 如果当前生成的是value
+                }
+                else {// 如果当前生成的是value
                     if (isOpen) {
                         if (curChar == openName) {
                             isOpen = false;
                         }
 
-                    } else {//如果没开启嵌套
+                    }
+                    else {//如果没开启嵌套
                         if (curChar == '{') {//如果碰到，就开启嵌套
                             isOpen = true;
                             openName = '}';
@@ -171,7 +174,8 @@ public class UriVariables {
                         putKeyValueToMap(temp, isKey, key, map);
                         temp.setLength(0);
                         isKey = true;
-                    } else {
+                    }
+                    else {
                         temp.append(curChar);
                     }
                 }
@@ -182,14 +186,15 @@ public class UriVariables {
         return map;
     }
 
-    private static void putKeyValueToMap (StringBuilder temp, boolean isKey, String key, Map<String, Object> map) {
+    private static void putKeyValueToMap(StringBuilder temp, boolean isKey, String key, Map<String, Object> map) {
         if (isKey) {
             key = temp.toString();
             if (key.length() == 0) {
                 throw new PayErrorException(new PayException("QString format illegal", "内容格式有误"));
             }
             map.put(key, "");
-        } else {
+        }
+        else {
             if (key.length() == 0) {
                 throw new PayErrorException(new PayException("QString format illegal", "内容格式有误"));
             }
