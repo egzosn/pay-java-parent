@@ -145,6 +145,7 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage> {
 
     /**
      * IPN 地址设置的路径：https://developer.paypal.com/developer/ipnSimulator/
+     * 参数解析与校验  https://developer.paypal.com/docs/api-basics/notifications/ipn/IPNIntro/#id08CKFJ00JYK
      * 1.Check that the payment_status is Completed.
      * 2.If the payment_status is Completed, check the txn_id against the previous PayPal transaction that you processed to ensure the IPN message is not a duplicate.
      * 3.Check that the receiver_email is an email address registered in your PayPal account.
@@ -240,7 +241,7 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage> {
 
     /**
      * 返回创建的订单信息
-     *
+     * 订单信息与接口地址 https://developer.paypal.com/docs/api/orders/v2
      * @param order 支付订单
      * @return 订单信息
      * @see PayOrder 支付订单信息
@@ -350,6 +351,8 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage> {
     /**
      * 申请退款接口
      *
+     * 1.需要通过支付单号获取captureId 详情： https://developer.paypal.com/docs/api/payments/v2/#captures
+     * 2.通过captureId发起退款  详情： https://developer.paypal.com/docs/api/payments/v2/#captures_refund
      * @param refundOrder 退款订单信息
      * @return 返回支付方申请退款后的结果
      */
@@ -384,7 +387,7 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage> {
 
     /**
      * 查询退款
-     *
+     * 通过退款id获取退款信息 详情：https://developer.paypal.com/docs/api/payments/v2/#refunds
      * @param refundOrder 退款订单单号信息
      * @return 返回支付方查询退款后的结果
      */
