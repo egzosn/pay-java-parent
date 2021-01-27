@@ -2,13 +2,37 @@
 package com.egzosn.pay.demo.controller;
 
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.annotation.Resource;
+import javax.imageio.ImageIO;
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
+
+import static com.egzosn.pay.demo.dao.ApyAccountRepository.apyAccounts;
+
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.ali.api.AliPayService;
 import com.egzosn.pay.ali.bean.AliTransactionType;
 import com.egzosn.pay.common.api.PayConfigStorage;
 import com.egzosn.pay.common.api.PayMessageInterceptor;
 import com.egzosn.pay.common.api.PayService;
-import com.egzosn.pay.common.bean.*;
+import com.egzosn.pay.common.bean.MethodType;
+import com.egzosn.pay.common.bean.PayMessage;
+import com.egzosn.pay.common.bean.PayOrder;
+import com.egzosn.pay.common.bean.PayOutMessage;
+import com.egzosn.pay.common.bean.RefundOrder;
+import com.egzosn.pay.common.bean.RefundResult;
+import com.egzosn.pay.common.bean.TransferOrder;
 import com.egzosn.pay.common.http.UriVariables;
 import com.egzosn.pay.common.util.MatrixToImageWriter;
 import com.egzosn.pay.common.util.str.StringUtils;
@@ -18,22 +42,6 @@ import com.egzosn.pay.demo.request.QueryOrder;
 import com.egzosn.pay.demo.service.ApyAccountService;
 import com.egzosn.pay.demo.service.PayResponse;
 import com.egzosn.pay.wx.bean.WxTransactionType;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.ModelAndView;
-
-import javax.annotation.Resource;
-import javax.imageio.ImageIO;
-import javax.servlet.http.HttpServletRequest;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
-import static com.egzosn.pay.demo.dao.ApyAccountRepository.apyAccounts;
 
 /**
  * 发起支付入口
@@ -76,7 +84,7 @@ public class PayController {
      * 跳到支付页面
      * 针对实时支付,即时付款
      *
-     * @param request           请求
+     * @param request         请求
      * @param payId           账户id
      * @param transactionType 交易类型， 这个针对于每一个 支付类型的对应的几种交易方式
      * @param bankType        针对刷卡支付，卡的类型，类型值
@@ -115,6 +123,7 @@ public class PayController {
     /**
      * 跳到支付页面
      * 针对实时支付,即时付款
+     *
      * @param request 请求
      * @return 跳到支付页面
      */
@@ -164,7 +173,7 @@ public class PayController {
      *
      * @param payId           支付账户id
      * @param transactionType 交易类型
-     * @param price 金额
+     * @param price           金额
      * @return 支付预订单信息
      */
     @RequestMapping("app")
@@ -188,7 +197,7 @@ public class PayController {
      * @return 支付结果
      */
     @RequestMapping(value = "microPay")
-    public Map<String, Object> microPay(Integer payId, String transactionType, BigDecimal price, String authCode)  {
+    public Map<String, Object> microPay(Integer payId, String transactionType, BigDecimal price, String authCode) {
         //获取对应的支付账户操作工具（可根据账户id）
         PayResponse payResponse = service.getPayResponse(payId);
 
@@ -200,7 +209,7 @@ public class PayController {
         PayConfigStorage storage = payResponse.getService().getPayConfigStorage();
         //校验
         if (payResponse.getService().verify(params)) {
-            PayMessage message = new PayMessage(params, storage.getPayType(), storage.getMsgType().name());
+            PayMessage message = new PayMessage(params, storage.getPayType());
             //支付校验通过后的处理
             payResponse.getRouter().route(message);
         }
@@ -215,7 +224,6 @@ public class PayController {
      * @param payId           账户id
      * @param transactionType 交易类型， 这个针对于每一个 支付类型的对应的几种交易方式
      * @param price           金额
-     *
      * @return 二维码图像
      * @throws IOException IOException
      */
@@ -228,10 +236,12 @@ public class PayController {
         ImageIO.write(payResponse.getService().genQrPay(new PayOrder("订单title", "摘要", null == price ? BigDecimal.valueOf(0.01) : price, System.currentTimeMillis() + "", PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType))), "JPEG", baos);
         return baos.toByteArray();
     }
+
     /**
      * 获取二维码地址
      * 二维码支付
-     * @param price       金额
+     *
+     * @param price 金额
      * @return 二维码图像
      * @throws IOException IOException
      */
@@ -240,8 +250,9 @@ public class PayController {
         //获取对应的支付账户操作工具（可根据账户id）
         //获取对应的支付账户操作工具（可根据账户id）
         PayResponse payResponse = service.getPayResponse(payId);
-        return payResponse.getService().getQrPay( new PayOrder("订单title", "摘要", null == price ? BigDecimal.valueOf(0.01) : price, System.currentTimeMillis() + "", PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType)));
+        return payResponse.getService().getQrPay(new PayOrder("订单title", "摘要", null == price ? BigDecimal.valueOf(0.01) : price, System.currentTimeMillis() + "", PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(transactionType)));
     }
+
     /**
      * 获取一码付二维码图像
      * 二维码支付
@@ -249,7 +260,7 @@ public class PayController {
      * @param wxPayId  微信账户id
      * @param aliPayId 支付宝id
      * @param price    金额
-     * @param request    请求
+     * @param request  请求
      * @return 二维码图像
      * @throws IOException IOException
      */
@@ -279,7 +290,7 @@ public class PayController {
      * @param wxPayId  微信账户id
      * @param aliPayId 支付宝id
      * @param price    金额
-     * @param request    请求
+     * @param request  请求
      * @return 支付宝与微信平台的判断
      * @throws IOException IOException
      */
@@ -309,15 +320,13 @@ public class PayController {
     }
 
 
-
-
     /**
      * 支付回调地址 方式一
      * <p>
      * 方式二，{@link #payBack(HttpServletRequest, Integer)} 是属于简化方式， 试用与简单的业务场景
      *
      * @param request 请求
-     * @param payId 账户id
+     * @param payId   账户id
      * @return 支付是否成功
      * @throws IOException IOException
      */
@@ -361,14 +370,14 @@ public class PayController {
      * 方式二
      *
      * @param request 请求
-     * @param payId 账户id
+     * @param payId   账户id
      * @return 支付是否成功
      * @throws IOException IOException
-     * 拦截器相关增加， 详情查看{@link com.egzosn.pay.common.api.PayService#addPayMessageInterceptor(PayMessageInterceptor)}
-     * <p>
-     * 业务处理在对应的PayMessageHandler里面处理，在哪里设置PayMessageHandler，详情查看{@link com.egzosn.pay.common.api.PayService#setPayMessageHandler(com.egzosn.pay.common.api.PayMessageHandler)}
-     * </p>
-     * 如果未设置 {@link com.egzosn.pay.common.api.PayMessageHandler} 那么会使用默认的 {@link com.egzosn.pay.common.api.DefaultPayMessageHandler}
+     *                     拦截器相关增加， 详情查看{@link com.egzosn.pay.common.api.PayService#addPayMessageInterceptor(PayMessageInterceptor)}
+     *                     <p>
+     *                     业务处理在对应的PayMessageHandler里面处理，在哪里设置PayMessageHandler，详情查看{@link com.egzosn.pay.common.api.PayService#setPayMessageHandler(com.egzosn.pay.common.api.PayMessageHandler)}
+     *                     </p>
+     *                     如果未设置 {@link com.egzosn.pay.common.api.PayMessageHandler} 那么会使用默认的 {@link com.egzosn.pay.common.api.DefaultPayMessageHandler}
      */
     @RequestMapping(value = "payBack{payId}.json")
     public String payBack(HttpServletRequest request, @PathVariable Integer payId) throws IOException {
@@ -417,6 +426,7 @@ public class PayController {
 
     /**
      * 申请退款接口
+     *
      * @param payId 账户id
      * @param order 订单的请求体
      * @return 返回支付方申请退款后的结果
@@ -426,7 +436,8 @@ public class PayController {
         PayResponse payResponse = service.getPayResponse(payId);
 
 //        return payResponse.getService().refund(order.getTradeNo(), order.getOutTradeNo(), order.getRefundAmount(), order.getTotalAmount());
-        return payResponse.getService().refund(order);
+        final PayService service = payResponse.getService();
+        return service.refund(order);
     }
 
     /**
@@ -458,21 +469,8 @@ public class PayController {
 
 
     /**
-     * 通用查询接口，根据 TransactionType 类型进行实现,此接口不包括退款
-     *
-     * @param order 订单的请求体
-     * @return 返回支付方对应接口的结果
-     */
-    @RequestMapping("secondaryInterface")
-    public Map<String, Object> secondaryInterface(QueryOrder order) {
-        PayResponse payResponse = service.getPayResponse(order.getPayId());
-        TransactionType type = PayType.valueOf(payResponse.getStorage().getPayType()).getTransactionType(order.getTransactionType());
-        return payResponse.getService().secondaryInterface(order.getTradeNoOrBillDate(), order.getOutTradeNoBillType(), type);
-    }
-
-
-    /**
      * 转账
+     *
      * @param payId 账户id
      * @param order 转账订单
      * @return 对应的转账结果
@@ -485,7 +483,8 @@ public class PayController {
 
     /**
      * 转账查询
-     * @param payId 账户id
+     *
+     * @param payId   账户id
      * @param outNo   商户转账订单号
      * @param tradeNo 支付平台转账订单号
      * @return 对应的转账订单

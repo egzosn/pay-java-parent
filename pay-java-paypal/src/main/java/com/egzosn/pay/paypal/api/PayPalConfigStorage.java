@@ -8,36 +8,57 @@ import com.egzosn.pay.common.api.BasePayConfigStorage;
  * 贝宝支付配置存储
  *
  * @author egan
- *         <p>
- *         email egzosn@gmail.com
- *         date 2018-4-8 22:11:42
+ * <p>
+ * email egzosn@gmail.com
+ * date 2018-4-8 22:11:42
  */
 public class PayPalConfigStorage extends BasePayConfigStorage {
 
-    private String clientID;
+    private String clientId;
 
     @Override
+    @Deprecated
     public String getAppid() {
-        return clientID;
+        return clientId;
+    }
+
+    /**
+     * 应用id
+     * 纠正名称
+     *
+     * @return 应用id
+     */
+    @Override
+    public String getAppId() {
+        return clientId;
     }
 
     @Override
     public String getPid() {
-        return clientID;
+        return clientId;
     }
 
     @Override
     public String getSeller() {
-        return clientID;
+        return clientId;
     }
 
     public String getClientID() {
-        return clientID;
+        return clientId;
     }
 
-    public void setClientID(String clientID) {
-        this.clientID = clientID;
+    public void setClientID(String clientId) {
+        this.clientId = clientId;
     }
+
+    public String getClientId() {
+        return clientId;
+    }
+
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
+    }
+
 
     public String getClientSecret() {
         return getKeyPrivate();
@@ -50,6 +71,10 @@ public class PayPalConfigStorage extends BasePayConfigStorage {
 
     /**
      * 设置取消页面的url
+     * <pre>
+     * 注意：这里不是异步回调的通知
+     * IPN 地址设置的路径：https://developer.paypal.com/developer/ipnSimulator/
+     * </pre>
      *
      * @param cancelUrl 取消页面的url
      */
@@ -59,6 +84,11 @@ public class PayPalConfigStorage extends BasePayConfigStorage {
 
     /**
      * 获取取消页面的url
+     * <pre>
+     * 注意：这里不是异步回调的通知
+     * IPN 地址设置的路径：https://developer.paypal.com/developer/ipnSimulator/
+     * </pre>
+     *
      * @return 取消页面的url
      */
     public String getCancelUrl() {

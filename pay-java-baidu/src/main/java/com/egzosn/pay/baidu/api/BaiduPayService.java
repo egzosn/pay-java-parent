@@ -1,25 +1,31 @@
 package com.egzosn.pay.baidu.api;
 
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.baidu.bean.BaiduPayOrder;
-import com.egzosn.pay.baidu.bean.BaiduRefundOrder;
 import com.egzosn.pay.baidu.bean.BaiduTransactionType;
 import com.egzosn.pay.baidu.bean.type.AuditStatus;
 import com.egzosn.pay.baidu.util.Asserts;
 import com.egzosn.pay.common.api.BasePayService;
-import com.egzosn.pay.common.bean.*;
+import com.egzosn.pay.common.bean.BaseRefundResult;
+import com.egzosn.pay.common.bean.CurType;
+import com.egzosn.pay.common.bean.MethodType;
+import com.egzosn.pay.common.bean.PayMessage;
+import com.egzosn.pay.common.bean.PayOrder;
+import com.egzosn.pay.common.bean.PayOutMessage;
+import com.egzosn.pay.common.bean.RefundOrder;
+import com.egzosn.pay.common.bean.TransactionType;
 import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.common.http.UriVariables;
 import com.egzosn.pay.common.util.DateUtils;
 import com.egzosn.pay.common.util.Util;
 import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.str.StringUtils;
-
-import java.math.BigDecimal;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 
 public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
@@ -63,7 +69,7 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
         if (!RESPONSE_SUCCESS.equals(params.get(RESPONSE_STATUS))) {
             return false;
         }
-        return signVerify(params, String.valueOf(params.get(RSA_SIGN))) && verifySource(String.valueOf(params.get(TP_ORDER_ID)));
+        return signVerify(params, String.valueOf(params.get(RSA_SIGN)));
     }
 
     /**
@@ -73,7 +79,6 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
      * @param sign   签名原文
      * @return 结果
      */
-    @Override
     public boolean signVerify(Map<String, Object> params, String sign) {
         String rsaSign = String.valueOf(params.get(RSA_SIGN));
         String targetRsaSign = getRsaSign(params, RSA_SIGN);
@@ -81,10 +86,6 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
         return StringUtils.equals(rsaSign, targetRsaSign);
     }
 
-    @Override
-    public boolean verifySource(String id) {
-        return true;
-    }
 
     /**
      * 返回创建的订单信息
@@ -439,7 +440,6 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
      * @param transactionType 交易类型
      * @return 结果
      */
-    @Override
     public Map<String, Object> secondaryInterface(Object orderId,
                                                   String siteId,
                                                   TransactionType transactionType) {

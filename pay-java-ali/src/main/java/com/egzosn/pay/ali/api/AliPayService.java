@@ -123,7 +123,6 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
      * @param sign   比对的签名结果
      * @return 生成的签名结果
      */
-    @Override
     public boolean signVerify(Map<String, Object> params, String sign) {
 
         if (params instanceof JSONObject) {
@@ -171,7 +170,6 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
      * @param id 业务id, 数据的真实性.
      * @return true通过
      */
-    @Override
     public boolean verifySource(String id) {
         return true;
     }
@@ -281,10 +279,11 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
         switch ((AliTransactionType) order.getTransactionType()) {
             case SWEEPPAY:
                 bizContent.put("qr_code_timeout_express", DateUtils.minutesRemaining(order.getExpirationTime()) + "m");
+                break;
             case PAGE:
             case WAP:
             case APP:
-                bizContent.put("time_expire", DateUtils.formatDate(order.getExpirationTime(), "yyyy-MM-dd HH:mm"));
+                bizContent.put("time_expire", DateUtils.formatDate(order.getExpirationTime(), DateUtils.YYYY_MM_DD_HH_MM_SS));
                 break;
             default:
         }
@@ -526,7 +525,9 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
         parameters.put(BIZ_CONTENT, JSON.toJSONString(bizContent));
         //设置签名
         setSign(parameters);
-        final AliRefundResult refundResult = AliRefundResult.create(requestTemplate.getForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(parameters), JSONObject.class));
+        JSONObject result = requestTemplate.getForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(parameters), JSONObject.class);
+        JSONObject refundResponse = result.getJSONObject("alipay_trade_refund_response");
+        AliRefundResult refundResult = AliRefundResult.create(refundResponse);
         refundResult.setOutRequestNo(refundOrder.getRefundNo());
         return refundResult;
     }
@@ -587,8 +588,6 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
      * @param transactionType    交易类型
      * @return 返回支付方对应接口的结果
      */
-
-    @Override
     public Map<String, Object> secondaryInterface(Object tradeNoOrBillDate, String outTradeNoBillType, TransactionType transactionType) {
 
         if (transactionType == AliTransactionType.REFUND) {

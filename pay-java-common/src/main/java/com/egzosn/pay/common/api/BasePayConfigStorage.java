@@ -4,8 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 
-import com.egzosn.pay.common.bean.MsgType;
-
 /**
  * 支付基础配置存储
  *
@@ -50,12 +48,6 @@ public abstract class BasePayConfigStorage implements PayConfigStorage {
      * 支付类型 aliPay 支付宝， wxPay微信..等等，扩展支付模块定义唯一。
      */
     private String payType;
-
-    /**
-     * 消息来源类型
-     */
-    @Deprecated
-    private MsgType msgType;
 
 
     /**
@@ -158,37 +150,36 @@ public abstract class BasePayConfigStorage implements PayConfigStorage {
         this.payType = payType;
     }
 
-    @Override
-    public MsgType getMsgType() {
-        return msgType;
-    }
-
-    public void setMsgType(MsgType msgType) {
-        this.msgType = msgType;
-    }
     /**
      * 获取访问令牌
-     * @return  访问令牌
+     *
+     * @return 访问令牌
      */
     public String getAccessToken() {
         return this.accessToken;
     }
+
     /**
      * 获取access token锁
+     *
      * @return access token锁
      */
     public Lock getAccessTokenLock() {
         return this.accessTokenLock;
     }
+
     /**
      * 强制将access token过期掉
-     *  @return 过期时间
+     *
+     * @return 过期时间
      */
     public long getExpiresTime() {
         return expiresTime;
     }
+
     /**
      * 访问令牌是否过期
+     *
      * @return true过期
      */
     public boolean isAccessTokenExpired() {
@@ -251,7 +242,7 @@ public abstract class BasePayConfigStorage implements PayConfigStorage {
 
     @Override
     public Map<String, Object> getAttrs() {
-        if (null == attr){
+        if (null == attr) {
             attr = new HashMap<>();
         }
         return attr;
@@ -265,7 +256,8 @@ public abstract class BasePayConfigStorage implements PayConfigStorage {
 
     /**
      * 添加配置信息
-     * @param key key
+     *
+     * @param key   key
      * @param value 值
      */
     public void addAttr(String key, Object value) {

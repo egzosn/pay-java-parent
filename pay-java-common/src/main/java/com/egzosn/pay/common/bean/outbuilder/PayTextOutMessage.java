@@ -1,6 +1,5 @@
 package com.egzosn.pay.common.bean.outbuilder;
 
-import com.egzosn.pay.common.bean.MsgType;
 import com.egzosn.pay.common.bean.PayOutMessage;
 
 /**
@@ -13,7 +12,6 @@ import com.egzosn.pay.common.bean.PayOutMessage;
 public class PayTextOutMessage extends PayOutMessage{
 
     public PayTextOutMessage() {
-        this.msgType = MsgType.text.name();
     }
 
     @Override
