@@ -26,6 +26,7 @@ import java.util.TreeMap;
 
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.api.BasePayService;
+import com.egzosn.pay.common.bean.BillType;
 import com.egzosn.pay.common.bean.MethodType;
 import com.egzosn.pay.common.bean.PayMessage;
 import com.egzosn.pay.common.bean.PayOrder;
@@ -45,6 +46,7 @@ import com.egzosn.pay.common.util.sign.encrypt.RSA;
 import com.egzosn.pay.common.util.sign.encrypt.RSA2;
 import com.egzosn.pay.common.util.str.StringUtils;
 import com.egzosn.pay.union.bean.SDKConstants;
+import com.egzosn.pay.union.bean.UnionPayBillType;
 import com.egzosn.pay.union.bean.UnionPayMessage;
 import com.egzosn.pay.union.bean.UnionRefundResult;
 import com.egzosn.pay.union.bean.UnionTransactionType;
@@ -658,16 +660,30 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
      * 下载对账单
      *
      * @param billDate 账单时间
+     * @param fileType 文件类型 文件类型，一般商户填写00即可
+     * @return 返回fileContent 请自行将数据落地
+     */
+    @Deprecated
+    @Override
+    public Map<String, Object> downloadbill(Date billDate, String fileType) {
+      return downloadBill(billDate, new UnionPayBillType(fileType));
+    }
+
+    /**
+     * 下载对账单
+     *
+     * @param billDate 账单时间
      * @param billType 账单类型
      * @return 返回fileContent 请自行将数据落地
      */
     @Override
-    public Map<String, Object> downloadbill(Date billDate, String billType) {
+    public Map<String, Object> downloadBill(Date billDate, BillType billType) {
+
         Map<String, Object> params = this.getCommonParam();
         UnionTransactionType.FILE_TRANSFER.convertMap(params);
 
         params.put(SDKConstants.param_settleDate, DateUtils.formatDate(billDate, DateUtils.MMDD));
-        params.put(SDKConstants.param_fileType, billType);
+        params.put(SDKConstants.param_fileType, billType.getFileType());
         params.remove(SDKConstants.param_backUrl);
         params.remove(SDKConstants.param_currencyCode);
         this.setSign(params);

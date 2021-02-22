@@ -1,16 +1,13 @@
 package com.egzosn.pay.common.util;
 
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.egzosn.pay.common.bean.result.PayException;
-import com.egzosn.pay.common.exception.PayErrorException;
-import com.egzosn.pay.common.util.str.StringUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
+import java.nio.charset.Charset;
+import java.util.List;
+import java.util.Map;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
@@ -22,20 +19,25 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringWriter;
-import java.nio.charset.Charset;
-import java.util.List;
-import java.util.Map;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.egzosn.pay.common.bean.result.PayException;
+import com.egzosn.pay.common.exception.PayErrorException;
+import com.egzosn.pay.common.util.str.StringUtils;
 
 
 /**
  * XML工具
  *
  * @author egan
- *         <pre>
+ * <pre>
  *         email egzosn@gmail.com
  *         date 2016-6-2 19:45:06
  *         </pre>
@@ -57,7 +59,8 @@ public class XML {
 
         try {
             return (JSONObject) inputStream2Map(in, null);
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new PayErrorException(new PayException("IOException", e.getMessage()));
         }
 
@@ -76,6 +79,7 @@ public class XML {
 
 
     }
+
     /**
      * 解析xml并转化为Json值
      *
@@ -90,6 +94,7 @@ public class XML {
         }
         return toJSONObject(content.getBytes(charset));
     }
+
     /**
      * 解析xml并转化为Json值
      *
@@ -103,7 +108,8 @@ public class XML {
         }
         try (InputStream in = new ByteArrayInputStream(content)) {
             return (JSONObject) inputStream2Map(in, null);
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new PayErrorException(new PayException("IOException", e.getMessage()));
         }
 
@@ -113,8 +119,8 @@ public class XML {
      * 解析xml并转化为Json值
      *
      * @param content json字符串
-     * @param clazz 需要转化的类
-     *              @param <T> 返回对应类型
+     * @param clazz   需要转化的类
+     * @param <T>     返回对应类型
      * @return Json值
      */
     public static <T> T toBean(String content, Class<T> clazz) {
@@ -124,7 +130,8 @@ public class XML {
         }
         try (InputStream in = new ByteArrayInputStream(content.getBytes("UTF-8"))) {
             return inputStream2Bean(in, clazz);
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new PayErrorException(new PayException("IOException", e.getMessage()));
         }
 
@@ -154,7 +161,8 @@ public class XML {
                         JSONArray array = new JSONArray();
                         array.add(json);
                         json = array;
-                    } else {
+                    }
+                    else {
                         j.put(node.getNodeName(), getChildren(nodeList));
                     }
                 }
@@ -164,7 +172,8 @@ public class XML {
                     c.put(node.getNodeName(), getChildren(nodeList));
                     ((JSONArray) json).add(c);
                 }
-            } else if (node.getNodeType() == Node.ELEMENT_NODE ) {
+            }
+            else if (node.getNodeType() == Node.ELEMENT_NODE) {
                 if (null == json) {
                     json = new JSONObject();
                 }
@@ -224,20 +233,25 @@ public class XML {
                 Node node = children.item(idx);
                 NodeList nodeList = node.getChildNodes();
                 int length = nodeList.getLength();
-                if (node.getNodeType() == Node.ELEMENT_NODE && (length >1 || length==1 && nodeList.item(0).hasChildNodes())) {
+                if (node.getNodeType() == Node.ELEMENT_NODE && (length > 1 || length == 1 && nodeList.item(0).hasChildNodes())) {
                     m.put(node.getNodeName(), getChildren(nodeList));
-                } else if (node.getNodeType() == Node.ELEMENT_NODE ) {
+                }
+                else if (node.getNodeType() == Node.ELEMENT_NODE) {
                     m.put(node.getNodeName(), node.getTextContent());
                 }
             }
-        } catch (Exception e) {
+        }
+        catch (ParserConfigurationException e) {
             throw new PayErrorException(new PayException("XML failure", "XML解析失败\n" + e.getMessage()));
-        } finally {
+        }
+        catch (SAXException e) {
+            throw new PayErrorException(new PayException("XML failure", "XML解析失败\n" + e.getMessage()));
+        }
+        finally {
             in.close();
         }
         return m;
     }
-
 
 
     /**
@@ -254,16 +268,17 @@ public class XML {
     /**
      * 将Map转换为XML格式的字符串
      *
-     * @param data Map类型数据
+     * @param data            Map类型数据
      * @param rootElementName 最外层节点名称
-     * @param encoding 字符编码
+     * @param encoding        字符编码
      * @return XML格式的字符串
      */
     public static String getMap2Xml(Map<String, Object> data, String rootElementName, String encoding) {
         Document document = null;
         try {
             document = newDocument();
-        } catch (ParserConfigurationException e) {
+        }
+        catch (ParserConfigurationException e) {
             throw new PayErrorException(new PayException("ParserConfigurationException", e.getLocalizedMessage()));
         }
         org.w3c.dom.Element root = document.createElement(rootElementName);
@@ -292,18 +307,18 @@ public class XML {
             transformer.transform(source, result);
             String output = writer.getBuffer().toString();
             return output;
-        } catch (TransformerException e) {
-            e.printStackTrace();
+        }
+        catch (TransformerException e) {
+            throw new PayErrorException(new PayException("XML failure", "XML生成失败\n" + e.getMessage()));
         }
 
 
-        return "";
     }
 
     /**
      * 将Map转换为XML格式的字符串
      *
-     * @param data Map类型数据
+     * @param data     Map类型数据
      * @param document 文档
      * @param element  节点
      */
@@ -333,17 +348,19 @@ public class XML {
         }
     }
 
-    private static void object2Xml(Object value, Document document, org.w3c.dom.Element element){
+    private static void object2Xml(Object value, Document document, org.w3c.dom.Element element) {
 
-        if (value instanceof Map){
-            map2Xml((Map)value, document, element);
-        }else if (value instanceof List){
-            List vs = (List)value;
-            for (Object  v : vs ){
+        if (value instanceof Map) {
+            map2Xml((Map) value, document, element);
+        }
+        else if (value instanceof List) {
+            List vs = (List) value;
+            for (Object v : vs) {
                 object2Xml(v, document, element);
             }
 //            map2Xml((Map)value, document, element);
-        }else {
+        }
+        else {
             value = value.toString().trim();
             element.appendChild(document.createTextNode(value.toString()));
         }

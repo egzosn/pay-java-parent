@@ -4,6 +4,7 @@ package com.egzosn.pay.demo.controller;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
@@ -99,10 +100,22 @@ public class PayPalV2PayController {
         order.setDescription(" description ");
         order.setTradeNo("paypal 平台的单号, 支付下单返回的单号");
         order.setRefundAmount(BigDecimal.valueOf(0.01));
-        return service.refund(order);
+        RefundResult refundResult = service.refund(order);
+        System.out.println("退款成功之后返回退款单号：" + refundResult.getRefundNo());
+        return refundResult;
     }
 
-
+    /**
+     * 查询退款
+     *
+     * @return 返回支付方查询退款后的结果
+     */
+    @RequestMapping("refundquery")
+    public Map<String, Object> refundquery() {
+        RefundOrder order = new RefundOrder();
+        order.setRefundNo("退款成功之后返回的退款单号");
+        return service.refundquery(order);
+    }
     /**
      * 注意：这里不是异步回调的通知 IPN 地址设置的路径：https://developer.paypal.com/developer/ipnSimulator/
      * PayPal确认付款调用的接口
@@ -115,6 +128,7 @@ public class PayPalV2PayController {
     @GetMapping(value = "payBackBefore.json")
     public String payBackBefore(HttpServletRequest request) throws IOException {
         try (InputStream is = request.getInputStream()) {
+            // 参数解析与校验  https://developer.paypal.com/docs/api-basics/notifications/ipn/IPNIntro/#id08CKFJ00JYK
             if (service.verify(service.getParameter2Map(request.getParameterMap(), is))) {
                 // TODO 这里进行成功后的订单业务处理
                 // TODO 返回成功付款页面，这个到时候再做一个漂亮的页面显示，并使用前后端分离的模式
@@ -129,6 +143,7 @@ public class PayPalV2PayController {
     /**
      * 支付回调地址
      * 注意：这里不是异步回调的通知 IPN 地址设置的路径：https://developer.paypal.com/developer/ipnSimulator/
+     * 参数解析与校验  https://developer.paypal.com/docs/api-basics/notifications/ipn/IPNIntro/#id08CKFJ00JYK
      *
      * @param request 请求
      * @return 结果
@@ -140,6 +155,7 @@ public class PayPalV2PayController {
     @RequestMapping(value = "payBack.json")
     public String payBack(HttpServletRequest request) throws IOException {
         //业务处理在对应的PayMessageHandler里面处理，在哪里设置PayMessageHandler，详情查看com.egzosn.pay.common.api.PayService.setPayMessageHandler()
+        // 参数解析与校验  https://developer.paypal.com/docs/api-basics/notifications/ipn/IPNIntro/#id08CKFJ00JYK
         return service.payBack(request.getParameterMap(), request.getInputStream()).toMessage();
     }
 

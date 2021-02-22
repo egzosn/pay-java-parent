@@ -150,7 +150,7 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
      */
     @Override
     public <O extends PayOrder> String toPay(O order) {
-        Map orderInfo = orderInfo(order);
+        Map<String, Object> orderInfo = orderInfo(order);
         return buildRequest(orderInfo, MethodType.POST);
     }
 
@@ -407,6 +407,30 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
     @Override
     public PayOutMessage payBack(Map<String, String[]> parameterMap, InputStream is) {
         Map<String, Object> data = getParameter2Map(parameterMap, is);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("回调响应:" + JSON.toJSONString(data));
+        }
+        if (!verify(data)) {
+            return getPayOutMessage("fail", "失败");
+        }
+        PayMessage payMessage = this.createMessage(data);
+        Map<String, Object> context = new HashMap<String, Object>();
+        for (PayMessageInterceptor interceptor : interceptors) {
+            if (!interceptor.intercept(payMessage, context, this)) {
+                return successPayOutMessage(payMessage);
+            }
+        }
+        return getPayMessageHandler().handle(payMessage, context, this);
+    }
+
+    /**
+     * 使用转换过的参数进行回调处理
+     *
+     * @param data 转化后的参数Map
+     * @return 获得回调响应信息
+     */
+    @Override
+    public PayOutMessage payBack(Map<String, Object> data) {
         if (LOG.isDebugEnabled()) {
             LOG.debug("回调响应:" + JSON.toJSONString(data));
         }

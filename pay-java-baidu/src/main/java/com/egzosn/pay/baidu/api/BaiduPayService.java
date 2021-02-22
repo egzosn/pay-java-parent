@@ -7,12 +7,14 @@ import java.util.Map;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.egzosn.pay.baidu.bean.BaiduBillType;
 import com.egzosn.pay.baidu.bean.BaiduPayOrder;
 import com.egzosn.pay.baidu.bean.BaiduTransactionType;
 import com.egzosn.pay.baidu.bean.type.AuditStatus;
 import com.egzosn.pay.baidu.util.Asserts;
 import com.egzosn.pay.common.api.BasePayService;
 import com.egzosn.pay.common.bean.BaseRefundResult;
+import com.egzosn.pay.common.bean.BillType;
 import com.egzosn.pay.common.bean.CurType;
 import com.egzosn.pay.common.bean.MethodType;
 import com.egzosn.pay.common.bean.PayMessage;
@@ -402,34 +404,48 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
     }
 
     /**
-     * 下载资金账单
+     * 下载订单对账单
      *
      * @param billDate    账单时间：日账单格式为yyyy-MM-dd
      * @param accessToken 用户token
      * @return 对账单
      */
+    @Deprecated
     @Override
     public Map<String, Object> downloadbill(Date billDate, String accessToken) {
+        return downloadBill(billDate, new BaiduBillType(accessToken, BaiduTransactionType.DOWNLOAD_ORDER_BILL.name()));
+    }
+
+    /**
+     * 下载对账单
+     *
+     * @param billDate 账单时间：日账单格式为yyyy-MM-dd，月账单格式为yyyy-MM。
+     * @param billType 账单类型 {@link BaiduBillType}
+     * @return 返回支付方下载对账单的结果
+     */
+    public Map<String, Object> downloadBill(Date billDate, BillType billType) {
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put("access_token", accessToken);
-        parameters.put("billTime", DateUtils.formatDay(billDate));
-        return requestTemplate.getForObject(String.format("%s?%s", getReqUrl(BaiduTransactionType.DOWNLOAD_BILL),
+        parameters.put("access_token", billType.getCustom());
+        parameters.put("billTime", DateUtils.formatDate(billDate, billType.getDatePattern()));
+        final String type = billType.getType();
+        BaiduTransactionType transactionType = BaiduTransactionType.DOWNLOAD_ORDER_BILL;
+        if (BaiduTransactionType.DOWNLOAD_BILL.name().equals(type)) {
+            transactionType = BaiduTransactionType.DOWNLOAD_BILL;
+        }
+        return requestTemplate.getForObject(String.format("%s?%s", getReqUrl(transactionType),
                 UriVariables.getMapToParameters(parameters)), JSONObject.class);
     }
 
     /**
-     * 下载订单对账单
+     * 下载资金账单
      *
      * @param billDate    账单时间：日账单格式为yyyy-MM-dd
      * @param accessToken 用户token
      * @return 账单结果
      */
-    public Map<String, Object> downloadOrderBill(Date billDate, String accessToken) {
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.put("access_token", accessToken);
-        parameters.put("billTime", DateUtils.formatDay(billDate));
-        return requestTemplate.getForObject(String.format("%s?%s", getReqUrl(BaiduTransactionType.DOWNLOAD_ORDER_BILL),
-                UriVariables.getMapToParameters(parameters)), JSONObject.class);
+    @Deprecated
+    public Map<String, Object> downloadMoneyBill(Date billDate, String accessToken) {
+        return downloadBill(billDate, new BaiduBillType(accessToken, BaiduTransactionType.DOWNLOAD_BILL.name()));
     }
 
     /**

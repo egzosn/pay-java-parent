@@ -9,6 +9,7 @@ import java.util.Map;
 
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.api.BasePayService;
+import com.egzosn.pay.common.bean.BillType;
 import com.egzosn.pay.common.bean.MethodType;
 import com.egzosn.pay.common.bean.PayMessage;
 import com.egzosn.pay.common.bean.PayOrder;
@@ -140,7 +141,7 @@ public class FuiouPayService extends BasePayService<FuiouPayConfigStorage> {
      */
     public boolean signVerify(Map<String, Object> params, String responseSign) {
 
-        String sign = createSign(SignUtils.parameters2MD5Str(params, "|"), payConfigStorage.getInputCharset());
+        String sign = createSign(SignUtils.parameters2Md5Str(params, "|"), payConfigStorage.getInputCharset());
 
         return responseSign.equals(sign);
     }
@@ -155,7 +156,7 @@ public class FuiouPayService extends BasePayService<FuiouPayConfigStorage> {
         LinkedHashMap<String, Object> params = new LinkedHashMap<String, Object>(3);
         params.put("mchnt_cd", payConfigStorage.getPid());
         params.put("order_id", orderId);
-        params.put("md5", createSign(SignUtils.parameters2MD5Str(params, "|"), payConfigStorage.getInputCharset()));
+        params.put("md5", createSign(SignUtils.parameters2Md5Str(params, "|"), payConfigStorage.getInputCharset()));
         JSONObject resultJson = getHttpRequestTemplate().postForObject(getReqUrl() + URL_FuiouSmpAQueryGate + "?" + UriVariables.getMapToParameters(params), null, JSONObject.class);
         if (null == resultJson) {
             return false;
@@ -177,7 +178,7 @@ public class FuiouPayService extends BasePayService<FuiouPayConfigStorage> {
         }
 
         Map<String, Object> parameters = getOrderInfo(order);
-        String sign = createSign(SignUtils.parameters2MD5Str(parameters, "|"), payConfigStorage.getInputCharset());
+        String sign = createSign(SignUtils.parameters2Md5Str(parameters, "|"), payConfigStorage.getInputCharset());
         parameters.put("md5", sign);
         return parameters;
     }
@@ -380,7 +381,7 @@ public class FuiouPayService extends BasePayService<FuiouPayConfigStorage> {
         LinkedHashMap<String, Object> params = new LinkedHashMap<>();
         params.put("mchnt_cd", payConfigStorage.getPid());
         params.put("order_id", outTradeNo);
-        params.put("md5", createSign(SignUtils.parameters2MD5Str(params, "|"), payConfigStorage.getInputCharset()));
+        params.put("md5", createSign(SignUtils.parameters2Md5Str(params, "|"), payConfigStorage.getInputCharset()));
         JSONObject resultJson = getHttpRequestTemplate().postForObject(getReqUrl() + URL_FuiouSmpAQueryGate + "?" + UriVariables.getMapToParameters(params), null, JSONObject.class);
         return resultJson;
     }
@@ -419,7 +420,7 @@ public class FuiouPayService extends BasePayService<FuiouPayConfigStorage> {
         //备注
         params.put("rem", "");
         params.putAll(refundOrder.getAttrs());
-        params.put("md5", createSign(SignUtils.parameters2MD5Str(params, "|"), payConfigStorage.getInputCharset()));
+        params.put("md5", createSign(SignUtils.parameters2Md5Str(params, "|"), payConfigStorage.getInputCharset()));
         JSONObject resultJson = getHttpRequestTemplate().postForObject(getReqUrl() + URL_FuiouSmpRefundGate, params, JSONObject.class);
         return FuiouRefundResult.create(resultJson);
     }
@@ -444,8 +445,21 @@ public class FuiouPayService extends BasePayService<FuiouPayConfigStorage> {
      * @param billType 账单类型，商户通过接口或商户经开放平台授权后其所属服务商通过接口可以获取以下账单类型：trade、signcustomer；trade指商户基于支付宝交易收单的业务账单；signcustomer是指基于商户支付宝余额收入及支出等资金变动的帐务账单；
      * @return 空
      */
+    @Deprecated
     @Override
     public Map<String, Object> downloadbill(Date billDate, String billType) {
+        return Collections.emptyMap();
+    }
+
+    /**
+     * 下载对账单
+     *
+     * @param billDate 账单时间：日账单格式为yyyy-MM-dd，月账单格式为yyyy-MM。
+     * @param billType 账单类型，商户通过接口或商户经开放平台授权后其所属服务商通过接口可以获取以下账单类型：trade、signcustomer；trade指商户基于支付宝交易收单的业务账单；signcustomer是指基于商户支付宝余额收入及支出等资金变动的帐务账单；
+     * @return 空
+     */
+    @Override
+    public Map<String, Object> downloadBill(Date billDate, BillType billType) {
         return Collections.emptyMap();
     }
 

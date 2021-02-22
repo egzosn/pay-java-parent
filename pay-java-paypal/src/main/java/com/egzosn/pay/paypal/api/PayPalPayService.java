@@ -20,6 +20,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.api.BasePayService;
 import com.egzosn.pay.common.bean.BaseRefundResult;
+import com.egzosn.pay.common.bean.BillType;
 import com.egzosn.pay.common.bean.CurType;
 import com.egzosn.pay.common.bean.DefaultCurType;
 import com.egzosn.pay.common.bean.MethodType;
@@ -347,8 +348,15 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage> {
         return resp;
     }
 
+    @Deprecated
     @Override
     public Map<String, Object> downloadbill(Date billDate, String billType) {
+        return Collections.emptyMap();
+    }
+
+
+    @Override
+    public Map<String, Object> downloadBill(Date billDate, BillType billType) {
         return Collections.emptyMap();
     }
 
