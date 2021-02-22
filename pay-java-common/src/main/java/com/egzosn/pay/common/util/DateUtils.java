@@ -60,6 +60,7 @@ public final class DateUtils {
     public static final String YYYYMMDDHHMMSS = "yyyyMMddHHmmss";
     public static final String MMDD = "MMdd";
     public static final String YYYYMM = "yyyyMM";
+    public static final String YYYY_MM = "yyyy-MM";
 
 
     public static String formatDate(Date date, String pattern) {
