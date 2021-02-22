@@ -30,13 +30,13 @@ public enum PayPalTransactionType implements TransactionType {
      */
     ORDERS_GET("/v2/checkout/orders/{order_id}"),
     /**
-     * 获取订单信息
+     * 确认订单并返回确认后订单信息
      */
     ORDERS_CAPTURE("/v2/checkout/orders/{order_id}/capture"),
     /**
-     * 获取订单信息
+     * 获取确认后订单信息
      */
-    CAPTURE("/v2/payments/captures/{capture_id}"),
+    GET_CAPTURE("/v2/payments/captures/{capture_id}"),
     /**
      * 退款
      */

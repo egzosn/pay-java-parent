@@ -55,7 +55,7 @@ import com.egzosn.pay.paypal.v2.bean.order.ShippingDetail;
  * email egzosn@gmail.com
  * date 2021-1-16 ‏‎22:15:09
  */
-public class PayPalPayService extends BasePayService<PayPalConfigStorage> {
+public class PayPalPayService extends BasePayService<PayPalConfigStorage> implements PayPalPayServiceInf {
 
     /**
      * 沙箱环境
@@ -242,6 +242,7 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage> {
     /**
      * 返回创建的订单信息
      * 订单信息与接口地址 https://developer.paypal.com/docs/api/orders/v2
+     *
      * @param order 支付订单
      * @return 订单信息
      * @see PayOrder 支付订单信息
@@ -338,8 +339,7 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage> {
      */
     @Override
     public Map<String, Object> query(String tradeNo, String outTradeNo) {
-        JSONObject resp = getHttpRequestTemplate().getForObject(getReqUrl(PayPalTransactionType.ORDERS_GET), authHeader(), JSONObject.class, tradeNo);
-        return resp;
+        return getHttpRequestTemplate().getForObject(getReqUrl(PayPalTransactionType.ORDERS_GET), authHeader(), JSONObject.class, tradeNo);
     }
 
     @Override
@@ -347,24 +347,115 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage> {
         return null;
     }
 
+    /**
+     * 注意：最好在付款成功之后回调时进行调用
+     * 确认订单并返回确认后订单信息
+     * <b>注意：此方法一个订单只能调用一次, 建议在支付回调时进行调用</b>
+     * 这里主要用来获取captureId使用，后续退款，查订单等等使用，用来替换下单返回的id
+     * 详情： https://developer.paypal.com/docs/api/orders/v2/#orders_capture
+     *
+     * @param tradeNo paypal下单成功之后返回的订单号
+     * @return 确认后订单信息
+     * 获取captureId
+     */
+    @Override
+    public Map<String, Object> ordersCapture(String tradeNo) {
+        JSONObject ordersCaptureInfo = getHttpRequestTemplate().getForObject(getReqUrl(PayPalTransactionType.ORDERS_CAPTURE), authHeader(), JSONObject.class, tradeNo);
+//        String captureId = ordersCaptureInfo.getJSONArray("purchaseUnits").getJSONObject(0).getJSONObject("payments").getJSONArray("captures").getJSONObject(0).getString("id");
+        return ordersCaptureInfo;
+    }
+
+    /**
+     * 确认订单之后获取订单信息
+     * 详情： https://developer.paypal.com/docs/api/payments/v2/#captures_get
+     *
+     * @param captureId 确认付款订单之后生成的id
+     * @return 确认付款订单详情
+     * <pre>
+     *     {
+     *   "id": "2GG279541U471931P",
+     *   "status": "COMPLETED",
+     *   "status_details": {},
+     *   "amount": {
+     *     "total": "10.99",
+     *     "currency": "USD"
+     *   },
+     *   "final_capture": true,
+     *   "seller_protection": {
+     *     "status": "ELIGIBLE",
+     *     "dispute_categories": [
+     *       "ITEM_NOT_RECEIVED",
+     *       "UNAUTHORIZED_TRANSACTION"
+     *     ]
+     *   },
+     *   "seller_receivable_breakdown": {
+     *     "gross_amount": {
+     *       "total": "10.99",
+     *       "currency": "USD"
+     *     },
+     *     "paypal_fee": {
+     *       "value": "0.33",
+     *       "currency": "USD"
+     *     },
+     *     "net_amount": {
+     *       "value": "10.66",
+     *       "currency": "USD"
+     *     },
+     *     "receivable_amount": {
+     *       "currency_code": "CNY",
+     *       "value": "59.26"
+     *     },
+     *     "paypal_fee_in_receivable_currency": {
+     *       "currency_code": "CNY",
+     *       "value": "1.13"
+     *     },
+     *     "exchange_rate": {
+     *       "source_currency": "USD",
+     *       "target_currency": "CNY",
+     *       "value": "5.9483297432325"
+     *     }
+     *   },
+     *   "invoice_id": "INVOICE-123",
+     *   "create_time": "2017-09-11T23:24:01Z",
+     *   "update_time": "2017-09-11T23:24:01Z",
+     *   "links": [
+     *     {
+     *       "href": "https://api-m.paypal.com/v2/payments/captures/2GG279541U471931P",
+     *       "rel": "self",
+     *       "method": "GET"
+     *     },
+     *     {
+     *       "href": "https://api-m.paypal.com/v2/payments/captures/2GG279541U471931P/refund",
+     *       "rel": "refund",
+     *       "method": "POST"
+     *     },
+     *     {
+     *       "href": "https://api-m.paypal.com/v2/payments/authorizations/0VF52814937998046",
+     *       "rel": "up",
+     *       "method": "GET"
+     *     }
+     *   ]
+     * }
+     *
+     * </pre>
+     *
+     */
+    @Override
+    public Map<String, Object> getCapture(String captureId) {
+        JSONObject ordersCaptureInfo = getHttpRequestTemplate().getForObject(getReqUrl(PayPalTransactionType.GET_CAPTURE), authHeader(), JSONObject.class, captureId);
+        return ordersCaptureInfo;
+    }
 
     /**
      * 申请退款接口
+     * 通过captureId发起退款  详情： https://developer.paypal.com/docs/api/payments/v2/#captures_refund
+     * captureId 详情{@link #ordersCapture(String)}
      *
-     * 1.需要通过支付单号获取captureId 详情： https://developer.paypal.com/docs/api/payments/v2/#captures
-     * 2.通过captureId发起退款  详情： https://developer.paypal.com/docs/api/payments/v2/#captures_refund
      * @param refundOrder 退款订单信息
      * @return 返回支付方申请退款后的结果
      */
     @Override
     public RefundResult refund(RefundOrder refundOrder) {
-
-        JSONObject ordersCaptureInfo = getHttpRequestTemplate().getForObject(getReqUrl(PayPalTransactionType.ORDERS_CAPTURE), authHeader(), JSONObject.class, refundOrder.getTradeNo());
-        if (!"COMPLETED".equals(ordersCaptureInfo.getString("status"))) {
-            return new PayPalRefundResult(ordersCaptureInfo, refundOrder.getTradeNo());
-        }
-
-        String captureId = ordersCaptureInfo.getJSONArray("purchaseUnits").getJSONObject(0).getJSONObject("payments").getJSONArray("captures").getJSONObject(0).getString("id");
         JSONObject request = new JSONObject();
         Money amount = new Money();
         if (null == refundOrder.getCurType()) {
@@ -376,9 +467,10 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage> {
         request.put("note_to_payer", refundOrder.getDescription());
         request.put("invoiceId", refundOrder.getOutTradeNo());
 
-
         HttpStringEntity httpEntity = new HttpStringEntity(request.toJSONString(), ContentType.APPLICATION_JSON);
         httpEntity.setHeaders(authHeader());
+        //TODO: 这里TradeNo为{@link #ordersCapture} 确认订单之后的captureId
+        String captureId = refundOrder.getTradeNo();
         JSONObject resp = getHttpRequestTemplate().postForObject(getReqUrl(PayPalTransactionType.REFUND), httpEntity, JSONObject.class, captureId);
         PayPalRefundResult payPalRefundResult = new PayPalRefundResult(resp, refundOrder.getTradeNo());
         refundOrder.setRefundNo(payPalRefundResult.getRefundNo());
@@ -388,6 +480,7 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage> {
     /**
      * 查询退款
      * 通过退款id获取退款信息 详情：https://developer.paypal.com/docs/api/payments/v2/#refunds
+     *
      * @param refundOrder 退款订单单号信息
      * @return 返回支付方查询退款后的结果
      */
