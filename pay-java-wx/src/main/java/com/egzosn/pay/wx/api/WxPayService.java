@@ -47,11 +47,13 @@ import com.egzosn.pay.common.bean.RefundOrder;
 import com.egzosn.pay.common.bean.SignType;
 import com.egzosn.pay.common.bean.TransactionType;
 import com.egzosn.pay.common.bean.TransferOrder;
+import com.egzosn.pay.common.bean.TransferType;
 import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.ClientHttpRequest;
 import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.common.http.HttpStringEntity;
+import com.egzosn.pay.common.http.UriVariables;
 import com.egzosn.pay.common.util.DateUtils;
 import com.egzosn.pay.common.util.Util;
 import com.egzosn.pay.common.util.XML;
@@ -776,12 +778,12 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
      * @param order 转账订单
      *              <pre>
      *
-     *                                                     注意事项：
-     *                                                     ◆ 当返回错误码为“SYSTEMERROR”时，请不要更换商户订单号，一定要使用原商户订单号重试，否则可能造成重复支付等资金风险。
-     *                                                     ◆ XML具有可扩展性，因此返回参数可能会有新增，而且顺序可能不完全遵循此文档规范，如果在解析回包的时候发生错误，请商户务必不要换单重试，请商户联系客服确认付款情况。如果有新回包字段，会更新到此API文档中。
-     *                                                     ◆ 因为错误代码字段err_code的值后续可能会增加，所以商户如果遇到回包返回新的错误码，请商户务必不要换单重试，请商户联系客服确认付款情况。如果有新的错误码，会更新到此API文档中。
-     *                                                     ◆ 错误代码描述字段err_code_des只供人工定位问题时做参考，系统实现时请不要依赖这个字段来做自动化处理。
-     *                                                     </pre>
+     *                           注意事项：
+     *                           ◆ 当返回错误码为“SYSTEMERROR”时，请不要更换商户订单号，一定要使用原商户订单号重试，否则可能造成重复支付等资金风险。
+     *                           ◆ XML具有可扩展性，因此返回参数可能会有新增，而且顺序可能不完全遵循此文档规范，如果在解析回包的时候发生错误，请商户务必不要换单重试，请商户联系客服确认付款情况。如果有新回包字段，会更新到此API文档中。
+     *                           ◆ 因为错误代码字段err_code的值后续可能会增加，所以商户如果遇到回包返回新的错误码，请商户务必不要换单重试，请商户联系客服确认付款情况。如果有新的错误码，会更新到此API文档中。
+     *                           ◆ 错误代码描述字段err_code_des只供人工定位问题时做参考，系统实现时请不要依赖这个字段来做自动化处理。
+     *                           </pre>
      * @return 对应的转账结果
      */
     @Override
@@ -912,17 +914,30 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
     public Map<String, Object> sendredpack(RedpackOrder redpackOrder) {
         Map<String, Object> parameters = new TreeMap<String, Object>();
         redPackParam(redpackOrder, parameters);
-        if (WxSendredpackType.SENDGROUPREDPACK == redpackOrder.getTransferType()) {
+        final TransferType transferType = redpackOrder.getTransferType();
+        if (WxSendredpackType.SENDGROUPREDPACK == transferType) {
             //现金红包，小程序红包默认传1.裂变红包取传入值，且需要大于3
             parameters.put("total_num", Math.max(redpackOrder.getTotalNum(), 3));
             parameters.put("amt_type", "ALL_RAND");
         }
-        else if (WxSendredpackType.SENDMINIPROGRAMHB == redpackOrder.getTransferType()) {
+        else if (WxSendredpackType.SENDMINIPROGRAMHB == transferType) {
             parameters.put("notify_way", "MINI_PROGRAM_JSAPI");
         }
 
         parameters.put(SIGN, createSign(SignUtils.parameterText(parameters, "&", SIGN), payConfigStorage.getInputCharset()));
-        return requestTemplate.postForObject(getReqUrl(redpackOrder.getTransferType()), XML.getMap2Xml(parameters), JSONObject.class);
+        final JSONObject resp = requestTemplate.postForObject(getReqUrl(redpackOrder.getTransferType()), XML.getMap2Xml(parameters), JSONObject.class);
+        if (WxSendredpackType.SENDMINIPROGRAMHB != transferType || FAIL.equals(resp.getString(RESULT_CODE))) {
+            return resp;
+        }
+        Map<String, Object> params = new TreeMap<String, Object>();
+        params.put("appId", payConfigStorage.getAppId());
+        params.put("timeStamp", System.currentTimeMillis() / 1000 + "");
+        params.put("nonceStr", parameters.get(NONCE_STR));
+        params.put("package", UriVariables.urlEncoder(resp.getString("package")));
+        String paySign = createSign(SignUtils.parameterText(params), payConfigStorage.getInputCharset());
+        params.put("signType", payConfigStorage.getSignType());
+        params.put("paySign", paySign);
+        return params;
     }
 
 
