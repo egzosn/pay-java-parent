@@ -274,7 +274,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
             if (WxTransactionType.JSAPI == order.getTransactionType()) {
                 params.put("signType", payConfigStorage.getSignType());
                 params.put("appId", payConfigStorage.getAppid());
-                params.put("timeStamp", System.currentTimeMillis() / 1000);
+                params.put("timeStamp", System.currentTimeMillis() / 1000 + "");
                 params.put("nonceStr", result.get(NONCE_STR));
                 params.put("package", "prepay_id=" + result.get("prepay_id"));
             }
@@ -287,7 +287,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
                 params.put("package", "Sign=WXPay");
             }
             String paySign = createSign(SignUtils.parameterText(params), payConfigStorage.getInputCharset());
-            params.put(SIGN, paySign);
+            params.put(WxTransactionType.JSAPI.equals(order.getTransactionType()) ? "paySign" : SIGN, paySign);
             return params;
         }
         throw new PayErrorException(new WxPayError(result.getString(RETURN_CODE), result.getString(RETURN_MSG_CODE), "Invalid sign value"));
