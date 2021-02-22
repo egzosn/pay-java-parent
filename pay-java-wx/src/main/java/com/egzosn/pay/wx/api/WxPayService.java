@@ -605,13 +605,14 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
         parameters.put("bill_type", billType);
         //目前只支持日账单
         parameters.put("bill_date", DateUtils.formatDate(billDate, DateUtils.YYYYMMDD));
-        setParameters(parameters, "tar_type", billType.getTarType());
+        String fileType = billType.getFileType();
+        setParameters(parameters, "tar_type", fileType);
         //设置签名
         setSign(parameters);
         Map<String, Object> ret = new HashMap<String, Object>(3);
         ret.put(RETURN_CODE, SUCCESS);
         ret.put(RETURN_MSG_CODE, "ok");
-        if (StringUtils.isEmpty(billType.getTarType())) {
+        if (StringUtils.isEmpty(fileType)) {
             String respStr = requestTemplate.postForObject(getReqUrl(WxTransactionType.DOWNLOADBILL), XML.getMap2Xml(parameters), String.class);
             if (respStr.indexOf("<") == 0) {
                 return XML.toJSONObject(respStr);
@@ -775,12 +776,12 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
      * @param order 转账订单
      *              <pre>
      *
-     *                                        注意事项：
-     *                                        ◆ 当返回错误码为“SYSTEMERROR”时，请不要更换商户订单号，一定要使用原商户订单号重试，否则可能造成重复支付等资金风险。
-     *                                        ◆ XML具有可扩展性，因此返回参数可能会有新增，而且顺序可能不完全遵循此文档规范，如果在解析回包的时候发生错误，请商户务必不要换单重试，请商户联系客服确认付款情况。如果有新回包字段，会更新到此API文档中。
-     *                                        ◆ 因为错误代码字段err_code的值后续可能会增加，所以商户如果遇到回包返回新的错误码，请商户务必不要换单重试，请商户联系客服确认付款情况。如果有新的错误码，会更新到此API文档中。
-     *                                        ◆ 错误代码描述字段err_code_des只供人工定位问题时做参考，系统实现时请不要依赖这个字段来做自动化处理。
-     *                                        </pre>
+     *                                                     注意事项：
+     *                                                     ◆ 当返回错误码为“SYSTEMERROR”时，请不要更换商户订单号，一定要使用原商户订单号重试，否则可能造成重复支付等资金风险。
+     *                                                     ◆ XML具有可扩展性，因此返回参数可能会有新增，而且顺序可能不完全遵循此文档规范，如果在解析回包的时候发生错误，请商户务必不要换单重试，请商户联系客服确认付款情况。如果有新回包字段，会更新到此API文档中。
+     *                                                     ◆ 因为错误代码字段err_code的值后续可能会增加，所以商户如果遇到回包返回新的错误码，请商户务必不要换单重试，请商户联系客服确认付款情况。如果有新的错误码，会更新到此API文档中。
+     *                                                     ◆ 错误代码描述字段err_code_des只供人工定位问题时做参考，系统实现时请不要依赖这个字段来做自动化处理。
+     *                                                     </pre>
      * @return 对应的转账结果
      */
     @Override

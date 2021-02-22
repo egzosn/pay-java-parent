@@ -87,14 +87,18 @@ public enum WxPayBillType implements BillType {
     }
 
     /**
-     * 获取压缩类型
+     * 获取文件类型
      *
-     * @return 压缩类型
+     * @return 文件类型
      */
     @Override
-    public String getTarType() {
+    public String getFileType() {
         return tarType;
     }
+
+
+
+
 
 
     /**
@@ -109,7 +113,7 @@ public enum WxPayBillType implements BillType {
 
     public static WxPayBillType forType(String type){
         for (WxPayBillType wxPayBillType : WxPayBillType.values()){
-            if (wxPayBillType.getType().equals(type) && StringUtils.isEmpty(wxPayBillType.getTarType())){
+            if (wxPayBillType.getType().equals(type) && StringUtils.isEmpty(wxPayBillType.getFileType())){
                 return wxPayBillType;
             }
         }

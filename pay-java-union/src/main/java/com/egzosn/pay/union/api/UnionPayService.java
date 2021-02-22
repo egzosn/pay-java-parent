@@ -46,6 +46,7 @@ import com.egzosn.pay.common.util.sign.encrypt.RSA;
 import com.egzosn.pay.common.util.sign.encrypt.RSA2;
 import com.egzosn.pay.common.util.str.StringUtils;
 import com.egzosn.pay.union.bean.SDKConstants;
+import com.egzosn.pay.union.bean.UnionPayBillType;
 import com.egzosn.pay.union.bean.UnionPayMessage;
 import com.egzosn.pay.union.bean.UnionRefundResult;
 import com.egzosn.pay.union.bean.UnionTransactionType;
@@ -659,31 +660,13 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
      * 下载对账单
      *
      * @param billDate 账单时间
-     * @param billType 账单类型
+     * @param fileType 文件类型 文件类型，一般商户填写00即可
      * @return 返回fileContent 请自行将数据落地
      */
     @Deprecated
     @Override
-    public Map<String, Object> downloadbill(Date billDate, String billType) {
-        Map<String, Object> params = this.getCommonParam();
-        UnionTransactionType.FILE_TRANSFER.convertMap(params);
-
-        params.put(SDKConstants.param_settleDate, DateUtils.formatDate(billDate, DateUtils.MMDD));
-        params.put(SDKConstants.param_fileType, billType);
-        params.remove(SDKConstants.param_backUrl);
-        params.remove(SDKConstants.param_currencyCode);
-        this.setSign(params);
-        String responseStr = getHttpRequestTemplate().postForObject(this.getFileTransUrl(), params, String.class);
-        JSONObject response = UriVariables.getParametersToMap(responseStr);
-        if (this.verify(response)) {
-            if (SDKConstants.OK_RESP_CODE.equals(response.get(SDKConstants.param_respCode))) {
-                return response;
-
-            }
-            throw new PayErrorException(new PayException(response.get(SDKConstants.param_respCode).toString(), response.get(SDKConstants.param_respMsg).toString(), response.toString()));
-
-        }
-        throw new PayErrorException(new PayException("failure", "验证签名失败", response.toString()));
+    public Map<String, Object> downloadbill(Date billDate, String fileType) {
+      return downloadBill(billDate, new UnionPayBillType(fileType));
     }
 
     /**
@@ -700,7 +683,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
         UnionTransactionType.FILE_TRANSFER.convertMap(params);
 
         params.put(SDKConstants.param_settleDate, DateUtils.formatDate(billDate, DateUtils.MMDD));
-        params.put(SDKConstants.param_fileType, billType.getTarType());
+        params.put(SDKConstants.param_fileType, billType.getFileType());
         params.remove(SDKConstants.param_backUrl);
         params.remove(SDKConstants.param_currencyCode);
         this.setSign(params);

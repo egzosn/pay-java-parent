@@ -20,10 +20,10 @@ public interface BillType {
     String getDatePattern();
 
     /**
-     * 获取压缩类型
-     * @return 压缩类型
+     * 获取文件类型
+     * @return 文件类型
      */
-    String getTarType();
+    String getFileType();
 
     /**
      * 自定义属性
