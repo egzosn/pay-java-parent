@@ -66,14 +66,15 @@ public enum  AliPayBillType implements BillType {
     }
 
     /**
-     * 获取压缩类型
+     * 获取文件类型
      *
-     * @return 压缩类型
+     * @return 文件类型
      */
     @Override
-    public String getTarType() {
+    public String getFileType() {
         return null;
     }
+
 
     /**
      * 自定义属性

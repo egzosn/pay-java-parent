@@ -62,19 +62,20 @@ public class BaiduBillType implements BillType {
         return datePattern;
     }
 
+    /**
+     * 获取文件类型
+     *
+     * @return 文件类型
+     */
+    @Override
+    public String getFileType() {
+        return null;
+    }
+
     public void setDatePattern(String datePattern) {
         this.datePattern = datePattern;
     }
 
-    /**
-     * 获取压缩类型
-     *
-     * @return 压缩类型
-     */
-    @Override
-    public String getTarType() {
-        return null;
-    }
 
 
     /**
