@@ -9,6 +9,7 @@ import java.util.TreeMap;
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.api.BasePayService;
 import com.egzosn.pay.common.bean.BaseRefundResult;
+import com.egzosn.pay.common.bean.BillType;
 import com.egzosn.pay.common.bean.CurType;
 import com.egzosn.pay.common.bean.DefaultCurType;
 import com.egzosn.pay.common.bean.MethodType;
@@ -372,8 +373,22 @@ public class YiJiPayService extends BasePayService<YiJiPayConfigStorage> {
      * @param billType 账单时间：日账单格式为yyyy-MM-dd，月账单格式为yyyy-MM。
      * @return 返回支付方下载对账单的结果
      */
+    @Deprecated
     @Override
     public Map<String, Object> downloadbill(Date billDate, String billType) {
+
+        return Collections.emptyMap();
+    }
+
+    /**
+     * 目前只支持日账单
+     *
+     * @param billDate 账单类型，商户通过接口或商户经开放平台授权后其所属服务商通过接口可以获取以下账单类型：trade、signcustomer；trade指商户基于易极付交易收单的业务账单；signcustomer是指基于商户易极付余额收入及支出等资金变动的帐务账单；
+     * @param billType 账单时间：日账单格式为yyyy-MM-dd，月账单格式为yyyy-MM。
+     * @return 返回支付方下载对账单的结果
+     */
+    @Override
+    public Map<String, Object> downloadBill(Date billDate, BillType billType) {
 
         return Collections.emptyMap();
     }

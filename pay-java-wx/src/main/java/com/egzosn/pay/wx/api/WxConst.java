@@ -32,6 +32,7 @@ public interface WxConst {
     String MCH_ID = "mch_id";
     String NONCE_STR = "nonce_str";
     String OUT_TRADE_NO = "out_trade_no";
+    String GZIP = "GZIP";
 
 
 }

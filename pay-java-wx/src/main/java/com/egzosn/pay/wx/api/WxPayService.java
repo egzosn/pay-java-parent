@@ -38,6 +38,7 @@ import static com.egzosn.pay.wx.bean.WxTransferType.TRANSFERS;
 
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.api.BasePayService;
+import com.egzosn.pay.common.bean.BillType;
 import com.egzosn.pay.common.bean.MethodType;
 import com.egzosn.pay.common.bean.PayMessage;
 import com.egzosn.pay.common.bean.PayOrder;
@@ -58,6 +59,7 @@ import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.sign.encrypt.RSA2;
 import com.egzosn.pay.common.util.str.StringUtils;
 import com.egzosn.pay.wx.bean.RedpackOrder;
+import com.egzosn.pay.wx.bean.WxPayBillType;
 import com.egzosn.pay.wx.bean.WxPayError;
 import com.egzosn.pay.wx.bean.WxPayMessage;
 import com.egzosn.pay.wx.bean.WxRefundResult;
@@ -560,10 +562,15 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
     /**
      * 目前只支持日账单
      *
-     * @param billDate 账单类型，商户通过接口或商户经开放平台授权后其所属服务商通过接口可以获取以下账单类型：trade、signcustomer；trade指商户基于支付宝交易收单的业务账单；signcustomer是指基于商户支付宝余额收入及支出等资金变动的帐务账单；
-     * @param billType 账单时间：日账单格式为yyyy-MM-dd，月账单格式为yyyy-MM。
+     * @param billDate 下载对账单的日期，格式：20140603
+     * @param billType 账单类型
+     *                 ALL（默认值），返回当日所有订单信息（不含充值退款订单）
+     *                 SUCCESS，返回当日成功支付的订单（不含充值退款订单）
+     *                 REFUND，返回当日退款订单（不含充值退款订单）
+     *                 RECHARGE_REFUND，返回当日充值退款订单
      * @return 返回支付方下载对账单的结果
      */
+    @Deprecated
     @Override
     public Map<String, Object> downloadbill(Date billDate, String billType) {
         Map<String, Object> parameters = getDownloadBillParam(billDate, billType, false);
@@ -582,6 +589,43 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
     }
 
     /**
+     * 目前只支持日账单
+     *
+     * @param billDate 下载对账单的日期，格式：20140603
+     * @param billType 账单类型
+     *                 ALL（默认值），返回当日所有订单信息（不含充值退款订单）
+     *                 SUCCESS，返回当日成功支付的订单（不含充值退款订单）
+     *                 REFUND，返回当日退款订单（不含充值退款订单）
+     *                 RECHARGE_REFUND，返回当日充值退款订单
+     * @return 返回支付方下载对账单的结果, 如果【账单类型】为gzip的话则返回值中key为data值为gzip的输入流
+     */
+    public Map<String, Object> downloadBill(Date billDate, BillType billType) {
+        //获取公共参数
+        Map<String, Object> parameters = getPublicParameters();
+        parameters.put("bill_type", billType);
+        //目前只支持日账单
+        parameters.put("bill_date", DateUtils.formatDate(billDate, DateUtils.YYYYMMDD));
+        setParameters(parameters, "tar_type", billType.getTarType());
+        //设置签名
+        setSign(parameters);
+        Map<String, Object> ret = new HashMap<String, Object>(3);
+        ret.put(RETURN_CODE, SUCCESS);
+        ret.put(RETURN_MSG_CODE, "ok");
+        if (StringUtils.isEmpty(billType.getTarType())) {
+            String respStr = requestTemplate.postForObject(getReqUrl(WxTransactionType.DOWNLOADBILL), XML.getMap2Xml(parameters), String.class);
+            if (respStr.indexOf("<") == 0) {
+                return XML.toJSONObject(respStr);
+            }
+            ret.put("data", respStr);
+            return ret;
+        }
+        InputStream respStream = requestTemplate.postForObject(getReqUrl(WxTransactionType.DOWNLOADBILL), XML.getMap2Xml(parameters), InputStream.class);
+        ret.put("data", respStream);
+        return ret;
+    }
+
+
+    /**
      * 目前只支持日账单,增加账单返回格式
      *
      * @param billDate 账单类型，商户通过接口或商户经开放平台授权后其所属服务商通过接口可以获取以下账单类型：trade、signcustomer；trade指商户基于支付宝交易收单的业务账单；signcustomer是指基于商户支付宝余额收入及支出等资金变动的帐务账单；
@@ -589,6 +633,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
      * @param path     账单返回格式 账单存储的基础路径,按月切割
      * @return 返回支付方下载对账单的结果
      */
+    @Deprecated
     @Override
     public Map<String, Object> downloadbill(Date billDate, String billType, String path) {
         Map<String, Object> parameters = getDownloadBillParam(billDate, billType, true);
@@ -622,6 +667,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
      * @return 解压后输入流
      * @throws IOException IOException
      */
+    @Deprecated
     public static InputStream uncompress(InputStream input) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         GZIPInputStream ungzip = new GZIPInputStream(input);
@@ -641,6 +687,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
      * @param inputStream 输入流
      * @throws IOException IOException
      */
+    @Deprecated
     private void writeToLocal(String destination, InputStream inputStream)
             throws IOException {
 
@@ -651,7 +698,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
             if (!file.getParentFile().exists()) {
                 boolean result = file.getParentFile().mkdirs();
                 if (!result) {
-                    System.out.println("创建失败");
+                    LOG.warn("创建失败");
                 }
             }
             OutputStream out = new FileOutputStream(file);
@@ -662,7 +709,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
                 len += size;
                 out.write(buf, 0, size);
             }
-            System.out.println("最终写入字节数大小:" + len);
+            LOG.info("最终写入字节数大小:" + len);
             inputStream.close();
             out.close();
         }
@@ -677,6 +724,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
      * @param tarType  账单返回格式 默认返回流false ，gzip 时候true
      * @return
      */
+    @Deprecated
     private Map<String, Object> getDownloadBillParam(Date billDate, String billType, boolean tarType) {
         //获取公共参数
         Map<String, Object> parameters = getPublicParameters();
@@ -688,7 +736,6 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
         }
         return parameters;
     }
-
 
     /**
      * @param transactionIdOrBillDate 支付平台订单号或者账单日期， 具体请 类型为{@link String }或者 {@link Date }，类型须强制限制，类型不对应则抛出异常{@link PayErrorException}
@@ -704,7 +751,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
 
         if (transactionType == WxTransactionType.DOWNLOADBILL) {
             if (transactionIdOrBillDate instanceof Date) {
-                return downloadbill((Date) transactionIdOrBillDate, outTradeNoBillType);
+                return downloadBill((Date) transactionIdOrBillDate, WxPayBillType.forType(outTradeNoBillType));
             }
             throw new PayErrorException(new PayException(FAILURE, "非法类型异常:" + transactionIdOrBillDate.getClass()));
         }
@@ -728,12 +775,12 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
      * @param order 转账订单
      *              <pre>
      *
-     *                           注意事项：
-     *                           ◆ 当返回错误码为“SYSTEMERROR”时，请不要更换商户订单号，一定要使用原商户订单号重试，否则可能造成重复支付等资金风险。
-     *                           ◆ XML具有可扩展性，因此返回参数可能会有新增，而且顺序可能不完全遵循此文档规范，如果在解析回包的时候发生错误，请商户务必不要换单重试，请商户联系客服确认付款情况。如果有新回包字段，会更新到此API文档中。
-     *                           ◆ 因为错误代码字段err_code的值后续可能会增加，所以商户如果遇到回包返回新的错误码，请商户务必不要换单重试，请商户联系客服确认付款情况。如果有新的错误码，会更新到此API文档中。
-     *                           ◆ 错误代码描述字段err_code_des只供人工定位问题时做参考，系统实现时请不要依赖这个字段来做自动化处理。
-     *                           </pre>
+     *                                        注意事项：
+     *                                        ◆ 当返回错误码为“SYSTEMERROR”时，请不要更换商户订单号，一定要使用原商户订单号重试，否则可能造成重复支付等资金风险。
+     *                                        ◆ XML具有可扩展性，因此返回参数可能会有新增，而且顺序可能不完全遵循此文档规范，如果在解析回包的时候发生错误，请商户务必不要换单重试，请商户联系客服确认付款情况。如果有新回包字段，会更新到此API文档中。
+     *                                        ◆ 因为错误代码字段err_code的值后续可能会增加，所以商户如果遇到回包返回新的错误码，请商户务必不要换单重试，请商户联系客服确认付款情况。如果有新的错误码，会更新到此API文档中。
+     *                                        ◆ 错误代码描述字段err_code_des只供人工定位问题时做参考，系统实现时请不要依赖这个字段来做自动化处理。
+     *                                        </pre>
      * @return 对应的转账结果
      */
     @Override

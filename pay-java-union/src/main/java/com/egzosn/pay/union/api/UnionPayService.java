@@ -26,6 +26,7 @@ import java.util.TreeMap;
 
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.api.BasePayService;
+import com.egzosn.pay.common.bean.BillType;
 import com.egzosn.pay.common.bean.MethodType;
 import com.egzosn.pay.common.bean.PayMessage;
 import com.egzosn.pay.common.bean.PayOrder;
@@ -661,6 +662,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
      * @param billType 账单类型
      * @return 返回fileContent 请自行将数据落地
      */
+    @Deprecated
     @Override
     public Map<String, Object> downloadbill(Date billDate, String billType) {
         Map<String, Object> params = this.getCommonParam();
@@ -668,6 +670,37 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
 
         params.put(SDKConstants.param_settleDate, DateUtils.formatDate(billDate, DateUtils.MMDD));
         params.put(SDKConstants.param_fileType, billType);
+        params.remove(SDKConstants.param_backUrl);
+        params.remove(SDKConstants.param_currencyCode);
+        this.setSign(params);
+        String responseStr = getHttpRequestTemplate().postForObject(this.getFileTransUrl(), params, String.class);
+        JSONObject response = UriVariables.getParametersToMap(responseStr);
+        if (this.verify(response)) {
+            if (SDKConstants.OK_RESP_CODE.equals(response.get(SDKConstants.param_respCode))) {
+                return response;
+
+            }
+            throw new PayErrorException(new PayException(response.get(SDKConstants.param_respCode).toString(), response.get(SDKConstants.param_respMsg).toString(), response.toString()));
+
+        }
+        throw new PayErrorException(new PayException("failure", "验证签名失败", response.toString()));
+    }
+
+    /**
+     * 下载对账单
+     *
+     * @param billDate 账单时间
+     * @param billType 账单类型
+     * @return 返回fileContent 请自行将数据落地
+     */
+    @Override
+    public Map<String, Object> downloadBill(Date billDate, BillType billType) {
+
+        Map<String, Object> params = this.getCommonParam();
+        UnionTransactionType.FILE_TRANSFER.convertMap(params);
+
+        params.put(SDKConstants.param_settleDate, DateUtils.formatDate(billDate, DateUtils.MMDD));
+        params.put(SDKConstants.param_fileType, billType.getTarType());
         params.remove(SDKConstants.param_backUrl);
         params.remove(SDKConstants.param_currencyCode);
         this.setSign(params);
