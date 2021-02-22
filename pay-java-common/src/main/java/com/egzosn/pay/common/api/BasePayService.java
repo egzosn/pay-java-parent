@@ -150,7 +150,7 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
      */
     @Override
     public <O extends PayOrder> String toPay(O order) {
-        Map orderInfo = orderInfo(order);
+        Map<String, Object> orderInfo = orderInfo(order);
         return buildRequest(orderInfo, MethodType.POST);
     }
 

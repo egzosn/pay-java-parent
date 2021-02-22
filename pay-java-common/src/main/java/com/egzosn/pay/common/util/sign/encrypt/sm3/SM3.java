@@ -137,7 +137,8 @@ public class SM3 {
     private static int FFj(int X, int Y, int Z, int j) {
         if (j >= 0 && j <= 15) {
             return FF1j(X, Y, Z);
-        } else {
+        }
+        else {
             return FF2j(X, Y, Z);
         }
     }
@@ -145,7 +146,8 @@ public class SM3 {
     private static int GGj(int X, int Y, int Z, int j) {
         if (j >= 0 && j <= 15) {
             return GG1j(X, Y, Z);
-        } else {
+        }
+        else {
             return GG2j(X, Y, Z);
         }
     }

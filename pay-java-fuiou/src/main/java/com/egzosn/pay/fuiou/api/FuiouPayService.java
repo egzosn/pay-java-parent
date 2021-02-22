@@ -141,7 +141,7 @@ public class FuiouPayService extends BasePayService<FuiouPayConfigStorage> {
      */
     public boolean signVerify(Map<String, Object> params, String responseSign) {
 
-        String sign = createSign(SignUtils.parameters2MD5Str(params, "|"), payConfigStorage.getInputCharset());
+        String sign = createSign(SignUtils.parameters2Md5Str(params, "|"), payConfigStorage.getInputCharset());
 
         return responseSign.equals(sign);
     }
@@ -156,7 +156,7 @@ public class FuiouPayService extends BasePayService<FuiouPayConfigStorage> {
         LinkedHashMap<String, Object> params = new LinkedHashMap<String, Object>(3);
         params.put("mchnt_cd", payConfigStorage.getPid());
         params.put("order_id", orderId);
-        params.put("md5", createSign(SignUtils.parameters2MD5Str(params, "|"), payConfigStorage.getInputCharset()));
+        params.put("md5", createSign(SignUtils.parameters2Md5Str(params, "|"), payConfigStorage.getInputCharset()));
         JSONObject resultJson = getHttpRequestTemplate().postForObject(getReqUrl() + URL_FuiouSmpAQueryGate + "?" + UriVariables.getMapToParameters(params), null, JSONObject.class);
         if (null == resultJson) {
             return false;
@@ -178,7 +178,7 @@ public class FuiouPayService extends BasePayService<FuiouPayConfigStorage> {
         }
 
         Map<String, Object> parameters = getOrderInfo(order);
-        String sign = createSign(SignUtils.parameters2MD5Str(parameters, "|"), payConfigStorage.getInputCharset());
+        String sign = createSign(SignUtils.parameters2Md5Str(parameters, "|"), payConfigStorage.getInputCharset());
         parameters.put("md5", sign);
         return parameters;
     }
@@ -381,7 +381,7 @@ public class FuiouPayService extends BasePayService<FuiouPayConfigStorage> {
         LinkedHashMap<String, Object> params = new LinkedHashMap<>();
         params.put("mchnt_cd", payConfigStorage.getPid());
         params.put("order_id", outTradeNo);
-        params.put("md5", createSign(SignUtils.parameters2MD5Str(params, "|"), payConfigStorage.getInputCharset()));
+        params.put("md5", createSign(SignUtils.parameters2Md5Str(params, "|"), payConfigStorage.getInputCharset()));
         JSONObject resultJson = getHttpRequestTemplate().postForObject(getReqUrl() + URL_FuiouSmpAQueryGate + "?" + UriVariables.getMapToParameters(params), null, JSONObject.class);
         return resultJson;
     }
@@ -420,7 +420,7 @@ public class FuiouPayService extends BasePayService<FuiouPayConfigStorage> {
         //备注
         params.put("rem", "");
         params.putAll(refundOrder.getAttrs());
-        params.put("md5", createSign(SignUtils.parameters2MD5Str(params, "|"), payConfigStorage.getInputCharset()));
+        params.put("md5", createSign(SignUtils.parameters2Md5Str(params, "|"), payConfigStorage.getInputCharset()));
         JSONObject resultJson = getHttpRequestTemplate().postForObject(getReqUrl() + URL_FuiouSmpRefundGate, params, JSONObject.class);
         return FuiouRefundResult.create(resultJson);
     }

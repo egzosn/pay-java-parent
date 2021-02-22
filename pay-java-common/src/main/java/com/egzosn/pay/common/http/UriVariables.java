@@ -5,6 +5,9 @@ import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
@@ -12,13 +15,17 @@ import com.egzosn.pay.common.exception.PayErrorException;
 /**
  * URL表达式处理器
  *
- * @author: egan
+ * @author egan
  * <pre>
  * email egzosn@gmail.com
  * date 2017/3/5 10:07
  * </pre>
  */
-public class UriVariables {
+public final class UriVariables {
+    private static final Log LOG = LogFactory.getLog(UriVariables.class);
+
+    private UriVariables() {
+    }
 
     /**
      * 依次匹配
@@ -96,26 +103,21 @@ public class UriVariables {
             if (o instanceof List) {
                 o = ((List) o).toArray();
             }
-            try {
-                if (o instanceof Object[]) {
-                    Object[] os = (Object[]) o;
-                    String valueStr = "";
-                    for (int i = 0, len = os.length; i < len; i++) {
-                        if (null == os[i]) {
-                            continue;
-                        }
-                        String value = os[i].toString().trim();
-                        valueStr += (i == len - 1) ? value : value + ",";
+            if (o instanceof Object[]) {
+                Object[] os = (Object[]) o;
+                String valueStr = "";
+                for (int i = 0, len = os.length; i < len; i++) {
+                    if (null == os[i]) {
+                        continue;
                     }
-                    builder.append(entry.getKey()).append("=").append(URLEncoder.encode(valueStr, "utf-8")).append("&");
-
-                    continue;
+                    String value = os[i].toString().trim();
+                    valueStr += (i == len - 1) ? value : value + ",";
                 }
-                builder.append(entry.getKey()).append("=").append(URLEncoder.encode(entry.getValue().toString(), "utf-8")).append("&");
+                builder.append(entry.getKey()).append("=").append(urlEncoder(valueStr)).append("&");
+                continue;
             }
-            catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
+            builder.append(entry.getKey()).append("=").append(urlEncoder(entry.getValue().toString())).append("&");
+
         }
         if (builder.length() > 1) {
             builder.deleteCharAt(builder.length() - 1);
@@ -200,6 +202,20 @@ public class UriVariables {
             }
             map.put(key, temp.toString());
         }
+    }
+
+    public static String urlEncoder(String str) {
+        return urlEncoder(str, "utf-8");
+    }
+
+    public static String urlEncoder(String str, String enc) {
+        try {
+            return URLEncoder.encode(str, enc);
+        }
+        catch (UnsupportedEncodingException e) {
+            LOG.error(e);
+        }
+        return str;
     }
 
 
