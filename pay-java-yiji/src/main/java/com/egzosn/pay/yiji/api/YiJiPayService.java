@@ -53,9 +53,6 @@ public class YiJiPayService extends BasePayService<YiJiPayConfigStorage> {
 
     public static final String SIGN = "sign";
 
-    public static final String SUCCESS_CODE = "10000";
-
-    public static final String CODE = "code";
 
     /**
      * 获取对应的请求地址
