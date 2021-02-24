@@ -50,7 +50,7 @@ public class PayTest {
 
         AliPayConfigStorage aliPayConfigStorage = new AliPayConfigStorage();
         aliPayConfigStorage.setPid("合作者id");
-        aliPayConfigStorage.setAppid("应用id");
+        aliPayConfigStorage.setAppId("应用id");
         //普通公钥方式与证书公钥方式为两者取其一的方式
         keyPublic(aliPayConfigStorage);
 //        certKeyPublic(aliPayConfigStorage);

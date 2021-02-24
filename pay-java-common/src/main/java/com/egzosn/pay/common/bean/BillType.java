@@ -3,8 +3,10 @@ package com.egzosn.pay.common.bean;
 /**
  * 账单类型
  * @author Egan
- * @email egzosn@gmail.com
- * @date 2021/2/22
+ * <pre>
+ * email egzosn@gmail.com
+ * date 2021/2/22
+ * </pre>
  */
 public interface BillType {
     /**

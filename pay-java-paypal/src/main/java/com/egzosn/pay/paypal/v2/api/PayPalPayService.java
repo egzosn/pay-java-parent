@@ -122,7 +122,7 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage> implem
             }
             if (payConfigStorage.isAccessTokenExpired()) {
                 Map<String, String> header = new HashMap<>();
-                header.put("Authorization", "Basic " + authorizationString(getPayConfigStorage().getAppid(), getPayConfigStorage().getKeyPrivate()));
+                header.put("Authorization", "Basic " + authorizationString(getPayConfigStorage().getAppId(), getPayConfigStorage().getKeyPrivate()));
                 header.put("Accept", "application/json");
                 header.put("Content-Type", "application/x-www-form-urlencoded");
                 try {
@@ -153,7 +153,7 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage> implem
      * 4.Check that the price (carried in mc_gross) and the currency (carried in mc_currency) are correct for the item (carried in item_name or item_number).
      *
      * @param params 回调回来的参数集
-     * @return
+     * @return 是否成功 true成功
      */
     @Override
     public boolean verify(Map<String, Object> params) {

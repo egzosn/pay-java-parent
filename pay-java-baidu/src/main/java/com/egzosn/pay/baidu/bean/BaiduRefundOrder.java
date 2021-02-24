@@ -54,6 +54,7 @@ public class BaiduRefundOrder extends RefundOrder {
 
     /**
      * 业务方退款批次id，退款业务流水唯一编号，发起部分退款时必传
+     * @param bizRefundBatchId 业务方退款批次id
      */
     public void setBizRefundBatchId(String bizRefundBatchId) {
         setRefundNo(bizRefundBatchId);

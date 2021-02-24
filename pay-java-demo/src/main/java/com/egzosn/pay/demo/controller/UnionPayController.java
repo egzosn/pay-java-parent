@@ -32,7 +32,7 @@ import static com.egzosn.pay.union.bean.UnionTransactionType.WEB;
 /**
  *  银联相关
  *
- * @author: egan
+ * @author egan
  * email egzosn@gmail.com
  * date 2016/11/18 0:25
  */

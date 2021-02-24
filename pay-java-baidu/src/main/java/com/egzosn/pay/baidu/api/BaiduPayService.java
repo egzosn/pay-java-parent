@@ -112,7 +112,7 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
         String appKey = payConfigStorage.getAppKey();
         Map<String, Object> result = new HashMap<>();
         result.put(APP_KEY, appKey);
-        result.put(APP_ID, payConfigStorage.getAppid());
+        result.put(APP_ID, payConfigStorage.getAppId());
         return result;
     }
 

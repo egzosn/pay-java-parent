@@ -31,7 +31,7 @@ import com.egzosn.pay.common.util.str.StringUtils;
 /**
  * 支付基础服务
  *
- * @author: egan
+ * @author egan
  * <pre>
  *      email egzosn@gmail.com
  *      date 2017/3/5 20:36

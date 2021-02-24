@@ -23,7 +23,7 @@ import com.egzosn.pay.demo.service.interceptor.YoudianPayMessageInterceptor;
 /**
  * 支付响应对象
  *
- * @author: egan
+ * @author egan
  * email egzosn@gmail.com
  * date 2016/11/18 0:34
  */

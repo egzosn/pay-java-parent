@@ -39,7 +39,7 @@ import com.egzosn.pay.common.util.str.StringUtils;
 /**
  * 一个HTTP请求的客户端
  *
- * @author: egan
+ * @author egan
  * <pre>
  * email egzosn@gmail.com
  * date 2017/3/4 17:56

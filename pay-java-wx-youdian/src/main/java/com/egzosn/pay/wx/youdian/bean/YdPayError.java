@@ -20,7 +20,7 @@ package com.egzosn.pay.wx.youdian.bean;
 import com.egzosn.pay.common.bean.result.PayError;
 
 /**
- * @author: egan
+ * @author egan
  *
  * email egzosn@gmail.com
  * date 2017/3/6 19:41

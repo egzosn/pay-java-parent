@@ -8,7 +8,7 @@ import com.egzosn.pay.common.bean.BillType;
 /**
  * 账单接口
  *
- * @author: faymanwang
+ * @author faymanwang
  * email: 1057438332@qq.com
  * time: 2020/7/31 11:21
  */

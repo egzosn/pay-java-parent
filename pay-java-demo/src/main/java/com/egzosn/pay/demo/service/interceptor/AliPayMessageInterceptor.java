@@ -13,7 +13,7 @@ import java.util.Map;
 
 /**
  * 支付宝回调信息拦截器
- * @author: egan
+ * @author egan
  * email egzosn@gmail.com
  * date 2017/1/18 19:28
  */

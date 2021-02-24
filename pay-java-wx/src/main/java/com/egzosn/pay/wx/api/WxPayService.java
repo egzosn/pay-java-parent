@@ -277,14 +277,14 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
 
             if (WxTransactionType.JSAPI == order.getTransactionType()) {
                 params.put("signType", payConfigStorage.getSignType());
-                params.put("appId", payConfigStorage.getAppid());
+                params.put("appId", payConfigStorage.getAppId());
                 params.put("timeStamp", System.currentTimeMillis() / 1000 + "");
                 params.put("nonceStr", result.get(NONCE_STR));
                 params.put("package", "prepay_id=" + result.get("prepay_id"));
             }
             else if (WxTransactionType.APP == order.getTransactionType()) {
                 params.put("partnerid", payConfigStorage.getPid());
-                params.put(APPID, payConfigStorage.getAppid());
+                params.put(APPID, payConfigStorage.getAppId());
                 params.put("prepayid", result.get("prepay_id"));
                 params.put("timestamp", System.currentTimeMillis() / 1000);
                 params.put("noncestr", result.get(NONCE_STR));
@@ -824,7 +824,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
      */
     public Map<String, Object> transfers(Map<String, Object> parameters, TransferOrder order) {
         //转账到余额, 申请商户号的appid或商户号绑定的appid
-        parameters.put("mch_appid", payConfigStorage.getAppid());
+        parameters.put("mch_appid", payConfigStorage.getAppId());
         parameters.put("openid", order.getPayeeAccount());
         parameters.put("spbill_create_ip", StringUtils.isEmpty(order.getIp()) ? "192.168.1.150" : order.getIp());
         //默认不校验真实姓名
@@ -908,7 +908,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
      *
      * @param redpackOrder 红包实体
      * @return 返回发红包实体后的结果
-     * @author: faymanwang 1057438332@qq.com
+     * @author faymanwang 1057438332@qq.com
      */
     @Override
     public Map<String, Object> sendredpack(RedpackOrder redpackOrder) {
@@ -948,7 +948,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
      *
      * @param mchBillno 商户发放红包的商户订单号
      * @return 返回查询结果
-     * @author: faymanwang 1057438332@qq.com
+     * @author faymanwang 1057438332@qq.com
      */
     @Override
     public Map<String, Object> gethbinfo(String mchBillno) {
@@ -968,7 +968,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
     private void redPackParam(RedpackOrder redpackOrder, Map<String, Object> parameters) {
         parameters.put(NONCE_STR, SignUtils.randomStr());
         parameters.put(MCH_ID, payConfigStorage.getPid());
-        parameters.put("wxappid", payConfigStorage.getAppid());
+        parameters.put("wxappid", payConfigStorage.getAppId());
         parameters.put("send_name", redpackOrder.getSendName());
         parameters.put("re_openid", redpackOrder.getReOpenid());
         parameters.put("mch_billno", redpackOrder.getMchBillno());

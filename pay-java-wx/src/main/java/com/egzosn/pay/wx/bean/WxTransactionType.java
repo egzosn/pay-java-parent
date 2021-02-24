@@ -9,12 +9,13 @@ import java.util.Map;
 
 /**
  * 微信交易类型
- * @author egan
  *
+ * @author egan
+ * <p>
  * email egzosn@gmail.com
  * date 2016/10/19 22:58
  */
-public enum  WxTransactionType implements TransactionType {
+public enum WxTransactionType implements TransactionType {
     /**
      * 公众号支付
      */
@@ -50,7 +51,7 @@ public enum  WxTransactionType implements TransactionType {
     /**
      * 刷脸支付
      */
-    FACEPAY("pay/facepay"){
+    FACEPAY("pay/facepay") {
         @Override
         public void setAttribute(Map<String, Object> parameters, PayOrder order) {
             parameters.put("openid", order.getOpenid());
@@ -60,11 +61,11 @@ public enum  WxTransactionType implements TransactionType {
     /**
      * H5支付
      */
-    MWEB("pay/unifiedorder"){
+    MWEB("pay/unifiedorder") {
         @Override
         public void setAttribute(Map<String, Object> parameters, PayOrder order) {
             //H5支付专用
-            LinkedHashMap value = new LinkedHashMap();
+            LinkedHashMap<String, String> value = new LinkedHashMap<String, String>(6);
             value.put("type", "Wap");
             //WAP网站URL地址
             value.put("wap_url", order.getWapUrl());
@@ -74,6 +75,7 @@ public enum  WxTransactionType implements TransactionType {
             sceneInfo.put("h5_info", value);
             parameters.put("scene_info", sceneInfo.toJSONString());
         }
+
         /**
          * 是否直接返回
          *
@@ -87,13 +89,14 @@ public enum  WxTransactionType implements TransactionType {
     /**
      * 刷卡付
      */
-    MICROPAY("pay/micropay"){
+    MICROPAY("pay/micropay") {
         @Override
         public void setAttribute(Map<String, Object> parameters, PayOrder order) {
             parameters.put("auth_code", order.getAuthCode());
             parameters.remove("notify_url");
             parameters.remove("trade_type");
         }
+
         /**
          * 是否直接返回
          *
@@ -146,6 +149,7 @@ public enum  WxTransactionType implements TransactionType {
     public String getType() {
         return this.name();
     }
+
     @Override
     public String getMethod() {
         return this.method;
@@ -153,13 +157,14 @@ public enum  WxTransactionType implements TransactionType {
 
     /**
      * 是否直接返回
+     *
      * @return 是否直接返回
      */
-    public boolean isReturn(){
+    public boolean isReturn() {
         return false;
     }
 
-    public  void setAttribute(Map<String, Object> parameters, PayOrder order){
+    public void setAttribute(Map<String, Object> parameters, PayOrder order) {
 
     }
 }

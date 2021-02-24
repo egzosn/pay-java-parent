@@ -23,9 +23,7 @@ public class Links {
 	public Links() {
 	}
 
-	/**
-	 * Parameterized Constructor
-	 */
+
 	public Links(String href, String rel) {
 		this.href = href;
 		this.rel = rel;

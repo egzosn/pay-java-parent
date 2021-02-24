@@ -40,9 +40,7 @@ public class Error {
     public Error() {
     }
 
-    /**
-     * Parameterized Constructor
-     */
+
     public Error(String name, String message, String informationLink, String debugId) {
         this.name = name;
         this.message = message;

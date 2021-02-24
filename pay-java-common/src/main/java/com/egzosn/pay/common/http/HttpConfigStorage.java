@@ -7,7 +7,7 @@ import java.io.*;
 
 /**
  * HTTP 配置
- * @author: egan
+ * @author egan
  *  <pre>
  * email egzosn@gmail.com
  * date 2017/3/3 20:48

@@ -9,7 +9,6 @@ import com.egzosn.pay.common.bean.CertStoreType;
 
 /**
  * @author Actinia
- * <p>
  * <pre>
  *         email hayesfu@qq.com
  *           create 2017 2017/11/4 0004

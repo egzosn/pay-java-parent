@@ -111,7 +111,7 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage> {
 
             if (payConfigStorage.isAccessTokenExpired()) {
                 Map<String, String> header = new HashMap<>();
-                header.put("Authorization", "Basic " + authorizationString(getPayConfigStorage().getAppid(), getPayConfigStorage().getKeyPrivate()));
+                header.put("Authorization", "Basic " + authorizationString(getPayConfigStorage().getAppId(), getPayConfigStorage().getKeyPrivate()));
                 header.put("Accept", "application/json");
                 header.put("Content-Type", "application/x-www-form-urlencoded");
                 try {
