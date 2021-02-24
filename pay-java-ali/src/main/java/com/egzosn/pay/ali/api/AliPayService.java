@@ -151,7 +151,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
      * @param params 响应参数
      * @return 公钥信息
      */
-    private String getKeyPublic(Map<String, Object> params) {
+    protected String getKeyPublic(Map<String, Object> params) {
         if (!payConfigStorage.isCertSign()) {
             return payConfigStorage.getKeyPublic();
         }
@@ -174,7 +174,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
      * @param id 业务id, 数据的真实性.
      * @return true通过
      */
-    public boolean verifySource(String id) {
+    protected boolean verifySource(String id) {
         return true;
     }
 
@@ -185,7 +185,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
      * @param parameters 请求参数
      * @return 请求参数
      */
-    private Map<String, Object> setSign(Map<String, Object> parameters) {
+    protected Map<String, Object> setSign(Map<String, Object> parameters) {
         parameters.put("sign_type", payConfigStorage.getSignType());
         String sign = createSign(SignUtils.parameterText(parameters, "&", SIGN), payConfigStorage.getInputCharset());
 
@@ -225,7 +225,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
      * @return 返回支付宝预下单信息
      * @see PayOrder 支付订单信息
      */
-    private Map<String, Object> getOrder(PayOrder order) {
+    protected Map<String, Object> getOrder(PayOrder order) {
 
 
         Map<String, Object> orderInfo = getPublicParameters(order.getTransactionType());
@@ -300,7 +300,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
      * @param transactionType 交易类型
      * @return 放回公共请求参数
      */
-    private Map<String, Object> getPublicParameters(TransactionType transactionType) {
+    protected Map<String, Object> getPublicParameters(TransactionType transactionType) {
         Map<String, Object> orderInfo = new TreeMap<>();
         orderInfo.put("app_id", payConfigStorage.getAppId());
         orderInfo.put("method", transactionType.getMethod());
@@ -316,7 +316,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
      *
      * @param orderInfo 订单信息
      */
-    private void loadCertSn(Map<String, Object> orderInfo) {
+    protected void loadCertSn(Map<String, Object> orderInfo) {
         if (payConfigStorage.isCertSign()) {
             final CertEnvironment certEnvironment = payConfigStorage.getCertEnvironment();
             setParameters(orderInfo, "app_cert_sn", certEnvironment.getMerchantCertSN());
@@ -492,7 +492,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
      * @param attrs      订单属性
      * @return 参数
      */
-    private void setAppAuthToken(Map<String, Object> parameters, Map<String, Object> attrs) {
+    protected void setAppAuthToken(Map<String, Object> parameters, Map<String, Object> attrs) {
         setAppAuthToken(parameters);
         setParameters(parameters, APP_AUTH_TOKEN, (String) attrs.remove(APP_AUTH_TOKEN));
     }
@@ -503,7 +503,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
      * @param parameters 参数
      * @return 参数
      */
-    private void setAppAuthToken(Map<String, Object> parameters) {
+    protected void setAppAuthToken(Map<String, Object> parameters) {
         setParameters(parameters, APP_AUTH_TOKEN, payConfigStorage.getAppAuthToken());
     }
 
