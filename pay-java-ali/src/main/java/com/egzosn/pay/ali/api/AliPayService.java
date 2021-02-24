@@ -246,7 +246,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
                 break;
             case WAP:
                 bizContent.put(PASSBACK_PARAMS, order.getAddition());
-                bizContent.put(PRODUCT_CODE, "QUICK_WAP_WAY");
+                bizContent.put(PRODUCT_CODE, "QUICK_WAP_PAY");
                 setReturnUrl(orderInfo, order);
                 break;
             case APP:
