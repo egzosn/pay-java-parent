@@ -54,6 +54,7 @@ public class AntCertificationUtil {
      *
      * @param certContent     需要验证的目标证书或者证书链
      * @param rootCertContent 可信根证书列表
+     * @return 是否校验成功
      */
     public static boolean isTrusted(String certContent, String rootCertContent) {
         X509Certificate[] certificates;

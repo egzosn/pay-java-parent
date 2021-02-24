@@ -6,7 +6,7 @@ import java.util.*;
 /**
  * 签名类型
  *
- * @author: egan
+ * @author egan
  * <pre>
  * email egzosn@gmail.com
  * date 2019/12/08 13:30

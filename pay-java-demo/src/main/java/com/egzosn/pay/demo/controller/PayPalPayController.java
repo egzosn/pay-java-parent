@@ -26,7 +26,7 @@ import com.egzosn.pay.paypal.bean.PayPalTransactionType;
 /**
  * 发起支付入口
  *
- * @author: egan
+ * @author egan
  * email egzosn@gmail.com
  * date 2018/05/06 10:30
  */

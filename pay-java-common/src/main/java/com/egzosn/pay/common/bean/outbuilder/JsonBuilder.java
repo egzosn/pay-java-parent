@@ -5,7 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.bean.PayOutMessage;
 
 /**
- * @author: egan
+ * @author egan
  *  <pre>
  *      email egzosn@gmail.com
  *      date 2017/1/13 14:30

@@ -36,7 +36,7 @@ import java.util.Map;
 
 /**
  * http请求工具
- * @author: egan
+ * @author egan
  *  <code>
  * email egzosn@gmail.com <br>
  * date 2017/3/3 21:33

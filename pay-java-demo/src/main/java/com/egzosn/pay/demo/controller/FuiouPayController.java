@@ -20,7 +20,7 @@ import java.util.UUID;
 /**
  * 发起支付入口
  *
- * @author: egan
+ * @author egan
  * email egzosn@gmail.com
  * date 2016/11/18 0:25
  */

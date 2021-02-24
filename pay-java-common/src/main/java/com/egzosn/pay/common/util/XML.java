@@ -125,7 +125,7 @@ public class XML {
      */
     public static <T> T toBean(String content, Class<T> clazz) {
 
-        if (null == content || "".equals(content)) {
+        if (StringUtils.isEmpty(content)) {
             return null;
         }
         try (InputStream in = new ByteArrayInputStream(content.getBytes("UTF-8"))) {
@@ -207,9 +207,8 @@ public class XML {
      * @param clazz 需要转化的类
      * @param <T> 类型
      * @return 对应的对象
-     * @throws IOException  xml io转化异常
      */
-    public static <T> T inputStream2Bean(InputStream in, Class<T> clazz) throws IOException {
+    public static <T> T inputStream2Bean(InputStream in, Class<T> clazz)  {
         JSON json = toJSONObject(in);
         return json.toJavaObject(clazz);
     }
@@ -220,7 +219,7 @@ public class XML {
      * @return 整理完成的参数集
      * @throws IOException xml io转化异常
      */
-    public static Map inputStream2Map(InputStream in, Map m) throws IOException {
+    public static Map<String, Object> inputStream2Map(InputStream in, Map<String, Object> m) throws IOException {
         if (null == m) {
             m = new JSONObject();
         }
@@ -351,10 +350,10 @@ public class XML {
     private static void object2Xml(Object value, Document document, org.w3c.dom.Element element) {
 
         if (value instanceof Map) {
-            map2Xml((Map) value, document, element);
+            map2Xml((Map<String, Object>) value, document, element);
         }
         else if (value instanceof List) {
-            List vs = (List) value;
+            List<Object> vs = (List<Object>) value;
             for (Object v : vs) {
                 object2Xml(v, document, element);
             }

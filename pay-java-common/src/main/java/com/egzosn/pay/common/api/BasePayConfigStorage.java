@@ -7,7 +7,7 @@ import java.util.concurrent.locks.Lock;
 /**
  * 支付基础配置存储
  *
- * @author: egan
+ * @author egan
  * <pre>
  *     email egzosn@gmail.com
  *     date 2017/3/5 20:33

@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @author: egan
+ * @author egan
  * email egzosn@gmail.com
  * date 2016/11/18 1:11
  */

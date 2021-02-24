@@ -19,7 +19,7 @@ package com.egzosn.pay.common.bean.result;
 
 /**
  * 支付异常
- * @author: egan
+ * @author egan
  *  <pre>
  *      email egzosn@gmail.com
  *      date 2017/3/7 12:32

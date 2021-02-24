@@ -51,7 +51,7 @@ public enum PayType implements BasePayType {
             //配置的附加参数的使用
             configStorage.setAttach(apyAccount.getPayId());
             configStorage.setPid(apyAccount.getPartner());
-            configStorage.setAppid(apyAccount.getAppid());
+            configStorage.setAppId(apyAccount.getAppId());
             configStorage.setKeyPublic(apyAccount.getPublicKey());
             configStorage.setKeyPrivate(apyAccount.getPrivateKey());
             configStorage.setNotifyUrl(apyAccount.getNotifyUrl());
@@ -84,7 +84,7 @@ public enum PayType implements BasePayType {
         public PayService getPayService(ApyAccount apyAccount) {
             WxPayConfigStorage wxPayConfigStorage = new WxPayConfigStorage();
             wxPayConfigStorage.setMchId(apyAccount.getPartner());
-            wxPayConfigStorage.setAppid(apyAccount.getAppid());
+            wxPayConfigStorage.setAppId(apyAccount.getAppId());
             //转账公钥，转账时必填
             wxPayConfigStorage.setKeyPublic(apyAccount.getPublicKey());
             wxPayConfigStorage.setSecretKey(apyAccount.getPrivateKey());
@@ -239,7 +239,7 @@ public enum PayType implements BasePayType {
             PayPalConfigStorage storage = new PayPalConfigStorage();
             //配置的附加参数的使用
             storage.setAttach(apyAccount.getPayId());
-            storage.setClientID(apyAccount.getAppid());
+            storage.setClientID(apyAccount.getAppId());
             storage.setClientSecret(apyAccount.getPrivateKey());
             storage.setTest(true);
             //发起付款后的页面转跳地址

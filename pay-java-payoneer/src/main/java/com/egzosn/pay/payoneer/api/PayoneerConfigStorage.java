@@ -100,6 +100,7 @@ public class PayoneerConfigStorage extends BasePayConfigStorage {
 
     /**
      * 获取 PayoneerPay API password
+     * @return PayoneerPay API password
      */
     public String getApiPassword() {
         return getKeyPrivate();

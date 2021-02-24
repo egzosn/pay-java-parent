@@ -18,7 +18,7 @@
 package com.egzosn.pay.common.bean;
 
 /**
- * @author: egan
+ * @author egan
  * <pre>
  *     email egzosn@gmail.com
  *     date 2017/2/7 9:52
