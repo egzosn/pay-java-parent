@@ -9,7 +9,8 @@
         
         AliPayConfigStorage aliPayConfigStorage = new AliPayConfigStorage();
         aliPayConfigStorage.setPid("合作者id");
-        aliPayConfigStorage.setAppid("应用id");
+        aliPayConfigStorage.setAppId("应用id");
+//      aliPayConfigStorage.setAppAuthToken("ISV代商户代用，指定appAuthToken");
         aliPayConfigStorage.setKeyPublic("支付宝公钥");
         aliPayConfigStorage.setKeyPrivate("应用私钥");
         aliPayConfigStorage.setNotifyUrl("异步回调地址");
@@ -27,7 +28,8 @@
         
         AliPayConfigStorage aliPayConfigStorage = new AliPayConfigStorage();
         aliPayConfigStorage.setPid("合作者id");
-        aliPayConfigStorage.setAppid("应用id");
+        aliPayConfigStorage.setAppId("应用id");
+//      aliPayConfigStorage.setAppAuthToken("ISV代商户代用，指定appAuthToken");
         aliPayConfigStorage.setKeyPrivate("应用私钥");
         //设置为证书方式
         aliPayConfigStorage.setCertSign(true);

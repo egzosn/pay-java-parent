@@ -8,7 +8,7 @@
 
               WxPayConfigStorage wxPayConfigStorage = new WxPayConfigStorage();
               wxPayConfigStorage.setMchId("合作者id（商户号）");
-              wxPayConfigStorage.setAppid("应用id");
+              wxPayConfigStorage.setAppId("应用id");
               wxPayConfigStorage.setKeyPublic("转账公钥，转账时必填");
               wxPayConfigStorage.setSecretKey("密钥");
               wxPayConfigStorage.setNotifyUrl("异步回调地址");
