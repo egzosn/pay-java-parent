@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
+import static com.egzosn.pay.ali.bean.AliPayConst.ALIPAY_CERT_SN_FIELD;
 import static com.egzosn.pay.ali.bean.AliPayConst.APP_AUTH_TOKEN;
 import static com.egzosn.pay.ali.bean.AliPayConst.BIZ_CONTENT;
 import static com.egzosn.pay.ali.bean.AliPayConst.CODE;
@@ -130,7 +131,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
 
         if (params instanceof JSONObject) {
             for (Map.Entry<String, Object> entry : params.entrySet()) {
-                if (SIGN.equals(entry.getKey())) {
+                if (SIGN.equals(entry.getKey()) || ALIPAY_CERT_SN_FIELD.equals(entry.getKey())) {
                     continue;
                 }
                 TreeMap<String, Object> response = new TreeMap((Map<String, Object>) entry.getValue());
@@ -164,7 +165,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
      * @return 支付宝公钥证书序列号
      */
     public String getAliPayCertSN(java.util.Map<String, Object> respMap) {
-        return (String) respMap.get(AliPayConst.ALIPAY_CERT_SN_FIELD);
+        return (String) respMap.get(ALIPAY_CERT_SN_FIELD);
     }
 
     /**
