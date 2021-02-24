@@ -24,7 +24,7 @@ public class ApyAccount {
     private String partner;
     // 应用id
 //    @Column(name = "appid")
-    private String appid;
+    private String appId;
     //   支付平台公钥(签名校验使用)，sign_type只有单一key时public_key与private_key相等，比如sign_type=MD5的情况
     private String publicKey;
     // 应用私钥(生成签名)
@@ -77,12 +77,12 @@ public class ApyAccount {
         this.partner = partner;
     }
 
-    public String getAppid() {
-        return appid;
+    public String getAppId() {
+        return appId;
     }
 
-    public void setAppid(String appid) {
-        this.appid = appid;
+    public void setAppId(String appId) {
+        this.appId = appId;
     }
 
     public String getPublicKey() {
@@ -178,7 +178,7 @@ public class ApyAccount {
         return "ApyAccount{" +
                 "payId=" + payId +
                 ", partner='" + partner + '\'' +
-                ", appid='" + appid + '\'' +
+                ", appId='" + appId + '\'' +
                 ", publicKey='" + publicKey + '\'' +
                 ", privateKey='" + privateKey + '\'' +
                 ", notifyUrl='" + notifyUrl + '\'' +
