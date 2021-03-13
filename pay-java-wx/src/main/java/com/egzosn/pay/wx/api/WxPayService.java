@@ -876,14 +876,16 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
         parameters.put(MCH_ID, payConfigStorage.getPid());
         parameters.put("partner_trade_no", outNo);
         parameters.put(NONCE_STR, SignUtils.randomStr());
-        parameters.put(SIGN, createSign(SignUtils.parameterText(parameters, "&", SIGN), payConfigStorage.getInputCharset()));
         if (StringUtils.isEmpty(wxTransferType)) {
             throw new PayErrorException(new WxPayError(FAILURE, "微信转账类型 #transferQuery(String outNo, String wxTransferType) 必填，详情com.egzosn.pay.wx.bean.WxTransferType"));
         }
         //如果类型为余额方式
         if (TRANSFERS.getType().equals(wxTransferType) || GETTRANSFERINFO.getType().equals(wxTransferType)) {
+             parameters.put(APPID, payConfigStorage.getAppId());
+             parameters.put(SIGN, createSign(SignUtils.parameterText(parameters, "&", SIGN), payConfigStorage.getInputCharset()));
             return getHttpRequestTemplate().postForObject(getReqUrl(GETTRANSFERINFO), XML.getMap2Xml(parameters), JSONObject.class);
         }
+        parameters.put(SIGN, createSign(SignUtils.parameterText(parameters, "&", SIGN), payConfigStorage.getInputCharset()));
         //默认查询银行卡的记录
         return getHttpRequestTemplate().postForObject(getReqUrl(QUERY_BANK), XML.getMap2Xml(parameters), JSONObject.class);
     }
