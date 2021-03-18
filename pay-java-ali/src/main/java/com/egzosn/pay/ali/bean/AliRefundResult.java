@@ -2,6 +2,7 @@ package com.egzosn.pay.ali.bean;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import com.alibaba.fastjson.JSONObject;
@@ -92,7 +93,7 @@ public class AliRefundResult extends BaseRefundResult {
      * 只有在签约中指定需要返回资金明细，或者入参的query_options中指定时才返回该字段信息。
      */
     @JSONField(name = "refund_detail_item_list")
-    private TradeFundBill refundDetailItemList;
+    private List<TradeFundBill> refundDetailItemList;
     /**
      * 交易在支付时候的门店名称
      */
@@ -306,11 +307,11 @@ public class AliRefundResult extends BaseRefundResult {
         this.gmtRefundPay = gmtRefundPay;
     }
 
-    public TradeFundBill getRefundDetailItemList() {
+    public List<TradeFundBill> getRefundDetailItemList() {
         return refundDetailItemList;
     }
 
-    public void setRefundDetailItemList(TradeFundBill refundDetailItemList) {
+    public void setRefundDetailItemList(List<TradeFundBill> refundDetailItemList) {
         this.refundDetailItemList = refundDetailItemList;
     }
 
