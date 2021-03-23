@@ -490,7 +490,6 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
      *
      * @param parameters 参数
      * @param attrs      订单属性
-     * @return 参数
      */
     protected void setAppAuthToken(Map<String, Object> parameters, Map<String, Object> attrs) {
         setAppAuthToken(parameters);
@@ -501,7 +500,6 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
      * 设置支付宝授权Token
      *
      * @param parameters 参数
-     * @return 参数
      */
     protected void setAppAuthToken(Map<String, Object> parameters) {
         setParameters(parameters, APP_AUTH_TOKEN, payConfigStorage.getAppAuthToken());
