@@ -13,7 +13,7 @@ public class BaiduPayServiceTest {
     @Test
     public void orderInfo() {
         BaiduPayConfigStorage configStorage = new BaiduPayConfigStorage();
-        configStorage.setAppId("APP ID");
+        configStorage.setAppid("APP ID");
         configStorage.setAppKey("APP KEY");
         configStorage.setDealId("DEAL ID");
         configStorage.setKeyPublic("KEY PUBLIC");

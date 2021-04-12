@@ -3,13 +3,23 @@ package com.egzosn.pay.baidu.api;
 import com.egzosn.pay.common.api.BasePayConfigStorage;
 
 public class BaiduPayConfigStorage extends BasePayConfigStorage {
-    private String appId;
+
+    private String appid;
+
     private String dealId;
+    /**
+     * 支付平台公钥(签名校验使用)
+     */
+    private String keyPublic;
 
     @Override
-    @Deprecated
     public String getAppid() {
-        return this.appId;
+        return this.appid;
+    }
+
+    @Override
+    public String getAppId() {
+        return this.appid;
     }
 
     @Override
@@ -17,9 +27,10 @@ public class BaiduPayConfigStorage extends BasePayConfigStorage {
         return getDealId();
     }
 
+    //使用json序列化的时候会报错，所以不要直接抛出异常
     @Override
     public String getSeller() {
-        throw new UnsupportedOperationException("不支持");
+        return getDealId();
     }
 
     public String getDealId() {
@@ -31,33 +42,25 @@ public class BaiduPayConfigStorage extends BasePayConfigStorage {
     }
 
     public String getAppKey() {
-        return this.getKeyPrivate();
+        return this.appid;
     }
 
     public void setAppKey(String appKey) {
-        setKeyPrivate(appKey);
+        this.setAppid(appKey);
     }
 
     @Override
     public String getKeyPublic() {
-        return super.getKeyPrivate();
+        return keyPublic;
     }
 
     @Override
     public void setKeyPublic(String keyPublic) {
-        super.setKeyPublic(keyPublic);
+        this.keyPublic = keyPublic;
     }
 
-    public void setAppid(String appId) {
-        this.appId = appId;
+    public void setAppid(String appid) {
+        this.appid = appid;
     }
 
-    @Override
-    public String getAppId() {
-        return appId;
-    }
-
-    public void setAppId(String appId) {
-        this.appId = appId;
-    }
 }
