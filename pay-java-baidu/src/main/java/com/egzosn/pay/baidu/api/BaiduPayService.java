@@ -5,9 +5,9 @@ import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
+import com.egzosn.pay.common.util.sign.encrypt.Base64;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -98,7 +98,7 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
             Signature signature = Signature.getInstance(SIGN_ALGORITHMS);
             signature.initVerify(this.getPublicKeyX509(publicKey));
             signature.update(content.getBytes(CHARSET));
-            boolean verify = signature.verify(Base64.getDecoder().decode(rsaSign.getBytes(CHARSET)));
+            boolean verify = signature.verify(Base64.decode(rsaSign));
             LOG.info("使用公钥进行验签: " + verify);
             return verify;
         } catch (Exception e) {
@@ -119,12 +119,12 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
      * @throws NoSuchAlgorithmException
      */
     private static PublicKey getPublicKeyX509(String publicKey) throws InvalidKeySpecException,
-            NoSuchAlgorithmException, UnsupportedEncodingException {
+            NoSuchAlgorithmException {
         if (StringUtils.isEmpty(publicKey)) {
             return null;
         }
         KeyFactory keyFactory = KeyFactory.getInstance(SIGN_TYPE_RSA);
-        byte[] decodedKey = Base64.getDecoder().decode(publicKey.getBytes(CHARSET));
+        byte[] decodedKey = Base64.decode(publicKey);
         return keyFactory.generatePublic(new X509EncodedKeySpec(decodedKey));
     }
 
@@ -138,7 +138,12 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
      * @throws UnsupportedEncodingException
      */
     private String signContent(Map<String, Object> params) throws UnsupportedEncodingException {
-        Map<String, String> sortedParams = new TreeMap<>(Comparator.naturalOrder());
+        Map<String, String> sortedParams = new TreeMap<>(new Comparator<String>() {
+            @Override
+            public int compare(String o1, String o2) {
+                return o1.compareTo(o2);
+            }
+        });
         for (Map.Entry<String, Object> entry : params.entrySet()) {
             String key = entry.getKey();
             if (legalKey(key)) {
