@@ -59,7 +59,6 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
     private static final String SIGN_ALGORITHMS = "SHA1WithRSA";
     private static final String SIGN_TYPE_RSA = "RSA";
     private static final String SIGN_KEY = "rsaSign";
-    public static final String PAY_MONEY = "payMoney";
 
 
     public BaiduPayService(BaiduPayConfigStorage payConfigStorage) {
