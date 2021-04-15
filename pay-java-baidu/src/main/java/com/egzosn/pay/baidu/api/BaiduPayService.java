@@ -1,9 +1,13 @@
 package com.egzosn.pay.baidu.api;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.net.URLEncoder;
+import java.security.*;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.*;
+import com.egzosn.pay.common.util.sign.encrypt.Base64;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -51,6 +55,12 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
     public static final String RESPONSE_STATUS = "status";
 
 
+    private static final String CHARSET = "UTF-8";
+    private static final String SIGN_ALGORITHMS = "SHA1WithRSA";
+    private static final String SIGN_TYPE_RSA = "RSA";
+    private static final String SIGN_KEY = "rsaSign";
+
+
     public BaiduPayService(BaiduPayConfigStorage payConfigStorage) {
         super(payConfigStorage);
     }
@@ -68,11 +78,107 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
      */
     @Override
     public boolean verify(Map<String, Object> params) {
-        if (!RESPONSE_SUCCESS.equals(params.get(RESPONSE_STATUS))) {
+        if (!RESPONSE_SUCCESS.equals(params.get(RESPONSE_STATUS)) && !RESPONSE_SUCCESS.toString().equals(params.get(RESPONSE_STATUS))) {
             return false;
         }
-        return signVerify(params, String.valueOf(params.get(RSA_SIGN)));
+        LOG.info("开始验证回调签名参数：" + params);
+        try {
+            boolean checkSign = this.checkReturnSign(params, payConfigStorage.getKeyPublic(), (String) params.get(RSA_SIGN));
+            return checkSign;
+        } catch (Exception e) {
+            LOG.info("验签失败", e);
+        }
+        return false;
     }
+
+    public boolean checkReturnSign(Map<String, Object> params, String publicKey, String rsaSign) {
+        try {
+            String content = signContent(params);
+            Signature signature = Signature.getInstance(SIGN_ALGORITHMS);
+            signature.initVerify(this.getPublicKeyX509(publicKey));
+            signature.update(content.getBytes(CHARSET));
+            boolean verify = signature.verify(Base64.decode(rsaSign));
+            LOG.info("使用公钥进行验签: " + verify);
+            return verify;
+        } catch (Exception e) {
+            LOG.info("使用公钥进行验签出错, 返回false", e);
+        }
+        return false;
+    }
+
+
+    /**
+     * 将公钥字符串进行Base64 decode之后，生成X509标准公钥
+     *
+     * @param publicKey 公钥原始字符串
+     *
+     * @return X509标准公钥
+     *
+     * @throws InvalidKeySpecException
+     * @throws NoSuchAlgorithmException
+     */
+    private static PublicKey getPublicKeyX509(String publicKey) throws InvalidKeySpecException,
+            NoSuchAlgorithmException {
+        if (StringUtils.isEmpty(publicKey)) {
+            return null;
+        }
+        KeyFactory keyFactory = KeyFactory.getInstance(SIGN_TYPE_RSA);
+        byte[] decodedKey = Base64.decode(publicKey);
+        return keyFactory.generatePublic(new X509EncodedKeySpec(decodedKey));
+    }
+
+    /**
+     * 对输入参数进行key过滤排序和字符串拼接
+     *
+     * @param params 待签名参数集合
+     *
+     * @return 待签名内容
+     *
+     * @throws UnsupportedEncodingException
+     */
+    private String signContent(Map<String, Object> params) throws UnsupportedEncodingException {
+        Map<String, String> sortedParams = new TreeMap<>(new Comparator<String>() {
+            @Override
+            public int compare(String o1, String o2) {
+                return o1.compareTo(o2);
+            }
+        });
+        for (Map.Entry<String, Object> entry : params.entrySet()) {
+            String key = entry.getKey();
+            if (legalKey(key)) {
+                String value =
+                        entry.getValue() == null ? null : URLEncoder.encode(entry.getValue().toString(), CHARSET);
+                sortedParams.put(key, value);
+            }
+        }
+
+        StringBuilder builder = new StringBuilder();
+        if (sortedParams != null && sortedParams.size() > 1) {
+            for (Map.Entry<String, String> entry : sortedParams.entrySet()) {
+                if (StringUtils.equals(entry.getKey(), RSA_SIGN)) continue;
+                builder.append(entry.getKey());
+                builder.append("=");
+                builder.append(entry.getValue());
+                builder.append("&");
+            }
+            builder.deleteCharAt(builder.length() - 1);
+        }
+        LOG.info("验签字符串：\n" + builder);
+        return builder.toString();
+    }
+
+    /**
+     * 有效的待签名参数key值
+     * 非空、且非签名字段
+     *
+     * @param key 待签名参数key值
+     *
+     * @return true | false
+     */
+    private static boolean legalKey(String key) {
+        return StringUtils.isNotBlank(key) && !SIGN_KEY.equalsIgnoreCase(key);
+    }
+
 
     /**
      * 验证签名
@@ -97,8 +203,9 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
      */
     @Override
     public Map<String, Object> orderInfo(PayOrder order) {
-        Map<String, Object> params = getUseOrderInfoParams(order);
-        String rsaSign = getRsaSign(params, RSA_SIGN);
+        LOG.info("百度支付配置：" + JSON.toJSONString(payConfigStorage));
+        Map<String, Object> params = this.getUseOrderInfoParams(order);
+        String rsaSign = this.getRsaSign(params, RSA_SIGN);
         params.put(RSA_SIGN, rsaSign);
         return params;
     }
@@ -128,12 +235,15 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
         String appKey = payConfigStorage.getAppKey();
         String dealId = payConfigStorage.getDealId();
         result.put(APP_KEY, appKey);
-        result.put(TP_ORDER_ID, payOrder.getTradeNo());
         result.put(DEAL_ID, dealId);
+        result.put(TOTAL_AMOUNT, String.valueOf(Util.conversionCentAmount(order.getPrice())));
+        result.put(TP_ORDER_ID, payOrder.getOutTradeNo());
+
         result.put(DEAL_TITLE, payOrder.getSubject());
         result.put(SIGN_FIELDS_RANGE, payOrder.getSignFieldsRange());
         result.put(BIZ_INFO, JSON.toJSONString(payOrder.getBizInfo()));
-        result.put(TOTAL_AMOUNT, String.valueOf(Util.conversionAmount(order.getPrice())));
+
+        LOG.info("百度支付 getUseOrderInfoParams：" + JSON.toJSONString(result));
 
         return result;
     }
@@ -489,7 +599,17 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
      * @return 签名结果
      */
     private String getRsaSign(Map<String, Object> params, String... ignoreKeys) {
-        String waitSignVal = SignUtils.parameterText(params, "&", false, ignoreKeys);
-        return SignUtils.valueOf(payConfigStorage.getSignType()).createSign(waitSignVal, payConfigStorage.getKeyPrivate(), payConfigStorage.getInputCharset());
+        Map<String, Object> result = new HashMap<>();
+        String appKey = payConfigStorage.getAppKey();
+        String dealId = payConfigStorage.getDealId();
+        result.put(APP_KEY, appKey);
+        result.put(DEAL_ID, dealId);
+        result.put(TOTAL_AMOUNT, params.get(TOTAL_AMOUNT));
+        result.put(TP_ORDER_ID, params.get(TP_ORDER_ID));
+
+        LOG.info("百度支付签名参数：" + JSON.toJSONString(result));
+
+        String waitSignVal = SignUtils.parameterText(result, "&", false, ignoreKeys);
+        return SignUtils.RSA.createSign(waitSignVal, payConfigStorage.getKeyPrivate(), payConfigStorage.getInputCharset());
     }
 }
