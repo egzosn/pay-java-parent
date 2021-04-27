@@ -57,7 +57,8 @@ android 例子 [pay-java-android](https://gitee.com/egzosn/pay-java-android)
 ## 交流
 很希望更多志同道合友友一起扩展新的的支付接口。
 
-这里感谢[ouyangxiangshao](https://github.com/ouyangxiangshao),[ZhuangXiong](https://github.com/ZhuangXiong) 与[Actinian](http://git.oschina.net/Actinia517) 所提交的安卓例子或者分支
+开发者
+[ouyangxiangshao](https://github.com/ouyangxiangshao)、[ZhuangXiong](https://github.com/ZhuangXiong) 、[Actinian](http://gitee.com/Actinia517)  、[Menjoe](https://gitee.com/menjoe-z) 
 
 也感谢各大友友同学帮忙进行接口测试
 
