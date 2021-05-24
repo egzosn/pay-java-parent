@@ -1,0 +1,44 @@
+name: Publish Package
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+    paths-ignore:
+      - 'docs/**'
+      - 'scripts/**'
+      - '*.md'
+      - '*.editorconfig'
+      - '*.gitignore'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: '11'
+          server-id: sonatype
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
+          gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+          gpg-passphrase: MAVEN_GPG_PASSPHRASE
+
+      - name: Publish Package Registry
+        run: |
+          SNAPSHOT_REPO="\${env.MAVEN_SERVER_ID}::default::\${env.SNAPSHOT_URL}"
+          RELEASE_REPO="\${env.MAVEN_SERVER_ID}::default::\${env.RELEASE_URL}"
+          mvn --batch-mode deploy -P release -DaltDeploymentRepository="${RELEASE_REPO}" -DaltSnapshotDeploymentRepository="${SNAPSHOT_REPO}" -DskipTests
+        env:
+          SNAPSHOT_URL: https://oss.sonatype.org/content/repositories/snapshots
+          RELEASE_URL: https://oss.sonatype.org/service/local/staging/deploy/maven2
+          MAVEN_SERVER_ID: sonatype
+          MAVEN_USERNAME: hocgin
+          MAVEN_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+
