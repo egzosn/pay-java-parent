@@ -149,6 +149,9 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
     public String getBackTransUrl() {
         return String.format(BACK_TRANS_URL, getReqUrl());
     }
+    public String getAppTransUrl() {
+        return String.format(APP_TRANS_URL, getReqUrl());
+    }
 
     public String getSingleQueryUrl() {
         return String.format(SINGLE_QUERY_URL, getReqUrl());
@@ -398,9 +401,9 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
      * @return 返回支付结果
      */
 
-    public JSONObject postOrder(PayOrder order) {
+    public JSONObject postOrder(PayOrder order, String  url) {
         Map<String, Object> params = orderInfo(order);
-        String responseStr = getHttpRequestTemplate().postForObject(this.getBackTransUrl(), params, String.class);
+        String responseStr = getHttpRequestTemplate().postForObject(url, params, String.class);
         JSONObject response = UriVariables.getParametersToMap(responseStr);
         if (response.isEmpty()) {
             throw new PayErrorException(new PayException("failure", "响应内容有误!", responseStr));
@@ -430,7 +433,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
     @Override
     public String getQrPay(PayOrder order) {
         order.setTransactionType(UnionTransactionType.APPLY_QR_CODE);
-        JSONObject response = postOrder(order);
+        JSONObject response = postOrder(order, getBackTransUrl());
         if (this.verify(response)) {
             if (SDKConstants.OK_RESP_CODE.equals(response.get(SDKConstants.param_respCode))) {
                 //成功
@@ -450,7 +453,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
     @Override
     public Map<String, Object> microPay(PayOrder order) {
         order.setTransactionType(UnionTransactionType.CONSUME);
-        JSONObject response = postOrder(order);
+        JSONObject response = postOrder(order, getBackTransUrl());
         return response;
     }
 
@@ -539,7 +542,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
         if (null == order.getTransactionType()) {
             order.setTransactionType(UnionTransactionType.APP);
         }
-        JSONObject response = postOrder(order);
+        JSONObject response = postOrder(order, getAppTransUrl());
         if (this.verify(response)) {
             if (SDKConstants.OK_RESP_CODE.equals(response.get(SDKConstants.param_respCode))) {
 //                //成功,获取tn号

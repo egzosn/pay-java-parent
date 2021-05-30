@@ -7,7 +7,7 @@ import com.egzosn.pay.common.api.PayService;
 import com.egzosn.pay.common.bean.BasePayType;
 import com.egzosn.pay.common.bean.CertStoreType;
 import com.egzosn.pay.common.bean.TransactionType;
-import com.egzosn.pay.common.http.HttpConfigStorage;
+import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.demo.service.handler.WxPayMessageHandler;
 import com.egzosn.pay.fuiou.api.FuiouPayConfigStorage;
 import com.egzosn.pay.fuiou.api.FuiouPayService;
@@ -47,27 +47,24 @@ public enum PayType implements BasePayType {
          */
         @Override
         public PayService getPayService(ApyAccount apyAccount) {
-            AliPayConfigStorage configStorage = new AliPayConfigStorage();
-            //配置的附加参数的使用
-            configStorage.setAttach(apyAccount.getPayId());
-            configStorage.setPid(apyAccount.getPartner());
-            configStorage.setAppId(apyAccount.getAppId());
-            configStorage.setKeyPublic(apyAccount.getPublicKey());
-            configStorage.setKeyPrivate(apyAccount.getPrivateKey());
-            configStorage.setNotifyUrl(apyAccount.getNotifyUrl());
-            configStorage.setReturnUrl(apyAccount.getReturnUrl());
-            configStorage.setSignType(apyAccount.getSignType());
-            configStorage.setSeller(apyAccount.getSeller());
-            configStorage.setPayType(apyAccount.getPayType().toString());
-            configStorage.setInputCharset(apyAccount.getInputCharset());
-            configStorage.setTest(apyAccount.isTest());
-            //请求连接池配置
-            HttpConfigStorage httpConfigStorage = new HttpConfigStorage();
-            //最大连接数
-            httpConfigStorage.setMaxTotal(20);
-            //默认的每个路由的最大连接数
-            httpConfigStorage.setDefaultMaxPerRoute(10);
-            return new AliPayService(configStorage, httpConfigStorage);
+            AliPayConfigStorage aliPayConfigStorage = new AliPayConfigStorage();
+            aliPayConfigStorage.setPid("2088102169916436");
+            aliPayConfigStorage.setAppId("2016080400165436");
+            aliPayConfigStorage.setCertSign(true);
+            //设置证书存储方式，这里为路径
+            aliPayConfigStorage.setCertStoreType(CertStoreType.CLASS_PATH);
+            aliPayConfigStorage.setMerchantCert("ali/appCertPublicKey_2016080400165436.crt");
+            aliPayConfigStorage.setAliPayCert("ali/alipayCertPublicKey_RSA2.crt");
+            aliPayConfigStorage.setAliPayRootCert("ali/alipayRootCert.crt");
+            aliPayConfigStorage.setKeyPrivate("MIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQCw7MD2Cwv/jnXssFjXnGx3JlGF57gJa2aYbJRV8MnNiPVpX4Ha+8ZjnQDhvkrWH4hHmzcujOr213HqloMpUSYBzCPiXGVRUUvdimejcHHTod7nI4g6nztzzfey/TXNDHmp7vY3pOIcjB0Zn0pkNAz2tKAFkqb4raHOqTB0QA0zD24Cn+26J2UJyYRcgeH0GtSQuUrm7yaGsuKakh+qtgWF6R71n5PMGOTQ5LH3i0WVHfCBkNGgJC6yC96HR4D7cosoyKD0+lp8UB/NVUWl7Tt/KLOgFUwh0GKSYFfv56O/VBV2+xqCGE4PlZESfVuOqz5vjjxzw3xDAUJrV8hSX/AJAgMBAAECggEBAKE0d3U4B4yo/2XUIH8EdgfykCFUSum6RFbpyBauORHfksyaSzV+ZvtomN8XhhSn0oJ8OMFfgM+86nz2+zdwSxMkMCYWTfLUAi4v59KRqAVO3kz4oS3Y3FDeAK3D7XuRvGFL7GgzAhtEx1cLPrsiehVn6s5pG15GxsIIgq/JlL1J88wn1zENLrVHmD6z/JpXvfb/RS1yR+5lyoohp4g0Ph9jJ3bCyUbRpK0QkPEzgAuWL0K2ITCL7PYHNAplI8d2xHHOLF9Qdjyx+ZrQ/RxtqzfyWzhqjsmp2qlgNCxWlt3woS9UhDB+nRvjEoWTJmIOszAMYuj8wGlX+3Ui3ALOdQECgYEA25EqnFPFinUnzgNvB6NYmh5STmZun6s4bUOLqwefKtEvrOtRwTu7sB7NIf37fizG3/MJUWHxiLy2/3ub4d2JxdDNBtJoEqnp6QB12qglCNa4CajdjtJa1dR81F9QvytsqEkmPYXFPPyviB0FcSIDAGMb3IbwvIfzBPY9WY8dJnECgYEAzkg3yKEFBZ8BU0WQ+3hyfKUoAhBEnxouxRSTBcXxwstJRiqaGTVe5aoJGQI+0xS7Z6q07XDtN2t97s6DnRLWbljsX6B64itzNhXRyzjdD3iZDU/KSw7khjhXf8XOZaj9eXmACDiUnkEn1xsM8bLiRGqB8y5f3aMY/RpuACGXnxkCgYEAx/zwT9Vpr1RIfjfYcJ+Su0X0994K0roUukj0tUJK8qf4gcsQ+y1aJe/YLib1ZBaKyj7G9O5+HmqtUAUZld/AdoJZzOXmz2EeYhD+R7wxh1xz4rCBpW3qOKvDS3jJxmZaIOoHv6/RWFxb0WGFrGcrTrX3EaWDLmWxr4pNlP5qsbECgYATllntrBR8/ycyEAX/SuWcHlaZM5BAh0zvm8+GGdCmDYWMqxjs0duL9URd4o+ynWJaKqR5c2KjA4r2tRdcP+Cqo7j2L5fbiAKtnQ7JvEGJaYsm72+nBuf+MrVkRZUepBhFg5r7rNu31zoAO+pTvQetNWvXeozRz93ckrjlPEtYaQKBgQDFwbV92rlRMLjZzlY+o0knoeJBjPQmPdiBTpGNimdy9L4c2Ure7affjcUiYhkKqrK5k5SScJTATgyQ7JF346FdtUtZ/6Kkj1RwJmmprPrDa9CATLoTle7g9OVd4sHT2ITHZMzPaF3ILvzcwJ70AD1xcxCQb+/7sDPmw7Mc8gOA7Q==");
+            aliPayConfigStorage.setNotifyUrl("http://pay.egzosn.com/payBack.json");
+            aliPayConfigStorage.setReturnUrl("http://pay.egzosn.com/payBack.html");
+            aliPayConfigStorage.setSignType(SignUtils.RSA2.name());
+            aliPayConfigStorage.setSeller("2088102169916436");
+            aliPayConfigStorage.setInputCharset("utf-8");
+            //是否为测试账号，沙箱环境
+            aliPayConfigStorage.setTest(true);
+            return new AliPayService(aliPayConfigStorage);
         }
 
         @Override
