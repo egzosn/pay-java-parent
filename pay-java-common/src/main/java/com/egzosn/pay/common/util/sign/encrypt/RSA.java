@@ -17,8 +17,8 @@ import java.security.spec.X509EncodedKeySpec;
 
 import javax.crypto.Cipher;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * RSA
@@ -29,7 +29,7 @@ import org.apache.commons.logging.LogFactory;
  * </pre>
  */
 public class RSA {
-    private static final Log LOG = LogFactory.getLog(RSA.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RSA.class);
     private static final String ALGORITHM = "RSA";
 
 
@@ -61,10 +61,10 @@ public class RSA {
             return Base64.encode(signed);
         }
         catch (GeneralSecurityException e) {
-            LOG.error(e);
+            LOG.error("", e);
         }
         catch (UnsupportedEncodingException e) {
-            LOG.error(e);
+            LOG.error("", e);
         }
 
         return null;
@@ -89,10 +89,10 @@ public class RSA {
             return Base64.encode(signed);
         }
         catch (GeneralSecurityException e) {
-            LOG.error(e);
+            LOG.error("", e);
         }
         catch (UnsupportedEncodingException e) {
-            LOG.error(e);
+            LOG.error("", e);
         }
 
         return null;
@@ -142,10 +142,10 @@ public class RSA {
             return signature.verify(Base64.decode(sign));
         }
         catch (GeneralSecurityException e) {
-            LOG.error(e);
+            LOG.error("", e);
         }
         catch (IOException e) {
-            LOG.error(e);
+            LOG.error("", e);
         }
         return false;
     }
@@ -168,10 +168,10 @@ public class RSA {
             return signature.verify(Base64.decode(sign));
         }
         catch (GeneralSecurityException e) {
-            LOG.error(e);
+            LOG.error("", e);
         }
         catch (IOException e) {
-            LOG.error(e);
+            LOG.error("", e);
         }
         return false;
     }

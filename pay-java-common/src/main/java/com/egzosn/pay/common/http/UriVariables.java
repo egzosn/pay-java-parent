@@ -5,8 +5,8 @@ import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.bean.result.PayException;
@@ -22,7 +22,7 @@ import com.egzosn.pay.common.exception.PayErrorException;
  * </pre>
  */
 public final class UriVariables {
-    private static final Log LOG = LogFactory.getLog(UriVariables.class);
+    private static final Logger LOG = LoggerFactory.getLogger(UriVariables.class);
 
     private UriVariables() {
     }
@@ -213,7 +213,7 @@ public final class UriVariables {
             return URLEncoder.encode(str, enc);
         }
         catch (UnsupportedEncodingException e) {
-            LOG.error(e);
+            LOG.error("", e);
         }
         return str;
     }

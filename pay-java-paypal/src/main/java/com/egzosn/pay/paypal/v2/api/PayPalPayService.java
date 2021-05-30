@@ -528,7 +528,7 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage> implem
                     }
                 }
                 catch (UnsupportedEncodingException e) {
-                    LOG.error(e);
+                    LOG.error("", e);
                 }
             }
             params.put(name, valueStr);

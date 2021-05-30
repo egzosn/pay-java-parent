@@ -1,13 +1,14 @@
 package com.egzosn.pay.common.api;
 
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.alibaba.fastjson.JSON;
 import com.egzosn.pay.common.bean.PayMessage;
 import com.egzosn.pay.common.bean.PayOutMessage;
 import com.egzosn.pay.common.exception.PayErrorException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import java.util.Map;
 
 /**
  * 默认处理支付回调消息的处理器接口
@@ -21,7 +22,7 @@ import java.util.Map;
  */
 public class DefaultPayMessageHandler implements PayMessageHandler<PayMessage, PayService> {
 
-    protected final Log LOG = LogFactory.getLog(DefaultPayMessageHandler.class);
+    protected final Logger LOG = LoggerFactory.getLogger(DefaultPayMessageHandler.class);
     /**
      * @param payMessage 支付消息
      * @param context    上下文，如果handler或interceptor之间有信息要传递，可以用这个

@@ -24,8 +24,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import com.egzosn.pay.common.bean.result.PayException;
@@ -44,7 +44,7 @@ import com.egzosn.pay.common.util.str.StringUtils;
  *
  */
 public class AntCertificationUtil {
-    private static final Log LOGGER = LogFactory.getLog(AntCertificationUtil.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AntCertificationUtil.class);
     static {
         Security.removeProvider("SunEC");
         Security.addProvider(new BouncyCastleProvider());

@@ -148,7 +148,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
             return signVerify(params, (String) params.get(SIGN));
         }
         catch (PayErrorException e) {
-            LOG.error(e);
+            LOG.error("", e);
         }
         return false;
     }

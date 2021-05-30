@@ -4,8 +4,8 @@ import com.egzosn.pay.common.bean.MethodType;
 import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.util.str.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -44,7 +44,7 @@ import java.util.Map;
  */
 public class HttpRequestTemplate {
 
-    protected static final Log LOG = LogFactory.getLog(HttpRequestTemplate.class);
+    protected static final Logger LOG = LoggerFactory.getLogger(HttpRequestTemplate.class);
 
     protected CloseableHttpClient httpClient;
 
@@ -123,7 +123,7 @@ public class HttpRequestTemplate {
             try {
                 return sslsf = new SSLConnectionSocketFactory(SSLContext.getDefault());
             } catch (NoSuchAlgorithmException e) {
-                LOG.error(e);
+                LOG.error("", e);
             }
         }
 
@@ -149,9 +149,9 @@ public class HttpRequestTemplate {
 
             return sslsf;
         } catch (IOException e) {
-            LOG.error(e);
+            LOG.error("", e);
         } catch (GeneralSecurityException e) {
-            LOG.error(e);
+            LOG.error("", e);
         }
         return null;
 

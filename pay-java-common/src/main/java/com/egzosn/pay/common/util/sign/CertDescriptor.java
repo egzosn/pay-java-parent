@@ -15,8 +15,8 @@
 package com.egzosn.pay.common.util.sign;
 
 import com.egzosn.pay.common.util.str.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -35,7 +35,7 @@ import java.util.Enumeration;
  * 声明：以下代码只是为了方便接入方测试而提供的样例代码，商户可以根据自己需要，按照技术文档编写。该代码仅供参考，不提供编码，性能，规范性等方面的保障
  */
 public class CertDescriptor {
-    protected static final Log LOG = LogFactory.getLog(CertDescriptor.class);
+    protected static final Logger LOG = LoggerFactory.getLogger(CertDescriptor.class);
     /**
      * 证书容器，存储对商户请求报文签名私钥证书.
      */

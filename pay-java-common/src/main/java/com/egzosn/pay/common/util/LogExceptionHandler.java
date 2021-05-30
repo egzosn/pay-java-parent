@@ -2,8 +2,8 @@ package com.egzosn.pay.common.util;
 
 import com.egzosn.pay.common.api.PayErrorExceptionHandler;
 import com.egzosn.pay.common.exception.PayErrorException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 
@@ -20,12 +20,12 @@ import org.apache.commons.logging.LogFactory;
  */
 public class LogExceptionHandler implements PayErrorExceptionHandler {
 
-    protected final Log log = LogFactory.getLog(PayErrorExceptionHandler.class);
+    protected final Logger LOGGER = LoggerFactory.getLogger(PayErrorExceptionHandler.class);
 
     @Override
     public void handle(PayErrorException e) {
 
-        log.error("Error happens", e);
+        LOGGER.error("Error happens", e);
 
     }
 

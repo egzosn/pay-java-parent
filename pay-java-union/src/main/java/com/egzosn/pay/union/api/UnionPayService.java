@@ -115,7 +115,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
             certDescriptor.initRootCert(payConfigStorage.getAcpRootCertInputStream());
         }
         catch (IOException e) {
-            LOG.error(e);
+            LOG.error("", e);
         }
 
 
@@ -386,10 +386,10 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
             LOG.error("verify certificate chain fail.", e);
         }
         catch (CertificateExpiredException e) {
-            LOG.error(e);
+            LOG.error("", e);
         }
         catch (GeneralSecurityException e) {
-            LOG.error(e);
+            LOG.error("", e);
         }
         return null;
     }

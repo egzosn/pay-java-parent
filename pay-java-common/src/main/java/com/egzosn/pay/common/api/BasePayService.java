@@ -11,8 +11,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.JSON;
 import com.egzosn.pay.common.bean.MethodType;
@@ -38,7 +39,7 @@ import com.egzosn.pay.common.util.str.StringUtils;
  *   </pre>
  */
 public abstract class BasePayService<PC extends PayConfigStorage> implements PayService<PC> {
-    protected final Log LOG = LogFactory.getLog(getClass());
+    protected final Logger LOG = LoggerFactory.getLogger(getClass());
     protected PC payConfigStorage;
 
     protected HttpRequestTemplate requestTemplate;
@@ -112,7 +113,7 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
             base64ClientID = com.egzosn.pay.common.util.sign.encrypt.Base64.encode(String.format("%s:%s", user, password).getBytes("UTF-8"));
         }
         catch (UnsupportedEncodingException e) {
-            LOG.error(e);
+            LOG.error("", e);
         }
 
         return base64ClientID;
@@ -202,7 +203,7 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
                     }
                 }
                 catch (UnsupportedEncodingException e) {
-                    LOG.error(e);
+                    LOG.error("", e);
                 }
             }
             params.put(name, valueStr);

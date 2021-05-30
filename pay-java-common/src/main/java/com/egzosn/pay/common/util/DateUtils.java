@@ -8,8 +8,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.http.util.Args;
 
 /**
@@ -22,7 +22,7 @@ import org.apache.http.util.Args;
  *         </pre>
  */
 public final class DateUtils {
-    private static final Log LOG = LogFactory.getLog(DateUtils.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DateUtils.class);
 
     private DateUtils() {
     }
@@ -81,7 +81,7 @@ public final class DateUtils {
             return formatFor.parse(date);
         }
         catch (ParseException e) {
-            LOG.error(e);
+            LOG.error("", e);
         }
         return null;
     }

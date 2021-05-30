@@ -6,8 +6,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.Signature;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
@@ -15,7 +15,7 @@ import com.egzosn.pay.common.util.sign.encrypt.sm3.SM3Digest;
 
 public class SecureUtil {
 
-    private static final Log LOG = LogFactory.getLog(SecureUtil.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SecureUtil.class);
     /**
      * 算法常量： SHA1
      */
@@ -49,7 +49,7 @@ public class SecureUtil {
             return md.digest();
         }
         catch (NoSuchAlgorithmException e) {
-            LOG.error(e);
+            LOG.error("", e);
             return null;
         }
     }
@@ -77,7 +77,7 @@ public class SecureUtil {
             return sha1StrBuff.toString().getBytes(encoding);
         }
         catch (UnsupportedEncodingException e) {
-            LOG.error(e);
+            LOG.error("", e);
             return null;
         }
     }
@@ -139,7 +139,7 @@ public class SecureUtil {
             bytes = SecureUtil.sm3(data.getBytes(encoding));
         }
         catch (UnsupportedEncodingException e) {
-            LOG.error(e);
+            LOG.error("", e);
         }
         StringBuilder sm3StrBuff = new StringBuilder();
         for (int i = 0; i < bytes.length; i++) {

@@ -17,8 +17,8 @@ import java.util.UUID;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.http.message.BasicNameValuePair;
 
 import com.egzosn.pay.common.bean.SignType;
@@ -93,13 +93,13 @@ public enum SignUtils implements SignType {
                 return sb.toString().toUpperCase();
             }
             catch (NoSuchAlgorithmException e) {
-                LOG.error(e);
+                LOG.error("", e);
             }
             catch (InvalidKeyException e) {
-                LOG.error(e);
+                LOG.error("", e);
             }
             catch (UnsupportedEncodingException e) {
-                LOG.error(e);
+                LOG.error("", e);
             }
 
             throw new PayErrorException(new PayException("fail", "HMACSHA256 签名异常"));
@@ -177,7 +177,7 @@ public enum SignUtils implements SignType {
             return com.egzosn.pay.common.util.sign.encrypt.RSA2.verify(text, sign, publicKey, characterEncoding);
         }
     };
-    private static final Log LOG = LogFactory.getLog(SignUtils.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SignUtils.class);
 
     /**
      * 把数组所有元素排序，并按照“参数=参数值”的模式用“@param separator”字符拼接成字符串

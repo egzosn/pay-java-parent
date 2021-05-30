@@ -9,8 +9,8 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.http.Consts;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -46,7 +46,7 @@ import com.egzosn.pay.common.util.str.StringUtils;
  *  </pre>
  */
 public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase implements org.apache.http.client.ResponseHandler<T> {
-    protected static final Log LOG = LogFactory.getLog(ClientHttpRequest.class);
+    protected static final Logger LOG = LoggerFactory.getLogger(ClientHttpRequest.class);
     public static final ContentType APPLICATION_FORM_URLENCODED_UTF_8 = ContentType.create("application/x-www-form-urlencoded", Consts.UTF_8);
     public static final ContentType APPLICATION_XML_UTF_8 = ContentType.create("application/xml", Consts.UTF_8);
 

@@ -8,8 +8,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.egzosn.pay.common.bean.PayMessage;
 import com.egzosn.pay.common.bean.PayOutMessage;
@@ -44,8 +44,8 @@ import com.egzosn.pay.common.util.LogExceptionHandler;
  * @author egan
  */
 public class PayMessageRouter {
+    protected final Logger LOG = LoggerFactory.getLogger(PayMessageRouter.class);
 
-    protected final Log LOG = LogFactory.getLog(PayMessageRouter.class);
     /**
      * 异步线程大小
      */
