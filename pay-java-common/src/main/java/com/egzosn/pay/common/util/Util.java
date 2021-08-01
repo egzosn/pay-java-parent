@@ -572,13 +572,18 @@ public class Util {
 
 
     /**
+     * 一百
+     */
+    public static final BigDecimal HUNDRED =  new BigDecimal(100);
+
+    /**
      * 元转分
      *
      * @param amount 元的金额
      * @return 分的金额
      */
-    public static final int conversionCentAmount(BigDecimal amount) {
-        return amount.multiply(new BigDecimal(100)).setScale(0, BigDecimal.ROUND_HALF_UP).intValue();
+    public static int conversionCentAmount(BigDecimal amount) {
+        return amount.multiply(HUNDRED).setScale(0, BigDecimal.ROUND_HALF_UP).intValue();
     }
 
     /**
@@ -587,7 +592,7 @@ public class Util {
      * @param amount 元的金额
      * @return 元的金额 两位小数
      */
-    public static final BigDecimal conversionAmount(BigDecimal amount) {
+    public static BigDecimal conversionAmount(BigDecimal amount) {
         return amount.setScale(2, BigDecimal.ROUND_HALF_UP);
     }
 

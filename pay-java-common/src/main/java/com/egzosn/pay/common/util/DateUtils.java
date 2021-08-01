@@ -8,9 +8,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 
+import org.apache.http.util.Args;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.http.util.Args;
 
 /**
  * 日期转换运算工具
@@ -90,15 +90,15 @@ public final class DateUtils {
         return parseDate(date, YYYY_MM_DD_HH_MM_SS);
     }
 
-    public static final String format(Date date) {
+    public static String format(Date date) {
         return formatDate(date, YYYY_MM_DD_HH_MM_SS);
     }
 
-    public static final Date parseDay(String date) {
+    public static Date parseDay(String date) {
         return parseDate(date, YYYY_MM_DD);
     }
 
-    public static final String formatDay(Date date) {
+    public static String formatDay(Date date) {
         return formatDate(date, YYYY_MM_DD);
     }
 
@@ -108,8 +108,8 @@ public final class DateUtils {
      * @param date 结束点日期
      * @return 分钟数
      */
-    public static final long minutesRemaining(Date date) {
-        return (date.getTime() / 1000 / 60 - System.currentTimeMillis() / 1000 / 60);
+    public static long minutesRemaining(Date date) {
+        return (date.getTime() / 1000 / 60 - DateUtils.toEpochSecond() / 60);
     }
 
     /**
@@ -118,7 +118,7 @@ public final class DateUtils {
      * @param date 结束点日期
      * @return 小时数
      */
-    public static final long remainingHours(Date date) {
+    public static long remainingHours(Date date) {
         return minutesRemaining(date) / 60;
     }
 
@@ -128,8 +128,18 @@ public final class DateUtils {
      * @param date 结束点日期
      * @return 天数
      */
-    public static final long remainingDays(Date date) {
+    public static long remainingDays(Date date) {
         return remainingHours(date) / 24;
     }
+
+    /**
+     * 将此日期时间转换为从epoch开始的秒数
+     *
+     * @return epoch开始的秒数
+     */
+    public static long toEpochSecond() {
+        return System.currentTimeMillis() / 1000;
+    }
+
 
 }
