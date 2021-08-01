@@ -1,6 +1,8 @@
 package com.egzosn.pay.common.http;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
+import com.egzosn.pay.common.util.str.StringUtils;
 
 /**
  * URL表达式处理器
@@ -23,6 +26,7 @@ import com.egzosn.pay.common.exception.PayErrorException;
  */
 public final class UriVariables {
     private static final Logger LOG = LoggerFactory.getLogger(UriVariables.class);
+    public static final String QUESTION = "?";
 
     private UriVariables() {
     }
@@ -218,5 +222,28 @@ public final class UriVariables {
         return str;
     }
 
+    /**
+     * 去除域名的标准url
+     *
+     * @param url url
+     * @return 去除域名的标准url
+     */
+    public static String getCanonicalUrl(String url) {
+        if (StringUtils.isEmpty(url)) {
+            return url;
+        }
+        try {
+            URI uri = new URI(url);
+            String path = uri.getPath();
+            String encodedQuery = uri.getQuery();
+            if (StringUtils.isNotEmpty(encodedQuery)) {
+                path += QUESTION.concat(encodedQuery);
+            }
+            return path;
+        }
+        catch (URISyntaxException e) {
+            throw new PayErrorException(new PayException("failure", "去除域名的标准url失败"), e);
+        }
 
+    }
 }

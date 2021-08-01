@@ -1,25 +1,30 @@
 package com.egzosn.pay.common.http;
 
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.UnsupportedCharsetException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.http.Header;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicHeader;
 
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
-import java.nio.charset.UnsupportedCharsetException;
-import java.util.*;
-
 import static com.egzosn.pay.common.http.UriVariables.getMapToParameters;
+
+import com.egzosn.pay.common.util.str.StringUtils;
 
 /**
  * 请求实体，包含请求头，内容类型，编码类型等
  *
  * @author egan
- *         <pre>
-*               email egzosn@gmail.com
-*               date 2017/12/20
-*           </pre>
+ * <pre>
+ *               email egzosn@gmail.com
+ *               date 2017/12/20
+ *           </pre>
  */
 public class HttpStringEntity extends StringEntity {
     /**
@@ -42,12 +47,13 @@ public class HttpStringEntity extends StringEntity {
 
 
     public void requestIsEmpty(Map<String, Object> request) {
-        if (null == request || request.isEmpty()){
+        if (null == request || request.isEmpty()) {
             this.isEmpty = true;
         }
     }
+
     public void requestIsEmpty(String request) {
-        if (null == request || request.isEmpty()){
+        if (StringUtils.isEmpty(request)) {
             this.isEmpty = true;
         }
 
@@ -59,7 +65,6 @@ public class HttpStringEntity extends StringEntity {
      *
      * @param request 请求体
      * @param headers 请求头
-     *
      * @throws UnsupportedEncodingException 不支持默认的HTTP字符集
      */
     public HttpStringEntity(Map<String, Object> request, Header... headers) throws UnsupportedEncodingException {
@@ -73,7 +78,6 @@ public class HttpStringEntity extends StringEntity {
      *
      * @param request 请求体
      * @param headers 请求头
-     *
      * @throws UnsupportedEncodingException 不支持默认的HTTP字符集
      */
     public HttpStringEntity(Map<String, Object> request, Map<String, String> headers) throws UnsupportedEncodingException {
@@ -119,7 +123,6 @@ public class HttpStringEntity extends StringEntity {
      * 构造器
      *
      * @param request 请求体
-     *
      * @throws UnsupportedEncodingException 不支持默认的HTTP字符集
      */
     public HttpStringEntity(Map<String, Object> request) throws UnsupportedEncodingException {
@@ -132,7 +135,6 @@ public class HttpStringEntity extends StringEntity {
      *
      * @param request     请求体
      * @param contentType 内容类型
-     *
      * @throws UnsupportedCharsetException 不支持默认的HTTP字符集
      */
     public HttpStringEntity(String request, ContentType contentType) throws UnsupportedCharsetException {
@@ -145,7 +147,6 @@ public class HttpStringEntity extends StringEntity {
      *
      * @param request 请求体
      * @param charset 字符类型
-     *
      * @throws UnsupportedCharsetException 不支持默认的HTTP字符集
      */
     public HttpStringEntity(String request, String charset) throws UnsupportedCharsetException {
@@ -169,7 +170,6 @@ public class HttpStringEntity extends StringEntity {
      *
      * @param request 请求体
      * @param headers 请求头
-     *
      * @throws UnsupportedEncodingException 不支持默认的HTTP字符集
      */
     public HttpStringEntity(String request, Header... headers) throws UnsupportedEncodingException {
@@ -185,7 +185,6 @@ public class HttpStringEntity extends StringEntity {
      *
      * @param request 请求体
      * @param headers 请求头
-     *
      * @throws UnsupportedEncodingException 不支持默认的HTTP字符集
      */
     public HttpStringEntity(String request, Map<String, String> headers) throws UnsupportedEncodingException {
@@ -237,6 +236,7 @@ public class HttpStringEntity extends StringEntity {
             addHeader(new BasicHeader(entry.getKey(), entry.getValue()));
         }
     }
+
     /**
      * 设置请求头
      *

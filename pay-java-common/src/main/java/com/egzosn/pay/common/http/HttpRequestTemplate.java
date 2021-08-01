@@ -1,11 +1,17 @@
 package com.egzosn.pay.common.http;
 
-import com.egzosn.pay.common.bean.MethodType;
-import com.egzosn.pay.common.bean.result.PayException;
-import com.egzosn.pay.common.exception.PayErrorException;
-import com.egzosn.pay.common.util.str.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.security.GeneralSecurityException;
+import java.security.KeyStore;
+import java.security.NoSuchAlgorithmException;
+import java.util.Map;
+
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+
+import org.apache.http.Header;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -23,24 +29,22 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.ssl.SSLContexts;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.security.GeneralSecurityException;
-import java.security.KeyStore;
-import java.security.NoSuchAlgorithmException;
-import java.util.Map;
+import com.egzosn.pay.common.bean.MethodType;
+import com.egzosn.pay.common.bean.result.PayException;
+import com.egzosn.pay.common.exception.PayErrorException;
+import com.egzosn.pay.common.util.str.StringUtils;
 
 /**
  * http请求工具
+ *
  * @author egan
- *  <code>
+ * <code>
  * email egzosn@gmail.com <br>
  * date 2017/3/3 21:33
- *  </code>
+ * </code>
  */
 public class HttpRequestTemplate {
 
@@ -55,8 +59,10 @@ public class HttpRequestTemplate {
     protected HttpConfigStorage configStorage;
 
     private SSLConnectionSocketFactory sslsf;
+
     /**
-     *  获取代理带代理地址的 HttpHost
+     * 获取代理带代理地址的 HttpHost
+     *
      * @return 获取代理带代理地址的 HttpHost
      */
     public HttpHost getHttpProxy() {
@@ -98,7 +104,8 @@ public class HttpRequestTemplate {
     }
 
     /**
-     *  初始化
+     * 初始化
+     *
      * @param configStorage 请求配置
      */
     public HttpRequestTemplate(HttpConfigStorage configStorage) {
@@ -111,24 +118,26 @@ public class HttpRequestTemplate {
 
 
     /**
-     *  创建ssl配置
+     * 创建ssl配置
+     *
      * @param configStorage 请求配置
      * @return SSLConnectionSocketFactory  Layered socket factory for TLS/SSL connections.
      */
-    public SSLConnectionSocketFactory createSSL( HttpConfigStorage configStorage){
-        if (null != sslsf){
+    public SSLConnectionSocketFactory createSSL(HttpConfigStorage configStorage) {
+        if (null != sslsf) {
             return sslsf;
         }
-        if (null == configStorage.getKeystore()){
+        if (null == configStorage.getKeystore()) {
             try {
                 return sslsf = new SSLConnectionSocketFactory(SSLContext.getDefault());
-            } catch (NoSuchAlgorithmException e) {
+            }
+            catch (NoSuchAlgorithmException e) {
                 LOG.error("", e);
             }
         }
 
         //读取本机存放的PKCS12证书文件
-        try(InputStream instream = configStorage.getKeystoreInputStream()){
+        try (InputStream instream = configStorage.getKeystoreInputStream()) {
             //指定读取证书格式为PKCS12
             KeyStore keyStore = KeyStore.getInstance("PKCS12");
 
@@ -148,9 +157,11 @@ public class HttpRequestTemplate {
                     new DefaultHostnameVerifier());
 
             return sslsf;
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             LOG.error("", e);
-        } catch (GeneralSecurityException e) {
+        }
+        catch (GeneralSecurityException e) {
             LOG.error("", e);
         }
         return null;
@@ -159,10 +170,11 @@ public class HttpRequestTemplate {
 
     /**
      * 创建凭据提供程序
+     *
      * @param configStorage 请求配置
      * @return 凭据提供程序
      */
-    public CredentialsProvider createCredentialsProvider(HttpConfigStorage configStorage){
+    public CredentialsProvider createCredentialsProvider(HttpConfigStorage configStorage) {
 
 
         if (StringUtils.isBlank(configStorage.getAuthUsername())) {
@@ -181,20 +193,21 @@ public class HttpRequestTemplate {
 
     /**
      * 初始化连接池
+     *
      * @param configStorage 配置
      * @return 连接池对象
      */
-    public PoolingHttpClientConnectionManager connectionManager(HttpConfigStorage configStorage){
-        if (null != connectionManager){
+    public PoolingHttpClientConnectionManager connectionManager(HttpConfigStorage configStorage) {
+        if (null != connectionManager) {
             return connectionManager;
         }
-        if (0 == configStorage.getMaxTotal() || 0 == configStorage.getDefaultMaxPerRoute()){
+        if (0 == configStorage.getMaxTotal() || 0 == configStorage.getDefaultMaxPerRoute()) {
             return null;
         }
         if (LOG.isInfoEnabled()) {
             LOG.info(String.format("Initialize the PoolingHttpClientConnectionManager -- maxTotal:%s, defaultMaxPerRoute:%s", configStorage.getMaxTotal(), configStorage.getDefaultMaxPerRoute()));
         }
-        Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory> create()
+        Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
                 .register("https", createSSL(configStorage))
                 .register("http", new PlainConnectionSocketFactory())
                 .build();
@@ -216,26 +229,25 @@ public class HttpRequestTemplate {
 
         if (null != configStorage && StringUtils.isNotBlank(configStorage.getHttpProxyHost())) {
             //http代理地址设置
-            httpProxy = new HttpHost(configStorage.getHttpProxyHost(),configStorage.getHttpProxyPort());;
+            httpProxy = new HttpHost(configStorage.getHttpProxyHost(), configStorage.getHttpProxyPort());
+            ;
         }
 
         return this;
     }
 
 
-
-
     /**
-     *
      * post
-     * @param uri 请求地址
-     * @param request 请求参数
+     *
+     * @param uri          请求地址
+     * @param request      请求参数
      * @param responseType 为响应类(需要自己依据响应格式来确定)
      * @param uriVariables 地址通配符对应的值
-     * @param <T> 响应类型
+     * @param <T>          响应类型
      * @return 类型对象
      */
-    public <T> T postForObject(String uri, Object request, Class<T> responseType, Object... uriVariables){
+    public <T> T postForObject(String uri, Object request, Class<T> responseType, Object... uriVariables) {
         return doExecute(URI.create(UriVariables.getUri(uri, uriVariables)), request, responseType, MethodType.POST);
     }
 
@@ -243,7 +255,7 @@ public class HttpRequestTemplate {
         return doExecute(URI.create(UriVariables.getUri(uri, uriVariables)), request, responseType, MethodType.POST);
     }
 
-    public <T> T postForObject(URI uri, Object request, Class<T> responseType){
+    public <T> T postForObject(URI uri, Object request, Class<T> responseType) {
         return doExecute(uri, request, responseType, MethodType.POST);
     }
 
@@ -255,14 +267,13 @@ public class HttpRequestTemplate {
      * @param responseType 响应类型
      * @param uriVariables 用于匹配表达式
      * @param <T>          响应类型
-     *
      * @return 类型对象
-     * <p>
+     * 
      * <code>
      * getForObject(&quot;http://egan.in/pay/{id}/f/{type}&quot;, String.class, &quot;1&quot;, &quot;APP&quot;)
      * </code>
      */
-    public <T> T getForObject(String uri, Class<T> responseType, Object... uriVariables){
+    public <T> T getForObject(String uri, Class<T> responseType, Object... uriVariables) {
 
         return doExecute(URI.create(UriVariables.getUri(uri, uriVariables)), null, responseType, MethodType.GET);
     }
@@ -277,101 +288,179 @@ public class HttpRequestTemplate {
      * @return 类型对象
      * <code>
      * Map&lt;String, String&gt; uriVariables = new HashMap&lt;String, String&gt;();<br>
-     *
+     * 
      * uriVariables.put(&quot;id&quot;, &quot;1&quot;);<br>
-     *
+     * 
      * uriVariables.put(&quot;type&quot;, &quot;APP&quot;);<br>
-     *
+     * 
      * getForObject(&quot;http://egan.in/pay/{id}/f/{type}&quot;, String.class, uriVariables)<br>
      * </code>
      */
-    public <T> T getForObject(String uri, Class<T> responseType, Map<String, ?> uriVariables){
+    public <T> T getForObject(String uri, Class<T> responseType, Map<String, ?> uriVariables) {
         return doExecute(URI.create(UriVariables.getUri(uri, uriVariables)), null, responseType, MethodType.GET);
     }
 
 
     /**
      * get 请求
-     * @param uri           请求地址
-     * @param header        请求头
+     *
+     * @param uri          请求地址
+     * @param header       请求头
      * @param responseType 响应类型
      * @param uriVariables 用于匹配表达式
-     * @param <T>            响应类型
-     * @return               类型对象
+     * @param <T>          响应类型
+     * @return 类型对象
      *
      * <code>
-     *    getForObject(&quot;http://egan.in/pay/{id}/f/{type}&quot;, String.class, &quot;1&quot;, &quot;APP&quot;)
+     * getForObject(&quot;http://egan.in/pay/{id}/f/{type}&quot;, String.class, &quot;1&quot;, &quot;APP&quot;)
      * </code>
      */
-    public <T> T getForObject(String uri, HttpHeader header, Class<T> responseType, Object... uriVariables){
+    public <T> T getForObject(String uri, HttpHeader header, Class<T> responseType, Object... uriVariables) {
 
-        return doExecute(URI.create(UriVariables.getUri(uri, uriVariables)), header, responseType, MethodType.GET);
+        return getForObjectEntity(uri, header, responseType, uriVariables).getBody();
     }
 
     /**
      * get 请求
      *
      * @param uri          请求地址
-     * @param header        请求头
+     * @param header       请求头
      * @param responseType 响应类型
      * @param uriVariables 用于匹配表达式
-     * @param <T>           响应类型
+     * @param <T>          响应类型
+     * @return 类型对象
+     *
+     * <code>
+     * getForObject(&quot;http://egan.in/pay/{id}/f/{type}&quot;, String.class, &quot;1&quot;, &quot;APP&quot;)
+     * </code>
+     */
+    public <T>  ResponseEntity<T>  getForObjectEntity(String uri, HttpHeader header, Class<T> responseType, Object... uriVariables) {
+
+        return doExecuteEntity(URI.create(UriVariables.getUri(uri, uriVariables)), header, responseType, MethodType.GET);
+    }
+
+    /**
+     * get 请求
+     *
+     * @param uri          请求地址
+     * @param header       请求头
+     * @param responseType 响应类型
+     * @param uriVariables 用于匹配表达式
+     * @param <T>          响应类型
      * @return 类型对象
      * <code>
      * Map&lt;String, String&gt; uriVariables = new HashMap&lt;String, String&gt;();<br>
-     *
+     * 
      * uriVariables.put(&quot;id&quot;, &quot;1&quot;);<br>
-     *
+     * 
      * uriVariables.put(&quot;type&quot;, &quot;APP&quot;);<br>
-     *
+     * 
      * getForObject(&quot;http://egan.in/pay/{id}/f/{type}&quot;, String.class, uriVariables)<br>
      * </code>
      */
-    public <T> T getForObject(String uri, HttpHeader header, Class<T> responseType, Map<String, ?> uriVariables){
-        return doExecute(URI.create(UriVariables.getUri(uri, uriVariables)), header, responseType, MethodType.GET);
+    public <T> T getForObject(String uri, HttpHeader header, Class<T> responseType, Map<String, ?> uriVariables) {
+        return getForObjectEntity(uri, header, responseType, uriVariables).getBody();
+    }
+    /**
+     * get 请求
+     *
+     * @param uri          请求地址
+     * @param header       请求头
+     * @param responseType 响应类型
+     * @param uriVariables 用于匹配表达式
+     * @param <T>          响应类型
+     * @return 类型对象
+     * <code>
+     * Map&lt;String, String&gt; uriVariables = new HashMap&lt;String, String&gt;();<br>
+     * 
+     * uriVariables.put(&quot;id&quot;, &quot;1&quot;);<br>
+     * 
+     * uriVariables.put(&quot;type&quot;, &quot;APP&quot;);<br>
+     * 
+     * getForObject(&quot;http://egan.in/pay/{id}/f/{type}&quot;, String.class, uriVariables)<br>
+     * </code>
+     */
+    public <T> ResponseEntity<T>  getForObjectEntity(String uri, HttpHeader header, Class<T> responseType, Map<String, ?> uriVariables) {
+        return doExecuteEntity(URI.create(UriVariables.getUri(uri, uriVariables)), header, responseType, MethodType.GET);
     }
 
 
     /**
      * http 请求执行
-     * @param uri 地址
-     * @param request 请求数据
+     *
+     * @param uri          地址
+     * @param request      请求数据
      * @param responseType 响应类型
-     * @param method 请求方法
-     * @param <T> 响应类型
+     * @param method       请求方法
+     * @param <T>          响应类型
      * @return 类型对象
      */
-    public <T>T doExecute(URI uri, Object request, Class<T> responseType, MethodType method){
+    public <T> T doExecute(URI uri, Object request, Class<T> responseType, MethodType method) {
+        return doExecuteEntity(uri, request, responseType, method).getBody();
+
+    }
+
+    /**
+     * http 请求执行
+     *
+     * @param uri          地址
+     * @param request      请求数据
+     * @param responseType 响应类型
+     * @param method       请求方法
+     * @param <T>          响应类型
+     * @return 类型对象
+     */
+    public <T> ResponseEntity<T> doExecuteEntity(URI uri, Object request, Class<T> responseType, MethodType method) {
+
         if (LOG.isDebugEnabled()) {
             LOG.debug(String.format("uri:%s, httpMethod:%s ", uri, method.name()));
         }
-        ClientHttpRequest<T> httpRequest = new ClientHttpRequest(uri ,method, request, null == configStorage ? null : configStorage.getCharset());
+        ClientHttpRequest<T> httpRequest = new ClientHttpRequest<T>(uri, method, request, null == configStorage ? null : configStorage.getCharset());
         //判断是否有代理设置
-        if (null != httpProxy){
+        if (null != httpProxy) {
             httpRequest.setProxy(httpProxy);
         }
         httpRequest.setResponseType(responseType);
         try (CloseableHttpResponse response = getHttpClient().execute(httpRequest)) {
-            return httpRequest.handleResponse(response);
-        }catch (IOException e){
+            int statusCode = response.getStatusLine().getStatusCode();
+            Header[] allHeaders = response.getAllHeaders();
+            T body = httpRequest.handleResponse(response);
+            return new ResponseEntity<>(statusCode, allHeaders, body);
+        }
+        catch (IOException e) {
             throw new PayErrorException(new PayException("IOException", e.getLocalizedMessage()));
-        }finally {
+        }
+        finally {
             httpRequest.releaseConnection();
         }
-
     }
 
 
     /**
      * http 请求执行
-     * @param uri 地址
-     * @param request 请求数据
+     *
+     * @param uri          地址
+     * @param request      请求数据
      * @param responseType 响应类型
-     * @param method 请求方法
-     * @param <T> 响应类型
+     * @param method       请求方法
+     * @param <T>          响应类型
      * @return 类型对象
      */
-    public <T>T doExecute(String uri, Object request, Class<T> responseType, MethodType method){
+    public <T> T doExecute(String uri, Object request, Class<T> responseType, MethodType method) {
         return doExecute(URI.create(uri), request, responseType, method);
+    }
+
+    /**
+     * http 请求执行
+     *
+     * @param uri          地址
+     * @param request      请求数据
+     * @param responseType 响应类型
+     * @param method       请求方法
+     * @param <T>          响应类型
+     * @return 类型对象
+     */
+    public <T> ResponseEntity<T> doExecuteEntity(String uri, Object request, Class<T> responseType, MethodType method) {
+        return doExecuteEntity(URI.create(uri), request, responseType, method);
     }
 }
