@@ -439,7 +439,6 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage> implem
      * }
      *
      * </pre>
-     *
      */
     @Override
     public Map<String, Object> getCapture(String captureId) {
@@ -490,13 +489,6 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage> implem
         JSONObject resp = getHttpRequestTemplate().getForObject(getReqUrl(PayPalTransactionType.REFUND_GET), authHeader(), JSONObject.class, refundOrder.getRefundNo());
         return resp;
     }
-
-    @Deprecated
-    @Override
-    public Map<String, Object> downloadbill(Date billDate, String billType) {
-        return Collections.emptyMap();
-    }
-
 
     public Map<String, Object> downloadBill(Date billDate, BillType billType) {
         return Collections.emptyMap();

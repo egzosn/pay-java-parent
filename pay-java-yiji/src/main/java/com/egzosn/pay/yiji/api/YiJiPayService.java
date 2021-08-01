@@ -23,6 +23,7 @@ import com.egzosn.pay.common.bean.TransferOrder;
 import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.common.util.DateUtils;
 import com.egzosn.pay.common.util.Util;
+import com.egzosn.pay.common.util.sign.SignTextUtils;
 import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.str.StringUtils;
 import com.egzosn.pay.yiji.bean.YiJiTransactionType;
@@ -120,7 +121,7 @@ public class YiJiPayService extends BasePayService<YiJiPayConfigStorage> {
      */
     private Map<String, Object> setSign(Map<String, Object> parameters) {
         parameters.put("signType", payConfigStorage.getSignType());
-        String sign = createSign(SignUtils.parameterText(parameters, "&", SIGN), payConfigStorage.getInputCharset());
+        String sign = createSign(SignTextUtils.parameterText(parameters, "&", SIGN), payConfigStorage.getInputCharset());
 
         parameters.put(SIGN, sign);
         return parameters;
@@ -363,22 +364,8 @@ public class YiJiPayService extends BasePayService<YiJiPayConfigStorage> {
 
     }
 
-    /**
-     * 目前只支持日账单
-     *
-     * @param billDate 账单类型，商户通过接口或商户经开放平台授权后其所属服务商通过接口可以获取以下账单类型：trade、signcustomer；trade指商户基于易极付交易收单的业务账单；signcustomer是指基于商户易极付余额收入及支出等资金变动的帐务账单；
-     * @param billType 账单时间：日账单格式为yyyy-MM-dd，月账单格式为yyyy-MM。
-     * @return 返回支付方下载对账单的结果
-     */
-    @Deprecated
-    @Override
-    public Map<String, Object> downloadbill(Date billDate, String billType) {
-
-        return Collections.emptyMap();
-    }
 
     /**
-     * 目前只支持日账单
      *
      * @param billDate 账单类型，商户通过接口或商户经开放平台授权后其所属服务商通过接口可以获取以下账单类型：trade、signcustomer；trade指商户基于易极付交易收单的业务账单；signcustomer是指基于商户易极付余额收入及支出等资金变动的帐务账单；
      * @param billType 账单时间：日账单格式为yyyy-MM-dd，月账单格式为yyyy-MM。

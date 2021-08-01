@@ -47,7 +47,7 @@ public class ApyAccountRepository {
         ApyAccount apyAccount2 = new ApyAccount();
         apyAccount2.setPayId(2);
         apyAccount2.setPartner("1469188802");
-        apyAccount2.setAppId("wx3344f4aed352deae");
+        apyAccount2.setAppId("wx3344f4aed352de09");
         // TODO 2017/2/9 16:20 author: egan  sign_type只有单一key时public_key与private_key相等，比如sign_type=MD5的情况
         apyAccount2.setPublicKey("991ded080***************f7fc61095");
         apyAccount2.setPrivateKey("991ded080***************f7fc61095");

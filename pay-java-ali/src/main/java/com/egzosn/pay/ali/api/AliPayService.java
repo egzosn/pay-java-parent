@@ -46,6 +46,7 @@ import com.egzosn.pay.common.http.HttpConfigStorage;
 import com.egzosn.pay.common.http.UriVariables;
 import com.egzosn.pay.common.util.DateUtils;
 import com.egzosn.pay.common.util.Util;
+import com.egzosn.pay.common.util.sign.SignTextUtils;
 import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.str.StringUtils;
 
@@ -94,7 +95,6 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
 
     public AliPayService(AliPayConfigStorage payConfigStorage, HttpConfigStorage configStorage) {
         super(payConfigStorage, configStorage);
-        payConfigStorage.loadCertEnvironment();
     }
 
     public AliPayService(AliPayConfigStorage payConfigStorage) {
@@ -187,7 +187,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
      */
     protected Map<String, Object> setSign(Map<String, Object> parameters) {
         parameters.put("sign_type", payConfigStorage.getSignType());
-        String sign = createSign(SignUtils.parameterText(parameters, "&", SIGN), payConfigStorage.getInputCharset());
+        String sign = createSign(SignTextUtils.parameterText(parameters, "&", SIGN), payConfigStorage.getInputCharset());
 
         parameters.put(SIGN, sign);
         return parameters;
@@ -566,9 +566,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
      * @param billType 账单类型，商户通过接口或商户经开放平台授权后其所属服务商通过接口可以获取以下账单类型：trade、signcustomer；trade指商户基于支付宝交易收单的业务账单；signcustomer是指基于商户支付宝余额收入及支出等资金变动的帐务账单；
      * @return 返回支付方下载对账单的结果
      */
-    @Deprecated
-    @Override
-    public Map<String, Object> downloadbill(Date billDate, String billType) {
+    public Map<String, Object> downloadBill(Date billDate, String billType) {
 
         return this.downloadBill(billDate, "trade".equals(billType) ? AliPayBillType.TRADE_DAY : AliPayBillType.SIGNCUSTOMER_DAY);
     }
@@ -614,7 +612,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
 
         if (transactionType == AliTransactionType.DOWNLOADBILL) {
             if (tradeNoOrBillDate instanceof Date) {
-                return downloadbill((Date) tradeNoOrBillDate, outTradeNoBillType);
+                return downloadBill((Date) tradeNoOrBillDate, outTradeNoBillType);
             }
             throw new PayErrorException(new PayException("failure", "非法类型异常:" + tradeNoOrBillDate.getClass()));
         }
@@ -627,7 +625,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
         //设置签名
         setSign(parameters);
 
-        return requestTemplate.getForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(parameters), JSONObject.class);
+        return requestTemplate.getForObject(getReqUrl(transactionType) + "?" + UriVariables.getMapToParameters(parameters), JSONObject.class);
     }
 
     /**

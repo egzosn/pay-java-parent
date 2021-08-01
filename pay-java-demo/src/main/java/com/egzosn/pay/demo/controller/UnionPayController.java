@@ -8,6 +8,7 @@ import com.egzosn.pay.common.bean.MethodType;
 import com.egzosn.pay.common.bean.PayOrder;
 import com.egzosn.pay.common.bean.RefundOrder;
 import com.egzosn.pay.common.http.HttpConfigStorage;
+import com.egzosn.pay.common.util.sign.SignTextUtils;
 import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.demo.request.QueryOrder;
 import com.egzosn.pay.union.api.UnionPayConfigStorage;
@@ -130,7 +131,7 @@ public class UnionPayController {
     public Map<String, Object> app() {
         Map<String, Object> data = new HashMap<>();
         data.put("code", 0);
-        PayOrder order = new PayOrder("订单title", "摘要", BigDecimal.valueOf(0.01), SignUtils.randomStr());
+        PayOrder order = new PayOrder("订单title", "摘要", BigDecimal.valueOf(0.01), SignTextUtils.randomStr());
         //App支付
         order.setTransactionType(UnionTransactionType.APP);
 
@@ -178,7 +179,7 @@ public class UnionPayController {
     public Map<String, Object> microPay(BigDecimal price, String authCode)  {
         //获取对应的支付账户操作工具（可根据账户id）
         //条码付
-        PayOrder order = new PayOrder("egan order", "egan order", null == price ? BigDecimal.valueOf(0.01) : price, SignUtils.randomStr(), UnionTransactionType.CONSUME);
+        PayOrder order = new PayOrder("egan order", "egan order", null == price ? BigDecimal.valueOf(0.01) : price, SignTextUtils.randomStr(), UnionTransactionType.CONSUME);
         //设置授权码，条码等
         order.setAuthCode(authCode);
         //支付结果
@@ -275,9 +276,9 @@ public class UnionPayController {
      * @param order 订单的请求体
      * @return 返回支付方下载对账单的结果
      */
-    @RequestMapping("downloadbill")
-    public Object downloadbill(QueryOrder order) {
-        return service.downloadbill(order.getBillDate(), order.getBillType());
+    @RequestMapping("downloadBill")
+    public Object downloadBill(QueryOrder order) {
+        return service.downloadBill(order.getBillDate(), order.getBillType());
     }
 
 

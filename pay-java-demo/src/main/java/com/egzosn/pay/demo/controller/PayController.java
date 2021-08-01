@@ -460,11 +460,11 @@ public class PayController {
      * @param order 订单的请求体
      * @return 返回支付方下载对账单的结果
      */
-    @RequestMapping("downloadbill")
-    public Object downloadbill(QueryOrder order) {
+    @RequestMapping("downloadBill")
+    public Object downloadBill(QueryOrder order) {
         PayResponse payResponse = service.getPayResponse(order.getPayId());
 
-        return payResponse.getService().downloadbill(order.getBillDate(), order.getBillType());
+        return payResponse.getService().downloadBill(order.getBillDate(), order.getBillType());
     }
 
 

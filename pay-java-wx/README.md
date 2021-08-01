@@ -217,7 +217,7 @@
 #### 交易关闭接口
   ```java
 
-          Map result = service..close("微信单号", "我方系统单号");
+          Map result = service.close("微信单号", "我方系统单号");
 
 ```
 

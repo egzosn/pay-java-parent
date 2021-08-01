@@ -348,11 +348,6 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage> {
         return resp;
     }
 
-    @Deprecated
-    @Override
-    public Map<String, Object> downloadbill(Date billDate, String billType) {
-        return Collections.emptyMap();
-    }
 
 
     @Override

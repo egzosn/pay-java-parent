@@ -41,6 +41,7 @@ import com.egzosn.pay.common.http.UriVariables;
 import com.egzosn.pay.common.util.DateUtils;
 import com.egzosn.pay.common.util.Util;
 import com.egzosn.pay.common.util.sign.CertDescriptor;
+import com.egzosn.pay.common.util.sign.SignTextUtils;
 import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.sign.encrypt.RSA;
 import com.egzosn.pay.common.util.sign.encrypt.RSA2;
@@ -80,7 +81,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
     /**
      * 证书解释器
      */
-    private CertDescriptor certDescriptor;
+    private volatile CertDescriptor certDescriptor;
 
     /**
      * 构造函数
@@ -103,12 +104,13 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
      */
     @Override
     public UnionPayService setPayConfigStorage(UnionPayConfigStorage payConfigStorage) {
-        super.setPayConfigStorage(payConfigStorage);
-        if (!payConfigStorage.isCertSign() || null != certDescriptor) {
+        this.payConfigStorage = payConfigStorage;
+        if (!payConfigStorage.isCertSign()) {
             return this;
         }
-
-        certDescriptor = new CertDescriptor();
+        if (null == certDescriptor) {
+            certDescriptor = new CertDescriptor();
+        }
         try {
             certDescriptor.initPrivateSignCert(payConfigStorage.getKeyPrivateCertInputStream(), payConfigStorage.getKeyPrivateCertPwd(), "PKCS12");
             certDescriptor.initPublicCert(payConfigStorage.getAcpMiddleCertInputStream());
@@ -149,6 +151,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
     public String getBackTransUrl() {
         return String.format(BACK_TRANS_URL, getReqUrl());
     }
+
     public String getAppTransUrl() {
         return String.format(APP_TRANS_URL, getReqUrl());
     }
@@ -217,7 +220,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
     public boolean signVerify(Map<String, Object> params, String sign) {
         SignUtils signUtils = SignUtils.valueOf(payConfigStorage.getSignType());
 
-        String data = SignUtils.parameterText(params, "&", "signature");
+        String data = SignTextUtils.parameterText(params, "&", "signature");
         switch (signUtils) {
             case RSA:
                 data = SignUtils.SHA1.createSign(data, "", payConfigStorage.getInputCharset());
@@ -322,20 +325,20 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
             case RSA:
                 parameters.put(SDKConstants.param_signMethod, SDKConstants.SIGNMETHOD_RSA);
                 parameters.put(SDKConstants.param_certId, certDescriptor.getSignCertId());
-                signStr = SignUtils.SHA1.createSign(SignUtils.parameterText(parameters, "&", "signature"), "", payConfigStorage.getInputCharset());
+                signStr = SignUtils.SHA1.createSign(SignTextUtils.parameterText(parameters, "&", "signature"), "", payConfigStorage.getInputCharset());
                 parameters.put(SDKConstants.param_signature, RSA.sign(signStr, certDescriptor.getSignCertPrivateKey(payConfigStorage.getKeyPrivateCertPwd()), payConfigStorage.getInputCharset()));
                 break;
             case RSA2:
                 parameters.put(SDKConstants.param_signMethod, SDKConstants.SIGNMETHOD_RSA);
                 parameters.put(SDKConstants.param_certId, certDescriptor.getSignCertId());
-                signStr = SignUtils.SHA256.createSign(SignUtils.parameterText(parameters, "&", "signature"), "", payConfigStorage.getInputCharset());
+                signStr = SignUtils.SHA256.createSign(SignTextUtils.parameterText(parameters, "&", "signature"), "", payConfigStorage.getInputCharset());
                 parameters.put(SDKConstants.param_signature, RSA2.sign(signStr, certDescriptor.getSignCertPrivateKey(payConfigStorage.getKeyPrivateCertPwd()), payConfigStorage.getInputCharset()));
                 break;
             case SHA1:
             case SHA256:
             case SM3:
                 String key = payConfigStorage.getKeyPrivate();
-                signStr = SignUtils.parameterText(parameters, "&", "signature");
+                signStr = SignTextUtils.parameterText(parameters, "&", "signature");
                 key = signUtils.createSign(key, "", payConfigStorage.getInputCharset()) + "&";
                 parameters.put(SDKConstants.param_signature, signUtils.createSign(signStr, key, payConfigStorage.getInputCharset()));
                 break;
@@ -401,7 +404,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
      * @return 返回支付结果
      */
 
-    public JSONObject postOrder(PayOrder order, String  url) {
+    public JSONObject postOrder(PayOrder order, String url) {
         Map<String, Object> params = orderInfo(order);
         String responseStr = getHttpRequestTemplate().postForObject(url, params, String.class);
         JSONObject response = UriVariables.getParametersToMap(responseStr);
@@ -666,10 +669,8 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
      * @param fileType 文件类型 文件类型，一般商户填写00即可
      * @return 返回fileContent 请自行将数据落地
      */
-    @Deprecated
-    @Override
-    public Map<String, Object> downloadbill(Date billDate, String fileType) {
-      return downloadBill(billDate, new UnionPayBillType(fileType));
+    public Map<String, Object> downloadBill(Date billDate, String fileType) {
+        return downloadBill(billDate, new UnionPayBillType(fileType));
     }
 
     /**

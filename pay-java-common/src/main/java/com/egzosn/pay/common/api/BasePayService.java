@@ -11,11 +11,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.JSON;
+import com.egzosn.pay.common.bean.BillType;
 import com.egzosn.pay.common.bean.MethodType;
 import com.egzosn.pay.common.bean.Order;
 import com.egzosn.pay.common.bean.PayMessage;
@@ -252,7 +252,7 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
      */
     @Override
     public <T> T cancel(String tradeNo, String outTradeNo, Callback<T> callback) {
-        return callback.perform(close(tradeNo, outTradeNo));
+        return callback.perform(cancel(tradeNo, outTradeNo));
     }
 
     /**
@@ -264,7 +264,7 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
      */
     @Override
     public Map<String, Object> cancel(String tradeNo, String outTradeNo) {
-        return Collections.EMPTY_MAP;
+        return Collections.emptyMap();
     }
 
 
@@ -297,19 +297,16 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
     }
 
     /**
-     * 目前只支持日账单
+     * 下载对账单
      *
-     * @param billDate 账单时间：具体请查看对应支付平台
-     * @param billType 账单类型，具体请查看对应支付平台
-     * @param callback 处理器
-     * @param <T>      返回类型
+     * @param billDate 账单时间：日账单格式为yyyy-MM-dd，月账单格式为yyyy-MM。
+     * @param billType 账单类型 内部自动转化 {@link BillType}
      * @return 返回支付方下载对账单的结果
      */
     @Override
-    public <T> T downloadbill(Date billDate, String billType, Callback<T> callback) {
-        return callback.perform(downloadbill(billDate, billType));
+    public Map<String, Object> downloadBill(Date billDate, String billType){
+        return Collections.emptyMap();
     }
-
     /**
      * 转账
      *

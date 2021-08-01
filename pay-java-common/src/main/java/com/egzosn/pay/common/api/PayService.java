@@ -276,11 +276,10 @@ public interface PayService<PC extends PayConfigStorage> {
      * 下载对账单
      *
      * @param billDate 账单时间：日账单格式为yyyy-MM-dd，月账单格式为yyyy-MM。
-     * @param billType 账单类型
+     * @param billType 账单类型 内部自动转化 {@link BillType}
      * @return 返回支付方下载对账单的结果
      */
-    @Deprecated
-    Map<String, Object> downloadbill(Date billDate, String billType);
+    Map<String, Object> downloadBill(Date billDate, String billType);
 
     /**
      * 下载对账单
@@ -291,16 +290,6 @@ public interface PayService<PC extends PayConfigStorage> {
      */
     Map<String, Object> downloadBill(Date billDate, BillType billType);
 
-    /**
-     * 下载对账单
-     *
-     * @param billDate 账单时间：具体请查看对应支付平台
-     * @param billType 账单类型，具体请查看对应支付平台
-     * @param callback 处理器
-     * @param <T>      返回类型
-     * @return 返回支付方下载对账单的结果
-     */
-    <T> T downloadbill(Date billDate, String billType, Callback<T> callback);
 
 
     /**

@@ -18,6 +18,11 @@ public class PayErrorException extends RuntimeException  {
         this.error = error;
     }
 
+    public PayErrorException(PayError error, Throwable throwable) {
+        super(error.getString(), throwable);
+        this.error = error;
+    }
+
 
     public PayError getPayError() {
         return error;
