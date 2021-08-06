@@ -69,7 +69,12 @@ android 例子 [pay-java-android](https://gitee.com/egzosn/pay-java-android)
 
 E-Mail：egzosn@gmail.com
 
-QQ群：542193977
+ **QQ群：** 
+
+
+1. pay-java(1群): 542193977(已满)
+2. pay-java(2群)：766275051
+
 
 微信群: 
 ![微信群](https://egzosn.gitee.io/pay-java-parent/wx.jpg "wx.jpg")
