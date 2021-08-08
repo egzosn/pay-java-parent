@@ -27,6 +27,10 @@ public class CertEnvironment {
     private String serialNumber;
 
 
+
+
+
+
     public CertEnvironment() {
     }
 

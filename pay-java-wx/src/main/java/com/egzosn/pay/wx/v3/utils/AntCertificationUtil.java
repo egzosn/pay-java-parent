@@ -2,14 +2,27 @@ package com.egzosn.pay.wx.v3.utils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
+import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.crypto.Cipher;
+import javax.crypto.spec.GCMParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 
 import com.egzosn.pay.common.exception.PayErrorException;
+import com.egzosn.pay.common.util.sign.encrypt.Base64;
 import com.egzosn.pay.wx.bean.WxPayError;
 import com.egzosn.pay.wx.v3.bean.CertEnvironment;
 
@@ -21,18 +34,63 @@ import com.egzosn.pay.wx.v3.bean.CertEnvironment;
  * date 2021/07/18.20:29
  */
 public final class AntCertificationUtil {
+
+    /**
+     * 微信平台证书容器  key = 序列号  value = 证书对象
+     */
+    private static final Map<String, Certificate> CERTIFICATE_MAP = new ConcurrentHashMap<>();
+
     private AntCertificationUtil() {
     }
 
     private static final KeyStore PKCS12_KEY_STORE;
+
+    private static final CertificateFactory CERTIFICATE_FACTORY;
 
     static {
         try {
             PKCS12_KEY_STORE = KeyStore.getInstance("PKCS12");
         }
         catch (KeyStoreException e) {
-            throw new PayErrorException(new WxPayError("500", " keystore 初始化失败"));
+            throw new PayErrorException(new WxPayError(WxConst.FAILURE, " keystore 初始化失败"), e);
         }
+
+        try {
+            CERTIFICATE_FACTORY = CertificateFactory.getInstance("X509", WxConst.BC_PROVIDER);
+        }
+        catch (NoSuchProviderException | CertificateException e) {
+            throw new PayErrorException(new WxPayError(WxConst.FAILURE, " keystore 初始化失败"), e);
+        }
+
+    }
+
+
+    /**
+     * 装载平台证书
+     *
+     * @param serialNo          证书序列
+     * @param certificateStream 证书流
+     */
+    public static void loadCertificate(String serialNo, InputStream certificateStream) {
+        try {
+            Certificate certificate = CERTIFICATE_FACTORY.generateCertificate(certificateStream);
+            CERTIFICATE_MAP.put(serialNo, certificate);
+        }
+        catch (CertificateException e) {
+            throw new PayErrorException(new WxPayError(WxConst.FAILURE, " 在生成微信v3证书时发生错误，原因是" + e.getMessage()), e);
+        }
+
+    }
+
+    /**
+     * 获取平台证书
+     *
+     * @param serialNo 证书序列
+     * @return 平台证书
+     */
+    public static Certificate getCertificate(String serialNo) {
+        return CERTIFICATE_MAP.get(serialNo);
+
     }
 
     /**
@@ -56,11 +114,60 @@ public final class AntCertificationUtil {
             return new CertEnvironment(privateKey, publicKey, serialNumber);
         }
         catch (GeneralSecurityException e) {
-            throw new PayErrorException(new WxPayError("500", "获取公私钥失败"), e);
+            throw new PayErrorException(new WxPayError(WxConst.FAILURE, "获取公私钥失败"), e);
         }
         catch (IOException e) {
-            throw new PayErrorException(new WxPayError("500", "私钥证书流加载失败"), e);
+            throw new PayErrorException(new WxPayError(WxConst.FAILURE, "私钥证书流加载失败"), e);
         }
 
     }
+
+
+    /**
+     * 解密响应体.
+     *
+     * @param associatedData 相关数据
+     * @param nonce          随机串
+     * @param cipherText     需要解密的文本
+     * @return the string
+     */
+    public static String decryptToString(String associatedData, String nonce, String cipherText, String secretKey, String characterEncoding) {
+
+        try {
+            Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding", WxConst.BC_PROVIDER);
+            SecretKeySpec key = new SecretKeySpec(secretKey.getBytes(Charset.forName(characterEncoding)), "AES");
+            GCMParameterSpec spec = new GCMParameterSpec(128, nonce.getBytes(Charset.forName(characterEncoding)));
+            cipher.init(Cipher.DECRYPT_MODE, key, spec);
+            cipher.updateAAD(associatedData.getBytes(Charset.forName(characterEncoding)));
+            byte[] bytes = cipher.doFinal(Base64.decode(cipherText));
+            return new String(bytes, Charset.forName(characterEncoding));
+        }
+        catch (GeneralSecurityException e) {
+            throw new PayErrorException(new WxPayError(WxConst.FAILURE, e.getMessage()), e);
+        }
+    }
+
+    /**
+     * 对请求敏感字段进行加密
+     *
+     * @param message     the message
+     * @param certificate the certificate
+     * @return encrypt message
+     * @since 1.0.6.RELEASE
+     */
+    public static String encryptToString(String message, Certificate certificate) {
+        try {
+            Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA-1AndMGF1Padding", WxConst.BC_PROVIDER);
+            cipher.init(Cipher.ENCRYPT_MODE, certificate.getPublicKey());
+
+            byte[] data = message.getBytes(StandardCharsets.UTF_8);
+            byte[] cipherData = cipher.doFinal(data);
+            return Base64.encode(cipherData);
+
+        }
+        catch (GeneralSecurityException e) {
+            throw new PayErrorException(new WxPayError(WxConst.FAILURE, e.getMessage()), e);
+        }
+    }
+
 }

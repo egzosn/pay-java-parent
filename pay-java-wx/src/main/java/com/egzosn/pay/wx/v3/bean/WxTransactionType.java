@@ -14,7 +14,7 @@ import com.egzosn.pay.wx.v3.bean.order.SceneInfo;
 import com.egzosn.pay.wx.v3.utils.WxConst;
 
 /**
- * 微信交易类型
+ * 微信V3交易类型
  *
  * @author egan
  * <p>
@@ -107,9 +107,7 @@ public enum WxTransactionType implements TransactionType {
     /**
      * 申请资金账单
      */
-    FUND_FLOW_BILL("bill/fundflowbill", MethodType.GET),
-
-
+    FUND_FLOW_BILL("bill/fundflowbill", MethodType.GET)
     ;
 
     WxTransactionType(String type, MethodType method) {

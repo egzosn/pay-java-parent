@@ -6,11 +6,11 @@ import java.net.URLEncoder;
 import java.security.PrivateKey;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.apache.http.entity.ContentType;
-import org.apache.http.message.BasicHeader;
+import org.apache.http.HttpEntity;
 
 import static com.egzosn.pay.wx.api.WxConst.OUT_TRADE_NO;
 import static com.egzosn.pay.wx.api.WxConst.RETURN_CODE;
@@ -20,7 +20,6 @@ import static com.egzosn.pay.wx.api.WxConst.SUCCESS;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.egzosn.pay.common.api.BasePayService;
 import com.egzosn.pay.common.bean.BillType;
 import com.egzosn.pay.common.bean.CurType;
@@ -44,10 +43,9 @@ import com.egzosn.pay.common.util.MapGen;
 import com.egzosn.pay.common.util.Util;
 import com.egzosn.pay.common.util.XML;
 import com.egzosn.pay.common.util.sign.SignTextUtils;
+import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.sign.encrypt.RSA2;
 import com.egzosn.pay.common.util.str.StringUtils;
-import com.egzosn.pay.wx.api.WxRedPackService;
-import com.egzosn.pay.wx.bean.RedpackOrder;
 import com.egzosn.pay.wx.bean.WxPayError;
 import com.egzosn.pay.wx.bean.WxPayMessage;
 import com.egzosn.pay.wx.bean.WxTransferType;
@@ -68,7 +66,7 @@ import com.egzosn.pay.wx.v3.utils.WxConst;
  * date 2016-5-18 14:09:01
  * </pre>
  */
-public class WxPayService extends BasePayService<WxPayConfigStorage> implements WxRedPackService {
+public class WxPayService extends BasePayService<WxPayConfigStorage> {
 
 
     /**
@@ -79,6 +77,22 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
      * 是否为服务商模式, 默认为false
      */
     private boolean partner = false;
+
+    /**
+     * 辅助api
+     */
+    private volatile WxPayAssistService wxPayAssistService;
+
+    public WxPayAssistService getAssistService() {
+        if (null == wxPayAssistService) {
+            wxPayAssistService = new DefaultWxPayAssistService(this);
+        }
+        return wxPayAssistService;
+    }
+
+    public void setAssistService(WxPayAssistService wxPayAssistService) {
+        this.wxPayAssistService = wxPayAssistService;
+    }
 
     /**
      * 创建支付服务
@@ -108,6 +122,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
     public BasePayService setPayConfigStorage(WxPayConfigStorage payConfigStorage) {
         payConfigStorage.loadCertEnvironment();
         this.payConfigStorage = payConfigStorage;
+
         return this;
     }
 
@@ -175,7 +190,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
      * @param parameters 参数信息
      * @return 参数信息
      */
-    private Map<String, Object> initPartner(Map<String, Object> parameters) {
+    private void initPartner(Map<String, Object> parameters) {
         if (null == parameters) {
             parameters = new HashMap<>();
         }
@@ -186,9 +201,6 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
         }
         setParameters(parameters, "sub_appid", payConfigStorage.getSubAppId());
         initSubMchId(parameters);
-
-        return parameters;
-
     }
 
     /**
@@ -217,69 +229,17 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
      * @param order      支付订单
      * @return 订单参数
      */
-    private Map<String, Object> loadSettleInfo(Map<String, Object> parameters, PayOrder order) {
+    private void loadSettleInfo(Map<String, Object> parameters, PayOrder order) {
         Object profitSharing = order.getAttr("profit_sharing");
         if (null != profitSharing) {
             Map<String, Object> settleInfo = new MapGen<String, Object>("profit_sharing", profitSharing).getAttr();
             parameters.put("settle_info", settleInfo);
+            return;
         }
-        else {
-            //结算信息
-            setParameters(parameters, "settle_info", order);
-        }
-
-        return parameters;
-
-    }
-
-    /**
-     * 发起请求
-     *
-     * @param parameters      支付参数
-     * @param transactionType 交易类型
-     * @return 响应内容体
-     */
-    protected JSONObject doExecute(Map<String, Object> parameters, TransactionType transactionType) {
-        String requestBody = JSON.toJSONString(parameters, SerializerFeature.WriteMapNullValue);
-        return doExecute(requestBody, transactionType);
-    }
+        //结算信息
+        setParameters(parameters, "settle_info", order);
 
 
-    /**
-     * 发起请求
-     *
-     * @param body            请求内容
-     * @param transactionType 交易类型
-     * @param uriVariables    用于匹配表达式
-     * @return 响应内容体
-     */
-    protected JSONObject doExecute(String body, TransactionType transactionType, Object... uriVariables) {
-        String reqUrl = UriVariables.getUri(getReqUrl(transactionType), uriVariables);
-        MethodType method = MethodType.valueOf(transactionType.getMethod());
-        if (MethodType.GET == method && StringUtils.isNotEmpty(body)) {
-            reqUrl += UriVariables.QUESTION.concat(body);
-            body = "";
-        }
-        HttpStringEntity entity = initHttpStringEntity(reqUrl, body, transactionType.getMethod());
-        ResponseEntity<JSONObject> responseEntity = requestTemplate.doExecuteEntity(reqUrl, entity, JSONObject.class, method);
-        int statusCode = responseEntity.getStatusCode();
-        JSONObject responseBody = responseEntity.getBody();
-        if (statusCode >= 400) {
-            throw new PayErrorException(new WxPayError(responseBody.getString(WxConst.CODE), responseBody.getString(WxConst.MESSAGE), responseBody.toJSONString()));
-        }
-        return responseBody;
-    }
-
-    /**
-     * 发起请求
-     *
-     * @param parameters 支付参数
-     * @param order      订单
-     * @return 请求响应
-     */
-    protected JSONObject doExecute(Map<String, Object> parameters, PayOrder order) {
-        TransactionType transactionType = order.getTransactionType();
-        return doExecute(parameters, transactionType);
     }
 
 
@@ -318,7 +278,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
         TransactionType transactionType = order.getTransactionType();
         ((WxTransactionType) transactionType).setAttribute(parameters, order);
 
-        return doExecute(parameters, order);
+        return wxPayAssistService.doExecute(parameters, order);
     }
 
 
@@ -334,33 +294,37 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
 
         ////统一下单
         JSONObject result = unifiedOrder(order);
-        throw new PayErrorException(new WxPayError("", "等待作者实现"));
+        //如果是扫码支付或者刷卡付无需处理，直接返回
+        if (((WxTransactionType) order.getTransactionType()).isReturn()) {
+            return result;
+        }
 
-    }
+        Map<String, Object> params = new LinkedHashMap<>();
+        String appId = payConfigStorage.getAppId();
+        String timeStamp = String.valueOf(DateUtils.toEpochSecond());
+        String randomStr = SignTextUtils.randomStr();
+        String prepayId = result.getString("prepay_id");
+        if (WxTransactionType.JSAPI == order.getTransactionType()) {
+            params.put("appId", appId);
+            params.put("timeStamp", timeStamp);
+            params.put("nonceStr", randomStr);
+            prepayId = "prepay_id=" + prepayId;
+            params.put("package", prepayId);
+            params.put("signType", SignUtils.RSA.getName());
+        }
+        else if (WxTransactionType.APP == order.getTransactionType()) {
+            params.put(WxConst.APPID, appId);
+            params.put("partnerid", payConfigStorage.getMchId());
+            params.put("timestamp", timeStamp);
+            params.put("noncestr", randomStr);
+            params.put("prepayid", prepayId);
+            params.put("package", "Sign=WXPay");
+        }
+        String signText = StringUtils.joining("\n", appId, timeStamp, prepayId);
+        String paySign = createSign(signText, payConfigStorage.getInputCharset());
+        params.put(WxTransactionType.JSAPI.equals(order.getTransactionType()) ? "paySign" : "sign", paySign);
+        return params;
 
-
-    /**
-     * 初始化请求实体
-     * 这里也做签名处理
-     *
-     * @param body   请求内容体
-     * @param method 请求方法
-     * @return 请求实体
-     */
-    private HttpStringEntity initHttpStringEntity(String url, String body, String method) {
-        String nonceStr = SignTextUtils.randomStr();
-        long timestamp = DateUtils.toEpochSecond();
-        String canonicalUrl = UriVariables.getCanonicalUrl(url);
-        //签名信息
-        String signText = StringUtils.joining("\n", method, canonicalUrl, String.valueOf(timestamp), nonceStr, body);
-        String sign = createSign(signText, payConfigStorage.getInputCharset());
-        String serialNumber = payConfigStorage.getCertEnvironment().getSerialNumber();
-        // 生成token
-        String token = String.format(WxConst.TOKEN_PATTERN, payConfigStorage.getMchId(), nonceStr, timestamp, serialNumber, sign);
-        HttpStringEntity entity = new HttpStringEntity(body, ContentType.APPLICATION_JSON);
-        entity.addHeader(new BasicHeader("Authorization", WxConst.SCHEMA.concat(token)));
-        entity.addHeader(new BasicHeader("User-Agent", "Pay-Java-Service"));
-        return entity;
     }
 
 
@@ -398,8 +362,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
     private String getSpParameters() {
         Map<String, Object> attr = initSubMchId(null);
         setParameters(attr, WxConst.SP_MCH_ID, payConfigStorage.getSpMchId());
-        String parameters = UriVariables.getMapToParameters(attr);
-        return parameters;
+        return UriVariables.getMapToParameters(attr);
     }
 
 
@@ -510,7 +473,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
             transactionType = WxTransactionType.QUERY_OUT_TRADE_NO;
             uriVariable = outTradeNo;
         }
-        return doExecute(parameters, transactionType, uriVariable);
+        return wxPayAssistService.doExecute(parameters, transactionType, uriVariable);
     }
 
 
@@ -524,7 +487,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
     @Override
     public Map<String, Object> close(String transactionId, String outTradeNo) {
         String parameters = getSpParameters();
-        return doExecute(parameters, WxTransactionType.CLOSE, outTradeNo);
+        return wxPayAssistService.doExecute(parameters, WxTransactionType.CLOSE, outTradeNo);
     }
 
     /**
@@ -553,7 +516,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
         }
         parameters.put("amount", refundAmount);
         setParameters(parameters, "amount", refundOrder);
-        return WxRefundResult.create(doExecute(parameters, WxTransactionType.REFUND));
+        return WxRefundResult.create(wxPayAssistService.doExecute(parameters, WxTransactionType.REFUND));
     }
 
 
@@ -566,7 +529,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
     @Override
     public Map<String, Object> refundquery(RefundOrder refundOrder) {
         String parameters = UriVariables.getMapToParameters(initSubMchId(null));
-        return doExecute(parameters, WxTransactionType.REFUND_QUERY, refundOrder.getRefundNo());
+        return wxPayAssistService.doExecute(parameters, WxTransactionType.REFUND_QUERY, refundOrder.getRefundNo());
     }
 
     /**
@@ -608,10 +571,10 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
             initSubMchId(parameters).put("bill_type", billType.getType());
         }
         String body = UriVariables.getMapToParameters(parameters);
-        JSONObject result = doExecute(body, WxTransactionType.valueOf(billType.getCustom()));
+        JSONObject result = wxPayAssistService.doExecute(body, WxTransactionType.valueOf(billType.getCustom()));
         String downloadUrl = result.getString("download_url");
         MethodType methodType = MethodType.GET;
-        HttpStringEntity entity = initHttpStringEntity(downloadUrl, "", methodType.name());
+        HttpEntity entity = wxPayAssistService.buildHttpEntity(downloadUrl, "", methodType.name());
         ResponseEntity<InputStream> responseEntity = requestTemplate.doExecuteEntity(downloadUrl, entity, InputStream.class, methodType);
         InputStream inputStream = responseEntity.getBody();
         int statusCode = responseEntity.getStatusCode();
@@ -637,18 +600,16 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
      * @param order 转账订单
      *              <pre>
      *
-     *                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               注意事项：
-     *                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               ◆ 当返回错误码为“SYSTEMERROR”时，请不要更换商户订单号，一定要使用原商户订单号重试，否则可能造成重复支付等资金风险。
-     *                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               ◆ XML具有可扩展性，因此返回参数可能会有新增，而且顺序可能不完全遵循此文档规范，如果在解析回包的时候发生错误，请商户务必不要换单重试，请商户联系客服确认付款情况。如果有新回包字段，会更新到此API文档中。
-     *                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               ◆ 因为错误代码字段err_code的值后续可能会增加，所以商户如果遇到回包返回新的错误码，请商户务必不要换单重试，请商户联系客服确认付款情况。如果有新的错误码，会更新到此API文档中。
-     *                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               ◆ 错误代码描述字段err_code_des只供人工定位问题时做参考，系统实现时请不要依赖这个字段来做自动化处理。
-     *                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               </pre>
+     *                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 注意事项：
+     *                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 ◆ 当返回错误码为“SYSTEMERROR”时，请不要更换商户订单号，一定要使用原商户订单号重试，否则可能造成重复支付等资金风险。
+     *                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 ◆ XML具有可扩展性，因此返回参数可能会有新增，而且顺序可能不完全遵循此文档规范，如果在解析回包的时候发生错误，请商户务必不要换单重试，请商户联系客服确认付款情况。如果有新回包字段，会更新到此API文档中。
+     *                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 ◆ 因为错误代码字段err_code的值后续可能会增加，所以商户如果遇到回包返回新的错误码，请商户务必不要换单重试，请商户联系客服确认付款情况。如果有新的错误码，会更新到此API文档中。
+     *                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 ◆ 错误代码描述字段err_code_des只供人工定位问题时做参考，系统实现时请不要依赖这个字段来做自动化处理。
+     *                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 </pre>
      * @return 对应的转账结果
      */
     @Override
     public Map<String, Object> transfer(TransferOrder order) {
-
-
         throw new PayErrorException(new WxPayError("", "等待作者实现"));
     }
 
@@ -681,29 +642,5 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
         return WxPayMessage.create(message);
     }
 
-    /**
-     * 微信发红包
-     *
-     * @param redpackOrder 红包实体
-     * @return 返回发红包实体后的结果
-     */
-    @Override
-    public Map<String, Object> sendredpack(RedpackOrder redpackOrder) {
-        throw new PayErrorException(new WxPayError("", "等待作者实现"));
-    }
-
-
-    /**
-     * 查询红包记录
-     * 用于商户对已发放的红包进行查询红包的具体信息，可支持普通红包和裂变包
-     * 查询红包记录API只支持查询30天内的红包订单，30天之前的红包订单请登录商户平台查询。
-     *
-     * @param mchBillno 商户发放红包的商户订单号
-     * @return 返回查询结果
-     */
-    @Override
-    public Map<String, Object> gethbinfo(String mchBillno) {
-        throw new PayErrorException(new WxPayError("", "等待作者实现"));
-    }
 
 }

@@ -19,8 +19,8 @@ import java.util.UUID;
  *
  * 微信
  * @author egan
- * @email egzosn@gmail.com
- * @date 2017/8/18
+ * email egzosn@gmail.com
+ * date 2017/8/18
  */
 public class PayTest {
 

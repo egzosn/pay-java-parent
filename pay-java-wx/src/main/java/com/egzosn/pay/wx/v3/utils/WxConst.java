@@ -21,6 +21,11 @@ public final class WxConst {
      */
     public static final String CERT_ALIAS = "Tenpay Certificate";
     /**
+     * 加密算法提供方 - BouncyCastle
+     */
+    public static final String BC_PROVIDER = "BC";
+
+    /**
      * 沙箱
      */
     public static final String SANDBOXNEW = "sandboxnew/";
@@ -38,4 +43,5 @@ public final class WxConst {
     public static final String CODE = "code";
     public static final String MESSAGE = "message";
     public static final String SCENE_INFO = "scene_info";
+    public static final String FAILURE = "failure";
 }
