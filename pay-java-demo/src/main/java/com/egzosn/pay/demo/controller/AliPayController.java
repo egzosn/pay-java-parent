@@ -335,8 +335,8 @@ public class AliPayController {
      * @return 返回支付方下载对账单的结果
      */
     @RequestMapping("downloadbill")
-    public Object downloadbill(QueryOrder order) {
-        return service.downloadbill(order.getBillDate(), order.getBillType());
+    public Object downloadBill(QueryOrder order) {
+        return service.downloadBill(order.getBillDate(), order.getBillType());
     }
 
 

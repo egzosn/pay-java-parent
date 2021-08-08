@@ -16,8 +16,8 @@ import java.util.UUID;
  * 
  * 富友支付测试
  * @author egan
- * @email egzosn@gmail.com
- * @date 2017/8/18
+ * email egzosn@gmail.com
+ * date 2017/8/18
  */
 public class PayTest {
 

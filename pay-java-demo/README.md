@@ -7,8 +7,8 @@
 /**
  * 支付类型
  * @author egan
- * @email egzosn@gmail.com
- * @date 2016/11/20 0:30
+ * email egzosn@gmail.com
+ * date 2016/11/20 0:30
  */
 public enum PayType implements BasePayType {
 
@@ -107,8 +107,8 @@ public enum PayType implements BasePayType {
 /**
  * 支付响应对象
  * @author: egan
- * @email egzosn@gmail.com
- * @date 2016/11/18 0:34
+ * email egzosn@gmail.com
+ * date 2016/11/18 0:34
  */
 public class PayResponse {
     @Resource
@@ -244,8 +244,8 @@ public class PayResponse {
     /**
      * 支付宝回调信息拦截器
      * @author: egan
-     * @email egzosn@gmail.com
-     * @date 2017/1/18 19:28
+     * email egzosn@gmail.com
+     * date 2017/1/18 19:28
      */
     public class AliPayMessageInterceptor implements PayMessageInterceptor {
         /**
