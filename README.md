@@ -66,14 +66,13 @@ android 例子 [pay-java-android](https://gitee.com/egzosn/pay-java-android)
 作者公众号(每周输出)
 ![公众号](https://egzosn.gitee.io/pay-java-parent/gzh.png "gzh.png")
 
-E-Mail：ean@egzosn.com
+E-Mail：egan@egzosn.com
 
  **QQ群：** 
 
 
 1. pay-java(1群): 542193977(已满)
 2. pay-java(2群)：766275051
-
 
 微信群: 
 ![微信群](https://egzosn.gitee.io/pay-java-parent/wx.jpg "wx.jpg")
