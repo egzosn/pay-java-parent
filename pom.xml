@@ -54,6 +54,7 @@
 
     <modules>
         <module>pay-java-common</module>
+        <module>pay-java-web-support</module>
         <module>pay-java-ali</module>
         <module>pay-java-wx</module>
         <module>pay-java-wx-youdian</module>
