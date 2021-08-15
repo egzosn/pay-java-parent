@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.Signature;
 import java.security.cert.Certificate;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
@@ -12,11 +13,14 @@ import org.apache.http.message.BasicHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.apache.http.entity.ContentType.APPLICATION_JSON;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.egzosn.pay.common.bean.MethodType;
+import com.egzosn.pay.common.bean.NoticeParams;
 import com.egzosn.pay.common.bean.PayOrder;
 import com.egzosn.pay.common.bean.TransactionType;
 import com.egzosn.pay.common.exception.PayErrorException;
@@ -26,6 +30,9 @@ import com.egzosn.pay.common.http.ResponseEntity;
 import com.egzosn.pay.common.http.UriVariables;
 import com.egzosn.pay.common.util.DateUtils;
 import com.egzosn.pay.common.util.sign.SignTextUtils;
+import com.egzosn.pay.common.util.sign.encrypt.Base64;
+import com.egzosn.pay.common.util.sign.encrypt.RSA;
+import com.egzosn.pay.common.util.sign.encrypt.RSA2;
 import com.egzosn.pay.common.util.str.StringUtils;
 import com.egzosn.pay.wx.bean.WxPayError;
 import com.egzosn.pay.wx.v3.bean.WxTransactionType;
@@ -127,7 +134,8 @@ public class DefaultWxPayAssistService implements WxPayAssistService {
         String token = String.format(WxConst.TOKEN_PATTERN, payConfigStorage.getMchId(), nonceStr, timestamp, serialNumber, sign);
         HttpStringEntity entity = new HttpStringEntity(body, ContentType.APPLICATION_JSON);
         entity.addHeader(new BasicHeader("Authorization", WxConst.SCHEMA.concat(token)));
-        entity.addHeader(new BasicHeader("User-Agent", "Pay-Java-Service"));
+        entity.addHeader(new BasicHeader("User-Agent", "X-Pay-Service"));
+        entity.addHeader(new BasicHeader("Accept", APPLICATION_JSON.getMimeType()));
         return entity;
     }
 
@@ -169,36 +177,16 @@ public class DefaultWxPayAssistService implements WxPayAssistService {
      */
     @Override
     public Certificate getCertificate(String serialNo) {
-        final Certificate certificate = AntCertificationUtil.getCertificate(serialNo);
-        if (null == certificate){
+        Certificate certificate = AntCertificationUtil.getCertificate(serialNo);
+        if (null == certificate) {
             refreshCertificate();
+            certificate = AntCertificationUtil.getCertificate(serialNo);
         }
 
 
-
-        return null;
+        return certificate;
     }
 
 
-/*    *//**
-     * 我方对响应验签，和应答签名做比较，使用微信平台证书.
-     *
-     * @param params the params
-     * @return the boolean
-     *//*
-    public boolean responseSignVerify(ResponseSignVerifyParams params) {
 
-        String wechatpaySerial = params.getWechatpaySerial();
-        if (CERTIFICATE_MAP.isEmpty() || !CERTIFICATE_MAP.containsKey(wechatpaySerial)) {
-            wechatMetaContainer.getTenantIds().forEach(this::refreshCertificate);
-        }
-        Certificate certificate = CERTIFICATE_MAP.get(wechatpaySerial);
-
-        final String signatureStr = createSign(true, params.getWechatpayTimestamp(), params.getWechatpayNonce(), params.getBody());
-        Signature signer = Signature.getInstance("SHA256withRSA");
-        signer.initVerify(certificate);
-        signer.update(signatureStr.getBytes(StandardCharsets.UTF_8));
-
-        return signer.verify(Base64Utils.decodeFromString(params.getWechatpaySignature()));
-    }*/
 }

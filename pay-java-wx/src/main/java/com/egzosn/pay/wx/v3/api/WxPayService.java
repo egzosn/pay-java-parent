@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
 import java.security.PrivateKey;
+import java.security.cert.Certificate;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -17,6 +18,7 @@ import static com.egzosn.pay.wx.api.WxConst.RETURN_CODE;
 import static com.egzosn.pay.wx.api.WxConst.RETURN_MSG_CODE;
 import static com.egzosn.pay.wx.api.WxConst.SANDBOXNEW;
 import static com.egzosn.pay.wx.api.WxConst.SUCCESS;
+import static com.egzosn.pay.wx.v3.utils.AntCertificationUtil.getCertificate;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -24,7 +26,8 @@ import com.egzosn.pay.common.api.BasePayService;
 import com.egzosn.pay.common.bean.BillType;
 import com.egzosn.pay.common.bean.CurType;
 import com.egzosn.pay.common.bean.MethodType;
-import com.egzosn.pay.common.bean.Order;
+import com.egzosn.pay.common.bean.NoticeParams;
+import com.egzosn.pay.common.bean.OrderParaStructure;
 import com.egzosn.pay.common.bean.PayMessage;
 import com.egzosn.pay.common.bean.PayOrder;
 import com.egzosn.pay.common.bean.PayOutMessage;
@@ -34,12 +37,10 @@ import com.egzosn.pay.common.bean.TransferOrder;
 import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpConfigStorage;
-import com.egzosn.pay.common.http.HttpStringEntity;
 import com.egzosn.pay.common.http.ResponseEntity;
 import com.egzosn.pay.common.http.UriVariables;
 import com.egzosn.pay.common.util.DateUtils;
 import com.egzosn.pay.common.util.IOUtils;
-import com.egzosn.pay.common.util.MapGen;
 import com.egzosn.pay.common.util.Util;
 import com.egzosn.pay.common.util.XML;
 import com.egzosn.pay.common.util.sign.SignTextUtils;
@@ -73,15 +74,19 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
      * api服务地址，默认为国内
      */
     private String apiServerUrl = WxConst.URI;
-    /**
-     * 是否为服务商模式, 默认为false
-     */
-    private boolean partner = false;
+
 
     /**
      * 辅助api
      */
     private volatile WxPayAssistService wxPayAssistService;
+
+    /**
+     *  微信参数构造器
+     */
+    private volatile WxParameterStructure wxParameterStructure;
+
+
 
     public WxPayAssistService getAssistService() {
         if (null == wxPayAssistService) {
@@ -122,7 +127,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
     public BasePayService setPayConfigStorage(WxPayConfigStorage payConfigStorage) {
         payConfigStorage.loadCertEnvironment();
         this.payConfigStorage = payConfigStorage;
-
+        wxParameterStructure = new WxParameterStructure(payConfigStorage);
         return this;
     }
 
@@ -147,12 +152,13 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
     public String getReqUrl(TransactionType transactionType) {
         String type = transactionType.getType();
         String partnerStr = "";
-        if (partner) {
+        if (payConfigStorage.isPartner()) {
             partnerStr = "/partner";
         }
         type = type.replace("{partner}", partnerStr);
         return apiServerUrl + (payConfigStorage.isTest() ? SANDBOXNEW : "") + type;
     }
+
 
     /**
      * 回调校验
@@ -162,84 +168,32 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
      */
     @Override
     public boolean verify(Map<String, Object> params) {
-        throw new PayErrorException(new WxPayError("", "等待作者实现"));
+        throw new PayErrorException(new WxPayError("", "微信V3不支持方式"));
 
     }
 
-
     /**
-     * 获取公共参数
+     * 验签，使用微信平台证书.
      *
-     * @return 公共参数
+     * @param noticeParams 通知参数
+     * @return the boolean
      */
-    private Map<String, Object> getPublicParameters() {
+    public boolean verify(NoticeParams noticeParams) {
 
-        Map<String, Object> parameters = new TreeMap<String, Object>();
-        parameters.put(WxConst.APPID, payConfigStorage.getAppId());
-        parameters.put(WxConst.MCH_ID, payConfigStorage.getMchId());
+        //当前使用的微信平台证书序列号
+        String serial = noticeParams.getHeader("Wechatpay-Serial");
+        //微信服务器的时间戳
+        String timestamp = noticeParams.getHeader("Wechatpay-Timestamp");
+        //微信服务器提供的随机串
+        String nonce = noticeParams.getHeader("Wechatpay-Nonce");
+        //微信平台签名
+        String signature = noticeParams.getHeader("Wechatpay-Signature");
 
-        return parameters;
+        Certificate certificate = getCertificate(serial);
+        //签名信息
+        String signText = StringUtils.joining("\n", timestamp, nonce, JSON.toJSONString(noticeParams.getBody()));
 
-
-    }
-
-
-    /**
-     * 初始化商户相关信息
-     *
-     * @param parameters 参数信息
-     * @return 参数信息
-     */
-    private void initPartner(Map<String, Object> parameters) {
-        if (null == parameters) {
-            parameters = new HashMap<>();
-        }
-        if (StringUtils.isNotEmpty(payConfigStorage.getSpAppId()) && StringUtils.isNotEmpty(payConfigStorage.getSpMchId())) {
-            this.partner = true;
-            parameters.put("sp_appid", payConfigStorage.getSpAppId());
-            parameters.put(WxConst.SP_MCH_ID, payConfigStorage.getSpMchId());
-        }
-        setParameters(parameters, "sub_appid", payConfigStorage.getSubAppId());
-        initSubMchId(parameters);
-    }
-
-    /**
-     * 初始化商户相关信息
-     *
-     * @param parameters 参数信息
-     * @return 参数信息
-     */
-    private Map<String, Object> initSubMchId(Map<String, Object> parameters) {
-        if (null == parameters) {
-            parameters = new HashMap<>();
-        }
-        if (StringUtils.isNotEmpty(payConfigStorage.getSubMchId())) {
-            this.partner = true;
-            parameters.put(WxConst.SUB_MCH_ID, payConfigStorage.getSubMchId());
-        }
-        return parameters;
-
-    }
-
-
-    /**
-     * 加载结算信息
-     *
-     * @param parameters 订单参数
-     * @param order      支付订单
-     * @return 订单参数
-     */
-    private void loadSettleInfo(Map<String, Object> parameters, PayOrder order) {
-        Object profitSharing = order.getAttr("profit_sharing");
-        if (null != profitSharing) {
-            Map<String, Object> settleInfo = new MapGen<String, Object>("profit_sharing", profitSharing).getAttr();
-            parameters.put("settle_info", settleInfo);
-            return;
-        }
-        //结算信息
-        setParameters(parameters, "settle_info", order);
-
-
+        return RSA2.verify(signText, signature, certificate, payConfigStorage.getInputCharset());
     }
 
 
@@ -252,33 +206,33 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
     public JSONObject unifiedOrder(PayOrder order) {
 
         //统一下单
-        Map<String, Object> parameters = getPublicParameters();
-        initPartner(parameters);
+        Map<String, Object> parameters = wxParameterStructure.getPublicParameters();
+        wxParameterStructure.initPartner(parameters);
         // 商品描述
-        setParameters(parameters, "description", order.getSubject());
-        setParameters(parameters, "description", order.getBody());
+        OrderParaStructure.loadParameters(parameters, "description", order.getSubject());
+        OrderParaStructure.loadParameters(parameters, "description", order.getBody());
         // 订单号
         parameters.put(WxConst.OUT_TRADE_NO, order.getOutTradeNo());
         //交易结束时间
         if (null != order.getExpirationTime()) {
             parameters.put("time_expire", DateUtils.formatDate(order.getExpirationTime(), DateUtils.YYYYMMDDHHMMSS));
         }
-        setParameters(parameters, "attach", order.getAddition());
-        initNotifyUrl(parameters, order);
+        OrderParaStructure.loadParameters(parameters, "attach", order.getAddition());
+        wxParameterStructure.initNotifyUrl(parameters, order);
         //订单优惠标记
-        setParameters(parameters, "goods_tag", order);
+        OrderParaStructure.loadParameters(parameters, "goods_tag", order);
         parameters.put("amount", Amount.getAmount(order.getPrice(), order.getCurType()));
 
         //优惠功能
-        setParameters(parameters, "detail", order);
+        OrderParaStructure.loadParameters(parameters, "detail", order);
         //支付场景描述
-        setParameters(parameters, WxConst.SCENE_INFO, order);
-        loadSettleInfo(parameters, order);
+        OrderParaStructure.loadParameters(parameters, WxConst.SCENE_INFO, order);
+        wxParameterStructure.loadSettleInfo(parameters, order);
 
         TransactionType transactionType = order.getTransactionType();
         ((WxTransactionType) transactionType).setAttribute(parameters, order);
 
-        return wxPayAssistService.doExecute(parameters, order);
+        return getAssistService().doExecute(parameters, order);
     }
 
 
@@ -340,31 +294,6 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
         PrivateKey privateKey = payConfigStorage.getCertEnvironment().getPrivateKey();
         return RSA2.sign(content, privateKey, characterEncoding);
     }
-
-
-    /**
-     * 初始化通知URL必须为直接可访问的URL，不允许携带查询串，要求必须为https地址。
-     *
-     * @param parameters 订单参数
-     * @param order      订单信息
-     * @return 订单参数
-     */
-    private void initNotifyUrl(Map<String, Object> parameters, Order order) {
-        setParameters(parameters, WxConst.NOTIFY_URL, payConfigStorage.getNotifyUrl());
-        setParameters(parameters, WxConst.NOTIFY_URL, order);
-    }
-
-    /**
-     * 获取服务商相关信息
-     *
-     * @return 服务商相关信息
-     */
-    private String getSpParameters() {
-        Map<String, Object> attr = initSubMchId(null);
-        setParameters(attr, WxConst.SP_MCH_ID, payConfigStorage.getSpMchId());
-        return UriVariables.getMapToParameters(attr);
-    }
-
 
     /**
      * 将请求参数或者请求流转化为 Map
@@ -466,14 +395,14 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
     @Override
     public Map<String, Object> query(String transactionId, String outTradeNo) {
 
-        String parameters = getSpParameters();
+        String parameters = wxParameterStructure.getSpParameters();
         WxTransactionType transactionType = WxTransactionType.QUERY_TRANSACTION_ID;
         String uriVariable = transactionId;
         if (StringUtils.isNotEmpty(outTradeNo)) {
             transactionType = WxTransactionType.QUERY_OUT_TRADE_NO;
             uriVariable = outTradeNo;
         }
-        return wxPayAssistService.doExecute(parameters, transactionType, uriVariable);
+        return getAssistService().doExecute(parameters, transactionType, uriVariable);
     }
 
 
@@ -486,8 +415,8 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
      */
     @Override
     public Map<String, Object> close(String transactionId, String outTradeNo) {
-        String parameters = getSpParameters();
-        return wxPayAssistService.doExecute(parameters, WxTransactionType.CLOSE, outTradeNo);
+        String parameters = wxParameterStructure.getSpParameters();
+        return getAssistService().doExecute(parameters, WxTransactionType.CLOSE, outTradeNo);
     }
 
     /**
@@ -499,14 +428,14 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
     @Override
     public WxRefundResult refund(RefundOrder refundOrder) {
         //获取公共参数
-        Map<String, Object> parameters = initSubMchId(null);
+        Map<String, Object> parameters = wxParameterStructure.initSubMchId(null);
 
-        setParameters(parameters, "transaction_id", refundOrder.getTradeNo());
-        setParameters(parameters, OUT_TRADE_NO, refundOrder.getOutTradeNo());
-        setParameters(parameters, "out_refund_no", refundOrder.getRefundNo());
-        setParameters(parameters, "reason", refundOrder.getDescription());
-        setParameters(parameters, "funds_account", refundOrder);
-        initNotifyUrl(parameters, refundOrder);
+        OrderParaStructure.loadParameters(parameters, "transaction_id", refundOrder.getTradeNo());
+        OrderParaStructure.loadParameters(parameters, OUT_TRADE_NO, refundOrder.getOutTradeNo());
+        OrderParaStructure.loadParameters(parameters, "out_refund_no", refundOrder.getRefundNo());
+        OrderParaStructure.loadParameters(parameters, "reason", refundOrder.getDescription());
+        OrderParaStructure.loadParameters(parameters, "funds_account", refundOrder);
+        wxParameterStructure.initNotifyUrl(parameters, refundOrder);
         RefundAmount refundAmount = new RefundAmount();
         refundAmount.setRefund(Util.conversionCentAmount(refundOrder.getRefundAmount()));
         refundAmount.setTotal(Util.conversionCentAmount(refundOrder.getTotalAmount()));
@@ -515,8 +444,8 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
             refundAmount.setCurrency(curType.getType());
         }
         parameters.put("amount", refundAmount);
-        setParameters(parameters, "amount", refundOrder);
-        return WxRefundResult.create(wxPayAssistService.doExecute(parameters, WxTransactionType.REFUND));
+        OrderParaStructure.loadParameters(parameters, "amount", refundOrder);
+        return WxRefundResult.create(getAssistService().doExecute(parameters, WxTransactionType.REFUND));
     }
 
 
@@ -528,8 +457,8 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
      */
     @Override
     public Map<String, Object> refundquery(RefundOrder refundOrder) {
-        String parameters = UriVariables.getMapToParameters(initSubMchId(null));
-        return wxPayAssistService.doExecute(parameters, WxTransactionType.REFUND_QUERY, refundOrder.getRefundNo());
+        String parameters = UriVariables.getMapToParameters(wxParameterStructure.initSubMchId(null));
+        return getAssistService().doExecute(parameters, WxTransactionType.REFUND_QUERY, refundOrder.getRefundNo());
     }
 
     /**
@@ -563,18 +492,18 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
         //目前只支持日账单
         parameters.put("bill_date", DateUtils.formatDate(billDate, DateUtils.YYYYMMDD));
         String fileType = billType.getFileType();
-        setParameters(parameters, "tar_type", fileType);
+        OrderParaStructure.loadParameters(parameters, "tar_type", fileType);
         if (billType instanceof WxAccountType) {
-            setParameters(parameters, "account_type", billType.getType());
+            OrderParaStructure.loadParameters(parameters, "account_type", billType.getType());
         }
         else {
-            initSubMchId(parameters).put("bill_type", billType.getType());
+            wxParameterStructure.initSubMchId(parameters).put("bill_type", billType.getType());
         }
         String body = UriVariables.getMapToParameters(parameters);
-        JSONObject result = wxPayAssistService.doExecute(body, WxTransactionType.valueOf(billType.getCustom()));
+        JSONObject result = getAssistService().doExecute(body, WxTransactionType.valueOf(billType.getCustom()));
         String downloadUrl = result.getString("download_url");
         MethodType methodType = MethodType.GET;
-        HttpEntity entity = wxPayAssistService.buildHttpEntity(downloadUrl, "", methodType.name());
+        HttpEntity entity = getAssistService().buildHttpEntity(downloadUrl, "", methodType.name());
         ResponseEntity<InputStream> responseEntity = requestTemplate.doExecuteEntity(downloadUrl, entity, InputStream.class, methodType);
         InputStream inputStream = responseEntity.getBody();
         int statusCode = responseEntity.getStatusCode();
@@ -598,14 +527,6 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
      * 转账
      *
      * @param order 转账订单
-     *              <pre>
-     *
-     *                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 注意事项：
-     *                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 ◆ 当返回错误码为“SYSTEMERROR”时，请不要更换商户订单号，一定要使用原商户订单号重试，否则可能造成重复支付等资金风险。
-     *                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 ◆ XML具有可扩展性，因此返回参数可能会有新增，而且顺序可能不完全遵循此文档规范，如果在解析回包的时候发生错误，请商户务必不要换单重试，请商户联系客服确认付款情况。如果有新回包字段，会更新到此API文档中。
-     *                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 ◆ 因为错误代码字段err_code的值后续可能会增加，所以商户如果遇到回包返回新的错误码，请商户务必不要换单重试，请商户联系客服确认付款情况。如果有新的错误码，会更新到此API文档中。
-     *                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 ◆ 错误代码描述字段err_code_des只供人工定位问题时做参考，系统实现时请不要依赖这个字段来做自动化处理。
-     *                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 </pre>
      * @return 对应的转账结果
      */
     @Override

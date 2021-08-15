@@ -4,6 +4,7 @@ package com.egzosn.pay.wx.v3.bean.order;
 import java.math.BigDecimal;
 
 import com.egzosn.pay.common.bean.CurType;
+import com.egzosn.pay.common.bean.DefaultCurType;
 import com.egzosn.pay.common.util.Util;
 
 /**
@@ -66,10 +67,10 @@ public class Amount {
     public static Amount getAmount(BigDecimal total, CurType curType ) {
         // 总金额单位为分
         Amount amount = new Amount(Util.conversionCentAmount(total));
-        if (null != curType) {
-            amount.setCurrency(curType.getType());
+        if (null == curType) {
+            curType = DefaultCurType.CNY;
         }
-
+        amount.setCurrency(curType.getType());
         return amount;
     }
 }

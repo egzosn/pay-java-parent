@@ -67,14 +67,15 @@ public final class AntCertificationUtil {
 
     /**
      * 装载平台证书
-     *
-     * @param serialNo          证书序列
+     *  @param serialNo          证书序列
      * @param certificateStream 证书流
+     * @return
      */
-    public static void loadCertificate(String serialNo, InputStream certificateStream) {
+    public static Certificate loadCertificate(String serialNo, InputStream certificateStream) {
         try {
             Certificate certificate = CERTIFICATE_FACTORY.generateCertificate(certificateStream);
             CERTIFICATE_MAP.put(serialNo, certificate);
+            return certificate;
         }
         catch (CertificateException e) {
             throw new PayErrorException(new WxPayError(WxConst.FAILURE, " 在生成微信v3证书时发生错误，原因是" + e.getMessage()), e);

@@ -13,6 +13,7 @@ import com.egzosn.pay.common.bean.BillType;
 import com.egzosn.pay.common.bean.CurType;
 import com.egzosn.pay.common.bean.DefaultCurType;
 import com.egzosn.pay.common.bean.MethodType;
+import com.egzosn.pay.common.bean.NoticeParams;
 import com.egzosn.pay.common.bean.PayMessage;
 import com.egzosn.pay.common.bean.PayOrder;
 import com.egzosn.pay.common.bean.PayOutMessage;
@@ -91,13 +92,24 @@ public class YiJiPayService extends BasePayService<YiJiPayConfigStorage> {
     @Override
     public boolean verify(Map<String, Object> params) {
 
+     return verify(new NoticeParams(params));
+
+    }
+
+    /**
+     * 回调校验
+     *
+     * @param noticeParams 回调回来的参数集
+     * @return 签名校验 true通过
+     */
+    public boolean verify(NoticeParams noticeParams){
+        final Map<String, Object> params = noticeParams.getBody();
         if (params.get(SIGN) == null) {
             LOG.debug("易极付支付异常：params：" + params);
             return false;
         }
 
         return signVerify(params, (String) params.get(SIGN));
-
     }
 
     /**

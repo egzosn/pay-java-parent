@@ -70,6 +70,13 @@ public class WxPayConfigStorage extends BasePayConfigStorage {
      */
     private CertEnvironment certEnvironment;
 
+    /**
+     * 是否为服务商模式, 默认为false
+     */
+    private boolean partner = false;
+
+
+
     @Deprecated
     @Override
     public String getAppid() {
@@ -221,5 +228,13 @@ public class WxPayConfigStorage extends BasePayConfigStorage {
         catch (IOException e) {
             throw new PayErrorException(new PayException("读取证书异常", e.getMessage()));
         }
+    }
+
+    public boolean isPartner() {
+        return partner;
+    }
+
+    public void setPartner(boolean partner) {
+        this.partner = partner;
     }
 }
