@@ -67,7 +67,7 @@ android 例子 [pay-java-android](https://gitee.com/egzosn/pay-java-android)
 作者公众号(每周输出)
 ![公众号](https://egzosn.gitee.io/pay-java-parent/gzh.png "gzh.png")
 
-E-Mail：egzosn@gmail.com
+E-Mail：egan@egzosn.com
 
  **QQ群：** 
 
