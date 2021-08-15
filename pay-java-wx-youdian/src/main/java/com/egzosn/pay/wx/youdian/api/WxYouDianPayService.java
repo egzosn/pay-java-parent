@@ -16,6 +16,7 @@ import com.egzosn.pay.common.bean.BaseRefundResult;
 import com.egzosn.pay.common.bean.BillType;
 import com.egzosn.pay.common.bean.CurType;
 import com.egzosn.pay.common.bean.MethodType;
+import com.egzosn.pay.common.bean.NoticeParams;
 import com.egzosn.pay.common.bean.PayMessage;
 import com.egzosn.pay.common.bean.PayOrder;
 import com.egzosn.pay.common.bean.PayOutMessage;
@@ -132,8 +133,22 @@ public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorag
      * @param params 回调回来的参数集
      * @return 签名校验 true通过
      */
+    @Deprecated
     @Override
     public boolean verify(Map<String, Object> params) {
+
+        return verify(new NoticeParams(params));
+    }
+
+    /**
+     * 回调校验
+     *
+     * @param noticeParams 回调回来的参数集
+     * @return 签名校验 true通过
+     */
+    public boolean verify(NoticeParams noticeParams) {
+        final Map<String, Object> params = noticeParams.getBody();
+
         if (!"SUCCESS".equals(params.get("return_code"))) {
             LOG.debug(String.format("友店微信支付异常：return_code=%s,参数集=%s", params.get("return_code"), params));
             return false;
@@ -150,7 +165,6 @@ public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorag
         }
         return false;
     }
-
 
     /**
      * 根据反馈回来的信息，生成签名结果
@@ -493,7 +507,6 @@ public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorag
     public Map<String, Object> refundquery(RefundOrder refundOrder) {
         return Collections.emptyMap();
     }
-
 
 
     @Override

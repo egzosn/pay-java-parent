@@ -27,6 +27,7 @@ import com.egzosn.pay.common.bean.BaseRefundResult;
 import com.egzosn.pay.common.bean.BillType;
 import com.egzosn.pay.common.bean.CurType;
 import com.egzosn.pay.common.bean.MethodType;
+import com.egzosn.pay.common.bean.NoticeParams;
 import com.egzosn.pay.common.bean.PayMessage;
 import com.egzosn.pay.common.bean.PayOrder;
 import com.egzosn.pay.common.bean.PayOutMessage;
@@ -84,22 +85,34 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
      * @param params 回调回来的参数集
      * @return 结果
      */
+    @Deprecated
     @Override
     public boolean verify(Map<String, Object> params) {
+
+        return verify(new NoticeParams(params));
+    }
+
+    /**
+     * 回调校验
+     *
+     * @param noticeParams 回调回来的参数集
+     * @return 签名校验 true通过
+     */
+    @Override
+    public boolean verify(NoticeParams noticeParams) {
+        final Map<String, Object> params = noticeParams.getBody();
         if (!RESPONSE_SUCCESS.equals(params.get(RESPONSE_STATUS)) && !RESPONSE_SUCCESS.toString().equals(params.get(RESPONSE_STATUS))) {
             return false;
         }
         LOG.info("开始验证回调签名参数：" + params);
         try {
-            boolean checkSign = this.checkReturnSign(params, payConfigStorage.getKeyPublic(), (String) params.get(RSA_SIGN));
-            return checkSign;
+            return this.checkReturnSign(params, payConfigStorage.getKeyPublic(), (String) params.get(RSA_SIGN));
         }
         catch (Exception e) {
             LOG.info("验签失败", e);
         }
         return false;
     }
-
     public boolean checkReturnSign(Map<String, Object> params, String publicKey, String rsaSign) {
         try {
             String content = signContent(params);

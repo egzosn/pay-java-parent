@@ -11,6 +11,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.api.BasePayService;
 import com.egzosn.pay.common.bean.BillType;
 import com.egzosn.pay.common.bean.MethodType;
+import com.egzosn.pay.common.bean.NoticeParams;
 import com.egzosn.pay.common.bean.PayMessage;
 import com.egzosn.pay.common.bean.PayOrder;
 import com.egzosn.pay.common.bean.PayOutMessage;
@@ -117,8 +118,21 @@ public class FuiouPayService extends BasePayService<FuiouPayConfigStorage> {
      * @param params 回调回来的参数集
      * @return 返回检验结果 0000 成功 其他失败
      */
+    @Deprecated
     @Override
     public boolean verify(Map<String, Object> params) {
+
+        return verify(new NoticeParams(params));
+    }
+    /**
+     * 回调校验
+     *
+     * @param noticeParams 回调回来的参数集
+     * @return 签名校验 true通过
+     */
+    @Override
+    public boolean verify(NoticeParams noticeParams) {
+        final Map<String, Object> params = noticeParams.getBody();
         if (!"0000".equals(params.get("order_pay_code"))) {
             LOG.debug(String.format("富友支付异常：order_pay_code=%s,错误原因=%s,参数集=%s", params.get("order_pay_code"), params.get("order_pay_error"), params));
             return false;
@@ -128,11 +142,10 @@ public class FuiouPayService extends BasePayService<FuiouPayConfigStorage> {
             return (signVerify(params, (String) params.remove("md5")) && verifySource((String) params.get("order_id")));
         }
         catch (PayErrorException e) {
-            e.printStackTrace();
+           LOG.error("", e);
         }
         return false;
     }
-
     /**
      * 回调签名校验
      *

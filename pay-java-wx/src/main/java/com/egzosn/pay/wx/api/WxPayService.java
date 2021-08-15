@@ -40,7 +40,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.api.BasePayService;
 import com.egzosn.pay.common.bean.BillType;
 import com.egzosn.pay.common.bean.MethodType;
+import com.egzosn.pay.common.bean.NoticeParams;
 import com.egzosn.pay.common.bean.Order;
+import com.egzosn.pay.common.bean.OrderParaStructure;
 import com.egzosn.pay.common.bean.PayMessage;
 import com.egzosn.pay.common.bean.PayOrder;
 import com.egzosn.pay.common.bean.PayOutMessage;
@@ -135,9 +137,22 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
      * @param params 回调回来的参数集
      * @return 签名校验 true通过
      */
+    @Deprecated
     @Override
     public boolean verify(Map<String, Object> params) {
 
+        return verify(new NoticeParams(params));
+    }
+
+
+    /**
+     * 回调校验
+     *
+     * @param noticeParams 回调回来的参数集
+     * @return 签名校验 true通过
+     */
+    public boolean verify(NoticeParams noticeParams) {
+        final Map<String, Object> params = noticeParams.getBody();
         if (null == params.get(SIGN) || !(SUCCESS.equals(params.get(RETURN_CODE)) && SUCCESS.equals(params.get(RESULT_CODE)))) {
             if (LOG.isErrorEnabled()) {
                 LOG.error(String.format("微信支付异常：return_code=%s,参数集=%s", params.get(RETURN_CODE), params));
@@ -187,8 +202,8 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
         parameters.put(APPID, payConfigStorage.getAppId());
         parameters.put(MCH_ID, payConfigStorage.getMchId());
         //判断如果是服务商模式信息则加入
-        setParameters(parameters, "sub_mch_id", payConfigStorage.getSubMchId());
-        setParameters(parameters, "sub_appid", payConfigStorage.getSubAppId());
+        OrderParaStructure.loadParameters(parameters, "sub_mch_id", payConfigStorage.getSubMchId());
+        OrderParaStructure.loadParameters(parameters, "sub_appid", payConfigStorage.getSubAppId());
         parameters.put(NONCE_STR, SignTextUtils.randomStr());
         return parameters;
 
@@ -209,13 +224,13 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
         // 购买支付信息
         parameters.put("body", order.getSubject());
         // 购买支付信息
-        setParameters(parameters, "detail", order);
+        OrderParaStructure.loadParameters(parameters, "detail", order);
         // 订单号
         parameters.put(OUT_TRADE_NO, order.getOutTradeNo());
         parameters.put("spbill_create_ip", StringUtils.isEmpty(order.getSpbillCreateIp()) ? "192.168.1.150" : order.getSpbillCreateIp());
         // 总金额单位为分
         parameters.put("total_fee", Util.conversionCentAmount(order.getPrice()));
-        setParameters(parameters, "attach", order.getAddition());
+        OrderParaStructure.loadParameters(parameters, "attach", order.getAddition());
         initNotifyUrl(parameters, order);
         parameters.put("trade_type", order.getTransactionType().getType());
         if (null != order.getExpirationTime()) {
@@ -229,11 +244,11 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
 
         ((WxTransactionType) order.getTransactionType()).setAttribute(parameters, order);
         //可覆盖参数
-/*        setParameters(parameters, "notify_url", order);
-        setParameters(parameters, "goods_tag", order);
-        setParameters(parameters, "limit_pay", order);
-        setParameters(parameters, "receipt", order);
-        setParameters(parameters, "product_id", order);*/
+/*        OrderParaStructure.loadParameters(parameters, "notify_url", order);
+        OrderParaStructure.loadParameters(parameters, "goods_tag", order);
+        OrderParaStructure.loadParameters(parameters, "limit_pay", order);
+        OrderParaStructure.loadParameters(parameters, "receipt", order);
+        OrderParaStructure.loadParameters(parameters, "product_id", order);*/
         parameters.putAll(order.getAttrs());
         parameters = preOrderHandler(parameters, order);
         setSign(parameters);
@@ -514,8 +529,8 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
 
 
     private Map<String, Object> initNotifyUrl(Map<String, Object> parameters, Order order) {
-        setParameters(parameters, "notify_url", payConfigStorage.getNotifyUrl());
-        setParameters(parameters, "notify_url", order);
+        OrderParaStructure.loadParameters(parameters, "notify_url", payConfigStorage.getNotifyUrl());
+        OrderParaStructure.loadParameters(parameters, "notify_url", order);
         return parameters;
     }
 
@@ -530,16 +545,16 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
         //获取公共参数
         Map<String, Object> parameters = getPublicParameters();
 
-        setParameters(parameters, "transaction_id", refundOrder.getTradeNo());
-        setParameters(parameters, OUT_TRADE_NO, refundOrder.getOutTradeNo());
-        setParameters(parameters, "out_refund_no", refundOrder.getRefundNo());
+        OrderParaStructure.loadParameters(parameters, "transaction_id", refundOrder.getTradeNo());
+        OrderParaStructure.loadParameters(parameters, OUT_TRADE_NO, refundOrder.getOutTradeNo());
+        OrderParaStructure.loadParameters(parameters, "out_refund_no", refundOrder.getRefundNo());
         parameters.put("total_fee", Util.conversionCentAmount(refundOrder.getTotalAmount()));
         parameters.put("refund_fee", Util.conversionCentAmount(refundOrder.getRefundAmount()));
         initNotifyUrl(parameters, refundOrder);
         if (null != refundOrder.getCurType()) {
             parameters.put("refund_fee_type", refundOrder.getCurType().getType());
         }
-        setParameters(parameters, "refund_desc", refundOrder.getDescription());
+        OrderParaStructure.loadParameters(parameters, "refund_desc", refundOrder.getDescription());
         //附加参数，这里可进行覆盖前面所有参数
         parameters.putAll(refundOrder.getAttrs());
         //设置签名
@@ -559,9 +574,9 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
 
         //获取公共参数
         Map<String, Object> parameters = getPublicParameters();
-        setParameters(parameters, "transaction_id", refundOrder.getTradeNo());
-        setParameters(parameters, OUT_TRADE_NO, refundOrder.getOutTradeNo());
-        setParameters(parameters, "out_refund_no", refundOrder.getRefundNo());
+        OrderParaStructure.loadParameters(parameters, "transaction_id", refundOrder.getTradeNo());
+        OrderParaStructure.loadParameters(parameters, OUT_TRADE_NO, refundOrder.getOutTradeNo());
+        OrderParaStructure.loadParameters(parameters, "out_refund_no", refundOrder.getRefundNo());
         //设置签名
         setSign(parameters);
         return requestTemplate.postForObject(getReqUrl(WxTransactionType.REFUNDQUERY), XML.getMap2Xml(parameters), JSONObject.class);
@@ -601,7 +616,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
         //目前只支持日账单
         parameters.put("bill_date", DateUtils.formatDate(billDate, DateUtils.YYYYMMDD));
         String fileType = billType.getFileType();
-        setParameters(parameters, "tar_type", fileType);
+        OrderParaStructure.loadParameters(parameters, "tar_type", fileType);
         //设置签名
         setSign(parameters);
         Map<String, Object> ret = new HashMap<String, Object>(3);
@@ -758,8 +773,8 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
 
         //获取公共参数
         Map<String, Object> parameters = getPublicParameters();
-        setParameters(parameters, OUT_TRADE_NO, outTradeNoBillType);
-        setParameters(parameters, "transaction_id", (String) transactionIdOrBillDate);
+        OrderParaStructure.loadParameters(parameters, OUT_TRADE_NO, outTradeNoBillType);
+        OrderParaStructure.loadParameters(parameters, "transaction_id", (String) transactionIdOrBillDate);
         //设置签名
         setSign(parameters);
         return requestTemplate.postForObject(getReqUrl(transactionType), XML.getMap2Xml(parameters), JSONObject.class);

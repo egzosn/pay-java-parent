@@ -502,6 +502,7 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
      * @param order 订单对象
      * @return 返回订单参数
      */
+    @Deprecated
     protected Map<String, Object> setParameters(Map<String, Object> parameters, String key, Order order) {
         return OrderParaStructure.loadParameters(parameters, key, order);
     }

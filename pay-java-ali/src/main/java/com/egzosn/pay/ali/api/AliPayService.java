@@ -32,7 +32,9 @@ import com.egzosn.pay.ali.bean.OrderSettle;
 import com.egzosn.pay.common.api.BasePayService;
 import com.egzosn.pay.common.bean.BillType;
 import com.egzosn.pay.common.bean.MethodType;
+import com.egzosn.pay.common.bean.NoticeParams;
 import com.egzosn.pay.common.bean.Order;
+import com.egzosn.pay.common.bean.OrderParaStructure;
 import com.egzosn.pay.common.bean.PayMessage;
 import com.egzosn.pay.common.bean.PayOrder;
 import com.egzosn.pay.common.bean.PayOutMessage;
@@ -108,17 +110,29 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
      * @param params 回调回来的参数集
      * @return 签名校验 true通过
      */
+    @Deprecated
     @Override
     public boolean verify(Map<String, Object> params) {
+        return verify(new NoticeParams(params));
+    }
 
+    /**
+     * 回调校验
+     *
+     * @param noticeParams 回调回来的参数集
+     * @return 签名校验 true通过
+     */
+    @Override
+    public boolean verify(NoticeParams noticeParams) {
+        final Map<String, Object> params = noticeParams.getBody();
         if (params.get(SIGN) == null) {
             LOG.debug("支付宝支付异常：params：" + params);
             return false;
         }
 
         return signVerify(params, (String) params.get(SIGN)) && verifySource((String) params.get("notify_id"));
-
     }
+
 
     /**
      * 根据反馈回来的信息，生成签名结果
@@ -209,12 +223,12 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
 
     private void setNotifyUrl(Map<String, Object> orderInfo, PayOrder order) {
         orderInfo.put(NOTIFY_URL, payConfigStorage.getNotifyUrl());
-        setParameters(orderInfo, NOTIFY_URL, order);
+        OrderParaStructure.loadParameters(orderInfo, NOTIFY_URL, order);
     }
 
     private void setReturnUrl(Map<String, Object> orderInfo, PayOrder order) {
         orderInfo.put(RETURN_URL, payConfigStorage.getReturnUrl());
-        setParameters(orderInfo, RETURN_URL, order);
+        OrderParaStructure.loadParameters(orderInfo, RETURN_URL, order);
     }
 
     /**
@@ -235,7 +249,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
 
         Map<String, Object> bizContent = new TreeMap<>();
         bizContent.put("body", order.getBody());
-        setParameters(bizContent, "seller_id", payConfigStorage.getSeller());
+        OrderParaStructure.loadParameters(bizContent, "seller_id", payConfigStorage.getSeller());
         bizContent.put("subject", order.getSubject());
         bizContent.put("out_trade_no", order.getOutTradeNo());
         bizContent.put("total_amount", Util.conversionAmount(order.getPrice()).toString());
@@ -319,8 +333,8 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
     protected void loadCertSn(Map<String, Object> orderInfo) {
         if (payConfigStorage.isCertSign()) {
             final CertEnvironment certEnvironment = payConfigStorage.getCertEnvironment();
-            setParameters(orderInfo, "app_cert_sn", certEnvironment.getMerchantCertSN());
-            setParameters(orderInfo, "alipay_root_cert_sn", certEnvironment.getRootCertSN());
+            OrderParaStructure.loadParameters(orderInfo, "app_cert_sn", certEnvironment.getMerchantCertSN());
+            OrderParaStructure.loadParameters(orderInfo, "alipay_root_cert_sn", certEnvironment.getRootCertSN());
         }
     }
 
@@ -493,7 +507,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
      */
     protected void setAppAuthToken(Map<String, Object> parameters, Map<String, Object> attrs) {
         setAppAuthToken(parameters);
-        setParameters(parameters, APP_AUTH_TOKEN, (String) attrs.remove(APP_AUTH_TOKEN));
+        OrderParaStructure.loadParameters(parameters, APP_AUTH_TOKEN, (String) attrs.remove(APP_AUTH_TOKEN));
     }
 
     /**
@@ -502,7 +516,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
      * @param parameters 参数
      */
     protected void setAppAuthToken(Map<String, Object> parameters) {
-        setParameters(parameters, APP_AUTH_TOKEN, payConfigStorage.getAppAuthToken());
+        OrderParaStructure.loadParameters(parameters, APP_AUTH_TOKEN, payConfigStorage.getAppAuthToken());
     }
 
 
@@ -645,11 +659,11 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
         bizContent.put("out_biz_no", order.getOutNo());
         bizContent.put("trans_amount", order.getAmount());
         transferType.setAttr(bizContent, order);
-        setParameters(bizContent, "order_title", order);
-        setParameters(bizContent, "original_order_id", order);
+        OrderParaStructure.loadParameters(bizContent, "order_title", order);
+        OrderParaStructure.loadParameters(bizContent, "original_order_id", order);
         setPayeeInfo(bizContent, order);
         bizContent.put("remark", order.getRemark());
-        setParameters(bizContent, "business_params", order);
+        OrderParaStructure.loadParameters(bizContent, "business_params", order);
 
         //设置请求参数的集合
         parameters.put(BIZ_CONTENT, JSON.toJSONString(bizContent));

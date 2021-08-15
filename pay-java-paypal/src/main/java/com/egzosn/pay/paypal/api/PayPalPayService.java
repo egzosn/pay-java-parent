@@ -24,6 +24,7 @@ import com.egzosn.pay.common.bean.BillType;
 import com.egzosn.pay.common.bean.CurType;
 import com.egzosn.pay.common.bean.DefaultCurType;
 import com.egzosn.pay.common.bean.MethodType;
+import com.egzosn.pay.common.bean.NoticeParams;
 import com.egzosn.pay.common.bean.PayMessage;
 import com.egzosn.pay.common.bean.PayOrder;
 import com.egzosn.pay.common.bean.PayOutMessage;
@@ -133,9 +134,17 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage> {
     }
 
 
+    @Deprecated
     @Override
     public boolean verify(Map<String, Object> params) {
 
+        return verify(new NoticeParams(params));
+
+    }
+
+    @Override
+    public boolean verify(NoticeParams noticeParams) {
+        final Map<String, Object> params = noticeParams.getBody();
         HttpStringEntity httpEntity = new HttpStringEntity("{\"payer_id\":\"" + (String) params.get("PayerID") + "\"}", ContentType.APPLICATION_JSON);
         httpEntity.setHeaders(authHeader());
         JSONObject resp = getHttpRequestTemplate().postForObject(getReqUrl(PayPalTransactionType.EXECUTE), httpEntity, JSONObject.class, (String) params.get("paymentId"));

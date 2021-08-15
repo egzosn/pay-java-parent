@@ -25,6 +25,7 @@ import com.egzosn.pay.common.bean.BillType;
 import com.egzosn.pay.common.bean.CurType;
 import com.egzosn.pay.common.bean.DefaultCurType;
 import com.egzosn.pay.common.bean.MethodType;
+import com.egzosn.pay.common.bean.NoticeParams;
 import com.egzosn.pay.common.bean.PayMessage;
 import com.egzosn.pay.common.bean.PayOrder;
 import com.egzosn.pay.common.bean.PayOutMessage;
@@ -155,8 +156,16 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage> implem
      * @param params 回调回来的参数集
      * @return 是否成功 true成功
      */
+    @Deprecated
     @Override
     public boolean verify(Map<String, Object> params) {
+        return verify(new NoticeParams(params));
+
+    }
+
+    @Override
+    public boolean verify(NoticeParams noticeParams) {
+        final Map<String, Object> params = noticeParams.getBody();
         Object paymentStatus = params.get("payment_status");
         if (!"Completed".equals(paymentStatus)) {
             LOG.warn("状态未完成:" + paymentStatus);
@@ -166,8 +175,6 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage> implem
         return "VERIFIED".equals(resp);
 
     }
-
-
     /**
      * 获取授权请求头
      *

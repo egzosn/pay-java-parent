@@ -28,6 +28,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.api.BasePayService;
 import com.egzosn.pay.common.bean.BillType;
 import com.egzosn.pay.common.bean.MethodType;
+import com.egzosn.pay.common.bean.NoticeParams;
 import com.egzosn.pay.common.bean.PayMessage;
 import com.egzosn.pay.common.bean.PayOrder;
 import com.egzosn.pay.common.bean.PayOutMessage;
@@ -200,16 +201,28 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
      * @param result 回调回来的参数集
      * @return 签名校验 true通过
      */
+    @Deprecated
     @Override
     public boolean verify(Map<String, Object> result) {
 
+
+        return verify(new NoticeParams(result));
+    }
+
+    /**
+     * 回调校验
+     *
+     * @param noticeParams 回调回来的参数集
+     * @return 签名校验 true通过
+     */
+    public boolean verify(NoticeParams noticeParams) {
+        final Map<String, Object> result = noticeParams.getBody();
         if (null == result || result.get(SDKConstants.param_signature) == null) {
             LOG.debug("银联支付验签异常：params：" + result);
             return false;
         }
         return this.signVerify(result, (String) result.get(SDKConstants.param_signature));
     }
-
     /**
      * 签名校验
      *

@@ -20,6 +20,7 @@ import com.egzosn.pay.common.bean.BillType;
 import com.egzosn.pay.common.bean.CurType;
 import com.egzosn.pay.common.bean.DefaultCurType;
 import com.egzosn.pay.common.bean.MethodType;
+import com.egzosn.pay.common.bean.NoticeParams;
 import com.egzosn.pay.common.bean.PayMessage;
 import com.egzosn.pay.common.bean.PayOrder;
 import com.egzosn.pay.common.bean.PayOutMessage;
@@ -141,8 +142,21 @@ public class PayoneerPayService extends BasePayService<PayoneerConfigStorage> im
      * @param params 回调回来的参数集
      * @return 签名校验 true通过
      */
+    @Deprecated
     @Override
     public boolean verify(Map<String, Object> params) {
+
+        return verify(new NoticeParams(params));
+    }
+    /**
+     * 回调校验
+     *
+     * @param noticeParams 回调回来的参数集
+     * @return 签名校验 true通过
+     */
+    @Override
+    public boolean verify(NoticeParams noticeParams) {
+        final Map<String, Object> params = noticeParams.getBody();
         if (params != null && 0 == Integer.parseInt(params.get(CODE).toString())) {
             if (params.containsKey(OUT_TRADE_NO)) {
                 return verifySource((String) params.get(OUT_TRADE_NO));
@@ -151,7 +165,6 @@ public class PayoneerPayService extends BasePayService<PayoneerConfigStorage> im
         }
         return false;
     }
-
 
     /**
      * 支付宝需要,微信是否也需要再次校验来源，进行订单查询
