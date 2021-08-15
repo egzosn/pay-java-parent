@@ -17,7 +17,10 @@ import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.JSON;
 import com.egzosn.pay.common.bean.BillType;
 import com.egzosn.pay.common.bean.MethodType;
+import com.egzosn.pay.common.bean.NoticeParams;
+import com.egzosn.pay.common.bean.NoticeRequest;
 import com.egzosn.pay.common.bean.Order;
+import com.egzosn.pay.common.bean.OrderParaStructure;
 import com.egzosn.pay.common.bean.PayMessage;
 import com.egzosn.pay.common.bean.PayOrder;
 import com.egzosn.pay.common.bean.PayOutMessage;
@@ -118,6 +121,7 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
 
         return base64ClientID;
     }
+
 
     /**
      * 创建签名
@@ -398,6 +402,17 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
     /**
      * 将请求参数或者请求流转化为 Map
      *
+     * @param request 通知请求
+     * @return 获得回调的请求参数
+     */
+    @Override
+    public NoticeParams getNoticeParams(NoticeRequest request) {
+        return null;
+    }
+
+    /**
+     * 将请求参数或者请求流转化为 Map
+     *
      * @param parameterMap 请求参数
      * @param is           请求流
      * @return 获得回调响应信息
@@ -469,20 +484,26 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
         return orderInfo;
     }
 
+    /**
+     * 过时
+     * @param parameters 参数map
+     * @param key key
+     * @param value 值
+     * @return 返回订单参数
+     */
+    @Deprecated
     protected Map<String, Object> setParameters(Map<String, Object> parameters, String key, String value) {
-        if (StringUtils.isNotEmpty(value)) {
-            parameters.put(key, value);
-        }
-        return parameters;
+        return OrderParaStructure.loadParameters(parameters, key, value);
     }
-
+    /**
+     * 过时
+     * @param parameters 参数map
+     * @param key key
+     * @param order 订单对象
+     * @return 返回订单参数
+     */
     protected Map<String, Object> setParameters(Map<String, Object> parameters, String key, Order order) {
-        Object attr = order.getAttr(key);
-        if (null != attr && !"".equals(attr)) {
-            order.getAttrs().remove(key);
-            parameters.put(key, attr);
-        }
-        return parameters;
+        return OrderParaStructure.loadParameters(parameters, key, order);
     }
 
 

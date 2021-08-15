@@ -42,6 +42,11 @@ public class NoticeParams {
      */
     private Map<String, List<String>> headers;
 
+    /**
+     * 附加属性
+     */
+    private Map<String, Object> attr;
+
 
     public NoticeParams(Map<String, Object> body) {
         this.body = body;
@@ -81,5 +86,13 @@ public class NoticeParams {
 
     public void setHeaders(Map<String, List<String>> headers) {
         this.headers = headers;
+    }
+
+    public Map<String, Object> getAttr() {
+        return attr;
+    }
+
+    public void setAttr(Map<String, Object> attr) {
+        this.attr = attr;
     }
 }

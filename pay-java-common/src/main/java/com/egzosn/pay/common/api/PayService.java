@@ -7,6 +7,8 @@ import java.util.Map;
 
 import com.egzosn.pay.common.bean.BillType;
 import com.egzosn.pay.common.bean.MethodType;
+import com.egzosn.pay.common.bean.NoticeParams;
+import com.egzosn.pay.common.bean.NoticeRequest;
 import com.egzosn.pay.common.bean.PayMessage;
 import com.egzosn.pay.common.bean.PayOrder;
 import com.egzosn.pay.common.bean.PayOutMessage;
@@ -61,12 +63,20 @@ public interface PayService<PC extends PayConfigStorage> {
 
     /**
      * 回调校验
+     * 已过时方法，详情{@link #verify(NoticeParams)}
+     * @param params 回调回来的参数集
+     * @return 签名校验 true通过
+     */
+    @Deprecated
+    boolean verify(Map<String, Object> params);
+
+    /**
+     * 回调校验
      *
      * @param params 回调回来的参数集
      * @return 签名校验 true通过
      */
-
-    boolean verify(Map<String, Object> params);
+    boolean verify(NoticeParams params);
 
 
     /**
@@ -114,7 +124,16 @@ public interface PayService<PC extends PayConfigStorage> {
      * @param is           请求流
      * @return 获得回调的请求参数
      */
+    @Deprecated
     Map<String, Object> getParameter2Map(Map<String, String[]> parameterMap, InputStream is);
+
+    /**
+     * 将请求参数或者请求流转化为 Map
+     *
+     * @param request 通知请求
+     * @return 获得回调的请求参数
+     */
+    NoticeParams getNoticeParams(NoticeRequest request);
 
     /**
      * 获取输出消息，用户返回给支付端

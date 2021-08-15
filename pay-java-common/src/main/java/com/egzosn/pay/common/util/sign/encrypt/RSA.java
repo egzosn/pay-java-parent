@@ -12,6 +12,7 @@ import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.cert.Certificate;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
@@ -136,10 +137,7 @@ public class RSA {
     public static boolean verify(String content, String sign, String publicKey, String signAlgorithms, String characterEncoding) {
         try {
             PublicKey pubKey = getPublicKey(publicKey, ALGORITHM);
-            java.security.Signature signature = java.security.Signature.getInstance(signAlgorithms);
-            signature.initVerify(pubKey);
-            signature.update(content.getBytes(characterEncoding));
-            return signature.verify(Base64.decode(sign));
+            return verify(content, sign, pubKey, signAlgorithms, characterEncoding);
         }
         catch (GeneralSecurityException e) {
             LOG.error("", e);
@@ -176,6 +174,7 @@ public class RSA {
         return false;
     }
 
+
     /**
      * RSA验签名检查
      *
@@ -204,6 +203,20 @@ public class RSA {
         return verify(content, sign, publicKey, SIGN_ALGORITHMS, characterEncoding);
     }
 
+
+    /**
+     * RSA验签名检查
+     *
+     * @param content           待签名数据
+     * @param sign              签名值
+     * @param publicKey         公钥
+     * @param characterEncoding 编码格式
+     * @return 布尔值
+     */
+    public static boolean verify(String content, String sign, Certificate publicKey, String characterEncoding) {
+        final PublicKey pubKey = publicKey.getPublicKey();
+        return verify(content, sign, pubKey, SIGN_ALGORITHMS, characterEncoding);
+    }
     /**
      * 解密
      *
