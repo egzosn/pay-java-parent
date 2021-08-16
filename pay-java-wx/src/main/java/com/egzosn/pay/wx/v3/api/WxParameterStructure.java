@@ -1,6 +1,7 @@
 package com.egzosn.pay.wx.v3.api;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -35,7 +36,7 @@ public class WxParameterStructure {
      */
     public Map<String, Object> getPublicParameters() {
 
-        Map<String, Object> parameters = new TreeMap<String, Object>();
+        Map<String, Object> parameters = new LinkedHashMap<>();
         parameters.put(WxConst.APPID, payConfigStorage.getAppId());
         parameters.put(WxConst.MCH_ID, payConfigStorage.getMchId());
         return parameters;

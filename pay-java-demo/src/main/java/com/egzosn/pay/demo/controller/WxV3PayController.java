@@ -54,15 +54,15 @@ public class WxV3PayController {
     public void init() {
 
         WxPayConfigStorage wxPayConfigStorage = new WxPayConfigStorage();
-        wxPayConfigStorage.setAppId("wxc7b993ff15a9f27c");
-        wxPayConfigStorage.setMchId("1602947766");
+        wxPayConfigStorage.setAppId("wxc7b993ff15a9f271");
+        wxPayConfigStorage.setMchId("1602947765");
 //        wxPayConfigStorage.setKeyPublic("转账公钥，转账时必填");
-        wxPayConfigStorage.setSecretKey("9bd8f0e7af4841299d782406b7774f56");
-        wxPayConfigStorage.setNotifyUrl("https://pay.egzosn.com");
-        wxPayConfigStorage.setReturnUrl("https://pay.egzosn.com");
+        wxPayConfigStorage.setSecretKey("9bd8f0e7af4841299d782406b7774f52");
+        wxPayConfigStorage.setNotifyUrl("https://pay.egzosn.com/payback");
+        wxPayConfigStorage.setReturnUrl("https://pay.egzosn.com/payback");
         wxPayConfigStorage.setInputCharset("utf-8");
         wxPayConfigStorage.setCertSign(true);
-        wxPayConfigStorage.setApiClientKeyP12("E:\\Documents\\gitee\\pay-java-parent\\pay-java-demo\\src\\main\\resources\\yifenli_mall.p12");
+        wxPayConfigStorage.setApiClientKeyP12("yifenli_mall.p12");
         wxPayConfigStorage.setCertStoreType(CertStoreType.PATH);
         service = new WxPayService(wxPayConfigStorage);
         //设置回调消息处理
@@ -142,7 +142,7 @@ public class WxV3PayController {
     public byte[] toWxQrPay(BigDecimal price) throws IOException {
         //获取对应的支付账户操作工具（可根据账户id）
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ImageIO.write(service.genQrPay(new PayOrder("订单title", "摘要", null == price ? BigDecimal.valueOf(0.01) : price, System.currentTimeMillis() + "", WxTransactionType.NATIVE)), "JPEG", baos);
+        ImageIO.write(service.genQrPay(new PayOrder("测试商品", "测试商品", null == price ? BigDecimal.valueOf(0.01) : price, UUID.randomUUID().toString().replace("-", ""), WxTransactionType.NATIVE)), "JPEG", baos);
         return baos.toByteArray();
     }
 

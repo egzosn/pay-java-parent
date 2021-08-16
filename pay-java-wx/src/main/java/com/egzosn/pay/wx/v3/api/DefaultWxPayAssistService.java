@@ -134,7 +134,7 @@ public class DefaultWxPayAssistService implements WxPayAssistService {
         String token = String.format(WxConst.TOKEN_PATTERN, payConfigStorage.getMchId(), nonceStr, timestamp, serialNumber, sign);
         HttpStringEntity entity = new HttpStringEntity(body, ContentType.APPLICATION_JSON);
         entity.addHeader(new BasicHeader("Authorization", WxConst.SCHEMA.concat(token)));
-        entity.addHeader(new BasicHeader("User-Agent", "X-Pay-Service"));
+        entity.addHeader(new BasicHeader("User-Agent", "Pay-Java-Parent"));
         entity.addHeader(new BasicHeader("Accept", APPLICATION_JSON.getMimeType()));
         return entity;
     }

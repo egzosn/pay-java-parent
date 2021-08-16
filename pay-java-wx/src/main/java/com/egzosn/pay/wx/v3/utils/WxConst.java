@@ -30,7 +30,7 @@ public final class WxConst {
      */
     public static final String SANDBOXNEW = "sandboxnew/";
     public static final String APPID = "appid";
-    public static final String MCH_ID = "mch_id";
+    public static final String MCH_ID = "mchid";
     public static final String SUB_MCH_ID = "sub_mchid";
     public static final String SP_MCH_ID = "sp_mchid";
     public static final String OUT_TRADE_NO = "out_trade_no";

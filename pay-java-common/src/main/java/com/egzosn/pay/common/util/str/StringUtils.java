@@ -156,10 +156,8 @@ public class StringUtils {
             if (StringUtils.isEmpty(s)) {
                 continue;
             }
-            if (builder.length() > 0) {
-                builder.append(separator);
-            }
-            builder.append(s);
+
+            builder.append(s).append(separator);
         }
         return builder.toString();
     }
