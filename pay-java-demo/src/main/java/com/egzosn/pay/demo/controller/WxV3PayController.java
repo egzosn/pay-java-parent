@@ -60,12 +60,14 @@ public class WxV3PayController {
         wxPayConfigStorage.setAppId("wxc7b993ff15a9f271");
         wxPayConfigStorage.setMchId("1602947765");
 //        wxPayConfigStorage.setKeyPublic("转账公钥，转账时必填");
-        wxPayConfigStorage.setSecretKey("9bd8f0e7af4841299d782406b7774f52");
+        //V3密钥 https://pay.weixin.qq.com/wiki/doc/apiv3/wechatpay/wechatpay3_2.shtml
+        wxPayConfigStorage.setSecretKey("V3密钥");
         wxPayConfigStorage.setNotifyUrl("https://pay.egzosn.com/payback");
         wxPayConfigStorage.setReturnUrl("https://pay.egzosn.com/payback");
         wxPayConfigStorage.setInputCharset("utf-8");
         wxPayConfigStorage.setCertSign(true);
-        wxPayConfigStorage.setApiClientKeyP12("yifenli_mall.p12");
+        //商户API证书 https://pay.weixin.qq.com/wiki/doc/apiv3/wechatpay/wechatpay3_1.shtml
+        wxPayConfigStorage.setApiClientKeyP12("商户API证书.p12");
         wxPayConfigStorage.setCertStoreType(CertStoreType.PATH);
         service = new WxPayService(wxPayConfigStorage);
         //设置回调消息处理
