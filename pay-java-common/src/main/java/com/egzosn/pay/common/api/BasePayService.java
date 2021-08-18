@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.JSON;
 import com.egzosn.pay.common.bean.BillType;
+import com.egzosn.pay.common.bean.DefaultNoticeRequest;
 import com.egzosn.pay.common.bean.MethodType;
 import com.egzosn.pay.common.bean.NoticeParams;
 import com.egzosn.pay.common.bean.NoticeRequest;
@@ -56,7 +57,7 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
     /**
      * 支付消息拦截器
      */
-    protected List<PayMessageInterceptor> interceptors = new ArrayList<PayMessageInterceptor>();
+    protected List<PayMessageInterceptor<PayMessage, PayService>> interceptors = new ArrayList<PayMessageInterceptor<PayMessage, PayService>>();
     ;
 
     /**
@@ -191,6 +192,17 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
      */
     @Override
     public Map<String, Object> getParameter2Map(Map<String, String[]> parameterMap, InputStream is) {
+        return getNoticeParams(new DefaultNoticeRequest(parameterMap, is)).getBody();
+    }
+    /**
+     * 将请求参数或者请求流转化为 Map
+     *
+     * @param request 通知请求
+     * @return 获得回调的请求参数
+     */
+    @Override
+    public NoticeParams getNoticeParams(NoticeRequest request) {
+        final Map<String, String[]> parameterMap = request.getParameterMap();
 
         Map<String, Object> params = new TreeMap<String, Object>();
         for (Map.Entry<String, String[]> entry : parameterMap.entrySet()) {
@@ -212,9 +224,8 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
             }
             params.put(name, valueStr);
         }
-        return params;
+        return new NoticeParams(params);
     }
-
 
     /**
      * 交易查询接口，带处理器
@@ -399,16 +410,7 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
         interceptors.add(interceptor);
     }
 
-    /**
-     * 将请求参数或者请求流转化为 Map
-     *
-     * @param request 通知请求
-     * @return 获得回调的请求参数
-     */
-    @Override
-    public NoticeParams getNoticeParams(NoticeRequest request) {
-        return null;
-    }
+
 
     /**
      * 将请求参数或者请求流转化为 Map
@@ -417,16 +419,29 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
      * @param is           请求流
      * @return 获得回调响应信息
      */
+    @Deprecated
     @Override
     public PayOutMessage payBack(Map<String, String[]> parameterMap, InputStream is) {
-        Map<String, Object> data = getParameter2Map(parameterMap, is);
+     return payBack(new DefaultNoticeRequest(parameterMap, is));
+    }
+
+
+    /**
+     * 回调处理
+     *
+     * @param request 请求参数
+     * @return 获得回调响应信息
+     */
+    @Override
+    public PayOutMessage payBack(NoticeRequest request) {
+        final NoticeParams noticeParams = getNoticeParams(request);
         if (LOG.isDebugEnabled()) {
-            LOG.debug("回调响应:" + JSON.toJSONString(data));
+            LOG.debug("回调响应:{}" , JSON.toJSONString(noticeParams));
         }
-        if (!verify(data)) {
+        if (!verify(noticeParams)) {
             return getPayOutMessage("fail", "失败");
         }
-        PayMessage payMessage = this.createMessage(data);
+        PayMessage payMessage = this.createMessage(noticeParams.getBody());
         Map<String, Object> context = new HashMap<String, Object>();
         for (PayMessageInterceptor interceptor : interceptors) {
             if (!interceptor.intercept(payMessage, context, this)) {

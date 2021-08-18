@@ -2,6 +2,8 @@ package com.egzosn.pay.common.util;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Collection;
+import java.util.Map;
 
 public class Util {
     /**
@@ -69,9 +71,11 @@ public class Util {
         if (n.toByteArray().length == 33) {
             tmpd = new byte[32];
             System.arraycopy(n.toByteArray(), 1, tmpd, 0, 32);
-        } else if (n.toByteArray().length == 32) {
+        }
+        else if (n.toByteArray().length == 32) {
             tmpd = n.toByteArray();
-        } else {
+        }
+        else {
             tmpd = new byte[32];
             for (int i = 0; i < 32 - n.toByteArray().length; i++) {
                 tmpd[i] = 0;
@@ -348,7 +352,8 @@ public class Util {
             int algorism = 0;
             if (c >= '0' && c <= '9') {
                 algorism = c - '0';
-            } else {
+            }
+            else {
                 algorism = c - 55;
             }
             result += Math.pow(16, max - i) * algorism;
@@ -493,7 +498,8 @@ public class Util {
         int i = 0;
         try {
             i = Integer.parseInt(s, radix);
-        } catch (NumberFormatException ex) {
+        }
+        catch (NumberFormatException ex) {
             i = defaultInt;
         }
         return i;
@@ -510,7 +516,8 @@ public class Util {
         int i = 0;
         try {
             i = Integer.parseInt(s);
-        } catch (NumberFormatException ex) {
+        }
+        catch (NumberFormatException ex) {
             i = defaultInt;
         }
         return i;
@@ -574,7 +581,7 @@ public class Util {
     /**
      * 一百
      */
-    public static final BigDecimal HUNDRED =  new BigDecimal(100);
+    public static final BigDecimal HUNDRED = new BigDecimal(100);
 
     /**
      * 元转分
@@ -594,6 +601,15 @@ public class Util {
      */
     public static BigDecimal conversionAmount(BigDecimal amount) {
         return amount.setScale(2, BigDecimal.ROUND_HALF_UP);
+    }
+
+
+    public static <K, V> boolean isEmpty(Map<K, V> map) {
+        return null == map || map.isEmpty();
+    }
+
+    public static <V> boolean isEmpty(Collection<V> collection) {
+        return null == collection || collection.isEmpty();
     }
 
 

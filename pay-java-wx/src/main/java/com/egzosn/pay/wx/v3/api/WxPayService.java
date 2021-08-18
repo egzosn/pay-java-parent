@@ -5,11 +5,13 @@ import java.io.InputStream;
 import java.net.URLEncoder;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
+import java.util.Collections;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.apache.http.HttpEntity;
 
@@ -19,6 +21,7 @@ import static com.egzosn.pay.wx.api.WxConst.RETURN_MSG_CODE;
 import static com.egzosn.pay.wx.api.WxConst.SANDBOXNEW;
 import static com.egzosn.pay.wx.api.WxConst.SUCCESS;
 import static com.egzosn.pay.wx.v3.utils.AntCertificationUtil.getCertificate;
+import static com.egzosn.pay.wx.v3.utils.WxConst.FAILURE;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -27,6 +30,7 @@ import com.egzosn.pay.common.bean.BillType;
 import com.egzosn.pay.common.bean.CurType;
 import com.egzosn.pay.common.bean.MethodType;
 import com.egzosn.pay.common.bean.NoticeParams;
+import com.egzosn.pay.common.bean.NoticeRequest;
 import com.egzosn.pay.common.bean.OrderParaStructure;
 import com.egzosn.pay.common.bean.PayMessage;
 import com.egzosn.pay.common.bean.PayOrder;
@@ -41,8 +45,8 @@ import com.egzosn.pay.common.http.ResponseEntity;
 import com.egzosn.pay.common.http.UriVariables;
 import com.egzosn.pay.common.util.DateUtils;
 import com.egzosn.pay.common.util.IOUtils;
+import com.egzosn.pay.common.util.MapGen;
 import com.egzosn.pay.common.util.Util;
-import com.egzosn.pay.common.util.XML;
 import com.egzosn.pay.common.util.sign.SignTextUtils;
 import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.sign.encrypt.RSA2;
@@ -82,10 +86,9 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
     private volatile WxPayAssistService wxPayAssistService;
 
     /**
-     *  微信参数构造器
+     * 微信参数构造器
      */
     private volatile WxParameterStructure wxParameterStructure;
-
 
 
     public WxPayAssistService getAssistService() {
@@ -190,8 +193,17 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
         String signature = noticeParams.getHeader("Wechatpay-Signature");
 
         Certificate certificate = getCertificate(serial);
+
+        Map<String, Object> attr = noticeParams.getAttr();
+
+        if (Util.isEmpty(attr)) {
+            throw new PayErrorException(new WxPayError(FAILURE, "请勿置空NoticeParams.attr中的数据"));
+        }
+
+        //这里为微信回调时的请求内容体，原值数据
+        String body = (String) attr.get(WxConst.RESP_BODY);
         //签名信息
-        String signText = StringUtils.joining("\n", timestamp, nonce, JSON.toJSONString(noticeParams.getBody()));
+        String signText = StringUtils.joining("\n", timestamp, nonce, body);
 
         return RSA2.verify(signText, signature, certificate, payConfigStorage.getInputCharset());
     }
@@ -304,14 +316,35 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
      */
     @Override
     public Map<String, Object> getParameter2Map(Map<String, String[]> parameterMap, InputStream is) {
-        TreeMap<String, Object> map = new TreeMap<String, Object>();
-        try {
-            return XML.inputStream2Map(is, map);
+        throw new PayErrorException(new WxPayError(FAILURE, "微信V3不支持方式"));
+
+    }
+
+    /**
+     * 将请求参数或者请求流转化为 Map
+     *
+     * @param request 通知请求
+     * @return 获得回调的请求参数
+     */
+    @Override
+    public NoticeParams getNoticeParams(NoticeRequest request) {
+        NoticeParams noticeParams = new NoticeParams();
+        Map<String, List<String>> headers = new HashMap<>();
+        Enumeration<String> headerNames = request.getHeaderNames();
+        while (headerNames.hasMoreElements()) {
+            String name = headerNames.nextElement();
+            headers.put(name, Collections.list(request.getHeaders(name)));
+        }
+        noticeParams.setHeaders(headers);
+        try (InputStream is = request.getInputStream()) {
+            String body = IOUtils.toString(is);
+            noticeParams.setAttr(new MapGen<String, Object>(WxConst.RESP_BODY, body).getAttr());
+            noticeParams.setBody(JSON.parseObject(body));
         }
         catch (IOException e) {
-            throw new PayErrorException(new PayException("IOException", e.getMessage()));
+            LOG.error("获取回调参数异常", e);
         }
-
+        return super.getNoticeParams(request);
     }
 
     /**

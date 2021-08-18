@@ -7,6 +7,8 @@ import com.egzosn.pay.common.bean.PayOrder;
 import com.egzosn.pay.fuiou.api.FuiouPayConfigStorage;
 import com.egzosn.pay.fuiou.api.FuiouPayService;
 import com.egzosn.pay.fuiou.bean.FuiouTransactionType;
+import com.egzosn.pay.web.support.HttpRequestNoticeParams;
+
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -112,15 +114,32 @@ public class FuiouPayController {
      *
      * @return 是否成功
      *
-     * 业务处理在对应的PayMessageHandler里面处理，在哪里设置PayMessageHandler，详情查看{@link PayService#setPayMessageHandler(com.egzosn.pay.common.api.PayMessageHandler)}
+     * 业务处理在对应的PayMessageHandler里面处理，在哪里设置PayMessageHandler，详情查看{@link com.egzosn.pay.common.api.PayService#setPayMessageHandler(com.egzosn.pay.common.api.PayMessageHandler)}
      *
      * 如果未设置 {@link com.egzosn.pay.common.api.PayMessageHandler} 那么会使用默认的 {@link com.egzosn.pay.common.api.DefaultPayMessageHandler}
      * @throws IOException IOException
      */
-    @RequestMapping(value = "payBack.json")
-    public String payBack(HttpServletRequest request) throws IOException {
+    @Deprecated
+    @RequestMapping(value = "payBackOld.json")
+    public String payBackOld(HttpServletRequest request) throws IOException {
         //业务处理在对应的PayMessageHandler里面处理，在哪里设置PayMessageHandler，详情查看com.egzosn.pay.common.api.PayService.setPayMessageHandler()
         return service.payBack(request.getParameterMap(), request.getInputStream()).toMessage();
+    }
+    /**
+     * 支付回调地址
+     *
+     * @param request 请求
+     * @return 是否成功
+     * <p>
+     * 业务处理在对应的PayMessageHandler里面处理，在哪里设置PayMessageHandler，详情查看{@link com.egzosn.pay.common.api.PayService#setPayMessageHandler(com.egzosn.pay.common.api.PayMessageHandler)}
+     * <p>
+     * 如果未设置 {@link com.egzosn.pay.common.api.PayMessageHandler} 那么会使用默认的 {@link com.egzosn.pay.common.api.DefaultPayMessageHandler}
+     * @throws IOException IOException
+     */
+    @RequestMapping(value = "payBack.json")
+    public String payBack(HttpServletRequest request)  {
+        //业务处理在对应的PayMessageHandler里面处理，在哪里设置PayMessageHandler，详情查看com.egzosn.pay.common.api.PayService.setPayMessageHandler()
+        return service.payBack(new HttpRequestNoticeParams(request)).toMessage();
     }
 
 }

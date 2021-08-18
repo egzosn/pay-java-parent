@@ -17,10 +17,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.egzosn.pay.common.bean.CertStoreType;
+import com.egzosn.pay.common.bean.NoticeRequest;
 import com.egzosn.pay.common.bean.PayOrder;
 import com.egzosn.pay.common.bean.RefundOrder;
 import com.egzosn.pay.common.bean.TransferOrder;
 import com.egzosn.pay.demo.request.QueryOrder;
+import com.egzosn.pay.demo.service.handler.WxPayMessageHandler;
+import com.egzosn.pay.web.support.HttpRequestNoticeParams;
 import com.egzosn.pay.wx.bean.WxBank;
 import com.egzosn.pay.wx.bean.WxTransferType;
 import com.egzosn.pay.wx.v3.api.WxPayConfigStorage;
@@ -67,7 +70,7 @@ public class WxV3PayController {
         service = new WxPayService(wxPayConfigStorage);
         //设置回调消息处理
         //TODO {@link com.egzosn.pay.demo.controller.WxPayController#payBack}
-//        service.setPayMessageHandler(new WxPayMessageHandler(null));
+        service.setPayMessageHandler(new WxPayMessageHandler(null));
     }
 
 
@@ -162,35 +165,6 @@ public class WxV3PayController {
 
 
 
-    /**
-     * 支付回调地址 方式一
-     * <p>
-     * 方式二，{@link #payBack(HttpServletRequest)} 是属于简化方式， 试用与简单的业务场景
-     *
-     * @param request 请求
-     * @return 是否成功
-     * @throws IOException IOException
-     * @see #payBack(HttpServletRequest)
-     */
-    @Deprecated
-    @RequestMapping(value = "payBackBefore.json")
-    public String payBackBefore(HttpServletRequest request) throws IOException {
-
-        //获取支付方返回的对应参数
-        Map<String, Object> params = service.getParameter2Map(request.getParameterMap(), request.getInputStream());
-        if (null == params) {
-            return service.getPayOutMessage("fail", "失败").toMessage();
-        }
-
-        //校验
-        if (service.verify(params)) {
-            //这里处理业务逻辑
-            //......业务逻辑处理块........
-            return service.successPayOutMessage(null).toMessage();
-        }
-
-        return service.getPayOutMessage("fail", "失败").toMessage();
-    }
 
     /**
      * 支付回调地址
@@ -204,9 +178,9 @@ public class WxV3PayController {
      * @throws IOException IOException
      */
     @RequestMapping(value = "payBack.json")
-    public String payBack(HttpServletRequest request) throws IOException {
+    public String payBack(HttpServletRequest request)  {
         //业务处理在对应的PayMessageHandler里面处理，在哪里设置PayMessageHandler，详情查看com.egzosn.pay.common.api.PayService.setPayMessageHandler()
-        return service.payBack(request.getParameterMap(), request.getInputStream()).toMessage();
+        return service.payBack(new HttpRequestNoticeParams(request)).toMessage();
     }
 
 

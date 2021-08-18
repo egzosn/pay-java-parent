@@ -20,7 +20,7 @@ public class MapGen<K, V> {
         keyValue(key, value);
     }
 
-    public MapGen keyValue(K key, V value) {
+    public MapGen<K, V> keyValue(K key, V value) {
         attr.put(key, value);
         return this;
     }

@@ -47,6 +47,8 @@ public class NoticeParams {
      */
     private Map<String, Object> attr;
 
+    public NoticeParams() {
+    }
 
     public NoticeParams(Map<String, Object> body) {
         this.body = body;

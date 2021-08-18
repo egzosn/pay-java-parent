@@ -27,6 +27,7 @@ import com.egzosn.pay.common.api.PayConfigStorage;
 import com.egzosn.pay.common.api.PayMessageInterceptor;
 import com.egzosn.pay.common.api.PayService;
 import com.egzosn.pay.common.bean.MethodType;
+import com.egzosn.pay.common.bean.NoticeParams;
 import com.egzosn.pay.common.bean.PayMessage;
 import com.egzosn.pay.common.bean.PayOrder;
 import com.egzosn.pay.common.bean.PayOutMessage;
@@ -41,6 +42,7 @@ import com.egzosn.pay.demo.entity.PayType;
 import com.egzosn.pay.demo.request.QueryOrder;
 import com.egzosn.pay.demo.service.ApyAccountService;
 import com.egzosn.pay.demo.service.PayResponse;
+import com.egzosn.pay.web.support.HttpRequestNoticeParams;
 import com.egzosn.pay.wx.bean.WxTransactionType;
 
 /**
@@ -319,32 +321,52 @@ public class PayController {
 
     }
 
-
     /**
-     * 支付回调地址 方式一
-     * <p>
-     * 方式二，{@link #payBack(HttpServletRequest, Integer)} 是属于简化方式， 试用与简单的业务场景
+     * 支付回调地址
+     * 方式三
      *
      * @param request 请求
      * @param payId   账户id
      * @return 支付是否成功
      * @throws IOException IOException
+     *                     拦截器相关增加， 详情查看{@link com.egzosn.pay.common.api.PayService#addPayMessageInterceptor(PayMessageInterceptor)}
+     *                     <p>
+     *                     业务处理在对应的PayMessageHandler里面处理，在哪里设置PayMessageHandler，详情查看{@link com.egzosn.pay.common.api.PayService#setPayMessageHandler(com.egzosn.pay.common.api.PayMessageHandler)}
+     *                     </p>
+     *                     如果未设置 {@link com.egzosn.pay.common.api.PayMessageHandler} 那么会使用默认的 {@link com.egzosn.pay.common.api.DefaultPayMessageHandler}
+     */
+    @RequestMapping(value = "payBack{payId}.json")
+    public String payBack(HttpServletRequest request, @PathVariable Integer payId) throws IOException {
+        //业务处理在对应的PayMessageHandler里面处理，在哪里设置PayMessageHandler，详情查看com.egzosn.pay.common.api.PayService.setPayMessageHandler()
+        PayResponse payResponse = service.getPayResponse(payId);
+        return payResponse.getService().payBack(new HttpRequestNoticeParams(request)).toMessage();
+    }
+
+    /**
+     * 支付回调地址 方式一
+     * <p>
+     * 建议使用 方式三，{@link #payBack(HttpServletRequest, Integer)} 是属于简化方式， 试用与简单的业务场景
+     *
+     * @param request 请求
+     * @param payId   账户id
+     * @return 支付是否成功
      */
     @RequestMapping(value = "payBackOne{payId}.json")
-    public String payBackOne(HttpServletRequest request, @PathVariable Integer payId) throws IOException {
+    public String payBackOne(HttpServletRequest request, @PathVariable Integer payId) {
         //根据账户id，获取对应的支付账户操作工具
         PayResponse payResponse = service.getPayResponse(payId);
         PayConfigStorage storage = payResponse.getStorage();
         //获取支付方返回的对应参数
-        Map<String, Object> params = payResponse.getService().getParameter2Map(request.getParameterMap(), request.getInputStream());
-//        Map<String, Object> params = JSONObject.parseObject("{\"bizType\":\"000201\",\"signPubKeyCert\":\"-----BEGIN CERTIFICATE-----\\r\\nMIIEQzCCAyugAwIBAgIFEBJJZVgwDQYJKoZIhvcNAQEFBQAwWDELMAkGA1UEBhMC\\r\\nQ04xMDAuBgNVBAoTJ0NoaW5hIEZpbmFuY2lhbCBDZXJ0aWZpY2F0aW9uIEF1dGhv\\r\\ncml0eTEXMBUGA1UEAxMOQ0ZDQSBURVNUIE9DQTEwHhcNMTcxMTAxMDcyNDA4WhcN\\r\\nMjAxMTAxMDcyNDA4WjB3MQswCQYDVQQGEwJjbjESMBAGA1UEChMJQ0ZDQSBPQ0Ex\\r\\nMQ4wDAYDVQQLEwVDVVBSQTEUMBIGA1UECxMLRW50ZXJwcmlzZXMxLjAsBgNVBAMU\\r\\nJTA0MUBaMjAxNy0xMS0xQDAwMDQwMDAwOlNJR05AMDAwMDAwMDEwggEiMA0GCSqG\\r\\nSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDDIWO6AESrg+34HgbU9mSpgef0sl6avr1d\\r\\nbD/IjjZYM63SoQi3CZHZUyoyzBKodRzowJrwXmd+hCmdcIfavdvfwi6x+ptJNp9d\\r\\nEtpfEAnJk+4quriQFj1dNiv6uP8ARgn07UMhgdYB7D8aA1j77Yk1ROx7+LFeo7rZ\\r\\nDdde2U1opPxjIqOPqiPno78JMXpFn7LiGPXu75bwY2rYIGEEImnypgiYuW1vo9UO\\r\\nG47NMWTnsIdy68FquPSw5FKp5foL825GNX3oJSZui8d2UDkMLBasf06Jz0JKz5AV\\r\\nblaI+s24/iCfo8r+6WaCs8e6BDkaijJkR/bvRCQeQpbX3V8WoTLVAgMBAAGjgfQw\\r\\ngfEwHwYDVR0jBBgwFoAUz3CdYeudfC6498sCQPcJnf4zdIAwSAYDVR0gBEEwPzA9\\r\\nBghggRyG7yoBATAxMC8GCCsGAQUFBwIBFiNodHRwOi8vd3d3LmNmY2EuY29tLmNu\\r\\nL3VzL3VzLTE0Lmh0bTA5BgNVHR8EMjAwMC6gLKAqhihodHRwOi8vdWNybC5jZmNh\\r\\nLmNvbS5jbi9SU0EvY3JsMjQ4NzIuY3JsMAsGA1UdDwQEAwID6DAdBgNVHQ4EFgQU\\r\\nmQQLyuqYjES7qKO+zOkzEbvdFwgwHQYDVR0lBBYwFAYIKwYBBQUHAwIGCCsGAQUF\\r\\nBwMEMA0GCSqGSIb3DQEBBQUAA4IBAQAujhBuOcuxA+VzoUH84uoFt5aaBM3vGlpW\\r\\nKVMz6BUsLbIpp1ho5h+LaMnxMs6jdXXDh/du8X5SKMaIddiLw7ujZy1LibKy2jYi\\r\\nYYfs3tbZ0ffCKQtv78vCgC+IxUUurALY4w58fRLLdu8u8p9jyRFHsQEwSq+W5+bP\\r\\nMTh2w7cDd9h+6KoCN6AMI1Ly7MxRIhCbNBL9bzaxF9B5GK86ARY7ixkuDCEl4XCF\\r\\nJGxeoye9R46NqZ6AA/k97mJun//gmUjStmb9PUXA59fR5suAB5o/5lBySZ8UXkrI\\r\\npp/iLT8vIl1hNgLh0Ghs7DBSx99I+S3VuUzjHNxL6fGRhlix7Rb8\\r\\n-----END CERTIFICATE-----\",\"orderId\":\"20171213224128\",\"signature\":\"l8xBYSoMNzt01DDa9/JYcrQKWxN5tasUgSxf6NNsQK5t+DqMr2G9qhHXnDg5bEzeRyTFP4bM3htX9RTRhXYDy7EEsL46ZD4ib5I6mp2wXx+26zscUcLdJUiddkY5eFvQK4tPC8blw7Y6p858yiVJpHgbOK3cONhS7vwPJtK2jMbkY+GATu3aZ4iygkQc75cG+EW8nJQVwLNh7q9A6A6II18EFxR7XubdlIHXv/InVaS6ux8Wh2nmQlhRRnLtHq1ri7v1QPlu2FzM+kaf7/fn61iGr8zEPj62NzWDXue62LUfb4kTRgdkcJnfJBJl8vjZ/w93UtsnK3zjzJC/Nu+wCw==\",\"txnSubType\":\"01\",\"traceNo\":\"492156\",\"accNo\":\"6221********0000\",\"settleAmt\":\"1000\",\"settleCurrencyCode\":\"156\",\"settleDate\":\"1213\",\"txnType\":\"01\",\"encoding\":\"UTF-8\",\"version\":\"5.1.0\",\"queryId\":\"511712132241284921568\",\"accessType\":\"0\",\"exchangeRate\":\"0\",\"respMsg\":\"success\",\"traceTime\":\"1213224128\",\"txnTime\":\"20171213224128\",\"merId\":\"777290058154626\",\"currencyCode\":\"156\",\"respCode\":\"00\",\"signMethod\":\"01\",\"txnAmt\":\"1000\"}");
+        final PayService service = payResponse.getService();
+        final NoticeParams noticeParams = service.getNoticeParams(new HttpRequestNoticeParams(request));
 
-        if (null == params) {
+        if (null == noticeParams) {
             return payResponse.getService().getPayOutMessage("fail", "失败").toMessage();
         }
 
         //校验
-        if (payResponse.getService().verify(params)) {
+        if (payResponse.getService().verify(noticeParams)) {
+            Map<String, Object> params = noticeParams.getBody();
             //方式一  或者创建PayMessage的子类，AliPayMessage，WxPayMessage等等
        /*    PayMessage message = new PayMessage(params, storage.getPayType(), storage.getMsgType().name());
             PayOutMessage outMessage = payResponse.getRouter().route(message);*/
@@ -379,8 +401,9 @@ public class PayController {
      *                     </p>
      *                     如果未设置 {@link com.egzosn.pay.common.api.PayMessageHandler} 那么会使用默认的 {@link com.egzosn.pay.common.api.DefaultPayMessageHandler}
      */
-    @RequestMapping(value = "payBack{payId}.json")
-    public String payBack(HttpServletRequest request, @PathVariable Integer payId) throws IOException {
+    @Deprecated
+    @RequestMapping(value = "payBackOld{payId}.json")
+    public String payBackOld(HttpServletRequest request, @PathVariable Integer payId) throws IOException {
         //业务处理在对应的PayMessageHandler里面处理，在哪里设置PayMessageHandler，详情查看com.egzosn.pay.common.api.PayService.setPayMessageHandler()
         PayResponse payResponse = service.getPayResponse(payId);
         return payResponse.getService().payBack(request.getParameterMap(), request.getInputStream()).toMessage();

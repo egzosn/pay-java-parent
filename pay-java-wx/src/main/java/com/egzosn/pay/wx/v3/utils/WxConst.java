@@ -1,5 +1,7 @@
 package com.egzosn.pay.wx.v3.utils;
 
+import com.egzosn.pay.wx.v3.api.WxPayService;
+
 /**
  * 微信所需常量
  *
@@ -44,4 +46,6 @@ public final class WxConst {
     public static final String MESSAGE = "message";
     public static final String SCENE_INFO = "scene_info";
     public static final String FAILURE = "failure";
+
+    public static final String RESP_BODY = WxPayService.class.getName() + "$RESP_BODY";
 }

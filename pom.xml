@@ -87,6 +87,11 @@
                 <artifactId>pay-java-common</artifactId>
                 <version>${pay.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.egzosn</groupId>
+                <artifactId>pay-java-web-support</artifactId>
+                <version>${pay.version}</version>
+            </dependency>
 
             <!--httpcomponents-->
             <dependency>

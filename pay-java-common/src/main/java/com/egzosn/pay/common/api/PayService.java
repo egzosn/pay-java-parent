@@ -351,13 +351,21 @@ public interface PayService<PC extends PayConfigStorage> {
     <T> T transferQuery(String outNo, String tradeNo, Callback<T> callback);
 
     /**
-     * 将请求参数或者请求流转化为 Map
+     * 回调处理
      *
      * @param parameterMap 请求参数
      * @param is           请求流
      * @return 获得回调响应信息
+     * 过时方法，详情查看 {@link #payBack(NoticeRequest)}
      */
+    @Deprecated
     PayOutMessage payBack(Map<String, String[]> parameterMap, InputStream is);
+    /**
+     *  回调处理
+     * @param request 请求参数
+     * @return 获得回调响应信息
+     */
+    PayOutMessage payBack(NoticeRequest request);
 
     /**
      * 使用转换过的参数进行回调处理
@@ -371,7 +379,7 @@ public interface PayService<PC extends PayConfigStorage> {
      * 设置支付消息处理器,这里用于处理具体的支付业务
      *
      * @param handler 消息处理器
-     *                配合{@link  com.egzosn.pay.common.api.PayService#payBack(java.util.Map, java.io.InputStream)}进行使用
+     *                配合{@link  com.egzosn.pay.common.api.PayService#payBack(NoticeRequest)}进行使用
      *                <p>
      *                默认使用{@link  com.egzosn.pay.common.api.DefaultPayMessageHandler }进行实现
      */
@@ -381,7 +389,7 @@ public interface PayService<PC extends PayConfigStorage> {
      * 设置支付消息处理器,这里用于处理具体的支付业务
      *
      * @param interceptor 消息拦截器
-     *                    配合{@link  com.egzosn.pay.common.api.PayService#payBack(java.util.Map, java.io.InputStream)}进行使用
+     *                    配合{@link  com.egzosn.pay.common.api.PayService#payBack(NoticeRequest)}进行使用
      *                    <p>
      *                    默认使用{@link  com.egzosn.pay.common.api.DefaultPayMessageHandler }进行实现
      */

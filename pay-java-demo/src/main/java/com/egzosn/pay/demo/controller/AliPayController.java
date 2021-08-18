@@ -26,6 +26,7 @@ import com.egzosn.pay.ali.bean.AliTransferOrder;
 import com.egzosn.pay.ali.bean.AliTransferType;
 import com.egzosn.pay.ali.bean.OrderSettle;
 import com.egzosn.pay.common.bean.CertStoreType;
+import com.egzosn.pay.common.bean.NoticeParams;
 import com.egzosn.pay.common.bean.PayOrder;
 import com.egzosn.pay.common.bean.RefundOrder;
 import com.egzosn.pay.common.http.HttpConfigStorage;
@@ -34,6 +35,7 @@ import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.demo.request.QueryOrder;
 import com.egzosn.pay.demo.service.handler.AliPayMessageHandler;
 import com.egzosn.pay.demo.service.interceptor.AliPayMessageInterceptor;
+import com.egzosn.pay.web.support.HttpRequestNoticeParams;
 
 
 /**
@@ -223,13 +225,13 @@ public class AliPayController {
     public String payBackBefore(HttpServletRequest request) throws IOException {
 
         //获取支付方返回的对应参数
-        Map<String, Object> params = service.getParameter2Map(request.getParameterMap(), request.getInputStream());
-        if (null == params) {
+        NoticeParams noticeParams = service.getNoticeParams(new HttpRequestNoticeParams(request));
+        if (null == noticeParams) {
             return service.getPayOutMessage("fail", "失败").toMessage();
         }
 
         //校验
-        if (service.verify(params)) {
+        if (service.verify(noticeParams)) {
             //这里处理业务逻辑
             //......业务逻辑处理块........
             return service.successPayOutMessage(null).toMessage();
@@ -242,7 +244,25 @@ public class AliPayController {
      * 支付回调地址
      *
      * @param request 请求
-     * @return 返回对应的响应码
+     * @return 是否成功
+     * <p>
+     * 业务处理在对应的PayMessageHandler里面处理，在哪里设置PayMessageHandler，详情查看{@link com.egzosn.pay.common.api.PayService#setPayMessageHandler(com.egzosn.pay.common.api.PayMessageHandler)}
+     * <p>
+     * 如果未设置 {@link com.egzosn.pay.common.api.PayMessageHandler} 那么会使用默认的 {@link com.egzosn.pay.common.api.DefaultPayMessageHandler}
+     * @throws IOException IOException
+     */
+    @Deprecated
+    @RequestMapping(value = "payBackOld.json")
+    public String payBackOld(HttpServletRequest request) throws IOException {
+        //业务处理在对应的PayMessageHandler里面处理，在哪里设置PayMessageHandler，详情查看com.egzosn.pay.common.api.PayService.setPayMessageHandler()
+        return service.payBack(request.getParameterMap(), request.getInputStream()).toMessage();
+    }
+
+    /**
+     * 支付回调地址
+     *
+     * @param request 请求
+     * @return 是否成功
      * <p>
      * 业务处理在对应的PayMessageHandler里面处理，在哪里设置PayMessageHandler，详情查看{@link com.egzosn.pay.common.api.PayService#setPayMessageHandler(com.egzosn.pay.common.api.PayMessageHandler)}
      * <p>
@@ -250,11 +270,10 @@ public class AliPayController {
      * @throws IOException IOException
      */
     @RequestMapping(value = "payBack.json")
-    public String payBack(HttpServletRequest request) throws IOException {
+    public String payBack(HttpServletRequest request) {
         //业务处理在对应的PayMessageHandler里面处理，在哪里设置PayMessageHandler，详情查看com.egzosn.pay.common.api.PayService.setPayMessageHandler()
-        return service.payBack(request.getParameterMap(), request.getInputStream()).toMessage();
+        return service.payBack(new HttpRequestNoticeParams(request)).toMessage();
     }
-
 
     /**
      * 查询
