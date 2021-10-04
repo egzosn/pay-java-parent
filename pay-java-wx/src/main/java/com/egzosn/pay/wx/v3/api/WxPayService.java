@@ -20,7 +20,6 @@ import static com.egzosn.pay.wx.api.WxConst.RETURN_CODE;
 import static com.egzosn.pay.wx.api.WxConst.RETURN_MSG_CODE;
 import static com.egzosn.pay.wx.api.WxConst.SANDBOXNEW;
 import static com.egzosn.pay.wx.api.WxConst.SUCCESS;
-import static com.egzosn.pay.wx.v3.utils.AntCertificationUtil.getCertificate;
 import static com.egzosn.pay.wx.v3.utils.WxConst.FAILURE;
 
 import com.alibaba.fastjson.JSON;
@@ -52,14 +51,17 @@ import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.sign.encrypt.RSA2;
 import com.egzosn.pay.common.util.str.StringUtils;
 import com.egzosn.pay.wx.bean.WxPayError;
-import com.egzosn.pay.wx.bean.WxPayMessage;
+import com.egzosn.pay.wx.v3.bean.response.WxPayMessage;
 import com.egzosn.pay.wx.bean.WxTransferType;
 import com.egzosn.pay.wx.v3.bean.WxAccountType;
 import com.egzosn.pay.wx.v3.bean.WxBillType;
 import com.egzosn.pay.wx.v3.bean.WxTransactionType;
 import com.egzosn.pay.wx.v3.bean.order.Amount;
 import com.egzosn.pay.wx.v3.bean.order.RefundAmount;
+import com.egzosn.pay.wx.v3.bean.response.Resource;
+import com.egzosn.pay.wx.v3.bean.response.WxNoticeParams;
 import com.egzosn.pay.wx.v3.bean.response.WxRefundResult;
+import com.egzosn.pay.wx.v3.utils.AntCertificationUtil;
 import com.egzosn.pay.wx.v3.utils.WxConst;
 
 /**
@@ -94,6 +96,8 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
     public WxPayAssistService getAssistService() {
         if (null == wxPayAssistService) {
             wxPayAssistService = new DefaultWxPayAssistService(this);
+            //在这预先进行初始化
+            wxPayAssistService.refreshCertificate();
         }
         return wxPayAssistService;
     }
@@ -121,17 +125,26 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
         super(payConfigStorage, configStorage);
     }
 
+
     /**
-     * 设置支付配置
-     *
-     * @param payConfigStorage 支付配置
+     * 初始化之后执行
      */
     @Override
-    public BasePayService setPayConfigStorage(WxPayConfigStorage payConfigStorage) {
-        payConfigStorage.loadCertEnvironment();
-        this.payConfigStorage = payConfigStorage;
-        wxParameterStructure = new WxParameterStructure(payConfigStorage);
-        return this;
+    protected void initAfter() {
+        new Thread(() -> {
+            payConfigStorage.loadCertEnvironment();
+            wxParameterStructure = new WxParameterStructure(payConfigStorage);
+            //在这预先进行初始化
+            try {
+                Thread.sleep(10);
+            }
+            catch (InterruptedException e) {
+
+            }
+            getAssistService();
+        }).start();
+
+
     }
 
     /**
@@ -184,15 +197,15 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
     public boolean verify(NoticeParams noticeParams) {
 
         //当前使用的微信平台证书序列号
-        String serial = noticeParams.getHeader("Wechatpay-Serial");
+        String serial = noticeParams.getHeader("wechatpay-serial");
         //微信服务器的时间戳
-        String timestamp = noticeParams.getHeader("Wechatpay-Timestamp");
+        String timestamp = noticeParams.getHeader("wechatpay-timestamp");
         //微信服务器提供的随机串
-        String nonce = noticeParams.getHeader("Wechatpay-Nonce");
+        String nonce = noticeParams.getHeader("wechatpay-nonce");
         //微信平台签名
-        String signature = noticeParams.getHeader("Wechatpay-Signature");
+        String signature = noticeParams.getHeader("wechatpay-signature");
 
-        Certificate certificate = getCertificate(serial);
+        Certificate certificate = getAssistService().getCertificate(serial);
 
         Map<String, Object> attr = noticeParams.getAttr();
 
@@ -328,7 +341,21 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
      */
     @Override
     public NoticeParams getNoticeParams(NoticeRequest request) {
-        NoticeParams noticeParams = new NoticeParams();
+        WxNoticeParams noticeParams = null;
+        try (InputStream is = request.getInputStream()) {
+            String body = IOUtils.toString(is);
+            noticeParams = JSON.parseObject(body, WxNoticeParams.class);
+            noticeParams.setAttr(new MapGen<String, Object>(WxConst.RESP_BODY, body).getAttr());
+            Resource resource = noticeParams.getResource();
+            String associatedData = resource.getAssociatedData();
+            String nonce = resource.getNonce();
+            String ciphertext = resource.getCiphertext();
+            String data = AntCertificationUtil.decryptToString(associatedData, nonce, ciphertext, payConfigStorage.getV3ApiKey(), payConfigStorage.getInputCharset());
+            noticeParams.setBody(JSON.parseObject(data));
+        }
+        catch (IOException e) {
+            LOG.error("获取回调参数异常", e);
+        }
         Map<String, List<String>> headers = new HashMap<>();
         Enumeration<String> headerNames = request.getHeaderNames();
         while (headerNames.hasMoreElements()) {
@@ -336,15 +363,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
             headers.put(name, Collections.list(request.getHeaders(name)));
         }
         noticeParams.setHeaders(headers);
-        try (InputStream is = request.getInputStream()) {
-            String body = IOUtils.toString(is);
-            noticeParams.setAttr(new MapGen<String, Object>(WxConst.RESP_BODY, body).getAttr());
-            noticeParams.setBody(JSON.parseObject(body));
-        }
-        catch (IOException e) {
-            LOG.error("获取回调参数异常", e);
-        }
-        return super.getNoticeParams(request);
+        return noticeParams;
     }
 
     /**
@@ -356,7 +375,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
      */
     @Override
     public PayOutMessage getPayOutMessage(String code, String message) {
-        return PayOutMessage.XML().code(code.toUpperCase()).content(message).build();
+        return PayOutMessage.JSON().content("code", code).content("message", message).build();
     }
 
 
@@ -369,7 +388,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
      */
     @Override
     public PayOutMessage successPayOutMessage(PayMessage payMessage) {
-        return PayOutMessage.XML().code("SUCCESS").content("成功").build();
+        return getPayOutMessage("SUCCESS", "成功");
     }
 
 

@@ -3,9 +3,12 @@ package com.egzosn.pay.wx.v3.bean.order;
 import com.alibaba.fastjson.annotation.JSONField;
 
 /**
+ * 支付场景信息描述
  * @author Egan
+ * <pre>
  * email egzosn@gmail.com
  * date 2021/8/1
+ * </pre>
  */
 public class SceneInfo {
 
@@ -15,7 +18,7 @@ public class SceneInfo {
     @JSONField(name = "payer_client_ip")
     private String payerClientIp;
     /**
-     * 商户端设备号
+     * 商户端设备号（门店号或收银设备ID）。
      */
     @JSONField(name = "device_id")
     private String deviceId;

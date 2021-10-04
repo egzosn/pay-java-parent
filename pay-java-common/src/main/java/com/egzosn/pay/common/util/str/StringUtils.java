@@ -153,7 +153,7 @@ public class StringUtils {
     public static String joining(String separator, String... str) {
         StringBuilder builder = new StringBuilder();
         for (String s : str) {
-            if (StringUtils.isEmpty(s)) {
+            if (null == s) {
                 continue;
             }
 

@@ -1,5 +1,7 @@
 package com.egzosn.pay.common.util;
 
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -21,6 +23,9 @@ public class MapGen<K, V> {
     }
 
     public MapGen<K, V> keyValue(K key, V value) {
+        if (null == attr){
+            attr = new LinkedHashMap<>();
+        }
         attr.put(key, value);
         return this;
     }

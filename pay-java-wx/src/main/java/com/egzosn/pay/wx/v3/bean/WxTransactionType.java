@@ -74,6 +74,18 @@ public enum WxTransactionType implements TransactionType {
         }
 
     },
+    /**
+     * H5支付
+     * 兼容 后期会抛弃
+     */
+    @Deprecated
+    MWEB("pay{partner}/transactions/h5", MethodType.POST, true) {
+        @Override
+        public void setAttribute(Map<String, Object> parameters, PayOrder order) {
+            H5.setAttribute(parameters, order);
+        }
+
+    },
 
     /**
      * 查询订单

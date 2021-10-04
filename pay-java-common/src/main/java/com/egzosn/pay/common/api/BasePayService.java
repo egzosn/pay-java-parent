@@ -58,7 +58,7 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
      * 支付消息拦截器
      */
     protected List<PayMessageInterceptor<PayMessage, PayService>> interceptors = new ArrayList<PayMessageInterceptor<PayMessage, PayService>>();
-    ;
+
 
     /**
      * 设置支付配置
@@ -101,9 +101,15 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
     public BasePayService(PC payConfigStorage, HttpConfigStorage configStorage) {
         setPayConfigStorage(payConfigStorage);
         setRequestTemplateConfigStorage(configStorage);
+        initAfter();
     }
 
+    /**
+     * 初始化之后执行
+     */
+    protected void initAfter(){
 
+    }
     /**
      * Generate a Base64 encoded String from  user , password
      *

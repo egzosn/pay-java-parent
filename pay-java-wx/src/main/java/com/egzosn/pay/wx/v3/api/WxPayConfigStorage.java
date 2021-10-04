@@ -51,6 +51,10 @@ public class WxPayConfigStorage extends BasePayConfigStorage {
      * 微信支付分配的子商户号，开发者模式下必填 合作者id
      */
     private String subMchId;
+    /**
+     * V2 Api密钥
+     */
+    private String apiKey;
 
     /**
      * 商户API证书
@@ -111,19 +115,33 @@ public class WxPayConfigStorage extends BasePayConfigStorage {
 
     public void setMchId(String mchId) {
         this.mchId = mchId;
+        addAttr("mchId", mchId);
     }
 
     /**
      * 为商户平台设置的密钥key
      *
-     * @return 微信密钥
+     * @return 微信v2密钥
      */
-    public String getSecretKey() {
-        return getKeyPrivate();
+    public String getApiKey() {
+        return apiKey;
     }
 
-    public void setSecretKey(String secretKey) {
-        setKeyPrivate(secretKey);
+    public void setApiKey(String apiKey) {
+        this.apiKey = apiKey;
+        addAttr("apiKey", apiKey);
+    }
+
+    public void setV3ApiKey(String v3ApiKey) {
+        setKeyPrivate(v3ApiKey);
+    }
+    /**
+     * 为商户平台设置的密钥key
+     *
+     * @return 微信v3密钥
+     */
+    public String getV3ApiKey() {
+        return getKeyPrivate();
     }
 
     public void setAppId(String appId) {
@@ -147,6 +165,7 @@ public class WxPayConfigStorage extends BasePayConfigStorage {
 
     public void setSubAppId(String subAppId) {
         this.subAppId = subAppId;
+        addAttr("subAppId", subAppId);
     }
 
     public String getSpAppId() {
@@ -155,6 +174,7 @@ public class WxPayConfigStorage extends BasePayConfigStorage {
 
     public void setSpAppId(String spAppId) {
         this.spAppId = spAppId;
+        addAttr("spAppId", spAppId);
     }
 
     public String getSpMchId() {
@@ -163,6 +183,7 @@ public class WxPayConfigStorage extends BasePayConfigStorage {
 
     public void setSpMchId(String spMchId) {
         this.spMchId = spMchId;
+        addAttr("spMchId", spMchId);
     }
 
     /**
@@ -180,6 +201,7 @@ public class WxPayConfigStorage extends BasePayConfigStorage {
     @Deprecated
     public void setSubAppid(String subAppid) {
         this.subAppId = subAppid;
+        addAttr("subAppId", subAppId);
     }
 
 
@@ -189,6 +211,7 @@ public class WxPayConfigStorage extends BasePayConfigStorage {
 
     public void setSubMchId(String subMchId) {
         this.subMchId = subMchId;
+        addAttr("subMchId", subMchId);
     }
 
     public Object getApiClientKeyP12() {
@@ -197,6 +220,7 @@ public class WxPayConfigStorage extends BasePayConfigStorage {
 
     public void setApiClientKeyP12(Object apiClientKeyP12) {
         this.apiClientKeyP12 = apiClientKeyP12;
+        addAttr("apiClientKeyP12", apiClientKeyP12);
     }
 
     public CertStoreType getCertStoreType() {
@@ -205,6 +229,7 @@ public class WxPayConfigStorage extends BasePayConfigStorage {
 
     public void setCertStoreType(CertStoreType certStoreType) {
         this.certStoreType = certStoreType;
+        addAttr("certStoreType", certStoreType);
     }
 
     public CertEnvironment getCertEnvironment() {

@@ -17,12 +17,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.egzosn.pay.common.bean.CertStoreType;
-import com.egzosn.pay.common.bean.NoticeRequest;
 import com.egzosn.pay.common.bean.PayOrder;
 import com.egzosn.pay.common.bean.RefundOrder;
 import com.egzosn.pay.common.bean.TransferOrder;
 import com.egzosn.pay.demo.request.QueryOrder;
-import com.egzosn.pay.demo.service.handler.WxPayMessageHandler;
+import com.egzosn.pay.demo.service.handler.WxV3PayMessageHandler;
 import com.egzosn.pay.web.support.HttpRequestNoticeParams;
 import com.egzosn.pay.wx.bean.WxBank;
 import com.egzosn.pay.wx.bean.WxTransferType;
@@ -48,31 +47,27 @@ public class WxV3PayController {
 
 
 
-    public WxV3PayController() {
 
-
-    }
-
-    @PostConstruct
+    @PostConstruct  //没有证书的情况下注释掉，避免启动报错
     public void init() {
-
+        System.out.println("v3 init");
         WxPayConfigStorage wxPayConfigStorage = new WxPayConfigStorage();
-        wxPayConfigStorage.setAppId("wxc7b993ff15a9f271");
-        wxPayConfigStorage.setMchId("1602947765");
-//        wxPayConfigStorage.setKeyPublic("转账公钥，转账时必填");
+        wxPayConfigStorage.setAppId("wxc7b993ff15a9f27c");
+        wxPayConfigStorage.setMchId("1602947766");
         //V3密钥 https://pay.weixin.qq.com/wiki/doc/apiv3/wechatpay/wechatpay3_2.shtml
-        wxPayConfigStorage.setSecretKey("V3密钥");
-        wxPayConfigStorage.setNotifyUrl("https://pay.egzosn.com/payback");
-        wxPayConfigStorage.setReturnUrl("https://pay.egzosn.com/payback");
+        wxPayConfigStorage.setV3ApiKey("9bd8f0e7af4841299d782406b7774f56");
+        wxPayConfigStorage.setNotifyUrl("http://sailinmu.iok.la/wxV3/payBack.json");
+        wxPayConfigStorage.setReturnUrl("http://sailinmu.iok.la/wxV3/payBack.json");
         wxPayConfigStorage.setInputCharset("utf-8");
+        //使用证书时设置为true
         wxPayConfigStorage.setCertSign(true);
         //商户API证书 https://pay.weixin.qq.com/wiki/doc/apiv3/wechatpay/wechatpay3_1.shtml
-        wxPayConfigStorage.setApiClientKeyP12("商户API证书.p12");
+        wxPayConfigStorage.setApiClientKeyP12("E:\\Documents\\gitee\\支付\\yifenli_mall.p12");
         wxPayConfigStorage.setCertStoreType(CertStoreType.PATH);
         service = new WxPayService(wxPayConfigStorage);
         //设置回调消息处理
         //TODO {@link com.egzosn.pay.demo.controller.WxPayController#payBack}
-        service.setPayMessageHandler(new WxPayMessageHandler(null));
+        service.setPayMessageHandler(new WxV3PayMessageHandler());
     }
 
 

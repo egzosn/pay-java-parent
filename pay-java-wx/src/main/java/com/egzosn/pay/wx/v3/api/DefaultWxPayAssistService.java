@@ -162,7 +162,7 @@ public class DefaultWxPayAssistService implements WxPayAssistService {
             String associatedData = encryptCertificate.getString("associated_data");
             String nonce = encryptCertificate.getString("nonce");
             String ciphertext = encryptCertificate.getString("ciphertext");
-            String publicKey = AntCertificationUtil.decryptToString(associatedData, nonce, ciphertext, payConfigStorage.getSecretKey(), payConfigStorage.getInputCharset());
+            String publicKey = AntCertificationUtil.decryptToString(associatedData, nonce, ciphertext, payConfigStorage.getV3ApiKey(), payConfigStorage.getInputCharset());
             ByteArrayInputStream inputStream = new ByteArrayInputStream(publicKey.getBytes(StandardCharsets.UTF_8));
             AntCertificationUtil.loadCertificate(certificate.getString("serial_no"), inputStream);
         }
