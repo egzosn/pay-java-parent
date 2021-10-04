@@ -2,7 +2,6 @@ package com.egzosn.pay.wx.v3.api;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URLEncoder;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.util.Collections;
@@ -16,10 +15,7 @@ import java.util.Map;
 import org.apache.http.HttpEntity;
 
 import static com.egzosn.pay.wx.api.WxConst.OUT_TRADE_NO;
-import static com.egzosn.pay.wx.api.WxConst.RETURN_CODE;
-import static com.egzosn.pay.wx.api.WxConst.RETURN_MSG_CODE;
 import static com.egzosn.pay.wx.api.WxConst.SANDBOXNEW;
-import static com.egzosn.pay.wx.api.WxConst.SUCCESS;
 import static com.egzosn.pay.wx.v3.utils.WxConst.FAILURE;
 
 import com.alibaba.fastjson.JSON;
@@ -51,7 +47,6 @@ import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.sign.encrypt.RSA2;
 import com.egzosn.pay.common.util.str.StringUtils;
 import com.egzosn.pay.wx.bean.WxPayError;
-import com.egzosn.pay.wx.v3.bean.response.WxPayMessage;
 import com.egzosn.pay.wx.bean.WxTransferType;
 import com.egzosn.pay.wx.v3.bean.WxAccountType;
 import com.egzosn.pay.wx.v3.bean.WxBillType;
@@ -60,6 +55,7 @@ import com.egzosn.pay.wx.v3.bean.order.Amount;
 import com.egzosn.pay.wx.v3.bean.order.RefundAmount;
 import com.egzosn.pay.wx.v3.bean.response.Resource;
 import com.egzosn.pay.wx.v3.bean.response.WxNoticeParams;
+import com.egzosn.pay.wx.v3.bean.response.WxPayMessage;
 import com.egzosn.pay.wx.v3.bean.response.WxRefundResult;
 import com.egzosn.pay.wx.v3.utils.AntCertificationUtil;
 import com.egzosn.pay.wx.v3.utils.WxConst;
@@ -402,14 +398,8 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
      */
     @Override
     public String buildRequest(Map<String, Object> orderInfo, MethodType method) {
-        if (!SUCCESS.equals(orderInfo.get(RETURN_CODE))) {
-            throw new PayErrorException(new WxPayError((String) orderInfo.get(RETURN_CODE), (String) orderInfo.get(RETURN_MSG_CODE)));
-        }
-        if (WxTransactionType.H5.name().equals(orderInfo.get("trade_type"))) {
-            return String.format("<script type=\"text/javascript\">location.href=\"%s%s\"</script>", orderInfo.get("mweb_url"), StringUtils.isEmpty(payConfigStorage.getReturnUrl()) ? "" : "&redirect_url=" + URLEncoder.encode(payConfigStorage.getReturnUrl()));
-        }
-        throw new UnsupportedOperationException();
-
+        String redirectUrl = StringUtils.isEmpty(payConfigStorage.getReturnUrl()) ? "" : "&redirect_url=" + UriVariables.urlEncoder(payConfigStorage.getReturnUrl());
+        return String.format("<script type=\"text/javascript\">location.href=\"%s%s\"</script>", orderInfo.get("h5_url"), redirectUrl);
     }
 
     /**
