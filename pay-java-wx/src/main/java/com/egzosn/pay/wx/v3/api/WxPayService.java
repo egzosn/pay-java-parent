@@ -22,6 +22,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.api.BasePayService;
 import com.egzosn.pay.common.bean.BillType;
+import com.egzosn.pay.common.bean.CloseOrder;
 import com.egzosn.pay.common.bean.CurType;
 import com.egzosn.pay.common.bean.MethodType;
 import com.egzosn.pay.common.bean.NoticeParams;
@@ -81,26 +82,12 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
     /**
      * 辅助api
      */
-    private volatile WxPayAssistService wxPayAssistService;
+    private volatile WxPayAssistService assistService;
 
     /**
      * 微信参数构造器
      */
     private volatile WxParameterStructure wxParameterStructure;
-
-
-    public WxPayAssistService getAssistService() {
-        if (null == wxPayAssistService) {
-            wxPayAssistService = new DefaultWxPayAssistService(this);
-            //在这预先进行初始化
-            wxPayAssistService.refreshCertificate();
-        }
-        return wxPayAssistService;
-    }
-
-    public void setAssistService(WxPayAssistService wxPayAssistService) {
-        this.wxPayAssistService = wxPayAssistService;
-    }
 
     /**
      * 创建支付服务
@@ -123,25 +110,23 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
 
 
     /**
-     * 初始化之后执行
+     * 辅助api
+     * @return 辅助api
      */
-    @Override
-    protected void initAfter() {
-        new Thread(() -> {
-            payConfigStorage.loadCertEnvironment();
-            wxParameterStructure = new WxParameterStructure(payConfigStorage);
+    public WxPayAssistService getAssistService() {
+        if (null == assistService) {
+            assistService = new DefaultWxPayAssistService(this);
             //在这预先进行初始化
-            try {
-                Thread.sleep(10);
-            }
-            catch (InterruptedException e) {
-
-            }
-            getAssistService();
-        }).start();
-
-
+            assistService.refreshCertificate();
+        }
+        return assistService;
     }
+
+    public void setAssistService(WxPayAssistService assistService) {
+        this.assistService = assistService;
+    }
+
+
 
     /**
      * 设置api服务器地址
@@ -152,6 +137,14 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
     public WxPayService setApiServerUrl(String apiServerUrl) {
         this.apiServerUrl = apiServerUrl;
         return this;
+    }
+
+    public String getApiServerUrl() {
+        return apiServerUrl;
+    }
+
+    public WxParameterStructure getWxParameterStructure() {
+        return wxParameterStructure;
     }
 
     /**
@@ -323,6 +316,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
      * @param is           请求流
      * @return 获得回调的请求参数
      */
+    @Deprecated
     @Override
     public Map<String, Object> getParameter2Map(Map<String, String[]> parameterMap, InputStream is) {
         throw new PayErrorException(new WxPayError(FAILURE, "微信V3不支持方式"));
@@ -350,7 +344,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
             noticeParams.setBody(JSON.parseObject(data));
         }
         catch (IOException e) {
-            LOG.error("获取回调参数异常", e);
+            throw new PayErrorException(new WxPayError(FAILURE, "获取回调参数异常"), e);
         }
         Map<String, List<String>> headers = new HashMap<>();
         Enumeration<String> headerNames = request.getHeaderNames();
@@ -457,8 +451,20 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
      */
     @Override
     public Map<String, Object> close(String transactionId, String outTradeNo) {
+        return close(new CloseOrder(outTradeNo));
+    }
+
+
+    /**
+     * 交易关闭接口
+     *
+     * @param closeOrder 关闭订单
+     * @return 返回支付方交易关闭后的结果
+     */
+    @Override
+    public Map<String, Object> close(CloseOrder closeOrder) {
         String parameters = wxParameterStructure.getSpParameters();
-        return getAssistService().doExecute(parameters, WxTransactionType.CLOSE, outTradeNo);
+        return getAssistService().doExecute(parameters, WxTransactionType.CLOSE, closeOrder.getOutTradeNo());
     }
 
     /**

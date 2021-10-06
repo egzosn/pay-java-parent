@@ -16,7 +16,7 @@ import com.egzosn.pay.wx.v3.bean.response.order.PromotionDetail;
 import com.egzosn.pay.wx.v3.bean.response.order.TradeState;
 
 /**
- * 支付回调消息
+ * 支付回调消息,兼容退款回调
  * @author Egan
  * <pre>
  * email egan@egzosn.com
@@ -99,8 +99,36 @@ public class WxPayMessage extends PayMessage {
      */
     @JSONField(name = "trade_state")
     private TradeState tradeState;
-
-
+    /**
+     * 商户退款单号
+     */
+    @JSONField(name = "out_refund_no")
+    private String outRefundNo;
+    /**
+     * 微信退款单号
+     */
+    @JSONField(name = "refund_id")
+    private String refundId;
+    /**
+     * 退款状态，枚举值：
+     * SUCCESS：退款成功
+     * CLOSE：退款关闭
+     * ABNORMAL：退款异常，退款到银行发现用户的卡作废或者冻结了，导致原路退款银行卡失败，可前往【商户平台—>交易中心】，手动处理此笔退款
+     * 示例值：SUCCESS
+     */
+    @JSONField(name = "refund_status")
+    private TradeState refundStatus;
+    /**
+     * 退款入账账户
+     * 取当前退款单的退款入账方。
+     * 1、退回银行卡：{银行名称}{卡类型}{卡尾号}
+     * 2、退回支付用户零钱: 支付用户零钱
+     * 3、退还商户: 商户基本账户、商户结算银行账户
+     * 4、退回支付用户零钱通：支付用户零钱通
+     * 示例值：招商银行信用卡0403
+     */
+    @JSONField(name = "user_received_account")
+    private String userReceivedAccount;
     /**
      * 交易状态描述
      * 示例值：支付成功
@@ -121,7 +149,7 @@ public class WxPayMessage extends PayMessage {
     private String attach;
 
     /**
-     * 支付完成时间，遵循rfc3339标准格式，
+     * 支付完成时间|| 退款完成时间，遵循rfc3339标准格式，
      * 格式为YYYY-MM-DDTHH:mm:ss+TIMEZONE，YYYY-MM-DD表示年月日，T出现在字符串中，表示time元素的开头，HH:mm:ss表示时分秒，
      * TIMEZONE表示时区（+08:00表示东八区时间，领先UTC 8小时，即北京时间）。
      * 例如：2015-05-20T13:29:35+08:00表示，北京时间2015年5月20日 13点29分35秒。
@@ -301,6 +329,37 @@ public class WxPayMessage extends PayMessage {
         return BigDecimal.valueOf(getAmount().getTotal());
     }
 
+    public String getOutRefundNo() {
+        return outRefundNo;
+    }
+
+    public void setOutRefundNo(String outRefundNo) {
+        this.outRefundNo = outRefundNo;
+    }
+
+    public String getRefundId() {
+        return refundId;
+    }
+
+    public void setRefundId(String refundId) {
+        this.refundId = refundId;
+    }
+
+    public TradeState getRefundStatus() {
+        return refundStatus;
+    }
+
+    public void setRefundStatus(TradeState refundStatus) {
+        this.refundStatus = refundStatus;
+    }
+
+    public String getUserReceivedAccount() {
+        return userReceivedAccount;
+    }
+
+    public void setUserReceivedAccount(String userReceivedAccount) {
+        this.userReceivedAccount = userReceivedAccount;
+    }
 
     public static final WxPayMessage create(Map<String, Object> message) {
         WxPayMessage payMessage = new JSONObject(message).toJavaObject(WxPayMessage.class);

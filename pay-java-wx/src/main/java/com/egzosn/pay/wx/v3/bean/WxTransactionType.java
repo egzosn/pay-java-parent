@@ -25,11 +25,14 @@ public enum WxTransactionType implements TransactionType {
     /**
      * 获取证书.
      */
-    CERT("certificates", MethodType.GET),
+    CERT("/v3/certificates", MethodType.GET),
+
+    //-----------------------------------------------------------------
+    //以下为直连与服务商支付方式
     /**
-     * 公众号支付
+     * 微信公众号支付或者小程序支付
      */
-    JSAPI("pay{partner}/transactions/jsapi", MethodType.POST) {
+    JSAPI("/v3/pay{partner}/transactions/jsapi", MethodType.POST) {
         @Override
         public void setAttribute(Map<String, Object> parameters, PayOrder order) {
             String key = parameters.containsKey("sub_mchid") ? "sub_openid" : "openid";
@@ -40,15 +43,15 @@ public enum WxTransactionType implements TransactionType {
     /**
      * 二维码支付
      */
-    NATIVE("pay{partner}/transactions/native", MethodType.POST, true),
+    NATIVE("/v3/pay{partner}/transactions/native", MethodType.POST, true),
     /**
      * 移动支付
      */
-    APP("pay{partner}/transactions/app", MethodType.POST),
+    APP("/v3/pay{partner}/transactions/app", MethodType.POST),
     /**
      * H5支付
      */
-    H5("pay{partner}/transactions/h5", MethodType.POST, true) {
+    H5("/v3/pay{partner}/transactions/h5", MethodType.POST, true) {
         @Override
         public void setAttribute(Map<String, Object> parameters, PayOrder order) {
             Object sceneInfoObj = parameters.get(WxConst.SCENE_INFO);
@@ -79,7 +82,7 @@ public enum WxTransactionType implements TransactionType {
      * 兼容 后期会抛弃
      */
     @Deprecated
-    MWEB("pay{partner}/transactions/h5", MethodType.POST, true) {
+    MWEB("/v3/pay{partner}/transactions/h5", MethodType.POST, true) {
         @Override
         public void setAttribute(Map<String, Object> parameters, PayOrder order) {
             H5.setAttribute(parameters, order);
@@ -91,35 +94,64 @@ public enum WxTransactionType implements TransactionType {
      * 查询订单
      * 兼容V2的方式，通过入参来决定
      */
-    QUERY("pay{partner}/transactions/", MethodType.GET),
+    QUERY("/v3/pay{partner}/transactions/", MethodType.GET),
     /**
      * 微信支付订单号查询
      */
-    QUERY_TRANSACTION_ID("pay{partner}/transactions/id/{transaction_id}", MethodType.GET),
+    QUERY_TRANSACTION_ID("/v3/pay{partner}/transactions/id/{transaction_id}", MethodType.GET),
     /**
      * 商户订单号查询
      */
-    QUERY_OUT_TRADE_NO("pay{partner}/transactions/out-trade-no/{out_trade_no}", MethodType.GET),
+    QUERY_OUT_TRADE_NO("/v3/pay{partner}/transactions/out-trade-no/{out_trade_no}", MethodType.GET),
     /**
      * 关闭订单
      */
-    CLOSE("pay{partner}/transactions/out-trade-no/{out_trade_no}/close", MethodType.POST),
+    CLOSE("/v3/pay{partner}/transactions/out-trade-no/{out_trade_no}/close", MethodType.POST),
     /**
      * 申请退款
      */
-    REFUND("refund/domestic/refunds", MethodType.POST),
+    REFUND("/v3/refund/domestic/refunds", MethodType.POST),
     /**
      * 查询退款
      */
-    REFUND_QUERY("refund/domestic/refunds/{out_refund_no}", MethodType.GET),
+    REFUND_QUERY("/v3/refund/domestic/refunds/{out_refund_no}", MethodType.GET),
     /**
      * 申请交易账单
      */
-    TRADE_BILL("bill/tradebill", MethodType.GET),
+    TRADE_BILL("/v3/bill/tradebill", MethodType.GET),
     /**
      * 申请资金账单
      */
-    FUND_FLOW_BILL("bill/fundflowbill", MethodType.GET)
+    FUND_FLOW_BILL("/v3/bill/fundflowbill", MethodType.GET),
+
+    //-----------------------------------------------------------------
+    //以下为合并支付
+    /**
+     * 合单下单-APP支付API.
+     */
+    COMBINE_APP("/v3/combine-transactions/app", MethodType.POST),
+
+    /**
+     * 合单下单-微信公众号支付或者小程序支付.
+     */
+    COMBINE_JSAPI("/v3/combine-transactions/jsapi", MethodType.POST),
+    /**
+     * 合单下单-H5支付API.
+     */
+    COMBINE_H5("/v3/combine-transactions/h5", MethodType.POST, true),
+    /**
+     * 合单下单-Native支付API.
+     */
+    COMBINE_NATIVE("/v3/combine-transactions/native", MethodType.POST, true),
+    /**
+     * 合单查询订单API.
+     */
+    COMBINE_TRANSACTION("/v3/combine-transactions/out-trade-no/{combine_out_trade_no}", MethodType.GET),
+
+    /**
+     * 合单关闭订单API.
+     */
+    COMBINE_CLOSE("/v3/combine-transactions/out-trade-no/{combine_out_trade_no}/close", MethodType.POST),
     ;
 
     WxTransactionType(String type, MethodType method) {

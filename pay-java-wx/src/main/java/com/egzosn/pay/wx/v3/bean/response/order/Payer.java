@@ -11,6 +11,7 @@ package com.egzosn.pay.wx.v3.bean.response.order;
 public class Payer {
     /**
      * 用户在直连商户appid下的唯一标识。
+     * 使用合单appid获取的对应用户openid。是用户在商户appid下的唯一标识。
      */
     private String openid;
 
