@@ -47,7 +47,6 @@ import com.egzosn.pay.wx.v3.utils.WxConst;
  * date 2021/8/7
  */
 public class DefaultWxPayAssistService implements WxPayAssistService {
-    protected final Logger LOG = LoggerFactory.getLogger(getClass());
     private WxPayConfigStorage payConfigStorage;
 
     private HttpRequestTemplate requestTemplate;
@@ -118,6 +117,7 @@ public class DefaultWxPayAssistService implements WxPayAssistService {
      * 构建请求实体
      * 这里也做签名处理
      *
+     * @param url   url
      * @param body   请求内容体
      * @param method 请求方法
      * @return 请求实体

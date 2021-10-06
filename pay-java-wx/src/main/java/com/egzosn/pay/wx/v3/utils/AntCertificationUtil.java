@@ -67,9 +67,10 @@ public final class AntCertificationUtil {
 
     /**
      * 装载平台证书
-     *  @param serialNo          证书序列
+     *
+     * @param serialNo          证书序列
      * @param certificateStream 证书流
-     * @return
+     * @return 平台证书
      */
     public static Certificate loadCertificate(String serialNo, InputStream certificateStream) {
         try {
@@ -127,10 +128,12 @@ public final class AntCertificationUtil {
     /**
      * 解密响应体.
      *
-     * @param associatedData 相关数据
-     * @param nonce          随机串
-     * @param cipherText     需要解密的文本
-     * @return the string
+     * @param associatedData    相关数据
+     * @param nonce             随机串
+     * @param cipherText        需要解密的文本
+     * @param secretKey         密钥
+     * @param characterEncoding 编码类型
+     * @return  解密后的信息
      */
     public static String decryptToString(String associatedData, String nonce, String cipherText, String secretKey, String characterEncoding) {
 
@@ -153,8 +156,7 @@ public final class AntCertificationUtil {
      *
      * @param message     the message
      * @param certificate the certificate
-     * @return encrypt message
-     * @since 1.0.6.RELEASE
+     * @return  加密后的内容
      */
     public static String encryptToString(String message, Certificate certificate) {
         try {

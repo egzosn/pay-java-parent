@@ -8,8 +8,10 @@ import com.egzosn.pay.wx.v3.utils.WxConst;
 /**
  * 微信合单关闭订单
  * @author Egan
- * @email egan@egzosn.com
- * @date 2021/10/6
+ * <pre>
+ * email egan@egzosn.com
+ * date 2021/10/6
+ * </pre>
  */
 public class CombineCloseOrder extends CloseOrder {
 

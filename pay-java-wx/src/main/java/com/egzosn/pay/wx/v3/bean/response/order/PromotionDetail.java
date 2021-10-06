@@ -7,8 +7,10 @@ import com.alibaba.fastjson.annotation.JSONField;
 /**
  * 优惠功能
  *
- * @author felord.cn
- * @since 1.0.0.RELEASE
+ * <pre>
+ * email egan@egzosn.com
+ * date 2021/10/6
+ * </pre>
  */
 
 public class PromotionDetail {

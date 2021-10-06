@@ -53,6 +53,7 @@ public interface WxPayAssistService {
      * 构建请求实体
      * 这里也做签名处理
      *
+     * @param url   url
      * @param body   请求内容体
      * @param method 请求方法
      * @return 请求实体

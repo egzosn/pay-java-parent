@@ -69,7 +69,6 @@ public class WxCombinePayService extends WxPayService {
      *
      * @param parameters 订单参数
      * @param order      订单信息
-     * @return 订单参数
      */
     public void initNotifyUrl(Map<String, Object> parameters, Order order) {
         OrderParaStructure.loadParameters(parameters, WxConst.NOTIFY_URL, payConfigStorage.getNotifyUrl());

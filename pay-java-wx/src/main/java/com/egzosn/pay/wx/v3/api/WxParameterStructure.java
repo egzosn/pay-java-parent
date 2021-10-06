@@ -52,7 +52,6 @@ public class WxParameterStructure {
      *
      * @param parameters 订单参数
      * @param order      支付订单
-     * @return 订单参数
      */
     public void loadSettleInfo(Map<String, Object> parameters, PayOrder order) {
         Object profitSharing = order.getAttr("profit_sharing");
@@ -74,7 +73,6 @@ public class WxParameterStructure {
      *
      * @param parameters 订单参数
      * @param order      订单信息
-     * @return 订单参数
      */
     public void initNotifyUrl(Map<String, Object> parameters, Order order) {
         OrderParaStructure.loadParameters(parameters, WxConst.NOTIFY_URL, payConfigStorage.getNotifyUrl());
@@ -95,7 +93,6 @@ public class WxParameterStructure {
      * 初始化商户相关信息
      *
      * @param parameters 参数信息
-     * @return 参数信息
      */
     public void initPartner(Map<String, Object> parameters) {
         if (null == parameters) {

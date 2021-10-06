@@ -5,8 +5,10 @@ import java.util.Map;
 /**
  * 关闭订单
  * @author Egan
- * @email egan@egzosn.com
- * @date 2021/10/6
+ * <pre>
+ * email egan@egzosn.com
+ * date 2021/10/6
+ * </pre>
  */
 public class CloseOrder implements Order {
 
