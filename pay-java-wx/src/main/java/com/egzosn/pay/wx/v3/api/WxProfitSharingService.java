@@ -174,43 +174,6 @@ public class WxProfitSharingService extends WxPayService implements ProfitSharin
     }
 
     /**
-     * 将请求参数或者请求流转化为 Map
-     *
-     * @param request 通知请求
-     * @return 获得回调的请求参数
-     */
-    @Override
-    public NoticeParams getNoticeParams(NoticeRequest request) {
-        throw new PayErrorException(new WxPayError("", "分账不支持方式"));
-    }
-
-    /**
-     * 获取输出消息，用户返回给支付端
-     *
-     * @param code    状态
-     * @param message 消息
-     * @return 返回输出消息
-     */
-    @Override
-    public PayOutMessage getPayOutMessage(String code, String message) {
-        return PayOutMessage.JSON().content("code", code).content("message", message).build();
-    }
-
-
-    /**
-     * 获取成功输出消息，用户返回给支付端
-     * 主要用于拦截器中返回
-     *
-     * @param payMessage 支付回调消息
-     * @return 返回输出消息
-     */
-    @Override
-    public PayOutMessage successPayOutMessage(PayMessage payMessage) {
-        return getPayOutMessage("SUCCESS", "成功");
-    }
-
-
-    /**
      * 获取输出消息，用户返回给支付端, 针对于web端
      *
      * @param orderInfo 发起支付的订单信息
