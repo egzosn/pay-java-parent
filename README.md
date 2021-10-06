@@ -1,4 +1,4 @@
-全能第三方支付对接Java开发工具包.优雅的轻量级支付模块集成支付对接支付整合（微信,支付宝,银联,友店,富友,跨境支付paypal,payoneer(P卡派安盈)易极付）app,扫码,网页支付刷卡付条码付刷脸付转账红包服务商模式、支持多种支付类型多支付账户，支付与业务完全剥离，简单几行代码即可实现支付，简单快速完成支付模块的开发，可轻松嵌入到任何系统里 目前仅是一个开发工具包（即SDK），只提供简单Web实现，建议使用maven或gradle引用本项目即可使用本SDK提供的各种支付相关的功能 
+全能第三方支付对接Java开发工具包.优雅的轻量级支付模块集成支付对接支付整合（微信,支付宝,银联,友店,富友,跨境支付paypal,payoneer(P卡派安盈)易极付）app,扫码,网页支付刷卡付条码付刷脸付转账红包服务商模式，微信分账,合并支付、支持多种支付类型多支付账户，支付与业务完全剥离，简单几行代码即可实现支付，简单快速完成支付模块的开发，可轻松嵌入到任何系统里 目前仅是一个开发工具包（即SDK），只提供简单Web实现，建议使用maven或gradle引用本项目即可使用本SDK提供的各种支付相关的功能 
 
 
 ### 特性
@@ -41,6 +41,9 @@
 ###### 支付教程 
 
  * [基础模块支付宝微信讲解](https://gitee.com/egzosn/pay-java-parent/wikis/Home)
+ * [微信V3，查看demo/WxV3PayController](pay-java-demo?dir=1&filepath=pay-java-demo)
+ * [微信合并支付，查看demo/WxV3CombinePayController](pay-java-demo?dir=1&filepath=pay-java-demo)
+ * [微信分账，查看demo/WxV3ProfitSharingController](pay-java-demo?dir=1&filepath=pay-java-demo)
  * [银联](pay-java-union?dir=1&filepath=pay-java-union)
  * [payoneer](pay-java-payoneer?dir=1&filepath=pay-java-payoneer)
  * [paypal](pay-java-paypal?dir=1&filepath=pay-java-paypal)
