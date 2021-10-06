@@ -21,8 +21,9 @@ import static com.egzosn.pay.wx.v3.utils.WxConst.FAILURE;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.api.BasePayService;
+import com.egzosn.pay.common.bean.AssistOrder;
 import com.egzosn.pay.common.bean.BillType;
-import com.egzosn.pay.common.bean.CloseOrder;
+
 import com.egzosn.pay.common.bean.CurType;
 import com.egzosn.pay.common.bean.MethodType;
 import com.egzosn.pay.common.bean.NoticeParams;
@@ -32,6 +33,7 @@ import com.egzosn.pay.common.bean.PayMessage;
 import com.egzosn.pay.common.bean.PayOrder;
 import com.egzosn.pay.common.bean.PayOutMessage;
 import com.egzosn.pay.common.bean.RefundOrder;
+import com.egzosn.pay.common.bean.RefundResult;
 import com.egzosn.pay.common.bean.TransactionType;
 import com.egzosn.pay.common.bean.TransferOrder;
 import com.egzosn.pay.common.bean.result.PayException;
@@ -66,8 +68,8 @@ import com.egzosn.pay.wx.v3.utils.WxConst;
  *
  * @author egan
  * <pre>
- * email egzosn@gmail.com
- * date 2016-5-18 14:09:01
+ * email egan@egzosn.com
+ * date 2021/10/6
  * </pre>
  */
 public class WxPayService extends BasePayService<WxPayConfigStorage> {
@@ -111,6 +113,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
 
     /**
      * 辅助api
+     *
      * @return 辅助api
      */
     public WxPayAssistService getAssistService() {
@@ -126,7 +129,18 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
         this.assistService = assistService;
     }
 
+    /**
+     * 初始化之后执行
+     */
+    @Override
+    protected void initAfter() {
+        new Thread(() -> {
+            payConfigStorage.loadCertEnvironment();
+            wxParameterStructure = new WxParameterStructure(payConfigStorage);
+            getAssistService();
+        }).start();
 
+    }
 
     /**
      * 设置api服务器地址
@@ -223,8 +237,8 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
         Map<String, Object> parameters = wxParameterStructure.getPublicParameters();
         wxParameterStructure.initPartner(parameters);
         // 商品描述
-        OrderParaStructure.loadParameters(parameters, "description", order.getSubject());
-        OrderParaStructure.loadParameters(parameters, "description", order.getBody());
+        OrderParaStructure.loadParameters(parameters, WxConst.DESCRIPTION, order.getSubject());
+        OrderParaStructure.loadParameters(parameters, WxConst.DESCRIPTION, order.getBody());
         // 订单号
         parameters.put(WxConst.OUT_TRADE_NO, order.getOutTradeNo());
         //交易结束时间
@@ -430,7 +444,19 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
      */
     @Override
     public Map<String, Object> query(String transactionId, String outTradeNo) {
+        return query(new AssistOrder(transactionId, outTradeNo));
+    }
 
+    /**
+     * 交易查询接口
+     *
+     * @param assistOrder 查询条件
+     * @return 返回查询回来的结果集，支付方原值返回
+     */
+    @Override
+    public Map<String, Object> query(AssistOrder assistOrder) {
+        String transactionId = assistOrder.getTradeNo();
+        String outTradeNo = assistOrder.getOutTradeNo();
         String parameters = wxParameterStructure.getSpParameters();
         WxTransactionType transactionType = WxTransactionType.QUERY_TRANSACTION_ID;
         String uriVariable = transactionId;
@@ -438,7 +464,9 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
             transactionType = WxTransactionType.QUERY_OUT_TRADE_NO;
             uriVariable = outTradeNo;
         }
+
         return getAssistService().doExecute(parameters, transactionType, uriVariable);
+
     }
 
 
@@ -451,21 +479,21 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
      */
     @Override
     public Map<String, Object> close(String transactionId, String outTradeNo) {
-        return close(new CloseOrder(outTradeNo));
+        return close(new AssistOrder(outTradeNo));
     }
-
 
     /**
      * 交易关闭接口
      *
-     * @param closeOrder 关闭订单
+     * @param assistOrder 关闭订单
      * @return 返回支付方交易关闭后的结果
      */
     @Override
-    public Map<String, Object> close(CloseOrder closeOrder) {
+    public Map<String, Object> close(AssistOrder assistOrder) {
         String parameters = wxParameterStructure.getSpParameters();
-        return getAssistService().doExecute(parameters, WxTransactionType.CLOSE, closeOrder.getOutTradeNo());
+        return getAssistService().doExecute(parameters, WxTransactionType.CLOSE, assistOrder.getOutTradeNo());
     }
+
 
     /**
      * 申请退款接口
@@ -474,7 +502,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
      * @return 返回支付方申请退款后的结果
      */
     @Override
-    public WxRefundResult refund(RefundOrder refundOrder) {
+    public RefundResult refund(RefundOrder refundOrder) {
         //获取公共参数
         Map<String, Object> parameters = wxParameterStructure.initSubMchId(null);
 
@@ -538,7 +566,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
         Map<String, Object> parameters = new HashMap<>(5);
 
         //目前只支持日账单
-        parameters.put("bill_date", DateUtils.formatDate(billDate, DateUtils.YYYYMMDD));
+        parameters.put(WxConst.BILL_DATE, DateUtils.formatDate(billDate, DateUtils.YYYY_MM_DD));
         String fileType = billType.getFileType();
         OrderParaStructure.loadParameters(parameters, "tar_type", fileType);
         if (billType instanceof WxAccountType) {
@@ -567,7 +595,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
         }
         Map<String, Object> data = new HashMap<>();
         data.put("file", inputStream);
-        return result;
+        return data;
     }
 
 
@@ -579,7 +607,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
      */
     @Override
     public Map<String, Object> transfer(TransferOrder order) {
-        throw new PayErrorException(new WxPayError("", "等待作者实现"));
+        throw new PayErrorException(new WxPayError("", "V3不支持转账"));
     }
 
 
@@ -596,7 +624,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
      */
     @Override
     public Map<String, Object> transferQuery(String outNo, String wxTransferType) {
-        throw new PayErrorException(new WxPayError("", "等待作者实现"));
+        throw new PayErrorException(new WxPayError("", "V3不支持转账查询"));
     }
 
 

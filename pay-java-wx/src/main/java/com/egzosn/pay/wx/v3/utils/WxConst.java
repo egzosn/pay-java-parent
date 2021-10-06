@@ -33,6 +33,17 @@ public final class WxConst {
     public static final String SANDBOXNEW = "sandboxnew/";
     public static final String COMBINE = "combine_";
     public static final String APPID = "appid";
+    public static final String SUB_APPID = "sub_appid";
+    public static final String TRANSACTION_ID = "transaction_id";
+    public static final String OUT_ORDER_NO = "out_order_no";
+    public static final String TYPE = "type";
+    public static final String ACCOUNT = "account";
+    public static final String NAME = "name";
+    public static final String RELATION_TYPE = "relationType";
+    public static final String CUSTOM_RELATION = "customRelation";
+    public static final String DESCRIPTION = "description";
+    public static final String BILL_DATE = "bill_date";
+    public static final String TAR_TYPE = "tar_type";
 
     public static final String COMBINE_APPID = COMBINE + APPID;
     public static final String MCH_ID = "mchid";
@@ -45,6 +56,8 @@ public final class WxConst {
     public static final String TIME_START = "time_start";
     public static final String TIME_EXPIRE = "time_expire";
     public static final String SUB_ORDERS = "sub_orders";
+    public static final String RECEIVERS = "receivers";
+    public static final String UNFREEZE_UNSPLIT = "unfreeze_unsplit";
 
     public static final String TOKEN_PATTERN = "mchid=\"%s\",nonce_str=\"%s\",timestamp=\"%d\",serial_no=\"%s\",signature=\"%s\"";
 

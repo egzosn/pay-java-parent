@@ -361,7 +361,7 @@ public class WxPayMessage extends PayMessage {
         this.userReceivedAccount = userReceivedAccount;
     }
 
-    public static final WxPayMessage create(Map<String, Object> message) {
+    public static WxPayMessage create(Map<String, Object> message) {
         WxPayMessage payMessage = new JSONObject(message).toJavaObject(WxPayMessage.class);
 //        payMessage.setPayType("");
         payMessage.setPayMessage(message);

@@ -3,8 +3,6 @@ package com.egzosn.pay.wx.v3.api;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TreeMap;
-
 
 import com.egzosn.pay.common.bean.Order;
 import com.egzosn.pay.common.bean.OrderParaStructure;
@@ -56,7 +54,7 @@ public class WxParameterStructure {
     public void loadSettleInfo(Map<String, Object> parameters, PayOrder order) {
         Object profitSharing = order.getAttr("profit_sharing");
         if (null != profitSharing) {
-            Map<String, Object> settleInfo = new MapGen<String, Object>("profit_sharing", profitSharing).getAttr();
+            Map<String, Object> settleInfo = new MapGen<>("profit_sharing", profitSharing).getAttr();
             parameters.put("settle_info", settleInfo);
             return;
         }

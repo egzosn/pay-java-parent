@@ -17,9 +17,10 @@ import com.egzosn.pay.wx.v3.utils.WxConst;
  * 微信V3交易类型
  *
  * @author egan
- * <p>
- * email egzosn@gmail.com
+ * <pre>
+ * email egan@egzosn.com
  * date 2016/10/19 22:58
+ * </pre>
  */
 public enum WxTransactionType implements TransactionType {
     /**
@@ -127,7 +128,7 @@ public enum WxTransactionType implements TransactionType {
     //-----------------------------------------------------------------
     //以下为合并支付
     /**
-     * 合单下单-APP支付API.
+     * 合单下单-APP支付
      */
     COMBINE_APP("/v3/combine-transactions/app", MethodType.POST),
 
@@ -136,20 +137,20 @@ public enum WxTransactionType implements TransactionType {
      */
     COMBINE_JSAPI("/v3/combine-transactions/jsapi", MethodType.POST),
     /**
-     * 合单下单-H5支付API.
+     * 合单下单-H5支付
      */
     COMBINE_H5("/v3/combine-transactions/h5", MethodType.POST, true),
     /**
-     * 合单下单-Native支付API.
+     * 合单下单-Native支付
      */
     COMBINE_NATIVE("/v3/combine-transactions/native", MethodType.POST, true),
     /**
-     * 合单查询订单API.
+     * 合单查询订单
      */
     COMBINE_TRANSACTION("/v3/combine-transactions/out-trade-no/{combine_out_trade_no}", MethodType.GET),
 
     /**
-     * 合单关闭订单API.
+     * 合单关闭订单
      */
     COMBINE_CLOSE("/v3/combine-transactions/out-trade-no/{combine_out_trade_no}/close", MethodType.POST),
     ;

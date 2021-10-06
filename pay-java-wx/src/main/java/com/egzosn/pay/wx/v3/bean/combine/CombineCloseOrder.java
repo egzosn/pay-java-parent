@@ -2,7 +2,8 @@ package com.egzosn.pay.wx.v3.bean.combine;
 
 import java.util.List;
 
-import com.egzosn.pay.common.bean.CloseOrder;
+import com.egzosn.pay.common.bean.AssistOrder;
+
 import com.egzosn.pay.wx.v3.utils.WxConst;
 
 /**
@@ -13,7 +14,7 @@ import com.egzosn.pay.wx.v3.utils.WxConst;
  * date 2021/10/6
  * </pre>
  */
-public class CombineCloseOrder extends CloseOrder {
+public class CombineCloseOrder extends AssistOrder {
 
     /**
      * 子单信息，必填，最多50单

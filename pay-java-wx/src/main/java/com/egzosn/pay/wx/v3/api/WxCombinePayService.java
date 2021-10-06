@@ -6,7 +6,7 @@ import java.util.Map;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.egzosn.pay.common.bean.CloseOrder;
+import com.egzosn.pay.common.bean.AssistOrder;
 import com.egzosn.pay.common.bean.Order;
 import com.egzosn.pay.common.bean.OrderParaStructure;
 import com.egzosn.pay.common.bean.PayMessage;
@@ -26,8 +26,8 @@ import com.egzosn.pay.wx.v3.utils.WxConst;
  *
  * @author egan
  * <pre>
- * email egzosn@gmail.com
- * date 2016-5-18 14:09:01
+ * email egan@egzosn.com
+ * date 2021/10/6
  * </pre>
  */
 public class WxCombinePayService extends WxPayService {
@@ -114,9 +114,18 @@ public class WxCombinePayService extends WxPayService {
      */
     @Override
     public Map<String, Object> query(String transactionId, String outTradeNo) {
-        return getAssistService().doExecute("", WxTransactionType.COMBINE_TRANSACTION, outTradeNo);
+        return query(new AssistOrder(outTradeNo));
     }
-
+    /**
+     * 交易查询接口
+     *
+     * @param assistOrder 查询条件
+     * @return 返回查询回来的结果集，支付方原值返回
+     */
+    @Override
+    public Map<String, Object> query(AssistOrder assistOrder) {
+        return getAssistService().doExecute("", WxTransactionType.COMBINE_TRANSACTION, assistOrder.getOutTradeNo());
+    }
 
     /**
      * 交易关闭接口
@@ -133,16 +142,16 @@ public class WxCombinePayService extends WxPayService {
     /**
      * 交易关闭接口
      *
-     * @param closeOrder 关闭订单
+     * @param assistOrder 关闭订单
      * @return 返回支付方交易关闭后的结果
      */
     @Override
-    public Map<String, Object> close(CloseOrder closeOrder) {
+    public Map<String, Object> close(AssistOrder assistOrder) {
         Map<String, Object> parameters = new MapGen<String, Object>(WxConst.COMBINE_APPID, payConfigStorage.getAppId())
-                .keyValue(WxConst.SUB_ORDERS, closeOrder.getAttr(WxConst.SUB_ORDERS))
+                .keyValue(WxConst.SUB_ORDERS, assistOrder.getAttr(WxConst.SUB_ORDERS))
                 .getAttr();
         String requestBody = JSON.toJSONString(parameters, SerializerFeature.WriteMapNullValue);
-        return getAssistService().doExecute(requestBody, WxTransactionType.COMBINE_CLOSE, closeOrder.getOutTradeNo());
+        return getAssistService().doExecute(requestBody, WxTransactionType.COMBINE_CLOSE, assistOrder.getOutTradeNo());
     }
 
     /**
