@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.Map;
 
 import com.egzosn.pay.common.bean.BillType;
+import com.egzosn.pay.common.bean.CloseOrder;
 import com.egzosn.pay.common.bean.MethodType;
 import com.egzosn.pay.common.bean.NoticeParams;
 import com.egzosn.pay.common.bean.NoticeRequest;
@@ -218,8 +219,17 @@ public interface PayService<PC extends PayConfigStorage> {
      * @param tradeNo    支付平台订单号
      * @param outTradeNo 商户单号
      * @return 返回支付方交易关闭后的结果
+     * @see #close(CloseOrder)
      */
+    @Deprecated
     Map<String, Object> close(String tradeNo, String outTradeNo);
+    /**
+     * 交易关闭接口
+     *
+     * @param closeOrder    关闭订单
+     * @return 返回支付方交易关闭后的结果
+     */
+    Map<String, Object> close(CloseOrder closeOrder);
 
 
     /**

@@ -14,6 +14,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.api.BasePayService;
 import com.egzosn.pay.common.bean.BaseRefundResult;
 import com.egzosn.pay.common.bean.BillType;
+import com.egzosn.pay.common.bean.CloseOrder;
 import com.egzosn.pay.common.bean.CurType;
 import com.egzosn.pay.common.bean.MethodType;
 import com.egzosn.pay.common.bean.NoticeParams;
@@ -422,7 +423,16 @@ public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorag
     public Map<String, Object> close(String tradeNo, String outTradeNo) {
         return Collections.emptyMap();
     }
-
+    /**
+     * 交易关闭接口
+     *
+     * @param closeOrder    关闭订单
+     * @return 返回支付方交易关闭后的结果
+     */
+    @Override
+    public Map<String, Object> close(CloseOrder closeOrder){
+        return Collections.emptyMap();
+    }
 
     /**
      * 申请退款接口

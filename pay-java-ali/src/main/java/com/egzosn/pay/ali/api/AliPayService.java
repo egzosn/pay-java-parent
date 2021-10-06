@@ -31,6 +31,7 @@ import com.egzosn.pay.ali.bean.CertEnvironment;
 import com.egzosn.pay.ali.bean.OrderSettle;
 import com.egzosn.pay.common.api.BasePayService;
 import com.egzosn.pay.common.bean.BillType;
+import com.egzosn.pay.common.bean.CloseOrder;
 import com.egzosn.pay.common.bean.MethodType;
 import com.egzosn.pay.common.bean.NoticeParams;
 import com.egzosn.pay.common.bean.Order;
@@ -130,7 +131,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
             return false;
         }
 
-        return signVerify(params, (String) params.get(SIGN)) && verifySource((String) params.get("notify_id"));
+        return signVerify(params, (String) params.get(SIGN));
     }
 
 
@@ -182,15 +183,6 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
         return (String) respMap.get(ALIPAY_CERT_SN_FIELD);
     }
 
-    /**
-     * 校验数据来源
-     *
-     * @param id 业务id, 数据的真实性.
-     * @return true通过
-     */
-    protected boolean verifySource(String id) {
-        return true;
-    }
 
 
     /**
@@ -482,6 +474,17 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
     @Override
     public Map<String, Object> close(String tradeNo, String outTradeNo) {
         return secondaryInterface(tradeNo, outTradeNo, AliTransactionType.CLOSE);
+    }
+
+    /**
+     * 交易关闭接口
+     *
+     * @param closeOrder    关闭订单
+     * @return 返回支付方交易关闭后的结果
+     */
+    @Override
+    public Map<String, Object> close(CloseOrder closeOrder){
+        return secondaryInterface(closeOrder.getTradeNo(), closeOrder.getOutTradeNo(), AliTransactionType.CLOSE);
     }
 
     /**

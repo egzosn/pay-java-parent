@@ -1,11 +1,14 @@
 package com.egzosn.pay.common.bean;
 
+import java.util.Date;
 import java.util.Map;
 
+import com.egzosn.pay.common.util.DateUtils;
 import com.egzosn.pay.common.util.str.StringUtils;
 
 /**
  * 订单参数构造器
+ *
  * @author Egan
  * <pre>
  * email egzosn@gmail.com
@@ -31,5 +34,10 @@ public final class OrderParaStructure {
         }
         return parameters;
     }
+
+    public static Map<String, Object> loadDateParameters(Map<String, Object> parameters, String key, Order order, String datePattern) {
+        return OrderParaStructure.loadParameters(parameters, key, DateUtils.formatDate((Date) order.getAttr(key), datePattern));
+    }
+
 
 }

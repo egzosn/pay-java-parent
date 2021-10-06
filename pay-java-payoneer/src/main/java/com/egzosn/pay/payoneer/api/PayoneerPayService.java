@@ -17,6 +17,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.api.BasePayService;
 import com.egzosn.pay.common.bean.BaseRefundResult;
 import com.egzosn.pay.common.bean.BillType;
+import com.egzosn.pay.common.bean.CloseOrder;
 import com.egzosn.pay.common.bean.CurType;
 import com.egzosn.pay.common.bean.DefaultCurType;
 import com.egzosn.pay.common.bean.MethodType;
@@ -305,7 +306,16 @@ public class PayoneerPayService extends BasePayService<PayoneerConfigStorage> im
     public Map<String, Object> close(String tradeNo, String outTradeNo) {
         return secondaryInterface(tradeNo, outTradeNo, PayoneerTransactionType.CHARGE_CANCEL);
     }
-
+    /**
+     * 交易关闭接口
+     *
+     * @param closeOrder    关闭订单
+     * @return 返回支付方交易关闭后的结果
+     */
+    @Override
+    public Map<String, Object> close(CloseOrder closeOrder){
+        return secondaryInterface(closeOrder.getTradeNo(), closeOrder.getOutTradeNo(), PayoneerTransactionType.CHARGE_CANCEL);
+    }
     /**
      * 交易交易撤销
      *

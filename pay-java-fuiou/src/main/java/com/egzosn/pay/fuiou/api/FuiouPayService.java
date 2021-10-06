@@ -10,6 +10,7 @@ import java.util.Map;
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.api.BasePayService;
 import com.egzosn.pay.common.bean.BillType;
+import com.egzosn.pay.common.bean.CloseOrder;
 import com.egzosn.pay.common.bean.MethodType;
 import com.egzosn.pay.common.bean.NoticeParams;
 import com.egzosn.pay.common.bean.PayMessage;
@@ -412,7 +413,16 @@ public class FuiouPayService extends BasePayService<FuiouPayConfigStorage> {
     public Map<String, Object> close(String tradeNo, String outTradeNo) {
         return Collections.EMPTY_MAP;
     }
-
+    /**
+     * 交易关闭接口
+     *
+     * @param closeOrder    关闭订单
+     * @return 返回支付方交易关闭后的结果
+     */
+    @Override
+    public Map<String, Object> close(CloseOrder closeOrder){
+        throw new UnsupportedOperationException("不支持该操作");
+    }
 
     /**
      * 申请退款接口

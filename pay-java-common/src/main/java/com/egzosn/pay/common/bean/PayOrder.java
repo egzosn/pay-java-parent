@@ -48,10 +48,12 @@ public class PayOrder implements Order {
     /**
      * 设备信息
      */
+    @Deprecated
     private String deviceInfo;
     /**
      * 支付创建ip
      */
+    @Deprecated
     private String spbillCreateIp;
     /**
      * 付款条码串,人脸凭证，有关支付代码相关的，

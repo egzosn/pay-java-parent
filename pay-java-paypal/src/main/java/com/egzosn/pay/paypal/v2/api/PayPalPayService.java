@@ -22,6 +22,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.api.BasePayService;
 import com.egzosn.pay.common.bean.BillType;
+import com.egzosn.pay.common.bean.CloseOrder;
 import com.egzosn.pay.common.bean.CurType;
 import com.egzosn.pay.common.bean.DefaultCurType;
 import com.egzosn.pay.common.bean.MethodType;
@@ -354,7 +355,16 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage> implem
     public Map<String, Object> close(String tradeNo, String outTradeNo) {
         return null;
     }
-
+    /**
+     * 交易关闭接口
+     *
+     * @param closeOrder    关闭订单
+     * @return 返回支付方交易关闭后的结果
+     */
+    @Override
+    public Map<String, Object> close(CloseOrder closeOrder){
+        throw new UnsupportedOperationException("不支持该操作");
+    }
     /**
      * 注意：最好在付款成功之后回调时进行调用
      * 确认订单并返回确认后订单信息

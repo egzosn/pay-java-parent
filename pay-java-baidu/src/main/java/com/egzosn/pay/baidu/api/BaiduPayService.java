@@ -25,6 +25,7 @@ import com.egzosn.pay.baidu.util.Asserts;
 import com.egzosn.pay.common.api.BasePayService;
 import com.egzosn.pay.common.bean.BaseRefundResult;
 import com.egzosn.pay.common.bean.BillType;
+import com.egzosn.pay.common.bean.CloseOrder;
 import com.egzosn.pay.common.bean.CurType;
 import com.egzosn.pay.common.bean.MethodType;
 import com.egzosn.pay.common.bean.NoticeParams;
@@ -438,7 +439,16 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
     public Map<String, Object> close(String tradeNo, String outTradeNo) {
         throw new UnsupportedOperationException("不支持该操作");
     }
-
+    /**
+     * 交易关闭接口
+     *
+     * @param closeOrder    关闭订单
+     * @return 返回支付方交易关闭后的结果
+     */
+    @Override
+    public Map<String, Object> close(CloseOrder closeOrder){
+        throw new UnsupportedOperationException("不支持该操作");
+    }
 
     /**
      * 退款

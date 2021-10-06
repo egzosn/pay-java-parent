@@ -39,6 +39,7 @@ import static com.egzosn.pay.wx.bean.WxTransferType.TRANSFERS;
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.api.BasePayService;
 import com.egzosn.pay.common.bean.BillType;
+import com.egzosn.pay.common.bean.CloseOrder;
 import com.egzosn.pay.common.bean.MethodType;
 import com.egzosn.pay.common.bean.NoticeParams;
 import com.egzosn.pay.common.bean.Order;
@@ -514,6 +515,17 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
 
         return secondaryInterface(transactionId, outTradeNo, WxTransactionType.CLOSE);
     }
+    /**
+     * 交易关闭接口
+     *
+     * @param closeOrder    关闭订单
+     * @return 返回支付方交易关闭后的结果
+     */
+    @Override
+    public Map<String, Object> close(CloseOrder closeOrder){
+        return secondaryInterface(closeOrder.getTradeNo(), closeOrder.getOutTradeNo(), WxTransactionType.CLOSE);
+    }
+
 
     /**
      * 交易交易撤销
