@@ -48,17 +48,17 @@ public class WxV3CombinePayController {
     @PostConstruct  //没有证书的情况下注释掉，避免启动报错
     public void init() {
         WxPayConfigStorage wxPayConfigStorage = new WxPayConfigStorage();
-        wxPayConfigStorage.setAppId("wxc7b993ff15a9f27c");
-        wxPayConfigStorage.setMchId("1602947766");
+        wxPayConfigStorage.setAppId("wxc7b993ff15a9f26c");
+        wxPayConfigStorage.setMchId("1602947765");
         //V3密钥 https://pay.weixin.qq.com/wiki/doc/apiv3/wechatpay/wechatpay3_2.shtml
-        wxPayConfigStorage.setV3ApiKey("9bd8f0e7af4841299d782406b7774f56");
+        wxPayConfigStorage.setV3ApiKey("9bd8f0e7af4841299d782406b7774f57");
         wxPayConfigStorage.setNotifyUrl("http://sailinmu.iok.la/wxV3/payBack.json");
         wxPayConfigStorage.setReturnUrl("http://sailinmu.iok.la/wxV3/payBack.json");
         wxPayConfigStorage.setInputCharset("utf-8");
         //使用证书时设置为true
         wxPayConfigStorage.setCertSign(true);
         //商户API证书 https://pay.weixin.qq.com/wiki/doc/apiv3/wechatpay/wechatpay3_1.shtml
-        wxPayConfigStorage.setApiClientKeyP12("E:\\Documents\\gitee\\支付\\yifenli_mall.p12");
+        wxPayConfigStorage.setApiClientKeyP12("yifenli_mall.p12");
         wxPayConfigStorage.setCertStoreType(CertStoreType.PATH);
         service = new WxCombinePayService(wxPayConfigStorage);
         //设置回调消息处理
