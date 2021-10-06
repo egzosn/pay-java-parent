@@ -30,8 +30,9 @@ import com.egzosn.pay.ali.bean.AliTransferType;
 import com.egzosn.pay.ali.bean.CertEnvironment;
 import com.egzosn.pay.ali.bean.OrderSettle;
 import com.egzosn.pay.common.api.BasePayService;
+import com.egzosn.pay.common.bean.AssistOrder;
 import com.egzosn.pay.common.bean.BillType;
-import com.egzosn.pay.common.bean.CloseOrder;
+
 import com.egzosn.pay.common.bean.MethodType;
 import com.egzosn.pay.common.bean.NoticeParams;
 import com.egzosn.pay.common.bean.Order;
@@ -256,7 +257,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
                 //产品码。
                 //商家和支付宝签约的产品码。 枚举值（点击查看签约情况）：
                 //QUICK_WAP_WAY：无线快捷支付产品。
-                //默认值为QUICK_WAP_PAY。 
+                //默认值为QUICK_WAP_PAY。
                 bizContent.put(PRODUCT_CODE, "QUICK_WAP_PAY");
                 OrderParaStructure.loadParameters(bizContent, PRODUCT_CODE, order);
                 setReturnUrl(orderInfo, order);
@@ -470,6 +471,18 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
 
     }
 
+    /**
+     * 交易查询接口
+     *
+     * @param assistOrder 查询条件
+     * @return 返回查询回来的结果集，支付方原值返回
+     */
+    @Override
+    public Map<String, Object> query(AssistOrder assistOrder) {
+        return secondaryInterface(assistOrder.getTradeNo(), assistOrder.getOutTradeNo(), AliTransactionType.QUERY);
+    }
+
+
 
     /**
      * 交易关闭接口
@@ -486,12 +499,12 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
     /**
      * 交易关闭接口
      *
-     * @param closeOrder    关闭订单
+     * @param assistOrder    关闭订单
      * @return 返回支付方交易关闭后的结果
      */
     @Override
-    public Map<String, Object> close(CloseOrder closeOrder){
-        return secondaryInterface(closeOrder.getTradeNo(), closeOrder.getOutTradeNo(), AliTransactionType.CLOSE);
+    public Map<String, Object> close(AssistOrder assistOrder){
+        return secondaryInterface(assistOrder.getTradeNo(), assistOrder.getOutTradeNo(), AliTransactionType.CLOSE);
     }
 
     /**

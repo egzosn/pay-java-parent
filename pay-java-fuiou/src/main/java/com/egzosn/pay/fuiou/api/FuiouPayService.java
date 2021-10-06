@@ -1,6 +1,5 @@
 package com.egzosn.pay.fuiou.api;
 
-import java.io.InputStream;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -9,10 +8,11 @@ import java.util.Map;
 
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.api.BasePayService;
+import com.egzosn.pay.common.bean.AssistOrder;
 import com.egzosn.pay.common.bean.BillType;
-import com.egzosn.pay.common.bean.CloseOrder;
 import com.egzosn.pay.common.bean.MethodType;
 import com.egzosn.pay.common.bean.NoticeParams;
+import com.egzosn.pay.common.bean.NoticeRequest;
 import com.egzosn.pay.common.bean.PayMessage;
 import com.egzosn.pay.common.bean.PayOrder;
 import com.egzosn.pay.common.bean.PayOutMessage;
@@ -125,6 +125,7 @@ public class FuiouPayService extends BasePayService<FuiouPayConfigStorage> {
 
         return verify(new NoticeParams(params));
     }
+
     /**
      * 回调校验
      *
@@ -143,10 +144,11 @@ public class FuiouPayService extends BasePayService<FuiouPayConfigStorage> {
             return (signVerify(params, (String) params.remove("md5")) && verifySource((String) params.get("order_id")));
         }
         catch (PayErrorException e) {
-           LOG.error("", e);
+            LOG.error("", e);
         }
         return false;
     }
+
     /**
      * 回调签名校验
      *
@@ -254,15 +256,16 @@ public class FuiouPayService extends BasePayService<FuiouPayConfigStorage> {
         return SignUtils.valueOf(payConfigStorage.getSignType().toUpperCase()).createSign(content, "|" + payConfigStorage.getKeyPrivate(), characterEncoding);
     }
 
+
     /**
      * 将请求参数或者请求流转化为 Map
      *
-     * @param parameterMap 请求参数
-     * @param is           请求流
-     * @return 返回参数集合
+     * @param request 通知请求
+     * @return 获得回调的请求参数
      */
     @Override
-    public Map<String, Object> getParameter2Map(Map<String, String[]> parameterMap, InputStream is) {
+    public NoticeParams getNoticeParams(NoticeRequest request) {
+        Map<String, String[]> parameterMap = request.getParameterMap();
         Map<String, Object> params = conversion(parameterMap, new LinkedHashMap<String, Object>(), "mchnt_cd");
         conversion(parameterMap, params, "order_id");
         conversion(parameterMap, params, "order_date");
@@ -273,7 +276,7 @@ public class FuiouPayService extends BasePayService<FuiouPayConfigStorage> {
         conversion(parameterMap, params, "resv1");
         conversion(parameterMap, params, "fy_ssn");
         conversion(parameterMap, params, "md5");
-        return params;
+        return new NoticeParams(params);
     }
 
     /**
@@ -393,12 +396,23 @@ public class FuiouPayService extends BasePayService<FuiouPayConfigStorage> {
     @Override
     public Map<String, Object> query(String tradeNo, String outTradeNo) {
 
+        return query(new AssistOrder(tradeNo, outTradeNo));
+    }
+
+    /**
+     * 交易查询接口
+     *
+     * @param assistOrder 查询条件
+     * @return 返回查询回来的结果集，支付方原值返回
+     */
+    @Override
+    public Map<String, Object> query(AssistOrder assistOrder) {
+
         LinkedHashMap<String, Object> params = new LinkedHashMap<>();
         params.put("mchnt_cd", payConfigStorage.getPid());
-        params.put("order_id", outTradeNo);
+        params.put("order_id", assistOrder.getOutTradeNo());
         params.put("md5", createSign(SignTextUtils.parameters2Md5Str(params, "|"), payConfigStorage.getInputCharset()));
-        JSONObject resultJson = getHttpRequestTemplate().postForObject(getReqUrl() + URL_FuiouSmpAQueryGate + "?" + UriVariables.getMapToParameters(params), null, JSONObject.class);
-        return resultJson;
+        return getHttpRequestTemplate().postForObject(getReqUrl() + URL_FuiouSmpAQueryGate + "?" + UriVariables.getMapToParameters(params), null, JSONObject.class);
     }
 
 
@@ -411,16 +425,17 @@ public class FuiouPayService extends BasePayService<FuiouPayConfigStorage> {
      */
     @Override
     public Map<String, Object> close(String tradeNo, String outTradeNo) {
-        return Collections.EMPTY_MAP;
+        throw new UnsupportedOperationException("不支持该操作");
     }
+
     /**
      * 交易关闭接口
      *
-     * @param closeOrder    关闭订单
+     * @param assistOrder 关闭订单
      * @return 返回支付方交易关闭后的结果
      */
     @Override
-    public Map<String, Object> close(CloseOrder closeOrder){
+    public Map<String, Object> close(AssistOrder assistOrder) {
         throw new UnsupportedOperationException("不支持该操作");
     }
 

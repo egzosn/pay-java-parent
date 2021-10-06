@@ -25,7 +25,6 @@ import com.egzosn.pay.web.support.HttpRequestNoticeParams;
 import com.egzosn.pay.wx.v3.api.WxPayConfigStorage;
 import com.egzosn.pay.wx.v3.api.WxPayService;
 import com.egzosn.pay.wx.v3.bean.WxTransactionType;
-import com.egzosn.pay.wx.v3.bean.response.WxRefundResult;
 
 /**
  * 微信V3发起支付入口

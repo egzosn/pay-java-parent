@@ -26,8 +26,9 @@ import java.util.TreeMap;
 
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.api.BasePayService;
+import com.egzosn.pay.common.bean.AssistOrder;
 import com.egzosn.pay.common.bean.BillType;
-import com.egzosn.pay.common.bean.CloseOrder;
+
 import com.egzosn.pay.common.bean.MethodType;
 import com.egzosn.pay.common.bean.NoticeParams;
 import com.egzosn.pay.common.bean.PayMessage;
@@ -224,6 +225,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
         }
         return this.signVerify(result, (String) result.get(SDKConstants.param_signature));
     }
+
     /**
      * 签名校验
      *
@@ -581,25 +583,35 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
      */
     @Override
     public Map<String, Object> query(String tradeNo, String outTradeNo) {
+        return query(new AssistOrder(tradeNo, outTradeNo));
+
+    }
+
+    /**
+     * 交易查询接口
+     *
+     * @param assistOrder 查询条件
+     * @return 返回查询回来的结果集，支付方原值返回
+     */
+    @Override
+    public Map<String, Object> query(AssistOrder assistOrder) {
         Map<String, Object> params = this.getCommonParam();
         UnionTransactionType.QUERY.convertMap(params);
-        params.put(SDKConstants.param_orderId, outTradeNo);
+        params.put(SDKConstants.param_orderId, assistOrder.getOutTradeNo());
         this.setSign(params);
         String responseStr = getHttpRequestTemplate().postForObject(this.getSingleQueryUrl(), params, String.class);
         JSONObject response = UriVariables.getParametersToMap(responseStr);
-        if (this.verify(response)) {
+        if (this.verify(new NoticeParams(response))) {
             if (SDKConstants.OK_RESP_CODE.equals(response.getString(SDKConstants.param_respCode))) {
                 String origRespCode = response.getString(SDKConstants.param_origRespCode);
                 if ((SDKConstants.OK_RESP_CODE).equals(origRespCode)) {
                     //交易成功，更新商户订单状态
-                    //TODO
                     return response;
                 }
             }
             throw new PayErrorException(new PayException(response.getString(SDKConstants.param_respCode), response.getString(SDKConstants.param_respMsg), response.toJSONString()));
         }
         throw new PayErrorException(new PayException("failure", "验证签名失败", response.toJSONString()));
-
     }
 
 
@@ -657,14 +669,15 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
     public Map<String, Object> close(String tradeNo, String outTradeNo) {
         return Collections.emptyMap();
     }
+
     /**
      * 交易关闭接口
      *
-     * @param closeOrder    关闭订单
+     * @param assistOrder 关闭订单
      * @return 返回支付方交易关闭后的结果
      */
     @Override
-    public Map<String, Object> close(CloseOrder closeOrder){
+    public Map<String, Object> close(AssistOrder assistOrder) {
         return Collections.emptyMap();
     }
 

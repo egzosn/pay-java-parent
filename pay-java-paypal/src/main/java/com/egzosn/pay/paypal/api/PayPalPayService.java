@@ -19,9 +19,9 @@ import org.apache.http.message.BasicHeader;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.api.BasePayService;
+import com.egzosn.pay.common.bean.AssistOrder;
 import com.egzosn.pay.common.bean.BaseRefundResult;
 import com.egzosn.pay.common.bean.BillType;
-import com.egzosn.pay.common.bean.CloseOrder;
 import com.egzosn.pay.common.bean.CurType;
 import com.egzosn.pay.common.bean.DefaultCurType;
 import com.egzosn.pay.common.bean.MethodType;
@@ -263,8 +263,19 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage> {
      */
     @Override
     public Map<String, Object> query(String tradeNo, String outTradeNo) {
-        JSONObject resp = getHttpRequestTemplate().getForObject(getReqUrl(PayPalTransactionType.ORDERS), authHeader(), JSONObject.class, tradeNo);
-        return resp;
+
+        return query(new AssistOrder(tradeNo, outTradeNo));
+    }
+
+    /**
+     * 交易查询接口
+     *
+     * @param assistOrder 查询条件
+     * @return 返回查询回来的结果集，支付方原值返回
+     */
+    @Override
+    public Map<String, Object> query(AssistOrder assistOrder) {
+        return getHttpRequestTemplate().getForObject(getReqUrl(PayPalTransactionType.ORDERS), authHeader(), JSONObject.class, assistOrder.getTradeNo());
     }
 
     @Override
@@ -275,13 +286,14 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage> {
     /**
      * 交易关闭接口
      *
-     * @param closeOrder    关闭订单
+     * @param assistOrder 关闭订单
      * @return 返回支付方交易关闭后的结果
      */
     @Override
-    public Map<String, Object> close(CloseOrder closeOrder){
+    public Map<String, Object> close(AssistOrder assistOrder) {
         throw new UnsupportedOperationException("不支持该操作");
     }
+
     /**
      * 申请退款接口
      *
@@ -363,10 +375,8 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage> {
      */
     @Override
     public Map<String, Object> refundquery(RefundOrder refundOrder) {
-        JSONObject resp = getHttpRequestTemplate().getForObject(getReqUrl(PayPalTransactionType.REFUND_QUERY), authHeader(), JSONObject.class, refundOrder.getTradeNo());
-        return resp;
+        return getHttpRequestTemplate().getForObject(getReqUrl(PayPalTransactionType.REFUND_QUERY), authHeader(), JSONObject.class, refundOrder.getTradeNo());
     }
-
 
 
     @Override

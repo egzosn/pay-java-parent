@@ -8,9 +8,10 @@ import java.util.TreeMap;
 
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.api.BasePayService;
+import com.egzosn.pay.common.bean.AssistOrder;
 import com.egzosn.pay.common.bean.BaseRefundResult;
 import com.egzosn.pay.common.bean.BillType;
-import com.egzosn.pay.common.bean.CloseOrder;
+
 import com.egzosn.pay.common.bean.CurType;
 import com.egzosn.pay.common.bean.DefaultCurType;
 import com.egzosn.pay.common.bean.MethodType;
@@ -287,6 +288,17 @@ public class YiJiPayService extends BasePayService<YiJiPayConfigStorage> {
         return Collections.emptyMap();
     }
 
+    /**
+     * 交易查询接口
+     *
+     * @param assistOrder 查询条件
+     * @return 返回查询回来的结果集，支付方原值返回
+     */
+    @Override
+    public Map<String, Object> query(AssistOrder assistOrder) {
+        return Collections.emptyMap();
+    }
+
 
     /**
      * 交易关闭接口
@@ -302,11 +314,11 @@ public class YiJiPayService extends BasePayService<YiJiPayConfigStorage> {
     /**
      * 交易关闭接口
      *
-     * @param closeOrder    关闭订单
+     * @param assistOrder    关闭订单
      * @return 返回支付方交易关闭后的结果
      */
     @Override
-    public Map<String, Object> close(CloseOrder closeOrder){
+    public Map<String, Object> close(AssistOrder assistOrder){
         return Collections.emptyMap();
     }
 

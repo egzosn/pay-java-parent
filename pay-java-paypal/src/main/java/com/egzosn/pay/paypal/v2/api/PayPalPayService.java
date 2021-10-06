@@ -21,8 +21,9 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.api.BasePayService;
+import com.egzosn.pay.common.bean.AssistOrder;
 import com.egzosn.pay.common.bean.BillType;
-import com.egzosn.pay.common.bean.CloseOrder;
+
 import com.egzosn.pay.common.bean.CurType;
 import com.egzosn.pay.common.bean.DefaultCurType;
 import com.egzosn.pay.common.bean.MethodType;
@@ -351,6 +352,17 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage> implem
         return getHttpRequestTemplate().getForObject(getReqUrl(PayPalTransactionType.ORDERS_GET), authHeader(), JSONObject.class, tradeNo);
     }
 
+    /**
+     * 交易查询接口
+     *
+     * @param assistOrder 查询条件
+     * @return 返回查询回来的结果集，支付方原值返回
+     */
+    @Override
+    public Map<String, Object> query(AssistOrder assistOrder) {
+        return getHttpRequestTemplate().getForObject(getReqUrl(PayPalTransactionType.ORDERS_GET), authHeader(), JSONObject.class, assistOrder.getTradeNo());
+    }
+
     @Override
     public Map<String, Object> close(String tradeNo, String outTradeNo) {
         return null;
@@ -358,11 +370,11 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage> implem
     /**
      * 交易关闭接口
      *
-     * @param closeOrder    关闭订单
+     * @param assistOrder    关闭订单
      * @return 返回支付方交易关闭后的结果
      */
     @Override
-    public Map<String, Object> close(CloseOrder closeOrder){
+    public Map<String, Object> close(AssistOrder assistOrder){
         throw new UnsupportedOperationException("不支持该操作");
     }
     /**
@@ -512,38 +524,7 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage> implem
     }
 
 
-    /**
-     * 将请求参数或者请求流转化为 Map
-     *
-     * @param parameterMap 请求参数
-     * @param is           请求流
-     * @return 获得回调的请求参数
-     */
-    @Override
-    public Map<String, Object> getParameter2Map(Map<String, String[]> parameterMap, InputStream is) {
 
-        Map<String, Object> params = new LinkedHashMap<>();
-        for (Map.Entry<String, String[]> entry : parameterMap.entrySet()) {
-            String name = entry.getKey();
-            String[] values = entry.getValue();
-            String valueStr = "";
-            for (int i = 0, len = values.length; i < len; i++) {
-                valueStr += (i == len - 1) ? values[i] : values[i] + ",";
-            }
-            if (StringUtils.isNotEmpty(payConfigStorage.getInputCharset()) && !valueStr.matches("\\w+")) {
-                try {
-                    if (valueStr.equals(new String(valueStr.getBytes("iso8859-1"), "iso8859-1"))) {
-                        valueStr = new String(valueStr.getBytes("iso8859-1"), payConfigStorage.getInputCharset());
-                    }
-                }
-                catch (UnsupportedEncodingException e) {
-                    LOG.error("", e);
-                }
-            }
-            params.put(name, valueStr);
-        }
-        return params;
-    }
 
 
 }

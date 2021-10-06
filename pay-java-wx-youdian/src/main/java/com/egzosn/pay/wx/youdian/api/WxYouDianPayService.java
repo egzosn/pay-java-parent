@@ -12,12 +12,14 @@ import java.util.concurrent.locks.Lock;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.api.BasePayService;
+import com.egzosn.pay.common.bean.AssistOrder;
 import com.egzosn.pay.common.bean.BaseRefundResult;
 import com.egzosn.pay.common.bean.BillType;
-import com.egzosn.pay.common.bean.CloseOrder;
+
 import com.egzosn.pay.common.bean.CurType;
 import com.egzosn.pay.common.bean.MethodType;
 import com.egzosn.pay.common.bean.NoticeParams;
+import com.egzosn.pay.common.bean.NoticeRequest;
 import com.egzosn.pay.common.bean.PayMessage;
 import com.egzosn.pay.common.bean.PayOrder;
 import com.egzosn.pay.common.bean.PayOutMessage;
@@ -298,15 +300,17 @@ public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorag
         return SignUtils.valueOf(payConfigStorage.getSignType().toUpperCase()).createSign(content, "&source=http://life.51youdian.com", characterEncoding);
     }
 
+
+
     /**
      * 将请求参数或者请求流转化为 Map
      *
-     * @param parameterMap 请求参数
-     * @param is           请求流
+     * @param request 通知请求
      * @return 获得回调的请求参数
      */
     @Override
-    public Map<String, Object> getParameter2Map(Map<String, String[]> parameterMap, InputStream is) {
+    public NoticeParams getNoticeParams(NoticeRequest request) {
+        final Map<String, String[]> parameterMap = request.getParameterMap();
         Map<String, Object> params = new TreeMap<String, Object>();
         for (Iterator iter = parameterMap.keySet().iterator(); iter.hasNext(); ) {
             String name = (String) iter.next();
@@ -318,7 +322,7 @@ public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorag
             params.put(name, valueStr.trim());
         }
 
-        return params;
+        return new NoticeParams(params);
 
     }
 
@@ -402,15 +406,26 @@ public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorag
      */
     @Override
     public Map<String, Object> query(String tradeNo, String outTradeNo) {
+      return query(new AssistOrder(tradeNo, outTradeNo));
+    }
+
+    /**
+     * 交易查询接口
+     *
+     * @param assistOrder 查询条件
+     * @return 返回查询回来的结果集，支付方原值返回
+     */
+    @Override
+    public Map<String, Object> query(AssistOrder assistOrder) {
         String apbNonce = SignTextUtils.randomStr();
         TreeMap<String, String> data = new TreeMap<>();
         data.put("access_token", payConfigStorage.getAccessToken());
 
-        if (StringUtils.isEmpty(tradeNo)) {
-            data.put("order_sn", outTradeNo);
+        if (StringUtils.isEmpty(assistOrder.getTradeNo())) {
+            data.put("order_sn", assistOrder.getOutTradeNo());
         }
         else {
-            data.put("order_sn", tradeNo);
+            data.put("order_sn", assistOrder.getTradeNo());
         }
         String sign = createSign(SignTextUtils.parameterText(data, "") + apbNonce, payConfigStorage.getInputCharset());
         String queryParam = SignTextUtils.parameterText(data) + "&apb_nonce=" + apbNonce + "&sign=" + sign;
@@ -426,11 +441,11 @@ public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorag
     /**
      * 交易关闭接口
      *
-     * @param closeOrder    关闭订单
+     * @param assistOrder    关闭订单
      * @return 返回支付方交易关闭后的结果
      */
     @Override
-    public Map<String, Object> close(CloseOrder closeOrder){
+    public Map<String, Object> close(AssistOrder assistOrder){
         return Collections.emptyMap();
     }
 

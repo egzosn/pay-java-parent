@@ -1,11 +1,9 @@
 package com.egzosn.pay.common.bean;
 
-import com.egzosn.pay.common.util.str.StringUtils;
-
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+
+import com.egzosn.pay.common.util.str.StringUtils;
 
 /**
  * 支付订单信息
@@ -16,7 +14,7 @@ import java.util.Map;
  *      date 2016/10/19 22:34
  *  </pre>
  */
-public class PayOrder implements Order {
+public class PayOrder extends AssistOrder {
     /**
      * 商品名称
      */
@@ -33,14 +31,7 @@ public class PayOrder implements Order {
      * 价格
      */
     private BigDecimal price;
-    /**
-     * 支付平台订单号,交易号
-     */
-    private String tradeNo;
-    /**
-     * 商户订单号
-     */
-    private String outTradeNo;
+
     /**
      * 银行卡类型
      */
@@ -63,12 +54,13 @@ public class PayOrder implements Order {
      * 微信专用，，，，
      * WAP支付链接
      */
+    @Deprecated
     private String wapUrl;
     /**
      * 微信专用，，，，
      * WAP支付网页名称
      */
-
+    @Deprecated
     private String wapName;
     /**
      * 用户唯一标识
@@ -76,10 +68,7 @@ public class PayOrder implements Order {
      * 支付宝 buyer_id
      */
     private String openid;
-    /**
-     * 交易类型
-     */
-    private TransactionType transactionType;
+
     /**
      * 支付币种
      */
@@ -88,11 +77,6 @@ public class PayOrder implements Order {
      * 订单过期时间
      */
     private Date expirationTime;
-
-    /**
-     * 订单附加信息，可用于预设未提供的参数，这里会覆盖以上所有的订单信息，
-     */
-    private volatile Map<String, Object> attr;
 
 
     public PayOrder() {
@@ -107,8 +91,8 @@ public class PayOrder implements Order {
         this.subject = StringUtils.tryTrim(subject);
         this.body = StringUtils.tryTrim(body);
         this.price = price;
-        this.outTradeNo = StringUtils.tryTrim(outTradeNo);
-        this.transactionType = transactionType;
+        setOutTradeNo(StringUtils.tryTrim(outTradeNo));
+        setTransactionType(transactionType);
     }
 
 
@@ -152,49 +136,6 @@ public class PayOrder implements Order {
         this.price = price;
     }
 
-    /**
-     * 支付平台订单号,交易号
-     *
-     * @return 支付平台订单号, 交易号
-     */
-    public String getTradeNo() {
-        return tradeNo;
-    }
-
-    /**
-     * 支付平台订单号,交易号
-     *
-     * @param tradeNo 支付平台订单号,交易号
-     */
-    public void setTradeNo(String tradeNo) {
-        this.tradeNo = tradeNo;
-    }
-
-    /**
-     * 获取商户订单号
-     *
-     * @return 商户订单号
-     */
-    public String getOutTradeNo() {
-        return outTradeNo;
-    }
-
-    /**
-     * 设置商户订单号
-     *
-     * @param outTradeNo 商户订单号
-     */
-    public void setOutTradeNo(String outTradeNo) {
-        this.outTradeNo = outTradeNo;
-    }
-
-    public TransactionType getTransactionType() {
-        return transactionType;
-    }
-
-    public void setTransactionType(TransactionType transactionType) {
-        this.transactionType = transactionType;
-    }
 
     public String getBankType() {
         return bankType;
@@ -260,48 +201,4 @@ public class PayOrder implements Order {
         this.expirationTime = expirationTime;
     }
 
-    @Override
-    public Map<String, Object> getAttrs() {
-        if (null == attr){
-            attr = new HashMap<>();
-        }
-        return attr;
-    }
-
-    @Override
-    public Object getAttr(String key) {
-        return getAttrs().get(key);
-    }
-
-
-    /**
-     * 添加订单信息
-     * @param key key
-     * @param value 值
-     */
-    @Override
-    public void addAttr(String key, Object value) {
-        getAttrs().put(key, value);
-    }
-
-
-
-    @Override
-    public String toString() {
-        return "PayOrder{" +
-                "subject='" + subject + '\'' +
-                ", body='" + body + '\'' +
-                ", price=" + price +
-                ", outTradeNo='" + outTradeNo + '\'' +
-                ", bankType='" + bankType + '\'' +
-                ", deviceInfo='" + deviceInfo + '\'' +
-                ", spbillCreateIp='" + spbillCreateIp + '\'' +
-                ", authCode='" + authCode + '\'' +
-                ", wapUrl='" + wapUrl + '\'' +
-                ", wapName='" + wapName + '\'' +
-                ", openid='" + openid + '\'' +
-                ", transactionType=" + transactionType +
-                ", curType=" + curType +
-                '}';
-    }
 }

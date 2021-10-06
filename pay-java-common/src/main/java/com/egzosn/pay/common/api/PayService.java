@@ -5,8 +5,9 @@ import java.io.InputStream;
 import java.util.Date;
 import java.util.Map;
 
+import com.egzosn.pay.common.bean.AssistOrder;
 import com.egzosn.pay.common.bean.BillType;
-import com.egzosn.pay.common.bean.CloseOrder;
+
 import com.egzosn.pay.common.bean.MethodType;
 import com.egzosn.pay.common.bean.NoticeParams;
 import com.egzosn.pay.common.bean.NoticeRequest;
@@ -67,6 +68,7 @@ public interface PayService<PC extends PayConfigStorage> {
      * 已过时方法，详情{@link #verify(NoticeParams)}
      * @param params 回调回来的参数集
      * @return 签名校验 true通过
+     * @see #verify(NoticeParams)
      */
     @Deprecated
     boolean verify(Map<String, Object> params);
@@ -124,6 +126,7 @@ public interface PayService<PC extends PayConfigStorage> {
      * @param parameterMap 请求参数
      * @param is           请求流
      * @return 获得回调的请求参数
+     * @see #getNoticeParams(NoticeRequest)
      */
     @Deprecated
     Map<String, Object> getParameter2Map(Map<String, String[]> parameterMap, InputStream is);
@@ -199,7 +202,9 @@ public interface PayService<PC extends PayConfigStorage> {
      * @param tradeNo    支付平台订单号
      * @param outTradeNo 商户单号
      * @return 返回查询回来的结果集，支付方原值返回
+     * @see #query(AssistOrder)
      */
+    @Deprecated
     Map<String, Object> query(String tradeNo, String outTradeNo);
 
     /**
@@ -211,7 +216,20 @@ public interface PayService<PC extends PayConfigStorage> {
      * @param <T>        返回类型
      * @return 返回查询回来的结果集
      */
+    @Deprecated
     <T> T query(String tradeNo, String outTradeNo, Callback<T> callback);
+
+
+    /**
+     * 交易查询接口
+     *
+     * @param assistOrder   查询条件
+     * @return 返回查询回来的结果集，支付方原值返回
+     */
+    Map<String, Object> query(AssistOrder assistOrder);
+
+
+
 
     /**
      * 交易关闭接口
@@ -219,17 +237,17 @@ public interface PayService<PC extends PayConfigStorage> {
      * @param tradeNo    支付平台订单号
      * @param outTradeNo 商户单号
      * @return 返回支付方交易关闭后的结果
-     * @see #close(CloseOrder)
+     * @see #close(AssistOrder)
      */
     @Deprecated
     Map<String, Object> close(String tradeNo, String outTradeNo);
     /**
      * 交易关闭接口
      *
-     * @param closeOrder    关闭订单
+     * @param assistOrder    关闭订单
      * @return 返回支付方交易关闭后的结果
      */
-    Map<String, Object> close(CloseOrder closeOrder);
+    Map<String, Object> close(AssistOrder assistOrder);
 
 
     /**
@@ -241,7 +259,9 @@ public interface PayService<PC extends PayConfigStorage> {
      * @param <T>        返回类型
      * @return 返回支付方交易关闭后的结果
      */
+    @Deprecated
     <T> T close(String tradeNo, String outTradeNo, Callback<T> callback);
+
 
     /**
      * 交易交易撤销
@@ -261,6 +281,7 @@ public interface PayService<PC extends PayConfigStorage> {
      * @param <T>        返回类型
      * @return 返回支付方交易撤销后的结果
      */
+    @Deprecated
     <T> T cancel(String tradeNo, String outTradeNo, Callback<T> callback);
 
 
@@ -280,6 +301,7 @@ public interface PayService<PC extends PayConfigStorage> {
      * @param <T>         返回类型
      * @return 返回支付方申请退款后的结果
      */
+    @Deprecated
     <T> T refund(RefundOrder refundOrder, Callback<T> callback);
 
 
@@ -299,6 +321,7 @@ public interface PayService<PC extends PayConfigStorage> {
      * @param <T>         返回类型
      * @return 返回支付方查询退款后的结果
      */
+    @Deprecated
     <T> T refundquery(RefundOrder refundOrder, Callback<T> callback);
 
     /**
@@ -337,6 +360,7 @@ public interface PayService<PC extends PayConfigStorage> {
      * @param <T>      返回类型
      * @return 对应的转账结果
      */
+    @Deprecated
     <T> T transfer(TransferOrder order, Callback<T> callback);
 
 
@@ -358,6 +382,7 @@ public interface PayService<PC extends PayConfigStorage> {
      * @param <T>      返回类型
      * @return 对应的转账订单
      */
+    @Deprecated
     <T> T transferQuery(String outNo, String tradeNo, Callback<T> callback);
 
     /**
@@ -377,13 +402,7 @@ public interface PayService<PC extends PayConfigStorage> {
      */
     PayOutMessage payBack(NoticeRequest request);
 
-    /**
-     * 使用转换过的参数进行回调处理
-     *
-     * @param data 转化后的参数Map
-     * @return 获得回调响应信息
-     */
-    PayOutMessage payBack(Map<String, Object> data);
+
 
     /**
      * 设置支付消息处理器,这里用于处理具体的支付业务
@@ -431,6 +450,7 @@ public interface PayService<PC extends PayConfigStorage> {
      * @param <O>       预订单类型
      * @return 处理后订单信息
      */
+    @Deprecated
     <O extends PayOrder> Map<String, Object> preOrderHandler(Map<String, Object> orderInfo, O payOrder);
 
 }

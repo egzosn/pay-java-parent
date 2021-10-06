@@ -23,9 +23,9 @@ import com.egzosn.pay.baidu.bean.BaiduTransactionType;
 import com.egzosn.pay.baidu.bean.type.AuditStatus;
 import com.egzosn.pay.baidu.util.Asserts;
 import com.egzosn.pay.common.api.BasePayService;
+import com.egzosn.pay.common.bean.AssistOrder;
 import com.egzosn.pay.common.bean.BaseRefundResult;
 import com.egzosn.pay.common.bean.BillType;
-import com.egzosn.pay.common.bean.CloseOrder;
 import com.egzosn.pay.common.bean.CurType;
 import com.egzosn.pay.common.bean.MethodType;
 import com.egzosn.pay.common.bean.NoticeParams;
@@ -429,6 +429,17 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
     }
 
     /**
+     * 交易查询接口
+     *
+     * @param assistOrder 查询条件
+     * @return 返回查询回来的结果集，支付方原值返回
+     */
+    @Override
+    public Map<String, Object> query(AssistOrder assistOrder) {
+        return secondaryInterface(assistOrder.getTradeNo(), assistOrder.getOutTradeNo(), BaiduTransactionType.PAY_QUERY);
+    }
+
+    /**
      * 百度不支持该操作
      *
      * @param tradeNo    支付平台订单号
@@ -442,11 +453,11 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
     /**
      * 交易关闭接口
      *
-     * @param closeOrder    关闭订单
+     * @param assistOrder    关闭订单
      * @return 返回支付方交易关闭后的结果
      */
     @Override
-    public Map<String, Object> close(CloseOrder closeOrder){
+    public Map<String, Object> close(AssistOrder assistOrder){
         throw new UnsupportedOperationException("不支持该操作");
     }
 

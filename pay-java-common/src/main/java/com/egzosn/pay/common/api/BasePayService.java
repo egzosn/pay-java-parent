@@ -257,6 +257,7 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
      * @param <T>        返回类型
      * @return 返回支付方交易关闭后的结果
      */
+    @Deprecated
     @Override
     public <T> T close(String tradeNo, String outTradeNo, Callback<T> callback) {
         return callback.perform(close(tradeNo, outTradeNo));
@@ -431,7 +432,6 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
      return payBack(new DefaultNoticeRequest(parameterMap, is));
     }
 
-
     /**
      * 回调处理
      *
@@ -448,31 +448,7 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
             return getPayOutMessage("fail", "失败");
         }
         PayMessage payMessage = this.createMessage(noticeParams.getBody());
-        Map<String, Object> context = new HashMap<String, Object>();
-        for (PayMessageInterceptor interceptor : interceptors) {
-            if (!interceptor.intercept(payMessage, context, this)) {
-                return successPayOutMessage(payMessage);
-            }
-        }
-        return getPayMessageHandler().handle(payMessage, context, this);
-    }
-
-    /**
-     * 使用转换过的参数进行回调处理
-     *
-     * @param data 转化后的参数Map
-     * @return 获得回调响应信息
-     */
-    @Override
-    public PayOutMessage payBack(Map<String, Object> data) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("回调响应:" + JSON.toJSONString(data));
-        }
-        if (!verify(data)) {
-            return getPayOutMessage("fail", "失败");
-        }
-        PayMessage payMessage = this.createMessage(data);
-        Map<String, Object> context = new HashMap<String, Object>();
+        Map<String, Object> context = new HashMap<>();
         for (PayMessageInterceptor interceptor : interceptors) {
             if (!interceptor.intercept(payMessage, context, this)) {
                 return successPayOutMessage(payMessage);

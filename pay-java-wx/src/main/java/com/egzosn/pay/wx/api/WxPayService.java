@@ -38,10 +38,12 @@ import static com.egzosn.pay.wx.bean.WxTransferType.TRANSFERS;
 
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.api.BasePayService;
+import com.egzosn.pay.common.bean.AssistOrder;
 import com.egzosn.pay.common.bean.BillType;
-import com.egzosn.pay.common.bean.CloseOrder;
+
 import com.egzosn.pay.common.bean.MethodType;
 import com.egzosn.pay.common.bean.NoticeParams;
+import com.egzosn.pay.common.bean.NoticeRequest;
 import com.egzosn.pay.common.bean.Order;
 import com.egzosn.pay.common.bean.OrderParaStructure;
 import com.egzosn.pay.common.bean.PayMessage;
@@ -389,25 +391,25 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
         return signType.createSign(content + "&key=" + (signType == SignUtils.MD5 ? "" : keyPrivate), keyPrivate, characterEncoding).toUpperCase();
     }
 
+
     /**
      * 将请求参数或者请求流转化为 Map
      *
-     * @param parameterMap 请求参数
-     * @param is           请求流
+     * @param request 通知请求
      * @return 获得回调的请求参数
      */
     @Override
-    public Map<String, Object> getParameter2Map(Map<String, String[]> parameterMap, InputStream is) {
+    public NoticeParams getNoticeParams(NoticeRequest request) {
+
         TreeMap<String, Object> map = new TreeMap<String, Object>();
         try {
-            return XML.inputStream2Map(is, map);
+            return new NoticeParams(XML.inputStream2Map(request.getInputStream(), map));
         }
         catch (IOException e) {
             throw new PayErrorException(new PayException("IOException", e.getMessage()));
         }
 
     }
-
     /**
      * 获取输出消息，用户返回给支付端
      *
@@ -502,6 +504,17 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
         return secondaryInterface(transactionId, outTradeNo, WxTransactionType.QUERY);
     }
 
+    /**
+     * 交易查询接口
+     *
+     * @param assistOrder 查询条件
+     * @return 返回查询回来的结果集，支付方原值返回
+     */
+    @Override
+    public Map<String, Object> query(AssistOrder assistOrder) {
+        return secondaryInterface(assistOrder.getTradeNo(), assistOrder.getOutTradeNo(), WxTransactionType.QUERY);
+    }
+
 
     /**
      * 交易关闭接口
@@ -518,12 +531,12 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
     /**
      * 交易关闭接口
      *
-     * @param closeOrder    关闭订单
+     * @param assistOrder    关闭订单
      * @return 返回支付方交易关闭后的结果
      */
     @Override
-    public Map<String, Object> close(CloseOrder closeOrder){
-        return secondaryInterface(closeOrder.getTradeNo(), closeOrder.getOutTradeNo(), WxTransactionType.CLOSE);
+    public Map<String, Object> close(AssistOrder assistOrder){
+        return secondaryInterface(assistOrder.getTradeNo(), assistOrder.getOutTradeNo(), WxTransactionType.CLOSE);
     }
 
 
@@ -626,7 +639,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
         Map<String, Object> parameters = getPublicParameters();
         parameters.put("bill_type", billType);
         //目前只支持日账单
-        parameters.put("bill_date", DateUtils.formatDate(billDate, DateUtils.YYYYMMDD));
+        parameters.put(WxConst.BILL_DATE, DateUtils.formatDate(billDate, DateUtils.YYYYMMDD));
         String fileType = billType.getFileType();
         OrderParaStructure.loadParameters(parameters, "tar_type", fileType);
         //设置签名
@@ -753,7 +766,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
         Map<String, Object> parameters = getPublicParameters();
         parameters.put("bill_type", billType);
         //目前只支持日账单
-        parameters.put("bill_date", DateUtils.formatDate(billDate, DateUtils.YYYYMMDD));
+        parameters.put(WxConst.BILL_DATE, DateUtils.formatDate(billDate, DateUtils.YYYYMMDD));
         if (tarType) {
             parameters.put("tar_type", "GZIP");
         }

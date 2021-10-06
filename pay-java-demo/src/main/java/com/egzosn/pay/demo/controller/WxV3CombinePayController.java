@@ -30,7 +30,6 @@ import com.egzosn.pay.wx.v3.bean.combine.CombineSubOrder;
 import com.egzosn.pay.wx.v3.bean.order.H5Info;
 import com.egzosn.pay.wx.v3.bean.order.SceneInfo;
 import com.egzosn.pay.wx.v3.bean.order.SubOrder;
-import com.egzosn.pay.wx.v3.bean.response.WxRefundResult;
 
 /**
  * 微信V3合单发起支付入口

@@ -33,6 +33,6 @@ public interface WxConst {
     String NONCE_STR = "nonce_str";
     String OUT_TRADE_NO = "out_trade_no";
     String GZIP = "GZIP";
-
+    String BILL_DATE = "bill_date";
 
 }
