@@ -25,6 +25,7 @@ import com.egzosn.pay.ali.bean.AliTransactionType;
 import com.egzosn.pay.ali.bean.AliTransferOrder;
 import com.egzosn.pay.ali.bean.AliTransferType;
 import com.egzosn.pay.ali.bean.OrderSettle;
+import com.egzosn.pay.common.bean.AssistOrder;
 import com.egzosn.pay.common.bean.CertStoreType;
 import com.egzosn.pay.common.bean.NoticeParams;
 import com.egzosn.pay.common.bean.PayOrder;
@@ -283,7 +284,7 @@ public class AliPayController {
      */
     @RequestMapping("query")
     public Map<String, Object> query(QueryOrder order) {
-        return service.query(order.getTradeNo(), order.getOutTradeNo());
+        return service.query(new AssistOrder(order.getTradeNo(), order.getOutTradeNo()));
     }
 
     /**
@@ -311,7 +312,7 @@ public class AliPayController {
      */
     @RequestMapping("close")
     public Map<String, Object> close(QueryOrder order) {
-        return service.close(order.getTradeNo(), order.getOutTradeNo());
+        return service.close(new AssistOrder(order.getTradeNo(), order.getOutTradeNo()));
     }
 
     /**

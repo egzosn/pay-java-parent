@@ -16,9 +16,11 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.egzosn.pay.common.bean.AssistOrder;
 import com.egzosn.pay.common.bean.CertStoreType;
 import com.egzosn.pay.common.bean.PayOrder;
 import com.egzosn.pay.common.bean.RefundOrder;
+import com.egzosn.pay.common.bean.RefundResult;
 import com.egzosn.pay.demo.request.QueryOrder;
 import com.egzosn.pay.demo.service.handler.WxV3PayMessageHandler;
 import com.egzosn.pay.web.support.HttpRequestNoticeParams;
@@ -178,7 +180,7 @@ public class WxV3PayController {
      */
     @RequestMapping("query")
     public Map<String, Object> query(QueryOrder order) {
-        return service.query(order.getTradeNo(), order.getOutTradeNo());
+        return service.query(new AssistOrder(order.getTradeNo(), order.getOutTradeNo()));
     }
 
 
@@ -190,7 +192,7 @@ public class WxV3PayController {
      */
     @RequestMapping("close")
     public Map<String, Object> close(QueryOrder order) {
-        return service.close(order.getTradeNo(), order.getOutTradeNo());
+        return service.close(new AssistOrder(order.getTradeNo(), order.getOutTradeNo()));
     }
 
     /**
@@ -200,7 +202,7 @@ public class WxV3PayController {
      * @return 返回支付方申请退款后的结果
      */
     @RequestMapping("refund")
-    public WxRefundResult refund(RefundOrder order) {
+    public RefundResult refund(RefundOrder order) {
 
         return service.refund(order);
     }

@@ -15,8 +15,10 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.egzosn.pay.common.bean.AssistOrder;
 import com.egzosn.pay.common.bean.CertStoreType;
 import com.egzosn.pay.common.bean.RefundOrder;
+import com.egzosn.pay.common.bean.RefundResult;
 import com.egzosn.pay.demo.request.QueryOrder;
 import com.egzosn.pay.demo.service.handler.WxV3CombinePayMessageHandler;
 import com.egzosn.pay.web.support.HttpRequestNoticeParams;
@@ -51,8 +53,8 @@ public class WxV3CombinePayController {
         wxPayConfigStorage.setMchId("1602947765");
         //V3密钥 https://pay.weixin.qq.com/wiki/doc/apiv3/wechatpay/wechatpay3_2.shtml
         wxPayConfigStorage.setV3ApiKey("9bd8f0e7af4841299d782406b7774f57");
-        wxPayConfigStorage.setNotifyUrl("http://sailinmu.iok.la/wxV3/payBack.json");
-        wxPayConfigStorage.setReturnUrl("http://sailinmu.iok.la/wxV3/payBack.json");
+        wxPayConfigStorage.setNotifyUrl("http://sailinmu.iok.la/wxV3combine/payBack.json");
+        wxPayConfigStorage.setReturnUrl("http://sailinmu.iok.la/wxV3combine/payBack.json");
         wxPayConfigStorage.setInputCharset("utf-8");
         //使用证书时设置为true
         wxPayConfigStorage.setCertSign(true);
@@ -93,7 +95,7 @@ public class WxV3CombinePayController {
         subOrder.setAmount(new CombineAmount(121));
         subOrder.setOutTradeNo("子单商户订单号 ");
         subOrder.setDescription("商品描述");
-        subOrder.setSubMchid("二级商户商户号，由微信支付生成并下发。服务商子商户的商户号，被合单方。直连商户不用传二级商户号。 ");
+        subOrder.setSubMchid("服务商必填----二级商户商户号，由微信支付生成并下发。服务商子商户的商户号，被合单方。直连商户不用传二级商户号。 ");
         subOrders.add(subOrder);
         order.setSubOrders(subOrders);
         order.setTransactionType(WxTransactionType.COMBINE_H5);
@@ -121,7 +123,7 @@ public class WxV3CombinePayController {
         subOrder.setAmount(new CombineAmount(111));
         subOrder.setOutTradeNo("子单商户订单号 ");
         subOrder.setDescription("商品描述");
-        subOrder.setSubMchid("二级商户商户号，由微信支付生成并下发。服务商子商户的商户号，被合单方。直连商户不用传二级商户号。 ");
+        subOrder.setSubMchid("服务商必填----二级商户商户号，由微信支付生成并下发。服务商子商户的商户号，被合单方。直连商户不用传二级商户号。 ");
         subOrders.add(subOrder);
         order.setSubOrders(subOrders);
         Map orderInfo = service.orderInfo(order);
@@ -150,7 +152,7 @@ public class WxV3CombinePayController {
         subOrder.setAmount(new CombineAmount(211));
         subOrder.setOutTradeNo("子单商户订单号 ");
         subOrder.setDescription("商品描述");
-        subOrder.setSubMchid("二级商户商户号，由微信支付生成并下发。服务商子商户的商户号，被合单方。直连商户不用传二级商户号。 ");
+        subOrder.setSubMchid("服务商必填----二级商户商户号，由微信支付生成并下发。服务商子商户的商户号，被合单方。直连商户不用传二级商户号。 ");
         subOrders.add(subOrder);
         order.setSubOrders(subOrders);
         Map orderInfo = service.orderInfo(order);
@@ -179,7 +181,7 @@ public class WxV3CombinePayController {
         subOrder.setAmount(new CombineAmount(131));
         subOrder.setOutTradeNo("子单商户订单号 ");
         subOrder.setDescription("商品描述");
-        subOrder.setSubMchid("二级商户商户号，由微信支付生成并下发。服务商子商户的商户号，被合单方。直连商户不用传二级商户号。 ");
+        subOrder.setSubMchid("服务商必填----二级商户商户号，由微信支付生成并下发。服务商子商户的商户号，被合单方。直连商户不用传二级商户号。 ");
         subOrders.add(subOrder);
         order.setSubOrders(subOrders);
 
@@ -210,7 +212,7 @@ public class WxV3CombinePayController {
         subOrder.setAmount(new CombineAmount(115));
         subOrder.setOutTradeNo("子单商户订单号 ");
         subOrder.setDescription("商品描述");
-        subOrder.setSubMchid("二级商户商户号，由微信支付生成并下发。服务商子商户的商户号，被合单方。直连商户不用传二级商户号。 ");
+        subOrder.setSubMchid("服务商必填----二级商户商户号，由微信支付生成并下发。服务商子商户的商户号，被合单方。直连商户不用传二级商户号。 ");
         subOrders.add(subOrder);
         order.setSubOrders(subOrders);
         //获取对应的支付账户操作工具（可根据账户id）
@@ -244,7 +246,7 @@ public class WxV3CombinePayController {
      */
     @RequestMapping("query")
     public Map<String, Object> query(QueryOrder order) {
-        return service.query(order.getTradeNo(), order.getOutTradeNo());
+        return service.query(new AssistOrder(order.getTradeNo(), order.getOutTradeNo()));
     }
 
 
@@ -262,7 +264,7 @@ public class WxV3CombinePayController {
         CombineSubOrder subOrder = new CombineSubOrder();
         subOrder.setMchid("子单商户号");
         subOrder.setOutTradeNo("子单商户订单号 ");
-        subOrder.setSubMchid("二级商户商户号，由微信支付生成并下发。服务商子商户的商户号，被合单方。直连商户不用传二级商户号。 ");
+        subOrder.setSubMchid("服务商必填----二级商户商户号，由微信支付生成并下发。服务商子商户的商户号，被合单方。直连商户不用传二级商户号。 ");
         subOrders.add(subOrder);
         order.setSubOrders(subOrders);
         return service.close(order);
@@ -275,7 +277,7 @@ public class WxV3CombinePayController {
      * @return 返回支付方申请退款后的结果
      */
     @RequestMapping("refund")
-    public WxRefundResult refund(RefundOrder order) {
+    public RefundResult refund(RefundOrder order) {
 
         return service.refund(order);
     }

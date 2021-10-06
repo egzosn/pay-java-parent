@@ -26,6 +26,7 @@ import com.egzosn.pay.ali.bean.AliTransactionType;
 import com.egzosn.pay.common.api.PayConfigStorage;
 import com.egzosn.pay.common.api.PayMessageInterceptor;
 import com.egzosn.pay.common.api.PayService;
+import com.egzosn.pay.common.bean.AssistOrder;
 import com.egzosn.pay.common.bean.MethodType;
 import com.egzosn.pay.common.bean.NoticeParams;
 import com.egzosn.pay.common.bean.PayMessage;
@@ -419,7 +420,7 @@ public class PayController {
     @RequestMapping("query")
     public Map<String, Object> query(QueryOrder order) {
         PayResponse payResponse = service.getPayResponse(order.getPayId());
-        return payResponse.getService().query(order.getTradeNo(), order.getOutTradeNo());
+        return payResponse.getService().query(new AssistOrder(order.getTradeNo(), order.getOutTradeNo()));
     }
     /**
      * 查询
@@ -444,7 +445,7 @@ public class PayController {
     @RequestMapping("close")
     public Map<String, Object> close(QueryOrder order) {
         PayResponse payResponse = service.getPayResponse(order.getPayId());
-        return payResponse.getService().close(order.getTradeNo(), order.getOutTradeNo());
+        return payResponse.getService().close(new AssistOrder(order.getTradeNo(), order.getOutTradeNo()));
     }
 
     /**

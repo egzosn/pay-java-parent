@@ -2,9 +2,23 @@
 package com.egzosn.pay.demo.controller;
 
 
-import com.egzosn.pay.common.api.PayService;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.imageio.ImageIO;
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import static com.egzosn.pay.union.bean.UnionTransactionType.WEB;
+
+import com.egzosn.pay.common.bean.AssistOrder;
 import com.egzosn.pay.common.bean.CertStoreType;
-import com.egzosn.pay.common.bean.MethodType;
 import com.egzosn.pay.common.bean.PayOrder;
 import com.egzosn.pay.common.bean.RefundOrder;
 import com.egzosn.pay.common.http.HttpConfigStorage;
@@ -16,21 +30,6 @@ import com.egzosn.pay.union.api.UnionPayService;
 import com.egzosn.pay.union.bean.UnionRefundResult;
 import com.egzosn.pay.union.bean.UnionTransactionType;
 import com.egzosn.pay.web.support.HttpRequestNoticeParams;
-
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import javax.annotation.PostConstruct;
-import javax.imageio.ImageIO;
-import javax.servlet.http.HttpServletRequest;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
-import static com.egzosn.pay.union.bean.UnionTransactionType.WEB;
 
 /**
  *  银联相关
@@ -271,7 +270,7 @@ public class UnionPayController {
      */
     @RequestMapping("query")
     public Map<String, Object> query(QueryOrder order) {
-        return service.query(order.getTradeNo(), order.getOutTradeNo());
+        return service.query(new AssistOrder(order.getTradeNo(), order.getOutTradeNo()));
     }
 
 

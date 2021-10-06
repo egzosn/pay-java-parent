@@ -303,7 +303,7 @@ public class WxPayController {
      */
     @RequestMapping("query")
     public Map<String, Object> query(QueryOrder order) {
-        return service.query(order.getTradeNo(), order.getOutTradeNo());
+        return service.query(new AssistOrder(order.getTradeNo(), order.getOutTradeNo()));
     }
 
 
@@ -315,7 +315,7 @@ public class WxPayController {
      */
     @RequestMapping("close")
     public Map<String, Object> close(QueryOrder order) {
-        return service.close(order.getTradeNo(), order.getOutTradeNo());
+        return service.close(new AssistOrder(order.getTradeNo(), order.getOutTradeNo()));
     }
 
     /**

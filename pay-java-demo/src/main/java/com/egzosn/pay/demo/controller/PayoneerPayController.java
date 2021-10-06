@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.egzosn.pay.common.bean.AssistOrder;
 import com.egzosn.pay.common.bean.DefaultCurType;
 import com.egzosn.pay.common.bean.PayOrder;
 import com.egzosn.pay.common.bean.RefundOrder;
@@ -160,7 +161,7 @@ public class PayoneerPayController {
      */
     @RequestMapping("query")
     public Map<String, Object> query(QueryOrder order) {
-        return service.query(order.getTradeNo(), order.getOutTradeNo());
+        return service.query(new AssistOrder(order.getTradeNo(), order.getOutTradeNo()));
     }
 
 
@@ -172,7 +173,7 @@ public class PayoneerPayController {
      */
     @RequestMapping("close")
     public Map<String, Object> close(QueryOrder order) {
-        return service.close(order.getTradeNo(), order.getOutTradeNo());
+        return service.close(new AssistOrder(order.getTradeNo(), order.getOutTradeNo()));
     }
 
     /**
