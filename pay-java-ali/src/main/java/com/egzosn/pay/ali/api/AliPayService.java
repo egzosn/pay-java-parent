@@ -253,7 +253,12 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
                 break;
             case WAP:
                 bizContent.put(PASSBACK_PARAMS, order.getAddition());
+                //产品码。
+                //商家和支付宝签约的产品码。 枚举值（点击查看签约情况）：
+                //QUICK_WAP_WAY：无线快捷支付产品。
+                //默认值为QUICK_WAP_PAY。 
                 bizContent.put(PRODUCT_CODE, "QUICK_WAP_PAY");
+                OrderParaStructure.loadParameters(bizContent, PRODUCT_CODE, order);
                 setReturnUrl(orderInfo, order);
                 break;
             case APP:
@@ -274,6 +279,8 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
                 break;
 
         }
+
+
         setExpirationTime(bizContent, order);
 
         bizContent.putAll(order.getAttrs());
