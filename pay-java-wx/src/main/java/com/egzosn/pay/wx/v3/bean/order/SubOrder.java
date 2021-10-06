@@ -32,15 +32,7 @@ public class SubOrder extends CombineSubOrder {
     private String description;
 
 
-    /**
-     * 二级商户商户号，由微信支付生成并下发。
-     * <p>
-     * 服务商子商户的商户号，被合单方。
-     * <p>
-     * 直连商户不用传二级商户号。
-     */
-    @JSONField(name = "sub_mchid")
-    private String subMchid;
+
 
     /**
      * 结算信息，选填
@@ -113,13 +105,6 @@ public class SubOrder extends CombineSubOrder {
     }
 
 
-    public String getSubMchid() {
-        return subMchid;
-    }
-
-    public void setSubMchid(String subMchid) {
-        this.subMchid = subMchid;
-    }
 
     public SettleInfo getSettleInfo() {
         return settleInfo;

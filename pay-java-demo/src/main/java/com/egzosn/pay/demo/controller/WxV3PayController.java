@@ -19,19 +19,16 @@ import org.springframework.web.bind.annotation.RestController;
 import com.egzosn.pay.common.bean.CertStoreType;
 import com.egzosn.pay.common.bean.PayOrder;
 import com.egzosn.pay.common.bean.RefundOrder;
-import com.egzosn.pay.common.bean.TransferOrder;
 import com.egzosn.pay.demo.request.QueryOrder;
 import com.egzosn.pay.demo.service.handler.WxV3PayMessageHandler;
 import com.egzosn.pay.web.support.HttpRequestNoticeParams;
-import com.egzosn.pay.wx.bean.WxBank;
-import com.egzosn.pay.wx.bean.WxTransferType;
 import com.egzosn.pay.wx.v3.api.WxPayConfigStorage;
 import com.egzosn.pay.wx.v3.api.WxPayService;
 import com.egzosn.pay.wx.v3.bean.WxTransactionType;
 import com.egzosn.pay.wx.v3.bean.response.WxRefundResult;
 
 /**
- * 发起支付入口
+ * 微信V3发起支付入口
  *
  * @author egan
  * email egzosn@gmail.com
@@ -44,13 +41,8 @@ public class WxV3PayController {
     private WxPayService service = null;
 
 
-
-
-
-
     @PostConstruct  //没有证书的情况下注释掉，避免启动报错
     public void init() {
-        System.out.println("v3 init");
         WxPayConfigStorage wxPayConfigStorage = new WxPayConfigStorage();
         wxPayConfigStorage.setAppId("wxc7b993ff15a9f27c");
         wxPayConfigStorage.setMchId("1602947766");
@@ -161,8 +153,6 @@ public class WxV3PayController {
     }
 
 
-
-
     /**
      * 支付回调地址
      *
@@ -175,7 +165,7 @@ public class WxV3PayController {
      * @throws IOException IOException
      */
     @RequestMapping(value = "payBack.json")
-    public String payBack(HttpServletRequest request)  {
+    public String payBack(HttpServletRequest request) {
         //业务处理在对应的PayMessageHandler里面处理，在哪里设置PayMessageHandler，详情查看com.egzosn.pay.common.api.PayService.setPayMessageHandler()
         return service.payBack(new HttpRequestNoticeParams(request)).toMessage();
     }
@@ -236,70 +226,6 @@ public class WxV3PayController {
     @RequestMapping("downloadbill")
     public Object downloadBill(QueryOrder order) {
         return service.downloadBill(order.getBillDate(), order.getBillType());
-    }
-
-
-    /**
-     * 转账到余额
-     *
-     * @param order 转账订单
-     * @return 对应的转账结果
-     */
-    @RequestMapping("transfer")
-    public Map<String, Object> transfer(TransferOrder order) {
-        order.setOutNo("partner_trade_no 商户转账订单号");
-        order.setPayeeAccount("用户openid");
-        order.setPayeeName("收款用户姓名， 非必填，如果填写将强制验证收款人姓名");
-        order.setRemark("转账备注, 非必填");
-        order.setAmount(new BigDecimal(10));
-
-        //转账到余额，这里默认值是转账到银行卡
-        order.setTransferType(WxTransferType.TRANSFERS);
-
-        return service.transfer(order);
-    }
-
-
-    /**
-     * 转账到银行卡
-     *
-     * @param order 转账订单
-     * @return 对应的转账结果
-     */
-    @RequestMapping("transferPayBank")
-    public Map<String, Object> transferPayBank(TransferOrder order) {
-        order.setOutNo("partner_trade_no 商户转账订单号");
-        //采用标准RSA算法，公钥由微信侧提供,将公钥信息配置在PayConfigStorage#setKeyPublic(String)
-        order.setPayeeAccount("enc_bank_no 收款方银行卡号");
-        order.setPayeeName("收款方用户名");
-        order.setBank(WxBank.ABC);
-        order.setRemark("转账备注, 非必填");
-        order.setAmount(new BigDecimal(10));
-        //转账到银行卡，这里默认值是转账到银行卡
-        order.setTransferType(WxTransferType.PAY_BANK);
-
-        return service.transfer(order);
-    }
-
-    /**
-     * 转账查询
-     *
-     * @param outNo          商户转账订单号
-     * @param wxTransferType 微信转账类型，
-     *                       .....这里没办法了只能这样写(┬＿┬)，请见谅
-     *                       {@link WxTransferType#QUERY_BANK}
-     *                       {@link WxTransferType#GETTRANSFERINFO}
-     *
-     *                       <p>
-     *                       <a href="https://pay.weixin.qq.com/wiki/doc/api/tools/mch_pay.php?chapter=14_3">企业付款到零钱</a>
-     *                       <a href="https://pay.weixin.qq.com/wiki/doc/api/tools/mch_pay.php?chapter=24_3">商户企业付款到银行卡</a>
-     *                       </p>
-     * @return 对应的转账订单
-     */
-    @RequestMapping("transferQuery")
-    public Map<String, Object> transferQuery(String outNo, String wxTransferType) {
-        //默认查询银行卡的记录 com.egzosn.pay.wx.v3.bean.WxTransferType#QUERY_BANK
-        return service.transferQuery(outNo, wxTransferType);
     }
 
 

@@ -23,7 +23,7 @@ public class Amount {
      * 货币类型 CNY：人民币，境内商户号仅支持人民币。
      * {@link com.egzosn.pay.common.bean.CurType}
      */
-    private String currency;
+    private String currency = DefaultCurType.CNY.getType();
 
     public Amount() {
     }

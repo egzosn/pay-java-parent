@@ -21,6 +21,12 @@ public class CombineAmount extends Amount {
     @JSONField(name = "total_amount")
     private Integer totalAmount;
 
+    public CombineAmount() {
+    }
+
+    public CombineAmount(Integer totalAmount) {
+        this.totalAmount = totalAmount;
+    }
 
     public Integer getTotalAmount() {
         return totalAmount;

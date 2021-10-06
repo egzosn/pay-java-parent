@@ -41,10 +41,15 @@ public class H5Info {
     @JSONField(name = "package_name")
     private String packageName;
 
+
+
     public H5Info() {
         this.type = "Wap";
     }
 
+    public H5Info(String type) {
+        this.type = type;
+    }
 
     public H5Info(String appName, String appUrl) {
         this();
