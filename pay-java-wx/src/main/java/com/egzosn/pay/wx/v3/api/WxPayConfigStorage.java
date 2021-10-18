@@ -244,7 +244,7 @@ public class WxPayConfigStorage extends BasePayConfigStorage {
      * 初始化证书信息
      */
     public void loadCertEnvironment() {
-        if (!isCertSign() || null != this.certEnvironment) {
+        if (null != this.certEnvironment) {
             return;
         }
         try (InputStream apiKeyCert = certStoreType.getInputStream(getApiClientKeyP12())) {

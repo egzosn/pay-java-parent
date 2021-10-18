@@ -128,7 +128,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
     public boolean verify(NoticeParams noticeParams) {
         final Map<String, Object> params = noticeParams.getBody();
         if (params.get(SIGN) == null) {
-            LOG.debug("支付宝支付异常：params：" + params);
+            LOG.debug("支付宝支付异常：params：{}", params);
             return false;
         }
 

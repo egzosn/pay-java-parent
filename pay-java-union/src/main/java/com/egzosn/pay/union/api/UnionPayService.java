@@ -108,13 +108,11 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
     @Override
     public UnionPayService setPayConfigStorage(UnionPayConfigStorage payConfigStorage) {
         this.payConfigStorage = payConfigStorage;
-        if (!payConfigStorage.isCertSign()) {
+        if (null != certDescriptor) {
             return this;
         }
-        if (null == certDescriptor) {
-            certDescriptor = new CertDescriptor();
-        }
         try {
+            certDescriptor = new CertDescriptor();
             certDescriptor.initPrivateSignCert(payConfigStorage.getKeyPrivateCertInputStream(), payConfigStorage.getKeyPrivateCertPwd(), "PKCS12");
             certDescriptor.initPublicCert(payConfigStorage.getAcpMiddleCertInputStream());
             certDescriptor.initRootCert(payConfigStorage.getAcpRootCertInputStream());
