@@ -199,7 +199,7 @@ public class WxRefundResult extends BaseRefundResult {
      * 这里只接收0的，其余请自行获取
      */
     @JSONField(name = "coupon_refund_id_0")
-    private Integer couponRefundId0;
+    private String couponRefundId0;
     /**
      * 获取退款请求结果状态码
      *
@@ -480,11 +480,11 @@ public class WxRefundResult extends BaseRefundResult {
         this.couponRefundCount = couponRefundCount;
     }
 
-    public Integer getCouponRefundId0() {
+    public String getCouponRefundId0() {
         return couponRefundId0;
     }
 
-    public void setCouponRefundId0(Integer couponRefundId0) {
+    public void setCouponRefundId0(String couponRefundId0) {
         this.couponRefundId0 = couponRefundId0;
     }
 
