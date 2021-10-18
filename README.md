@@ -8,9 +8,10 @@
     4. 简单快速完成支付模块的开发
     5. 支持多种支付类型多支付账户扩展
 
-### 本项目包含 3 个部分：
+### 本项目包含 4 个部分：
 
      1. pay-java-common  公共lib,支付核心与规范定义
+     2. pay-java-web-support  web支持包，目前已实现回调相关
      2. pay-java-demo  具体的支付demo
      3. pay-java-*  具体的支付实现库
      
@@ -21,7 +22,7 @@
 <dependency>
     <groupId>com.egzosn</groupId>
     <artifactId>{module-name}</artifactId>
-    <version>2.14.3</version>
+    <version>2.14.3-b</version>
 </dependency>
 
 ```
