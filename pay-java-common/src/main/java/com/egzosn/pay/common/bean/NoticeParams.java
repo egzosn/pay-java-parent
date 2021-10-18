@@ -70,6 +70,9 @@ public class NoticeParams {
     }
 
     public Enumeration<String> getHeaderNames() {
+        if (null == headers){
+            return  Collections.enumeration(Collections.emptySet());
+        }
         return Collections.enumeration(this.headers.keySet());
     }
 

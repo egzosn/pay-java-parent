@@ -350,7 +350,7 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
      */
     @Override
     public Map<String, Object> transfer(TransferOrder order) {
-        return new HashMap<>(0);
+        return Collections.emptyMap();
     }
 
     /**
@@ -362,7 +362,7 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
      */
     @Override
     public Map<String, Object> transferQuery(String outNo, String tradeNo) {
-        return new HashMap<>(0);
+        return Collections.emptyMap();
     }
 
     /**
