@@ -75,6 +75,7 @@ public enum WxTransactionType implements TransactionType {
             if (null == h5Info) {
                 sceneInfo.setH5Info(new H5Info(order.getWapName(), order.getWapUrl()));
             }
+            parameters.put("scene_info", sceneInfo);
         }
 
     },
