@@ -123,7 +123,7 @@ public class AliPayController {
     @RequestMapping(value = "toPay.html", produces = "text/html;charset=UTF-8")
     public String toPay(BigDecimal price) {
         //及时收款
-        PayOrder order = new PayOrder("订单title", "摘要", null == price ? BigDecimal.valueOf(0.01) : price, UUID.randomUUID().toString().replace("-", ""), AliTransactionType.PAGE);
+        PayOrder order = new PayOrder("订单title", "摘'要", null == price ? BigDecimal.valueOf(0.01) : price, UUID.randomUUID().toString().replace("-", ""), AliTransactionType.PAGE);
         //WAP
 //        PayOrder order = new PayOrder("订单title", "摘要", null == price ? BigDecimal.valueOf(0.01) : price, UUID.randomUUID().toString().replace("-", ""), AliTransactionType.WAP);
 
@@ -200,7 +200,7 @@ public class AliPayController {
         //支付结果
         Map<String, Object> params = service.microPay(order);
         //校验
-        if (service.verify(params)) {
+        if (service.verify(new NoticeParams(params))) {
 
             //支付校验通过后的处理
             //......业务逻辑处理块........

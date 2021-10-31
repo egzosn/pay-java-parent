@@ -162,6 +162,12 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
      */
     @Override
     public <O extends PayOrder> String toPay(O order) {
+        if (StringUtils.isNotEmpty(order.getSubject()) && order.getSubject().contains("'")){
+            order.setSubject(order.getSubject().replace("'",""));
+        }
+        if (StringUtils.isNotEmpty(order.getBody()) && order.getBody().contains("'")){
+            order.setBody(order.getBody().replace("'",""));
+        }
         Map<String, Object> orderInfo = orderInfo(order);
         return buildRequest(orderInfo, MethodType.POST);
     }
