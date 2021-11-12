@@ -153,7 +153,7 @@ public class HttpRequestTemplate {
 
             //指定TLS版本
             sslsf = new SSLConnectionSocketFactory(
-                    sslcontext, new String[]{"TLSv1"}, null,
+                    sslcontext, new String[]{"TLSv1","TLSv1.2"}, null,
                     new DefaultHostnameVerifier());
 
             return sslsf;
