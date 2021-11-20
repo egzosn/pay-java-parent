@@ -76,7 +76,7 @@
         <fastjson.version>1.2.73</fastjson.version>
         <zxing.version>3.3.1</zxing.version>
         <servlet-api.version>4.0.1</servlet-api.version>
-        <bcprov-jdk15on.version>1.59</bcprov-jdk15on.version>
+        <bcprov-jdk15on.version>1.67</bcprov-jdk15on.version>
     </properties>
 
 
