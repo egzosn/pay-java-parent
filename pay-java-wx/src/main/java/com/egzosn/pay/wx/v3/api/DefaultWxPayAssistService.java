@@ -70,7 +70,8 @@ public class DefaultWxPayAssistService implements WxPayAssistService {
      * @return 响应内容体
      */
     public JSONObject doExecute(Map<String, Object> parameters, TransactionType transactionType) {
-        String requestBody = JSON.toJSONString(parameters, SerializerFeature.WriteMapNullValue);
+//        String requestBody = JSON.toJSONString(parameters, SerializerFeature.WriteMapNullValue);
+        String requestBody = JSON.toJSONString(parameters);
         return doExecute(requestBody, transactionType);
     }
 

@@ -106,7 +106,11 @@
                 <artifactId>fastjson</artifactId>
                 <version>1.2.73</version>
             </dependency>
-
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcprov-jdk15on</artifactId>
+                <version>${bcprov-jdk15on.version}</version>
+            </dependency>
 
             <!-- log4j  -->
             <dependency>

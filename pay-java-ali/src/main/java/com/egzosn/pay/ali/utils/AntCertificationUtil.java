@@ -24,9 +24,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
@@ -38,17 +38,19 @@ import com.egzosn.pay.common.util.str.StringUtils;
  * 证书文件可信校验
  *
  * @author junying.wjy
- * @version $Id: AntCertificationUtil.java, v 0.1 2019-07-29 下午04:46 junying.wjy Exp $
- *
  * @author egan update  2020/10/12
- *
+ * @version $Id: AntCertificationUtil.java, v 0.1 2019-07-29 下午04:46 junying.wjy Exp $
  */
 public class AntCertificationUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(AntCertificationUtil.class);
+
     static {
-        Security.removeProvider("SunEC");
-        Security.addProvider(new BouncyCastleProvider());
+        if (null == Security.getProvider("BC")) {
+            Security.removeProvider("SunEC");
+            Security.addProvider(new BouncyCastleProvider());
+        }
     }
+
     /**
      * 验证证书是否可信
      *
@@ -141,7 +143,7 @@ public class AntCertificationUtil {
         //验证证书链
         for (int i = 1; i < certs.length; i++) {
             X509Certificate cert = certs[i];
-            if (!checkValidity(cert)){
+            if (!checkValidity(cert)) {
                 return false;
             }
             verifySignature(prev.getPublicKey(), cert);
@@ -155,7 +157,7 @@ public class AntCertificationUtil {
     /**
      * 验证证书链是否是信任证书库中证书签发的
      *
-     * @param cert     目标验证证书
+     * @param cert 目标验证证书
      * @return 验证结果
      */
     private static boolean checkValidity(X509Certificate cert) {
@@ -172,13 +174,11 @@ public class AntCertificationUtil {
     }
 
 
-
-    private static void verifySignature(PublicKey publicKey, X509Certificate cert){
+    private static void verifySignature(PublicKey publicKey, X509Certificate cert) {
         try {
             cert.verify(publicKey);
-        }
-        catch (GeneralSecurityException e) {
-          throw new PayErrorException(new PayException("证书校验失败", e.getMessage()));
+        } catch (GeneralSecurityException e) {
+            throw new PayErrorException(new PayException("证书校验失败", e.getMessage()));
         }
     }
 
@@ -281,7 +281,7 @@ public class AntCertificationUtil {
         addressingDown(issuerMap, certChain, subject);
     }
 
-    private static X509Certificate[] readPemCertChain(String cert){
+    private static X509Certificate[] readPemCertChain(String cert) {
         ByteArrayInputStream inputStream = new ByteArrayInputStream(cert.getBytes());
         CertificateFactory factory = null;
         try {
@@ -305,7 +305,7 @@ public class AntCertificationUtil {
         String rootCertSN = null;
         try {
             X509Certificate[] x509Certificates = readPemCertChain(rootCertContent);
-            if (null == x509Certificates){
+            if (null == x509Certificates) {
                 return null;
             }
             MessageDigest md = MessageDigest.getInstance("MD5");
@@ -381,8 +381,6 @@ public class AntCertificationUtil {
             throw new PayErrorException(new PayException(" 提取公钥证书中的公钥异常", e.getMessage()));
         }
     }
-
-
 
 
     public static String readFromInputStream(InputStream cert) {

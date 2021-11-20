@@ -27,6 +27,9 @@ import com.egzosn.pay.web.support.HttpRequestNoticeParams;
 import com.egzosn.pay.wx.v3.api.WxPayConfigStorage;
 import com.egzosn.pay.wx.v3.api.WxPayService;
 import com.egzosn.pay.wx.v3.bean.WxTransactionType;
+import com.egzosn.pay.wx.v3.bean.order.H5Info;
+import com.egzosn.pay.wx.v3.bean.order.SceneInfo;
+import com.egzosn.pay.wx.v3.utils.WxConst;
 
 /**
  * 微信V3发起支付入口
@@ -75,12 +78,11 @@ public class WxV3PayController {
     @RequestMapping(value = "toPay.html", produces = "text/html;charset=UTF-8")
     public String toPay(HttpServletRequest request, BigDecimal price) {
         PayOrder order = new PayOrder("订单title", "摘要", null == price ? BigDecimal.valueOf(0.01) : price, UUID.randomUUID().toString().replace("-", ""), WxTransactionType.H5);
-        order.setSpbillCreateIp(request.getHeader("X-Real-IP"));
         StringBuffer requestURL = request.getRequestURL();
-        //设置网页地址
-        order.setWapUrl(requestURL.substring(0, requestURL.indexOf("/") > 0 ? requestURL.indexOf("/") : requestURL.length()));
-        //设置网页名称
-        order.setWapName("在线充值");
+        SceneInfo sceneInfo = new SceneInfo();
+        sceneInfo.setPayerClientIp(request.getHeader("X-Real-IP"));
+        sceneInfo.setH5Info(new H5Info("在线充值", requestURL.substring(0, requestURL.indexOf("/") > 0 ? requestURL.indexOf("/") : requestURL.length())));
+        order.addAttr(WxConst.SCENE_INFO, sceneInfo);
 
 //        Map orderInfo = service.orderInfo(order);
 //        return service.buildRequest(orderInfo, MethodType.POST);

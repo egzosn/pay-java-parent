@@ -317,6 +317,38 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
      * @throws IOException 响应类型文本转换时抛出异常
      */
     private T toBean(HttpEntity entity, String[] contentType) throws IOException {
+
+
+        //是否为 输入流
+        if (InputStream.class.isAssignableFrom(responseType)) {
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            entity.writeTo(os);
+            return (T) new ByteArrayInputStream(os.toByteArray());
+        }
+        //是否为 字节数数组
+        if (byte[].class.isAssignableFrom(responseType)) {
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            entity.writeTo(os);
+            return (T) os.toByteArray();
+        }
+        //输出流
+        if (OutputStream.class.isAssignableFrom(responseType)) {
+            try {
+                OutputStream t;
+                if (responseType == OutputStream.class){
+                    t= new ByteArrayOutputStream();
+                }else {
+                    t = (OutputStream) responseType.newInstance();
+                }
+                entity.writeTo( t);
+                return (T) t;
+            } catch (InstantiationException e) {
+                throw new PayErrorException(new PayException("InstantiationException", e.getMessage()));
+            } catch (IllegalAccessException e) {
+                throw new PayErrorException(new PayException("IllegalAccessException", e.getMessage()));
+            }
+        }
+
         //判断内容类型是否为文本类型
         if (isText(contentType[0])) {
 /*            String charset = "UTF-8";
@@ -359,35 +391,6 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
             throw new PayErrorException(new PayException("failure", "类型转化异常,contentType:" + entity.getContentType().getValue(), result));
         }
 
-        //是否为 输入流
-        if (InputStream.class.isAssignableFrom(responseType)) {
-            ByteArrayOutputStream os = new ByteArrayOutputStream();
-            entity.writeTo(os);
-            return (T) new ByteArrayInputStream(os.toByteArray());
-        }
-        //是否为 字节数数组
-        if (byte[].class.isAssignableFrom(responseType)) {
-            ByteArrayOutputStream os = new ByteArrayOutputStream();
-            entity.writeTo(os);
-            return (T) os.toByteArray();
-        }
-        //输出流
-        if (OutputStream.class.isAssignableFrom(responseType)) {
-            try {
-                OutputStream t;
-                if (responseType == OutputStream.class){
-                    t= new ByteArrayOutputStream();
-                }else {
-                 t = (OutputStream) responseType.newInstance();
-                }
-                entity.writeTo( t);
-                return (T) t;
-            } catch (InstantiationException e) {
-                throw new PayErrorException(new PayException("InstantiationException", e.getMessage()));
-            } catch (IllegalAccessException e) {
-                throw new PayErrorException(new PayException("IllegalAccessException", e.getMessage()));
-            }
-        }
         throw new PayErrorException(new PayException("failure", "类型转化异常,contentType:" + entity.getContentType().getValue()));
     }
 

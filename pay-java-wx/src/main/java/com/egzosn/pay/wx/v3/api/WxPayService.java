@@ -302,7 +302,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
             params.put("prepayid", prepayId);
             params.put("package", "Sign=WXPay");
         }
-        String signText = StringUtils.joining("\n", appId, timeStamp, prepayId);
+        String signText = StringUtils.joining("\n", appId, timeStamp, randomStr, prepayId);
         String paySign = createSign(signText, payConfigStorage.getInputCharset());
         params.put(WxTransactionType.JSAPI.equals(order.getTransactionType()) ? "paySign" : "sign", paySign);
         return params;
@@ -523,6 +523,8 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
         OrderParaStructure.loadParameters(parameters, "amount", refundOrder);
         return WxRefundResult.create(getAssistService().doExecute(parameters, WxTransactionType.REFUND));
     }
+
+
 
 
     /**

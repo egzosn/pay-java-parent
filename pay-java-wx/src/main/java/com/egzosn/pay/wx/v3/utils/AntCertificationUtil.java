@@ -10,6 +10,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.Security;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -20,6 +21,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.crypto.Cipher;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.util.sign.encrypt.Base64;
@@ -49,6 +52,10 @@ public final class AntCertificationUtil {
 
     static {
         try {
+            if (null == Security.getProvider("BC")) {
+                Security.removeProvider("SunEC");
+                Security.addProvider(new BouncyCastleProvider());
+            }
             PKCS12_KEY_STORE = KeyStore.getInstance("PKCS12");
         }
         catch (KeyStoreException e) {
@@ -133,7 +140,7 @@ public final class AntCertificationUtil {
      * @param cipherText        需要解密的文本
      * @param secretKey         密钥
      * @param characterEncoding 编码类型
-     * @return  解密后的信息
+     * @return 解密后的信息
      */
     public static String decryptToString(String associatedData, String nonce, String cipherText, String secretKey, String characterEncoding) {
 
@@ -156,7 +163,7 @@ public final class AntCertificationUtil {
      *
      * @param message     the message
      * @param certificate the certificate
-     * @return  加密后的内容
+     * @return 加密后的内容
      */
     public static String encryptToString(String message, Certificate certificate) {
         try {
