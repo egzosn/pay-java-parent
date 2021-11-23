@@ -134,6 +134,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
      */
     @Override
     protected void initAfter() {
+        payConfigStorage.setPartner(StringUtils.isNotEmpty(payConfigStorage.getSubMchId()));
         new Thread(() -> {
             payConfigStorage.loadCertEnvironment();
             wxParameterStructure = new WxParameterStructure(payConfigStorage);
@@ -234,8 +235,9 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
     public JSONObject unifiedOrder(PayOrder order) {
 
         //统一下单
-        Map<String, Object> parameters = wxParameterStructure.getPublicParameters();
-        wxParameterStructure.initPartner(parameters);
+        Map<String, Object> parameters =  wxParameterStructure.initPartner(null);
+       ;
+//        wxParameterStructure.getPublicParameters(parameters);
         // 商品描述
         OrderParaStructure.loadParameters(parameters, WxConst.DESCRIPTION, order.getSubject());
         OrderParaStructure.loadParameters(parameters, WxConst.DESCRIPTION, order.getBody());
@@ -283,6 +285,9 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
 
         Map<String, Object> params = new LinkedHashMap<>();
         String appId = payConfigStorage.getAppId();
+        if (payConfigStorage.isPartner() && StringUtils.isNotEmpty(payConfigStorage.getSubAppId())){
+            appId = payConfigStorage.getSubAppId();
+        }
         String timeStamp = String.valueOf(DateUtils.toEpochSecond());
         String randomStr = SignTextUtils.randomStr();
         String prepayId = result.getString("prepay_id");
@@ -457,7 +462,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
     public Map<String, Object> query(AssistOrder assistOrder) {
         String transactionId = assistOrder.getTradeNo();
         String outTradeNo = assistOrder.getOutTradeNo();
-        String parameters = wxParameterStructure.getSpParameters();
+        String parameters = wxParameterStructure.getMchParameters();
         WxTransactionType transactionType = WxTransactionType.QUERY_TRANSACTION_ID;
         String uriVariable = transactionId;
         if (StringUtils.isNotEmpty(outTradeNo)) {
@@ -490,7 +495,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
      */
     @Override
     public Map<String, Object> close(AssistOrder assistOrder) {
-        String parameters = wxParameterStructure.getSpParameters();
+        String parameters = wxParameterStructure.getMchParameters();
         return getAssistService().doExecute(parameters, WxTransactionType.CLOSE, assistOrder.getOutTradeNo());
     }
 

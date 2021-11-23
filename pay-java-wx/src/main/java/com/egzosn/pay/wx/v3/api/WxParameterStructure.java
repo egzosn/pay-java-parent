@@ -9,11 +9,11 @@ import com.egzosn.pay.common.bean.OrderParaStructure;
 import com.egzosn.pay.common.bean.PayOrder;
 import com.egzosn.pay.common.http.UriVariables;
 import com.egzosn.pay.common.util.MapGen;
-import com.egzosn.pay.common.util.str.StringUtils;
 import com.egzosn.pay.wx.v3.utils.WxConst;
 
 /**
  * 微信参数构造器
+ *
  * @author Egan
  * <pre>
  * email egzosn@gmail.com
@@ -32,17 +32,17 @@ public class WxParameterStructure {
      *
      * @return 公共参数
      */
-    public Map<String, Object> getPublicParameters() {
-
-        Map<String, Object> parameters = new LinkedHashMap<>();
+    public Map<String, Object> getPublicParameters(Map<String, Object> parameters) {
+        if (payConfigStorage.isPartner()) {
+            return parameters;
+        }
+        if (null == parameters) {
+            parameters = new LinkedHashMap<>();
+        }
         parameters.put(WxConst.APPID, payConfigStorage.getAppId());
         parameters.put(WxConst.MCH_ID, payConfigStorage.getMchId());
         return parameters;
     }
-
-
-
-
 
 
     /**
@@ -65,7 +65,6 @@ public class WxParameterStructure {
     }
 
 
-
     /**
      * 初始化通知URL必须为直接可访问的URL，不允许携带查询串，要求必须为https地址。
      *
@@ -77,32 +76,38 @@ public class WxParameterStructure {
         OrderParaStructure.loadParameters(parameters, WxConst.NOTIFY_URL, order);
     }
 
+
     /**
-     * 获取服务商相关信息
+     * 获取商户相关信息
      *
-     * @return 服务商相关信息
+     * @return 商户相关信息
      */
-    public String getSpParameters() {
+    public String getMchParameters() {
         Map<String, Object> attr = initSubMchId(null);
-        OrderParaStructure.loadParameters(attr, WxConst.SP_MCH_ID, payConfigStorage.getSpMchId());
+        OrderParaStructure.loadParameters(attr, payConfigStorage.isPartner() ? WxConst.SP_MCH_ID : WxConst.MCH_ID, payConfigStorage.getMchId());
         return UriVariables.getMapToParameters(attr);
     }
+
     /**
      * 初始化商户相关信息
      *
      * @param parameters 参数信息
      */
-    public void initPartner(Map<String, Object> parameters) {
+    public Map<String, Object> initPartner(Map<String, Object> parameters) {
         if (null == parameters) {
-            parameters = new HashMap<>();
+            parameters = new LinkedHashMap<>();
         }
-        if (StringUtils.isNotEmpty(payConfigStorage.getSpAppId()) && StringUtils.isNotEmpty(payConfigStorage.getSpMchId())) {
-            payConfigStorage.setPartner(true);
-            parameters.put("sp_appid", payConfigStorage.getSpAppId());
-            parameters.put(WxConst.SP_MCH_ID, payConfigStorage.getSpMchId());
+        if (payConfigStorage.isPartner()) {
+            parameters.put("sp_appid", payConfigStorage.getAppId());
+            parameters.put(WxConst.SP_MCH_ID, payConfigStorage.getMchId());
+            OrderParaStructure.loadParameters(parameters, "sub_appid", payConfigStorage.getSubAppId());
+            OrderParaStructure.loadParameters(parameters, WxConst.SUB_MCH_ID, payConfigStorage.getSubMchId());
+            return parameters;
         }
-        OrderParaStructure.loadParameters(parameters, "sub_appid", payConfigStorage.getSubAppId());
-        initSubMchId(parameters);
+
+        parameters.put(WxConst.APPID, payConfigStorage.getAppId());
+        parameters.put(WxConst.MCH_ID, payConfigStorage.getMchId());
+        return parameters;
     }
 
 
@@ -116,10 +121,10 @@ public class WxParameterStructure {
         if (null == parameters) {
             parameters = new HashMap<>();
         }
-        if (StringUtils.isNotEmpty(payConfigStorage.getSubMchId())) {
-            payConfigStorage.setPartner(true);
-            parameters.put(WxConst.SUB_MCH_ID, payConfigStorage.getSubMchId());
+        if (payConfigStorage.isPartner()) {
+            OrderParaStructure.loadParameters(parameters, WxConst.SUB_MCH_ID, payConfigStorage.getSubMchId());
         }
+
         return parameters;
 
     }

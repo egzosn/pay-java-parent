@@ -169,20 +169,20 @@ public class WxPayConfigStorage extends BasePayConfigStorage {
     }
 
     public String getSpAppId() {
-        return spAppId;
+        return getAppId();
     }
 
     public void setSpAppId(String spAppId) {
-        this.spAppId = spAppId;
+        setAppId(spAppId);
         addAttr("spAppId", spAppId);
     }
 
     public String getSpMchId() {
-        return spMchId;
+        return getMchId();
     }
 
     public void setSpMchId(String spMchId) {
-        this.spMchId = spMchId;
+        setMchId(spMchId);
         addAttr("spMchId", spMchId);
     }
 
