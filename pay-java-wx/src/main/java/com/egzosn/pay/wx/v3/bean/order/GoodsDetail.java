@@ -33,13 +33,13 @@ public class GoodsDetail {
      * 商品数量
      */
 
-    private int quantity;
+    private Integer quantity;
     /**
      * 商品单价
      * 商品单价，单位为分
      */
     @JSONField(name = "unit_price")
-    private int unitPrice ;
+    private Integer unitPrice ;
 
 
     public String getMerchantGoodsId() {
@@ -66,19 +66,19 @@ public class GoodsDetail {
         this.goodsName = goodsName;
     }
 
-    public int getQuantity() {
+    public Integer getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(int quantity) {
+    public void setQuantity(Integer quantity) {
         this.quantity = quantity;
     }
 
-    public int getUnitPrice() {
+    public Integer getUnitPrice() {
         return unitPrice;
     }
 
-    public void setUnitPrice(int unitPrice) {
+    public void setUnitPrice(Integer unitPrice) {
         this.unitPrice = unitPrice;
     }
 }

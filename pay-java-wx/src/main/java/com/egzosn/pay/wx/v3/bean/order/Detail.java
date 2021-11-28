@@ -15,7 +15,7 @@ public class Detail {
      * 订单原价
      */
     @JSONField(name = "cost_price")
-    private int costPrice;
+    private Integer costPrice;
     /**
      * 商家小票
      */
@@ -25,11 +25,11 @@ public class Detail {
     @JSONField(name = "goods_detail")
     private List<GoodsDetail> goodsDetail;
 
-    public int getCostPrice() {
+    public Integer getCostPrice() {
         return costPrice;
     }
 
-    public void setCostPrice(int costPrice) {
+    public void setCostPrice(Integer costPrice) {
         this.costPrice = costPrice;
     }
 

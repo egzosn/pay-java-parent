@@ -17,7 +17,7 @@ public class RefundAmount extends Amount {
     /**
      * 退款金额,单位分
      */
-    private int refund;
+    private Integer refund;
 
     /**
      * 退款出资的账户类型及金额信息
@@ -28,38 +28,38 @@ public class RefundAmount extends Amount {
      * 用户支付金额,单位分
      */
     @JSONField(name = "payer_total")
-    private int payerTotal;
+    private Integer payerTotal;
     /**
      * 用户退款金额
      * 退款给用户的金额，不包含所有优惠券金额
      */
     @JSONField(name = "payer_refund")
-    private int payerRefund;
+    private Integer payerRefund;
     /**
      * 应结退款金额
      * 去掉非充值代金券退款金额后的退款金额，单位为分，退款金额=申请退款金额-非充值代金券退款金额，退款金额<=申请退款金额
      */
     @JSONField(name = "settlement_refund")
-    private int settlementRefund;
+    private Integer settlementRefund;
     /**
      * 应结订单金额
      * 应结订单金额=订单金额-免充值代金券金额，应结订单金额<=订单金额，单位为分
      */
     @JSONField(name = "settlement_total")
-    private int settlementTotal;
+    private Integer settlementTotal;
     /**
      * 优惠退款金额
      * 优惠退款金额<=退款金额，退款金额-代金券或立减优惠退款金额为现金，说明详见代金券或立减优惠，单位为分
      */
     @JSONField(name = "discount_refund")
-    private int discountRefund;
+    private Integer discountRefund;
 
 
-    public int getRefund() {
+    public Integer getRefund() {
         return refund;
     }
 
-    public void setRefund(int refund) {
+    public void setRefund(Integer refund) {
         this.refund = refund;
     }
 
@@ -71,43 +71,43 @@ public class RefundAmount extends Amount {
         this.from = from;
     }
 
-    public int getPayerTotal() {
+    public Integer getPayerTotal() {
         return payerTotal;
     }
 
-    public void setPayerTotal(int payerTotal) {
+    public void setPayerTotal(Integer payerTotal) {
         this.payerTotal = payerTotal;
     }
 
-    public int getPayerRefund() {
+    public Integer getPayerRefund() {
         return payerRefund;
     }
 
-    public void setPayerRefund(int payerRefund) {
+    public void setPayerRefund(Integer payerRefund) {
         this.payerRefund = payerRefund;
     }
 
-    public int getSettlementRefund() {
+    public Integer getSettlementRefund() {
         return settlementRefund;
     }
 
-    public void setSettlementRefund(int settlementRefund) {
+    public void setSettlementRefund(Integer settlementRefund) {
         this.settlementRefund = settlementRefund;
     }
 
-    public int getSettlementTotal() {
+    public Integer getSettlementTotal() {
         return settlementTotal;
     }
 
-    public void setSettlementTotal(int settlementTotal) {
+    public void setSettlementTotal(Integer settlementTotal) {
         this.settlementTotal = settlementTotal;
     }
 
-    public int getDiscountRefund() {
+    public Integer getDiscountRefund() {
         return discountRefund;
     }
 
-    public void setDiscountRefund(int discountRefund) {
+    public void setDiscountRefund(Integer discountRefund) {
         this.discountRefund = discountRefund;
     }
 }
