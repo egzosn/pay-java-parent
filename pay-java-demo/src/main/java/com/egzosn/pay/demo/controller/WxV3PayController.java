@@ -56,11 +56,13 @@ public class WxV3PayController {
         wxPayConfigStorage.setReturnUrl("http://sailinmu.iok.la/wxV3/payBack.json");
         wxPayConfigStorage.setInputCharset("utf-8");
         //使用证书时设置为true
-        wxPayConfigStorage.setCertSign(true);
+//        wxPayConfigStorage.setCertSign(true);
         //商户API证书 https://pay.weixin.qq.com/wiki/doc/apiv3/wechatpay/wechatpay3_1.shtml
         wxPayConfigStorage.setApiClientKeyP12("yifenli_mall.p12");
         wxPayConfigStorage.setCertStoreType(CertStoreType.PATH);
         service = new WxPayService(wxPayConfigStorage);
+        //微信海外支付：东南亚
+//        service.setApiServerUrl("https://apihk.mch.weixin.qq.com");
         //设置回调消息处理
         //TODO {@link com.egzosn.pay.demo.controller.WxPayController#payBack}
         service.setPayMessageHandler(new WxV3PayMessageHandler());
