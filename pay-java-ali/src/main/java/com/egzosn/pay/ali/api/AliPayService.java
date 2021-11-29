@@ -587,7 +587,11 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
         if (!StringUtils.isEmpty(refundOrder.getRefundNo())) {
             bizContent.put("out_request_no", refundOrder.getRefundNo());
         }
-        bizContent.putAll(refundOrder.getAttrs());
+        OrderParaStructure.loadParameters(parameters, "biz_type", refundOrder);
+        OrderParaStructure.loadParameters(parameters, "refund_reason", refundOrder.getDescription());
+        OrderParaStructure.loadParameters(parameters, "store_id", refundOrder);
+        OrderParaStructure.loadParameters(parameters, "terminal_id", refundOrder);
+//        bizContent.putAll(refundOrder.getAttrs());
         //设置请求参数的集合
         parameters.put(BIZ_CONTENT, JSON.toJSONString(bizContent));
         //设置签名

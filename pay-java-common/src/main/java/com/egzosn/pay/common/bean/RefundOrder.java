@@ -44,6 +44,10 @@ public class RefundOrder extends AssistOrder {
      */
     private String userId;
 
+    /**
+     * 退款URL
+     */
+    private String refundUrl;
 
     public String getRefundNo() {
         return refundNo;
@@ -125,4 +129,11 @@ public class RefundOrder extends AssistOrder {
         this.totalAmount = totalAmount;
     }
 
+    public String getRefundUrl() {
+        return refundUrl;
+    }
+
+    public void setRefundUrl(String refundUrl) {
+        this.refundUrl = refundUrl;
+    }
 }

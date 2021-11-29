@@ -340,11 +340,17 @@ public class AliPayController {
     /**
      * 查询退款
      *
-     * @param order 订单的请求体
      * @return 返回支付方查询退款后的结果
      */
     @RequestMapping("refundquery")
-    public Map<String, Object> refundquery(RefundOrder order) {
+    public Map<String, Object> refundquery() {
+        RefundOrder order = new RefundOrder();
+        order.setOutTradeNo("我方系统商户单号");
+        order.setTradeNo("支付宝单号");
+        //退款金额
+        order.setRefundAmount(new BigDecimal(1));
+        order.setRefundNo("退款单号");
+        order.setDescription("");
         return service.refundquery(order);
     }
 

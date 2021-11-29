@@ -269,7 +269,14 @@
 
 #### 查询退款
   ```java
-          Map result = service.refundquery("支付宝单号", "我方系统单号");
+        RefundOrder order = new RefundOrder();
+        order.setOutTradeNo("我方系统商户单号");
+        order.setTradeNo("支付宝单号");
+        //退款金额
+        order.setRefundAmount(new BigDecimal(1));
+        order.setRefundNo("退款单号");
+        order.setDescription("");
+        Map result = service.refundquery();
             
 ```
 
@@ -282,15 +289,17 @@
 
 #### 转账
   ```java
-        TransferOrder order = new TransferOrder();
-        order.setOutNo("商户转账订单号");
-        order.setPayeeAccount("收款方账户,支付宝登录号，支持邮箱和手机号格式");
-        order.setAmount(new BigDecimal(10));
-        order.setPayerName("付款方姓名, 非必填");
-        order.setPayeeName("收款方真实姓名, 非必填");
+        order.setOutBizNo("转账单号");
+        order.setTransAmount(new BigDecimal(10));
+        order.setOrderTitle("转账业务的标题");
+        order.setIdentity("参与方的唯一标识");
+        order.setIdentityType("参与方的标识类型，目前支持如下类型：");
+        order.setName("参与方真实姓名");
         order.setRemark("转账备注, 非必填");
-        //收款方账户类型 ,默认值 ALIPAY_LOGONID：支付宝登录号，支持邮箱和手机号格式。
-        order.setTransferType(AliTransferType.ALIPAY_LOGONID);
+        //单笔无密转账到支付宝账户
+        order.setTransferType(AliTransferType.TRANS_ACCOUNT_NO_PWD);
+        //单笔无密转账到银行卡
+//        order.setTransferType(AliTransferType.TRANS_BANKCARD_NO_PWD);
         Map result = service.transfer(order);
 
 ```
