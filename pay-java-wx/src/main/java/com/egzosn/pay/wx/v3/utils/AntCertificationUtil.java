@@ -51,6 +51,11 @@ public final class AntCertificationUtil {
     private static final CertificateFactory CERTIFICATE_FACTORY;
 
     static {
+        String javaVersion = System.getProperty("java.version");
+        if (javaVersion.contains("1.8") || javaVersion.startsWith("8")){
+            Security.setProperty("crypto.policy", "unlimited");
+        }
+
         try {
             if (null == Security.getProvider("BC")) {
                 Security.removeProvider("SunEC");
@@ -179,5 +184,6 @@ public final class AntCertificationUtil {
             throw new PayErrorException(new WxPayError(WxConst.FAILURE, e.getMessage()), e);
         }
     }
+
 
 }
