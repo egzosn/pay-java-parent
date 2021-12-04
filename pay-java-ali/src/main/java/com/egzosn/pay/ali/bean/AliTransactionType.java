@@ -85,6 +85,11 @@ public enum  AliTransactionType implements TransactionType {
      */
     REFUNDQUERY("alipay.trade.fastpay.refund.query"),
     /**
+     * 收单退款冲退完成通知
+     * 退款存在退到银行卡场景下时，收单会根据银行回执消息发送退款完成信息
+     */
+    REFUND_DEPOSITBACK_COMPLETED ("alipay.trade.refund.depositback.completed"),
+    /**
      * 下载对账单
      */
     DOWNLOADBILL("alipay.data.dataservice.bill.downloadurl.query"),

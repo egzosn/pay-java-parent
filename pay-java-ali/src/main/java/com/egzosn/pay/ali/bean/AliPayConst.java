@@ -60,4 +60,12 @@ public final class AliPayConst {
      * 收款方信息
      */
     public static final String ALIPAY_CERT_SN_FIELD = "alipay_cert_sn";
+    /**
+     * 业务扩展参数
+     */
+    public static final String EXTEND_PARAMS = "extend_params";
+    public static final String BIZ_TYPE = "biz_type";
+    public static final String REFUND_REASON = "refund_reason";
+    public static final String QUERY_OPTIONS = "query_options";
+    public static final String OUT_REQUEST_NO = "out_request_no";
 }

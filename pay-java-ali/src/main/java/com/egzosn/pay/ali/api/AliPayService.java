@@ -32,7 +32,6 @@ import com.egzosn.pay.ali.bean.OrderSettle;
 import com.egzosn.pay.common.api.BasePayService;
 import com.egzosn.pay.common.bean.AssistOrder;
 import com.egzosn.pay.common.bean.BillType;
-
 import com.egzosn.pay.common.bean.MethodType;
 import com.egzosn.pay.common.bean.NoticeParams;
 import com.egzosn.pay.common.bean.Order;
@@ -499,11 +498,11 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
     /**
      * 交易关闭接口
      *
-     * @param assistOrder    关闭订单
+     * @param assistOrder 关闭订单
      * @return 返回支付方交易关闭后的结果
      */
     @Override
-    public Map<String, Object> close(AssistOrder assistOrder){
+    public Map<String, Object> close(AssistOrder assistOrder) {
         return secondaryInterface(assistOrder.getTradeNo(), assistOrder.getOutTradeNo(), AliTransactionType.CLOSE);
     }
 
@@ -554,12 +553,14 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
         //获取公共参数
         Map<String, Object> parameters = getPublicParameters(AliTransactionType.REFUND);
         setAppAuthToken(parameters, refundOrder.getAttrs());
+
         Map<String, Object> bizContent = getBizContent(refundOrder.getTradeNo(), refundOrder.getOutTradeNo(), null);
-        if (!StringUtils.isEmpty(refundOrder.getRefundNo())) {
-            bizContent.put("out_request_no", refundOrder.getRefundNo());
-        }
+        OrderParaStructure.loadParameters(bizContent, AliPayConst.OUT_REQUEST_NO, refundOrder.getRefundNo());
         bizContent.put("refund_amount", Util.conversionAmount(refundOrder.getRefundAmount()));
-        bizContent.putAll(refundOrder.getAttrs());
+        OrderParaStructure.loadParameters(bizContent,  AliPayConst.REFUND_REASON, refundOrder.getDescription());
+        OrderParaStructure.loadParameters(bizContent,  AliPayConst.REFUND_REASON, refundOrder);
+        OrderParaStructure.loadParameters(bizContent,"refund_royalty_parameters", refundOrder);
+        OrderParaStructure.loadParameters(bizContent, AliPayConst.QUERY_OPTIONS, refundOrder);
         //设置请求参数的集合
         parameters.put(BIZ_CONTENT, JSON.toJSONString(bizContent));
         //设置签名
@@ -584,13 +585,8 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
         Map<String, Object> parameters = getPublicParameters(AliTransactionType.REFUNDQUERY);
         setAppAuthToken(parameters, refundOrder.getAttrs());
         Map<String, Object> bizContent = getBizContent(refundOrder.getTradeNo(), refundOrder.getOutTradeNo(), null);
-        if (!StringUtils.isEmpty(refundOrder.getRefundNo())) {
-            bizContent.put("out_request_no", refundOrder.getRefundNo());
-        }
-        OrderParaStructure.loadParameters(parameters, "biz_type", refundOrder);
-        OrderParaStructure.loadParameters(parameters, "refund_reason", refundOrder.getDescription());
-        OrderParaStructure.loadParameters(parameters, "store_id", refundOrder);
-        OrderParaStructure.loadParameters(parameters, "terminal_id", refundOrder);
+        OrderParaStructure.loadParameters(bizContent, AliPayConst.OUT_REQUEST_NO, refundOrder.getRefundNo());
+        OrderParaStructure.loadParameters(bizContent,  AliPayConst.QUERY_OPTIONS, refundOrder);
 //        bizContent.putAll(refundOrder.getAttrs());
         //设置请求参数的集合
         parameters.put(BIZ_CONTENT, JSON.toJSONString(bizContent));
