@@ -245,7 +245,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
         parameters.put(WxConst.OUT_TRADE_NO, order.getOutTradeNo());
         //交易结束时间
         if (null != order.getExpirationTime()) {
-            parameters.put("time_expire", DateUtils.formatDate(order.getExpirationTime(), DateUtils.YYYYMMDDHHMMSS));
+            parameters.put("time_expire", DateUtils.formatDate(order.getExpirationTime(), DateUtils.YYYY_MM_DD_T_HH_MM_SS_XX));
         }
         OrderParaStructure.loadParameters(parameters, "attach", order.getAddition());
         wxParameterStructure.initNotifyUrl(parameters, order);

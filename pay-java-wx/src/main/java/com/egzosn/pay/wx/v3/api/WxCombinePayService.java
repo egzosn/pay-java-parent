@@ -89,8 +89,8 @@ public class WxCombinePayService extends WxPayService {
         // 订单号
         parameters.put(WxConst.COMBINE_OUT_TRADE_NO, order.getOutTradeNo());
 
-        OrderParaStructure.loadDateParameters(parameters, WxConst.TIME_START, order, DateUtils.YYYY_MM_DD_T_HH_MM_SS);
-        OrderParaStructure.loadDateParameters(parameters, WxConst.TIME_EXPIRE, order, DateUtils.YYYY_MM_DD_T_HH_MM_SS);
+        OrderParaStructure.loadDateParameters(parameters, WxConst.TIME_START, order, DateUtils.YYYY_MM_DD_T_HH_MM_SS_XX);
+        OrderParaStructure.loadDateParameters(parameters, WxConst.TIME_EXPIRE, order, DateUtils.YYYY_MM_DD_T_HH_MM_SS_XX);
         initNotifyUrl(parameters, order);
         //支付场景描述
         OrderParaStructure.loadParameters(parameters, WxConst.SCENE_INFO, order);

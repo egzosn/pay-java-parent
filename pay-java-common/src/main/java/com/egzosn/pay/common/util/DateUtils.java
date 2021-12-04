@@ -58,7 +58,8 @@ public final class DateUtils {
     }
 
     public static final String YYYY_MM_DD_HH_MM_SS = "yyyy-MM-dd HH:mm:ss";
-    public static final String YYYY_MM_DD_T_HH_MM_SS = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
+    public static final String YYYY_MM_DD_T_HH_MM_SS_SSSXXX = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
+    public static final String YYYY_MM_DD_T_HH_MM_SS_XX = "yyyy-MM-dd'T'HH:mm:ssXXX";
     public static final String YYYY_MM_DD = "yyyy-MM-dd";
     public static final String YYYYMMDD = "yyyyMMdd";
     public static final String YYYYMMDDHHMMSS = "yyyyMMddHHmmss";
