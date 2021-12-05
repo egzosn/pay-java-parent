@@ -262,6 +262,9 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
         TransactionType transactionType = order.getTransactionType();
         ((WxTransactionType) transactionType).setAttribute(parameters, order);
 
+        // 订单附加信息，可用于预设未提供的参数，这里会覆盖以上所有的订单信息，
+        parameters.putAll(order.getAttrs());
+
         return getAssistService().doExecute(parameters, order);
     }
 
