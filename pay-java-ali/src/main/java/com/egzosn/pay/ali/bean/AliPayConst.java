@@ -68,4 +68,13 @@ public final class AliPayConst {
     public static final String REFUND_REASON = "refund_reason";
     public static final String QUERY_OPTIONS = "query_options";
     public static final String OUT_REQUEST_NO = "out_request_no";
+    /**
+     *  	用户付款中途退出返回商户网站的地址
+     */
+    public static final String QUIT_URL = "quit_url";
+    /**
+     * 请求来源地址。如果使用ALIAPP的集成方式，用户中途取消支付会返回该地址。
+     */
+    public static final String REQUEST_FROM_URL = "request_from_url";
+    public static final String DBACK_AMOUNT = "dback_amount";
 }

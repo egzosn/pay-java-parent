@@ -10,6 +10,7 @@ import static com.egzosn.pay.ali.bean.AliPayConst.ALIPAY_CERT_SN_FIELD;
 import static com.egzosn.pay.ali.bean.AliPayConst.APP_AUTH_TOKEN;
 import static com.egzosn.pay.ali.bean.AliPayConst.BIZ_CONTENT;
 import static com.egzosn.pay.ali.bean.AliPayConst.CODE;
+import static com.egzosn.pay.ali.bean.AliPayConst.DBACK_AMOUNT;
 import static com.egzosn.pay.ali.bean.AliPayConst.HTTPS_REQ_URL;
 import static com.egzosn.pay.ali.bean.AliPayConst.NOTIFY_URL;
 import static com.egzosn.pay.ali.bean.AliPayConst.PASSBACK_PARAMS;
@@ -61,7 +62,7 @@ import com.egzosn.pay.common.util.str.StringUtils;
  * email egzosn@gmail.com
  * date 2017-2-22 20:09
  */
-public class AliPayService extends BasePayService<AliPayConfigStorage> {
+public class AliPayService extends BasePayService<AliPayConfigStorage> implements AliPayServiceInf {
 
 
     /**
@@ -184,7 +185,6 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
     }
 
 
-
     /**
      * 生成并设置签名
      *
@@ -249,6 +249,8 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
             case PAGE:
                 bizContent.put(PASSBACK_PARAMS, order.getAddition());
                 bizContent.put(PRODUCT_CODE, "FAST_INSTANT_TRADE_PAY");
+                bizContent.put(AliPayConst.REQUEST_FROM_URL, payConfigStorage.getReturnUrl());
+                OrderParaStructure.loadParameters(bizContent, AliPayConst.REQUEST_FROM_URL, order);
                 setReturnUrl(orderInfo, order);
                 break;
             case WAP:
@@ -259,6 +261,9 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
                 //默认值为QUICK_WAP_PAY。
                 bizContent.put(PRODUCT_CODE, "QUICK_WAP_PAY");
                 OrderParaStructure.loadParameters(bizContent, PRODUCT_CODE, order);
+
+                bizContent.put(AliPayConst.QUIT_URL, payConfigStorage.getReturnUrl());
+                OrderParaStructure.loadParameters(bizContent, AliPayConst.QUIT_URL, order);
                 setReturnUrl(orderInfo, order);
                 break;
             case APP:
@@ -314,12 +319,24 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
      * @return 放回公共请求参数
      */
     protected Map<String, Object> getPublicParameters(TransactionType transactionType) {
+        boolean depositBack = transactionType == AliTransactionType.REFUND_DEPOSITBACK_COMPLETED;
         Map<String, Object> orderInfo = new TreeMap<>();
         orderInfo.put("app_id", payConfigStorage.getAppId());
-        orderInfo.put("method", transactionType.getMethod());
         orderInfo.put("charset", payConfigStorage.getInputCharset());
-        orderInfo.put("timestamp", DateUtils.format(new Date()));
-        orderInfo.put("version", "1.0");
+        String method = "method";
+        String version = "1.0";
+        if (depositBack) {
+            method = "msg_method";
+            orderInfo.put("utc_timestamp", System.currentTimeMillis());
+            version = "1.1";
+        }
+        else {
+            orderInfo.put("timestamp", DateUtils.format(new Date()));
+        }
+
+        orderInfo.put(method, transactionType.getMethod());
+        orderInfo.put("version", version);
+
         loadCertSn(orderInfo);
         return orderInfo;
     }
@@ -482,7 +499,6 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
     }
 
 
-
     /**
      * 交易关闭接口
      *
@@ -544,12 +560,19 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
 
     /**
      * 申请退款接口
+     * 兼容 收单退款冲退完成通知 {@link #refundDepositBackCompleted(RefundOrder)} 与 {@link com.egzosn.pay.ali.bean.RefundDepositBackCompletedNotify}
      *
      * @param refundOrder 退款订单信息
      * @return 返回支付方申请退款后的结果
      */
     @Override
     public AliRefundResult refund(RefundOrder refundOrder) {
+        if (null != refundOrder.getTransactionType() && refundOrder.getTransactionType() == AliTransactionType.REFUND_DEPOSITBACK_COMPLETED) {
+            String status = refundDepositBackCompleted(refundOrder);
+            AliRefundResult result = new AliRefundResult();
+            result.setCode(status);
+            return result;
+        }
         //获取公共参数
         Map<String, Object> parameters = getPublicParameters(AliTransactionType.REFUND);
         setAppAuthToken(parameters, refundOrder.getAttrs());
@@ -557,9 +580,9 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
         Map<String, Object> bizContent = getBizContent(refundOrder.getTradeNo(), refundOrder.getOutTradeNo(), null);
         OrderParaStructure.loadParameters(bizContent, AliPayConst.OUT_REQUEST_NO, refundOrder.getRefundNo());
         bizContent.put("refund_amount", Util.conversionAmount(refundOrder.getRefundAmount()));
-        OrderParaStructure.loadParameters(bizContent,  AliPayConst.REFUND_REASON, refundOrder.getDescription());
-        OrderParaStructure.loadParameters(bizContent,  AliPayConst.REFUND_REASON, refundOrder);
-        OrderParaStructure.loadParameters(bizContent,"refund_royalty_parameters", refundOrder);
+        OrderParaStructure.loadParameters(bizContent, AliPayConst.REFUND_REASON, refundOrder.getDescription());
+        OrderParaStructure.loadParameters(bizContent, AliPayConst.REFUND_REASON, refundOrder);
+        OrderParaStructure.loadParameters(bizContent, "refund_royalty_parameters", refundOrder);
         OrderParaStructure.loadParameters(bizContent, AliPayConst.QUERY_OPTIONS, refundOrder);
         //设置请求参数的集合
         parameters.put(BIZ_CONTENT, JSON.toJSONString(bizContent));
@@ -586,7 +609,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
         setAppAuthToken(parameters, refundOrder.getAttrs());
         Map<String, Object> bizContent = getBizContent(refundOrder.getTradeNo(), refundOrder.getOutTradeNo(), null);
         OrderParaStructure.loadParameters(bizContent, AliPayConst.OUT_REQUEST_NO, refundOrder.getRefundNo());
-        OrderParaStructure.loadParameters(bizContent,  AliPayConst.QUERY_OPTIONS, refundOrder);
+        OrderParaStructure.loadParameters(bizContent, AliPayConst.QUERY_OPTIONS, refundOrder);
 //        bizContent.putAll(refundOrder.getAttrs());
         //设置请求参数的集合
         parameters.put(BIZ_CONTENT, JSON.toJSONString(bizContent));
@@ -782,4 +805,37 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> {
     public PayMessage createMessage(Map<String, Object> message) {
         return AliPayMessage.create(message);
     }
+
+    /**
+     * 收单退款冲退完成通知
+     * 退款存在退到银行卡场景下时，收单会根据银行回执消息发送退款完成信息
+     *
+     * @param refundOrder 退款订单
+     * @return fail    消息获取失败	是  success	消息获取成功	否
+     */
+    @Override
+    public String refundDepositBackCompleted(RefundOrder refundOrder) {
+        //获取公共参数
+        Map<String, Object> parameters = getPublicParameters(refundOrder.getTransactionType());
+        OrderParaStructure.loadParameters(parameters, "notify_id", refundOrder);
+        OrderParaStructure.loadParameters(parameters, "msg_type", refundOrder);
+        OrderParaStructure.loadParameters(parameters, "msg_uid", refundOrder);
+        OrderParaStructure.loadParameters(parameters, "msg_app_id", refundOrder);
+
+        Map<String, Object> bizContent = getBizContent(refundOrder.getTradeNo(), refundOrder.getOutTradeNo(), null);
+        OrderParaStructure.loadParameters(bizContent, AliPayConst.OUT_REQUEST_NO, refundOrder.getRefundNo());
+        OrderParaStructure.loadParameters(bizContent, "dback_status", refundOrder);
+        bizContent.put(DBACK_AMOUNT, refundOrder.getRefundAmount());
+        OrderParaStructure.loadParameters(bizContent, DBACK_AMOUNT, refundOrder);
+        OrderParaStructure.loadParameters(bizContent, "bank_ack_time", refundOrder);
+        OrderParaStructure.loadParameters(bizContent, "est_bank_receipt_time", refundOrder);
+        //设置请求参数的集合
+        parameters.put(BIZ_CONTENT, JSON.toJSONString(bizContent));
+        //设置签名
+        setSign(parameters);
+
+        return null;
+    }
+
+
 }
