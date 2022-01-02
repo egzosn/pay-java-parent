@@ -297,7 +297,7 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage> implem
         header.addHeader(new BasicHeader("prefer", "return=representation"));
         entity.setHeaders(header);
         JSONObject resp = getHttpRequestTemplate().postForObject(getReqUrl(order.getTransactionType()), entity, JSONObject.class);
-        if ("created".equals(resp.getString("state")) && StringUtils.isNotEmpty(resp.getString("id"))) {
+        if ("created".equalsIgnoreCase(resp.getString("state")) && StringUtils.isNotEmpty(resp.getString("id"))) {
             order.setTradeNo(resp.getString("id"));
         }
         return preOrderHandler(resp, order);
