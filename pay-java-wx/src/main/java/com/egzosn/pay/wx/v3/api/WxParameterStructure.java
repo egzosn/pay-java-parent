@@ -82,11 +82,12 @@ public class WxParameterStructure {
      *
      * @return 商户相关信息
      */
-    public String getMchParameters() {
+    public Map<String, Object> getMchParameters() {
         Map<String, Object> attr = initSubMchId(null);
         OrderParaStructure.loadParameters(attr, payConfigStorage.isPartner() ? WxConst.SP_MCH_ID : WxConst.MCH_ID, payConfigStorage.getMchId());
-        return UriVariables.getMapToParameters(attr);
+        return attr;
     }
+
 
     /**
      * 初始化商户相关信息

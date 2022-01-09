@@ -462,7 +462,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
     public Map<String, Object> query(AssistOrder assistOrder) {
         String transactionId = assistOrder.getTradeNo();
         String outTradeNo = assistOrder.getOutTradeNo();
-        String parameters = wxParameterStructure.getMchParameters();
+        String parameters = UriVariables.getMapToParameters(wxParameterStructure.getMchParameters());
         WxTransactionType transactionType = WxTransactionType.QUERY_TRANSACTION_ID;
         String uriVariable = transactionId;
         if (StringUtils.isNotEmpty(outTradeNo)) {
@@ -495,7 +495,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
      */
     @Override
     public Map<String, Object> close(AssistOrder assistOrder) {
-        String parameters = wxParameterStructure.getMchParameters();
+        String parameters = JSON.toJSONString(wxParameterStructure.getMchParameters());
         return getAssistService().doExecute(parameters, WxTransactionType.CLOSE, assistOrder.getOutTradeNo());
     }
 
