@@ -136,11 +136,10 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
      *
      * @param publicKey 公钥原始字符串
      * @return X509标准公钥
-     * @throws InvalidKeySpecException
-     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeySpecException InvalidKeySpecException
+     * @throws NoSuchAlgorithmException NoSuchAlgorithmException
      */
-    private static PublicKey getPublicKeyX509(String publicKey) throws InvalidKeySpecException,
-            NoSuchAlgorithmException {
+    private static PublicKey getPublicKeyX509(String publicKey) throws InvalidKeySpecException, NoSuchAlgorithmException {
         if (StringUtils.isEmpty(publicKey)) {
             return null;
         }
@@ -154,7 +153,7 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
      *
      * @param params 待签名参数集合
      * @return 待签名内容
-     * @throws UnsupportedEncodingException
+     * @throws UnsupportedEncodingException UnsupportedEncodingException
      */
     private String signContent(Map<String, Object> params) throws UnsupportedEncodingException {
         Map<String, String> sortedParams = new TreeMap<>(new Comparator<String>() {
@@ -197,22 +196,6 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
     private static boolean legalKey(String key) {
         return StringUtils.isNotBlank(key) && !SIGN_KEY.equalsIgnoreCase(key);
     }
-
-
-    /**
-     * 验证签名
-     *
-     * @param params 参数集
-     * @param sign   签名原文
-     * @return 结果
-     */
-    public boolean signVerify(Map<String, Object> params, String sign) {
-        String rsaSign = String.valueOf(params.get(RSA_SIGN));
-        String targetRsaSign = getRsaSign(params, RSA_SIGN);
-        LOG.debug("百度返回的签名: " + rsaSign + " 本地产生的签名: " + targetRsaSign);
-        return StringUtils.equals(rsaSign, targetRsaSign);
-    }
-
 
     /**
      * 返回创建的订单信息

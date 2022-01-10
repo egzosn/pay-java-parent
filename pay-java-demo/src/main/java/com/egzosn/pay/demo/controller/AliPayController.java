@@ -76,8 +76,8 @@ public class AliPayController {
         //设置证书存储方式，这里为路径
         aliPayConfigStorage.setCertStoreType(CertStoreType.CLASS_PATH);
         aliPayConfigStorage.setMerchantCert("ali/appCertPublicKey_2016080400165436.crt");
-        aliPayConfigStorage.setAliPayCert("ali/alipayCertPublicKey_RSA2.crt");
         aliPayConfigStorage.setAliPayRootCert("ali/alipayRootCert.crt");
+        aliPayConfigStorage.setAliPayCert("ali/alipayCertPublicKey_RSA2.crt");
     }
 
     @PostConstruct
