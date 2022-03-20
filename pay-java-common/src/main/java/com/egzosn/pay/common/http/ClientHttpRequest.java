@@ -284,6 +284,9 @@ public class ClientHttpRequest<T> extends HttpEntityEnclosingRequestBase impleme
         final StatusLine statusLine = response.getStatusLine();
         final HttpEntity entity = response.getEntity();
 
+        if (null == entity){
+            return null;
+        }
         String[] value = null;
         if (null == entity.getContentType()) {
             value = new String[]{"application/x-www-form-urlencoded"};
