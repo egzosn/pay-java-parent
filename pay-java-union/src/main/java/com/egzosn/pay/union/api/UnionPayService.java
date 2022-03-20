@@ -31,6 +31,7 @@ import com.egzosn.pay.common.bean.BillType;
 
 import com.egzosn.pay.common.bean.MethodType;
 import com.egzosn.pay.common.bean.NoticeParams;
+import com.egzosn.pay.common.bean.OrderParaStructure;
 import com.egzosn.pay.common.bean.PayMessage;
 import com.egzosn.pay.common.bean.PayOrder;
 import com.egzosn.pay.common.bean.PayOutMessage;
@@ -166,6 +167,21 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
         return String.format(FILE_TRANS_URL, getReqUrl());
     }
 
+    /**
+     * 后台通知地址
+     *
+     * @param parameters 预订单信息
+     * @param order      订单
+     * @return 预订单信息
+     */
+    private Map<String, Object> initNotifyUrl(Map<String, Object> parameters, AssistOrder order) {
+        //后台通知地址
+        OrderParaStructure.loadParameters(parameters, SDKConstants.param_backUrl, payConfigStorage.getNotifyUrl());
+        OrderParaStructure.loadParameters(parameters, SDKConstants.param_backUrl, order.getNotifyUrl());
+        OrderParaStructure.loadParameters(parameters, SDKConstants.param_backUrl, order);
+        return parameters;
+    }
+
 
     /**
      * 银联全渠道系统，产品参数，除了encoding自行选择外其他不需修改
@@ -182,11 +198,11 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
         //商户代码
         params.put(SDKConstants.param_merId, payConfigStorage.getPid());
 
-        DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
         //订单发送时间
-        params.put(SDKConstants.param_txnTime, df.format(System.currentTimeMillis()));
+        params.put(SDKConstants.param_txnTime, DateUtils.formatDate(new Date(), DateUtils.YYYYMMDDHHMMSS));
         //后台通知地址
         params.put(SDKConstants.param_backUrl, payConfigStorage.getNotifyUrl());
+
         //交易币种
         params.put(SDKConstants.param_currencyCode, "156");
         //接入类型，商户接入填0 ，不需修改（0：直连商户， 1： 收单机构 2：平台商户）
@@ -282,7 +298,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
         Map<String, Object> params = this.getCommonParam();
 
         UnionTransactionType type = (UnionTransactionType) order.getTransactionType();
-
+        initNotifyUrl(params, order);
 
         //设置交易类型相关的参数
         type.convertMap(params);
@@ -645,7 +661,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
         String responseStr = getHttpRequestTemplate().postForObject(this.getBackTransUrl(), params, String.class);
         JSONObject response = UriVariables.getParametersToMap(responseStr);
 
-        if (this.verify(response)) {
+        if (this.verify(new NoticeParams(response))) {
             final UnionRefundResult refundResult = UnionRefundResult.create(response);
             if (SDKConstants.OK_RESP_CODE.equals(refundResult.getRespCode())) {
                 return refundResult;

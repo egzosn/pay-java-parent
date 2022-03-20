@@ -13,6 +13,7 @@ import com.egzosn.pay.common.bean.BillType;
 import com.egzosn.pay.common.bean.MethodType;
 import com.egzosn.pay.common.bean.NoticeParams;
 import com.egzosn.pay.common.bean.NoticeRequest;
+import com.egzosn.pay.common.bean.OrderParaStructure;
 import com.egzosn.pay.common.bean.PayMessage;
 import com.egzosn.pay.common.bean.PayOrder;
 import com.egzosn.pay.common.bean.PayOutMessage;
@@ -72,6 +73,10 @@ public class FuiouPayService extends BasePayService<FuiouPayConfigStorage> {
      * 3.4订单退款
      */
     public static final String URL_NewSmpRefundGate = "newSmpRefundGate.do";
+    /**
+     * 异步通知
+     */
+    public static final String BACK_NOTIFY_URL = "back_notify_url";
 
 
     /**
@@ -199,7 +204,12 @@ public class FuiouPayService extends BasePayService<FuiouPayConfigStorage> {
         parameters.put("md5", sign);
         return parameters;
     }
-
+    private Map<String, Object> initNotifyUrl(Map<String, Object> parameters, AssistOrder order) {
+        OrderParaStructure.loadParameters(parameters, BACK_NOTIFY_URL, payConfigStorage.getNotifyUrl());
+        OrderParaStructure.loadParameters(parameters, BACK_NOTIFY_URL, order.getNotifyUrl());
+        OrderParaStructure.loadParameters(parameters, BACK_NOTIFY_URL, order);
+        return parameters;
+    }
     /**
      * 按序添加请求参数
      *
@@ -222,8 +232,7 @@ public class FuiouPayService extends BasePayService<FuiouPayConfigStorage> {
         //商户接受支付结果通知地址
         parameters.put("page_notify_url", payConfigStorage.getReturnUrl());
         //商户接受的支付结果后台通知地址 //非必填
-        parameters.put("back_notify_url", StringUtils.isBlank(payConfigStorage.getNotifyUrl()) ? "" : payConfigStorage.getNotifyUrl());
-
+        initNotifyUrl(parameters, order);
         if (null != order.getExpirationTime()) {
             parameters.put("order_valid_time", DateUtils.minutesRemaining(order.getExpirationTime()) + "m");
         }

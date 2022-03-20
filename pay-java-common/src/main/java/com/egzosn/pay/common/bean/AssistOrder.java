@@ -29,6 +29,12 @@ public class AssistOrder implements Order {
      * 交易类型
      */
     private TransactionType transactionType;
+
+    /**
+     * 异步回调通知
+     */
+    private String notifyUrl;
+
     /**
      * 订单附加信息，可用于预设未提供的参数，这里会覆盖以上所有的订单信息，
      */
@@ -122,5 +128,11 @@ public class AssistOrder implements Order {
         getAttrs().put(key, value);
     }
 
+    public String getNotifyUrl() {
+        return notifyUrl;
+    }
 
+    public void setNotifyUrl(String notifyUrl) {
+        this.notifyUrl = notifyUrl;
+    }
 }
