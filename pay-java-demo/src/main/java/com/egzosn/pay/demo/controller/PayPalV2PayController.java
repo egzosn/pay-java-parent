@@ -165,7 +165,13 @@ public class PayPalV2PayController {
      * 业务处理在对应的PayMessageHandler里面处理，在哪里设置PayMessageHandler，详情查看{@link com.egzosn.pay.common.api.PayService#setPayMessageHandler(com.egzosn.pay.common.api.PayMessageHandler)}
      * <p>
      * 如果未设置 {@link com.egzosn.pay.common.api.PayMessageHandler} 那么会使用默认的 {@link com.egzosn.pay.common.api.DefaultPayMessageHandler}
-     * @throws IOException IOException
+     * 付款之后不会进行扣款，需要调用 {@link PayPalPayService#ordersCapture(java.lang.String)}进行扣款，并返回 captureId使用，后续退款，查订单等等使用，用来替换下单返回的id
+     * 注意：最好在付款成功之后回调时进行调用 {@link PayPalPayService#ordersCapture(java.lang.String)}
+     * 确认订单并返回确认后订单信息
+     * <b>注意：此方法一个订单只能调用一次, 建议在支付回调时进行调用</b>
+     * 这里主要用来获取captureId使用，后续退款，查订单等等使用，用来替换下单返回的id
+     * 详情： https://developer.paypal.com/docs/api/orders/v2/#orders_capture
+     *
      */
     @RequestMapping(value = "payBack.json")
     public String payBack(HttpServletRequest request)  {

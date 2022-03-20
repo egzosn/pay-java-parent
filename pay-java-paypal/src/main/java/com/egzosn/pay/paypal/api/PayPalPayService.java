@@ -195,7 +195,7 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage> {
             transaction.setDescription(order.getBody());
         }
         transaction.setAmount(amount);
-
+        transaction.setCustom(order.getOutTradeNo());
         List<Transaction> transactions = new ArrayList<>();
         transactions.add(transaction);
 
