@@ -213,8 +213,10 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> implement
         return setSign(getOrder(order));
     }
 
-    private void setNotifyUrl(Map<String, Object> orderInfo, PayOrder order) {
-        orderInfo.put(NOTIFY_URL, payConfigStorage.getNotifyUrl());
+    private void setNotifyUrl(Map<String, Object> orderInfo, AssistOrder order) {
+//        orderInfo.put(NOTIFY_URL, payConfigStorage.getNotifyUrl());
+        OrderParaStructure.loadParameters(orderInfo, NOTIFY_URL, payConfigStorage.getNotifyUrl());
+        OrderParaStructure.loadParameters(orderInfo, NOTIFY_URL,  order.getNotifyUrl());
         OrderParaStructure.loadParameters(orderInfo, NOTIFY_URL, order);
     }
 
