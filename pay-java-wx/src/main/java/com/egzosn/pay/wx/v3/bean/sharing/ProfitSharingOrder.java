@@ -101,6 +101,6 @@ public class ProfitSharingOrder extends PayOrder {
 
     public void setUnfreezeUnsplit(Boolean unfreezeUnsplit) {
         this.unfreezeUnsplit = unfreezeUnsplit;
-        addAttr(WxConst.UNFREEZE_UNSPLIT, receivers);
+        addAttr(WxConst.UNFREEZE_UNSPLIT, unfreezeUnsplit);
     }
 }

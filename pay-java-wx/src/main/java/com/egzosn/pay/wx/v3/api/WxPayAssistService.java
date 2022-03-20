@@ -8,7 +8,7 @@ import org.apache.http.HttpEntity;
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.bean.PayOrder;
 import com.egzosn.pay.common.bean.TransactionType;
-import com.egzosn.pay.common.http.HttpStringEntity;
+import com.egzosn.pay.common.http.ResponseEntity;
 
 /**
  * 微信支付辅助服务
@@ -39,6 +39,16 @@ public interface WxPayAssistService {
      * @return 响应内容体
      */
     JSONObject doExecute(String body, TransactionType transactionType, Object... uriVariables);
+
+    /**
+     * 发起请求
+     *
+     * @param body            请求内容
+     * @param transactionType 交易类型
+     * @param uriVariables    用于匹配表达式
+     * @return 响应内容体
+     */
+    ResponseEntity<JSONObject> doExecuteEntity(String body, TransactionType transactionType, Object... uriVariables);
 
     /**
      * 发起请求

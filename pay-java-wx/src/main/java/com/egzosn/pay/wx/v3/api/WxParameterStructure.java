@@ -4,10 +4,9 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import com.egzosn.pay.common.bean.Order;
+import com.egzosn.pay.common.bean.AssistOrder;
 import com.egzosn.pay.common.bean.OrderParaStructure;
 import com.egzosn.pay.common.bean.PayOrder;
-import com.egzosn.pay.common.http.UriVariables;
 import com.egzosn.pay.common.util.MapGen;
 import com.egzosn.pay.wx.v3.utils.WxConst;
 
@@ -71,8 +70,9 @@ public class WxParameterStructure {
      * @param parameters 订单参数
      * @param order      订单信息
      */
-    public void initNotifyUrl(Map<String, Object> parameters, Order order) {
+    public void initNotifyUrl(Map<String, Object> parameters, AssistOrder order) {
         OrderParaStructure.loadParameters(parameters, WxConst.NOTIFY_URL, payConfigStorage.getNotifyUrl());
+        OrderParaStructure.loadParameters(parameters, WxConst.NOTIFY_URL, order.getNotifyUrl());
         OrderParaStructure.loadParameters(parameters, WxConst.NOTIFY_URL, order);
     }
 

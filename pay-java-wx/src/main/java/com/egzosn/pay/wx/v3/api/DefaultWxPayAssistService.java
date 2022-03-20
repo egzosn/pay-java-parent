@@ -2,25 +2,19 @@ package com.egzosn.pay.wx.v3.api;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
-import java.security.Signature;
 import java.security.cert.Certificate;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.message.BasicHeader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.apache.http.entity.ContentType.APPLICATION_JSON;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.egzosn.pay.common.bean.MethodType;
-import com.egzosn.pay.common.bean.NoticeParams;
 import com.egzosn.pay.common.bean.PayOrder;
 import com.egzosn.pay.common.bean.TransactionType;
 import com.egzosn.pay.common.exception.PayErrorException;
@@ -30,9 +24,6 @@ import com.egzosn.pay.common.http.ResponseEntity;
 import com.egzosn.pay.common.http.UriVariables;
 import com.egzosn.pay.common.util.DateUtils;
 import com.egzosn.pay.common.util.sign.SignTextUtils;
-import com.egzosn.pay.common.util.sign.encrypt.Base64;
-import com.egzosn.pay.common.util.sign.encrypt.RSA;
-import com.egzosn.pay.common.util.sign.encrypt.RSA2;
 import com.egzosn.pay.common.util.str.StringUtils;
 import com.egzosn.pay.wx.bean.WxPayError;
 import com.egzosn.pay.wx.v3.bean.WxTransactionType;
@@ -84,7 +75,7 @@ public class DefaultWxPayAssistService implements WxPayAssistService {
      * @param uriVariables    用于匹配表达式
      * @return 响应内容体
      */
-    public JSONObject doExecute(String body, TransactionType transactionType, Object... uriVariables) {
+    public ResponseEntity<JSONObject> doExecuteEntity(String body, TransactionType transactionType, Object... uriVariables) {
         String reqUrl = UriVariables.getUri(wxPayService.getReqUrl(transactionType), uriVariables);
         MethodType method = MethodType.valueOf(transactionType.getMethod());
         if (MethodType.GET == method && StringUtils.isNotEmpty(body)) {
@@ -93,6 +84,19 @@ public class DefaultWxPayAssistService implements WxPayAssistService {
         }
         HttpEntity entity = buildHttpEntity(reqUrl, body, transactionType.getMethod());
         ResponseEntity<JSONObject> responseEntity = requestTemplate.doExecuteEntity(reqUrl, entity, JSONObject.class, method);
+        return responseEntity;
+    }
+
+    /**
+     * 发起请求
+     *
+     * @param body            请求内容
+     * @param transactionType 交易类型
+     * @param uriVariables    用于匹配表达式
+     * @return 响应内容体
+     */
+    public JSONObject doExecute(String body, TransactionType transactionType, Object... uriVariables) {
+        final ResponseEntity<JSONObject> responseEntity = doExecuteEntity(body, transactionType, uriVariables);
         int statusCode = responseEntity.getStatusCode();
         JSONObject responseBody = responseEntity.getBody();
         if (statusCode >= 400) {

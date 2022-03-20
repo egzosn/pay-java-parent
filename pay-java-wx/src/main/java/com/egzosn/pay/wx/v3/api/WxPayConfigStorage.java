@@ -72,7 +72,7 @@ public class WxPayConfigStorage extends BasePayConfigStorage {
     /**
      * 证书信息
      */
-    private CertEnvironment certEnvironment;
+    private volatile CertEnvironment certEnvironment;
 
     /**
      * 是否为服务商模式, 默认为false
@@ -233,6 +233,7 @@ public class WxPayConfigStorage extends BasePayConfigStorage {
     }
 
     public CertEnvironment getCertEnvironment() {
+        loadCertEnvironment();
         return certEnvironment;
     }
 

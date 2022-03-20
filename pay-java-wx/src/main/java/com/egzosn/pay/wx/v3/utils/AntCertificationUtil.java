@@ -21,8 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.crypto.Cipher;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import javax.management.openmbean.InvalidKeyException;
 
 import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.util.sign.encrypt.Base64;
@@ -57,10 +56,6 @@ public final class AntCertificationUtil {
         }
 
         try {
-            if (null == Security.getProvider("BC")) {
-                Security.removeProvider("SunEC");
-                Security.addProvider(new BouncyCastleProvider());
-            }
             PKCS12_KEY_STORE = KeyStore.getInstance("PKCS12");
         }
         catch (KeyStoreException e) {
@@ -126,6 +121,9 @@ public final class AntCertificationUtil {
             PublicKey publicKey = certificate.getPublicKey();
             PrivateKey privateKey = (PrivateKey) PKCS12_KEY_STORE.getKey(keyAlias, pem);
             return new CertEnvironment(privateKey, publicKey, serialNumber);
+        }
+        catch (InvalidKeyException e) {
+            throw new PayErrorException(new WxPayError(WxConst.FAILURE, "获取公私钥失败， 解决方式：替换jre包：local_policy.jar，US_export_policy.jar"), e);
         }
         catch (GeneralSecurityException e) {
             throw new PayErrorException(new WxPayError(WxConst.FAILURE, "获取公私钥失败"), e);

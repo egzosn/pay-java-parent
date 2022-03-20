@@ -16,15 +16,15 @@ public enum WxProfitSharingTransactionType implements TransactionType {
     /**
      * 请求分账
      */
-    ORDERS("/v3/profitsharing/orders ", MethodType.POST),
+    ORDERS("/v3/profitsharing/orders", MethodType.POST),
     /**
      * 查询分账结果
      */
-    ORDERS_RESULT("/v3/profitsharing/orders/{out_order_no} ", MethodType.POST),
+    ORDERS_RESULT("/v3/profitsharing/orders/{out_order_no}", MethodType.GET),
     /**
      * 请求分账回退
      */
-    RETURN_ORDERS("/v3/profitsharing/return-orders ", MethodType.POST),
+    RETURN_ORDERS("/v3/profitsharing/return-orders", MethodType.POST),
     /**
      * 查询分账回退结果
      */
@@ -32,19 +32,19 @@ public enum WxProfitSharingTransactionType implements TransactionType {
     /**
      * 解冻剩余资金
      */
-    ORDERS_UNFREEZE("/v3/profitsharing/orders/unfreeze ", MethodType.POST),
+    ORDERS_UNFREEZE("/v3/profitsharing/orders/unfreeze", MethodType.POST),
     /**
      * 查询剩余待分金额
      */
-    AMOUNTS("/v3/profitsharing/transactions/{transaction_id}/amounts ", MethodType.GET),
+    AMOUNTS("/v3/profitsharing/transactions/{transaction_id}/amounts", MethodType.GET),
     /**
      * 服务商专用-查询最大分账比例
      */
-    MCH_CONFIG("/v3/profitsharing/merchant-configs/{sub_mchid} ", MethodType.GET),
+    MCH_CONFIG("/v3/profitsharing/merchant-configs/{sub_mchid}", MethodType.GET),
     /**
      * 添加分账接收方
      */
-    RECEIVERS_ADD("/v3/profitsharing/receivers/add ", MethodType.POST),
+    RECEIVERS_ADD("/v3/profitsharing/receivers/add", MethodType.POST),
     /**
      * 删除分账接收方
      */
