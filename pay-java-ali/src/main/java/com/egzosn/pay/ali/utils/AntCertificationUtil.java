@@ -10,9 +10,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
 import java.security.PublicKey;
-import java.security.Security;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.CertificateNotYetValidException;
@@ -24,7 +22,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,12 +41,7 @@ import com.egzosn.pay.common.util.str.StringUtils;
 public class AntCertificationUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(AntCertificationUtil.class);
 
-    static {
-        if (null == Security.getProvider("BC")) {
-            Security.removeProvider("SunEC");
-            Security.addProvider(new BouncyCastleProvider());
-        }
-    }
+
 
     /**
      * 验证证书是否可信
@@ -283,12 +275,11 @@ public class AntCertificationUtil {
 
     private static X509Certificate[] readPemCertChain(String cert) {
         ByteArrayInputStream inputStream = new ByteArrayInputStream(cert.getBytes());
-        CertificateFactory factory = null;
         try {
-            factory = CertificateFactory.getInstance("X.509");
+            CertificateFactory factory = CertificateFactory.getInstance("X.509", "BC");;
             Collection<? extends Certificate> certificates = factory.generateCertificates(inputStream);
             return certificates.toArray(new X509Certificate[certificates.size()]);
-        }  catch (CertificateException e) {
+        }  catch (GeneralSecurityException e) {
             LOGGER.error("提取根证书失败", e);
         }
         return null;

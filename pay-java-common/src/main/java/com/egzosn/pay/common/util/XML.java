@@ -240,10 +240,7 @@ public class XML {
                 }
             }
         }
-        catch (ParserConfigurationException e) {
-            throw new PayErrorException(new PayException("XML failure", "XML解析失败\n" + e.getMessage()));
-        }
-        catch (SAXException e) {
+        catch (ParserConfigurationException | SAXException e) {
             throw new PayErrorException(new PayException("XML failure", "XML解析失败\n" + e.getMessage()));
         }
         finally {
