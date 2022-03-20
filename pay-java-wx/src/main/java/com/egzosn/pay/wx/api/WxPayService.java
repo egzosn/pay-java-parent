@@ -25,6 +25,7 @@ import static com.egzosn.pay.wx.api.WxConst.HMAC_SHA256;
 import static com.egzosn.pay.wx.api.WxConst.MCH_ID;
 import static com.egzosn.pay.wx.api.WxConst.NONCE_STR;
 import static com.egzosn.pay.wx.api.WxConst.OUT_TRADE_NO;
+import static com.egzosn.pay.wx.api.WxConst.REQ_INFO;
 import static com.egzosn.pay.wx.api.WxConst.RESULT_CODE;
 import static com.egzosn.pay.wx.api.WxConst.RETURN_CODE;
 import static com.egzosn.pay.wx.api.WxConst.RETURN_MSG_CODE;
@@ -40,7 +41,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.api.BasePayService;
 import com.egzosn.pay.common.bean.AssistOrder;
 import com.egzosn.pay.common.bean.BillType;
-
 import com.egzosn.pay.common.bean.MethodType;
 import com.egzosn.pay.common.bean.NoticeParams;
 import com.egzosn.pay.common.bean.NoticeRequest;
@@ -65,6 +65,7 @@ import com.egzosn.pay.common.util.Util;
 import com.egzosn.pay.common.util.XML;
 import com.egzosn.pay.common.util.sign.SignTextUtils;
 import com.egzosn.pay.common.util.sign.SignUtils;
+import com.egzosn.pay.common.util.sign.encrypt.AES;
 import com.egzosn.pay.common.util.sign.encrypt.RSA2;
 import com.egzosn.pay.common.util.str.StringUtils;
 import com.egzosn.pay.wx.bean.RedpackOrder;
@@ -156,6 +157,11 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
      */
     public boolean verify(NoticeParams noticeParams) {
         final Map<String, Object> params = noticeParams.getBody();
+        //如果为退款不需要校验, 直接返回，
+        if (params.containsKey(REQ_INFO)){
+            return true;
+        }
+
         if (null == params.get(SIGN) || !(SUCCESS.equals(params.get(RETURN_CODE)) && SUCCESS.equals(params.get(RESULT_CODE)))) {
             if (LOG.isErrorEnabled()) {
                 LOG.error(String.format("微信支付异常：return_code=%s,参数集=%s", params.get(RETURN_CODE), params));
@@ -247,7 +253,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
 
         ((WxTransactionType) order.getTransactionType()).setAttribute(parameters, order);
         //可覆盖参数
-/*        OrderParaStructure.loadParameters(parameters, "notify_url", order);
+/*        OrderParaStructure.loadParameters(parameters, NOTIFY_URL, order);
         OrderParaStructure.loadParameters(parameters, "goods_tag", order);
         OrderParaStructure.loadParameters(parameters, "limit_pay", order);
         OrderParaStructure.loadParameters(parameters, "receipt", order);
@@ -286,7 +292,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
         ////统一下单
         JSONObject result = unifiedOrder(order);
         // 对微信返回的数据进行校验
-        if (verify(preOrderHandler(result, order))) {
+        if (verify(new NoticeParams(preOrderHandler(result, order)))) {
             //如果是扫码支付或者刷卡付无需处理，直接返回
             if (((WxTransactionType) order.getTransactionType()).isReturn()) {
                 return result;
@@ -395,6 +401,29 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
     /**
      * 将请求参数或者请求流转化为 Map
      *
+     * @param body 通知请求`
+     * @return 获得回调的请求参数
+     */
+    public Map<String, Object> getRefundNoticeParams(Map<String, Object> body) {
+        String reqInfo = (String) body.get(REQ_INFO);
+        if (StringUtils.isEmpty(reqInfo)) {
+            return body;
+        }
+        try {
+            String decrypt = AES.decrypt(reqInfo, payConfigStorage.getSecretKey(), payConfigStorage.getInputCharset());
+            JSONObject data = XML.toJSONObject(decrypt);
+            body.putAll(data);
+            return body;
+        }
+        catch (GeneralSecurityException | IOException e) {
+            throw new PayErrorException(new WxPayError(FAIL, e.getMessage()), e);
+        }
+    }
+
+
+    /**
+     * 将请求参数或者请求流转化为 Map
+     *
      * @param request 通知请求
      * @return 获得回调的请求参数
      */
@@ -403,13 +432,16 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
 
         TreeMap<String, Object> map = new TreeMap<String, Object>();
         try {
-            return new NoticeParams(XML.inputStream2Map(request.getInputStream(), map));
+            Map<String, Object> body = XML.inputStream2Map(request.getInputStream(), map);
+            body = getRefundNoticeParams(body);
+            return new NoticeParams(body);
         }
         catch (IOException e) {
             throw new PayErrorException(new PayException("IOException", e.getMessage()));
         }
 
     }
+
     /**
      * 获取输出消息，用户返回给支付端
      *
@@ -528,14 +560,15 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
 
         return secondaryInterface(transactionId, outTradeNo, WxTransactionType.CLOSE);
     }
+
     /**
      * 交易关闭接口
      *
-     * @param assistOrder    关闭订单
+     * @param assistOrder 关闭订单
      * @return 返回支付方交易关闭后的结果
      */
     @Override
-    public Map<String, Object> close(AssistOrder assistOrder){
+    public Map<String, Object> close(AssistOrder assistOrder) {
         return secondaryInterface(assistOrder.getTradeNo(), assistOrder.getOutTradeNo(), WxTransactionType.CLOSE);
     }
 
@@ -553,9 +586,10 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
     }
 
 
-    private Map<String, Object> initNotifyUrl(Map<String, Object> parameters, Order order) {
-        OrderParaStructure.loadParameters(parameters, "notify_url", payConfigStorage.getNotifyUrl());
-        OrderParaStructure.loadParameters(parameters, "notify_url", order);
+    private Map<String, Object> initNotifyUrl(Map<String, Object> parameters, AssistOrder order) {
+        OrderParaStructure.loadParameters(parameters, WxConst.NOTIFY_URL, payConfigStorage.getNotifyUrl());
+        OrderParaStructure.loadParameters(parameters, WxConst.NOTIFY_URL, order.getNotifyUrl());
+        OrderParaStructure.loadParameters(parameters, WxConst.NOTIFY_URL, order);
         return parameters;
     }
 
@@ -620,7 +654,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
      * @return 返回支付方下载对账单的结果
      */
     public Map<String, Object> downloadBill(Date billDate, String billType) {
-        return downloadBill(billDate,  WxPayBillType.valueOf(billType));
+        return downloadBill(billDate, WxPayBillType.valueOf(billType));
     }
 
     /**
@@ -637,7 +671,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
     public Map<String, Object> downloadBill(Date billDate, BillType billType) {
         //获取公共参数
         Map<String, Object> parameters = getPublicParameters();
-        parameters.put("bill_type", billType);
+        parameters.put("bill_type", billType.getType());
         //目前只支持日账单
         parameters.put(WxConst.BILL_DATE, DateUtils.formatDate(billDate, DateUtils.YYYYMMDD));
         String fileType = billType.getFileType();
@@ -811,12 +845,12 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
      * @param order 转账订单
      *              <pre>
      *
-     *                                                     注意事项：
-     *                                                     ◆ 当返回错误码为“SYSTEMERROR”时，请不要更换商户订单号，一定要使用原商户订单号重试，否则可能造成重复支付等资金风险。
-     *                                                     ◆ XML具有可扩展性，因此返回参数可能会有新增，而且顺序可能不完全遵循此文档规范，如果在解析回包的时候发生错误，请商户务必不要换单重试，请商户联系客服确认付款情况。如果有新回包字段，会更新到此API文档中。
-     *                                                     ◆ 因为错误代码字段err_code的值后续可能会增加，所以商户如果遇到回包返回新的错误码，请商户务必不要换单重试，请商户联系客服确认付款情况。如果有新的错误码，会更新到此API文档中。
-     *                                                     ◆ 错误代码描述字段err_code_des只供人工定位问题时做参考，系统实现时请不要依赖这个字段来做自动化处理。
-     *                                                     </pre>
+     * 注意事项：
+     * ◆ 当返回错误码为“SYSTEMERROR”时，请不要更换商户订单号，一定要使用原商户订单号重试，否则可能造成重复支付等资金风险。
+     * ◆ XML具有可扩展性，因此返回参数可能会有新增，而且顺序可能不完全遵循此文档规范，如果在解析回包的时候发生错误，请商户务必不要换单重试，请商户联系客服确认付款情况。如果有新回包字段，会更新到此API文档中。
+     * ◆ 因为错误代码字段err_code的值后续可能会增加，所以商户如果遇到回包返回新的错误码，请商户务必不要换单重试，请商户联系客服确认付款情况。如果有新的错误码，会更新到此API文档中。
+     * ◆ 错误代码描述字段err_code_des只供人工定位问题时做参考，系统实现时请不要依赖这个字段来做自动化处理。
+     * </pre>
      * @return 对应的转账结果
      */
     @Override

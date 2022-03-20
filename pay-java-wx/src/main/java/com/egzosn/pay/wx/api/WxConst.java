@@ -34,5 +34,7 @@ public interface WxConst {
     String OUT_TRADE_NO = "out_trade_no";
     String GZIP = "GZIP";
     String BILL_DATE = "bill_date";
+    String REQ_INFO = "req_info";
+    String NOTIFY_URL = "notify_url";
 
 }
