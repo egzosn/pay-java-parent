@@ -59,7 +59,7 @@
         <module>pay-java-paypal</module>
         <module>pay-java-yiji</module>
         <module>pay-java-baidu</module>
-        <!--<module>pay-java-demo</module>-->
+        <module>pay-java-demo</module>
 
     </modules>
 
