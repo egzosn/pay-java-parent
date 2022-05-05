@@ -7,7 +7,7 @@
     <groupId>com.egzosn</groupId>
     <artifactId>pay-java-parent</artifactId>
     <packaging>pom</packaging>
-    <version>2.14.4</version>
+    <version>2.14.4-fix</version>
 
     <name>Pay Java - Parent</name>
     <description>Pay Java Parent</description>
@@ -39,11 +39,6 @@
             <email>hocgin@gmail.com</email>
             <url>https://github.com/hocgin</url>
         </developer>
-        <developer>
-            <name>Menjoe</name>
-            <email>1030009014@qq.com</email>
-            <url>https://gitee.com/menjoe-z</url>
-        </developer>
     </developers>
     <scm>
         <connection>scm:git:https://github.com/egzosn/pay-java-parent.git</connection>
@@ -70,7 +65,7 @@
 
 
     <properties>
-        <pay.version>2.14.4</pay.version>
+        <pay.version>2.14.4-fix</pay.version>
         <httpmime.version>4.5.4</httpmime.version>
         <log4j.version>1.2.17</log4j.version>
         <fastjson.version>1.2.73</fastjson.version>

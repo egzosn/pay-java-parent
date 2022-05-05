@@ -1,33 +1,15 @@
 package com.egzosn.pay.common.util.sign;
 
 
-import java.io.UnsupportedEncodingException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.security.Security;
 import java.util.Map;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.UUID;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.apache.http.message.BasicNameValuePair;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import static com.egzosn.pay.common.util.sign.SignTextUtils.parameterText;
 
 import com.egzosn.pay.common.bean.SignType;
-import com.egzosn.pay.common.bean.result.PayException;
-import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.util.sign.encrypt.HmacSha256;
-import com.egzosn.pay.common.util.str.StringUtils;
 
 /**
  * 签名 工具
@@ -207,6 +189,16 @@ public enum SignUtils implements SignType {
     public boolean verify(Map params, String sign, String key, String characterEncoding) {
         //判断是否一样
         return this.verify(parameterText(params), sign, key, characterEncoding);
+    }
+
+    /**
+     * 初始化BC
+     */
+    public static void initBc() {
+        if (null == Security.getProvider("BC")) {
+            Security.removeProvider("SunEC");
+            Security.addProvider(new BouncyCastleProvider());
+        }
     }
 
 

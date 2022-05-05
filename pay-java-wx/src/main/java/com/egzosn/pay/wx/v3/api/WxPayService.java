@@ -98,6 +98,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
      */
     public WxPayService(WxPayConfigStorage payConfigStorage) {
         super(payConfigStorage);
+
     }
 
     /**
@@ -109,7 +110,9 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
     public WxPayService(WxPayConfigStorage payConfigStorage, HttpConfigStorage configStorage) {
         super(payConfigStorage, configStorage);
     }
-
+    {
+        initAfter();
+    }
 
     /**
      * 辅助api
@@ -132,7 +135,6 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
     /**
      * 初始化之后执行
      */
-    @Override
     protected void initAfter() {
         payConfigStorage.setPartner(StringUtils.isNotEmpty(payConfigStorage.getSubMchId()));
 //        new Thread(() -> {

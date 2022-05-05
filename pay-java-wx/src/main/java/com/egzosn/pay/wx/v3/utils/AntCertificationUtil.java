@@ -24,6 +24,7 @@ import javax.crypto.spec.SecretKeySpec;
 import javax.management.openmbean.InvalidKeyException;
 
 import com.egzosn.pay.common.exception.PayErrorException;
+import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.sign.encrypt.Base64;
 import com.egzosn.pay.wx.bean.WxPayError;
 import com.egzosn.pay.wx.v3.bean.CertEnvironment;
@@ -54,7 +55,7 @@ public final class AntCertificationUtil {
         if (javaVersion.contains("1.8") || javaVersion.startsWith("8")){
             Security.setProperty("crypto.policy", "unlimited");
         }
-
+        SignUtils.initBc();
         try {
             PKCS12_KEY_STORE = KeyStore.getInstance("PKCS12");
         }

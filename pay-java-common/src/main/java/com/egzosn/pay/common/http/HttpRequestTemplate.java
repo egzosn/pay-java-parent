@@ -428,7 +428,7 @@ public class HttpRequestTemplate {
             return new ResponseEntity<>(statusCode, allHeaders, body);
         }
         catch (IOException e) {
-            throw new PayErrorException(new PayException("IOException", e.getLocalizedMessage()));
+            throw new PayErrorException(new PayException("IOException", e.getLocalizedMessage()), e);
         }
         finally {
             httpRequest.releaseConnection();

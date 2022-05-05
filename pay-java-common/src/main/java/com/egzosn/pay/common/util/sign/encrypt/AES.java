@@ -2,13 +2,13 @@ package com.egzosn.pay.common.util.sign.encrypt;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.security.Security;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
+import com.egzosn.pay.common.util.sign.SignUtils;
 
 /**
  * AES 加解密
@@ -30,11 +30,9 @@ public class AES {
     private static final String ALGORITHM_MODE_PADDING = "AES/ECB/PKCS7Padding";
 
     static {
-        if (null == Security.getProvider("BC")) {
-            Security.removeProvider("SunEC");
-            Security.addProvider(new BouncyCastleProvider());
-        }
+        SignUtils.initBc();
     }
+
 
     /**
      * 解密

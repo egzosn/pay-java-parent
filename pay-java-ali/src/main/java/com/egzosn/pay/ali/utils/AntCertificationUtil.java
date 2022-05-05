@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.util.IOUtils;
+import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.sign.encrypt.Base64;
 import com.egzosn.pay.common.util.str.StringUtils;
 
@@ -41,7 +42,9 @@ import com.egzosn.pay.common.util.str.StringUtils;
 public class AntCertificationUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(AntCertificationUtil.class);
 
-
+    static {
+        SignUtils.initBc();
+    }
 
     /**
      * 验证证书是否可信
@@ -54,7 +57,8 @@ public class AntCertificationUtil {
         X509Certificate[] certificates;
         try {
             certificates = readPemCertChain(certContent);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             LOGGER.error("读取证书失败", e);
             throw new RuntimeException(e);
         }
@@ -63,7 +67,8 @@ public class AntCertificationUtil {
         try {
             X509Certificate[] certs = readPemCertChain(rootCertContent);
             rootCerts.addAll(Arrays.asList(certs));
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             LOGGER.error("读取根证书失败", e);
             throw new RuntimeException(e);
         }
@@ -81,10 +86,12 @@ public class AntCertificationUtil {
     private static boolean verifyCert(X509Certificate cert, X509Certificate[] rootCerts) {
         try {
             cert.checkValidity();
-        } catch (CertificateExpiredException e) {
+        }
+        catch (CertificateExpiredException e) {
             LOGGER.error("证书已经过期", e);
             return false;
-        } catch (CertificateNotYetValidException e) {
+        }
+        catch (CertificateNotYetValidException e) {
             LOGGER.error("证书未激活", e);
             return false;
         }
@@ -104,7 +111,8 @@ public class AntCertificationUtil {
         try {
             PublicKey publicKey = issuer.getPublicKey();
             verifySignature(publicKey, cert);
-        } catch (PayErrorException e) {
+        }
+        catch (PayErrorException e) {
             LOGGER.error("证书链验证失败", e);
             return false;
         }
@@ -155,10 +163,12 @@ public class AntCertificationUtil {
     private static boolean checkValidity(X509Certificate cert) {
         try {
             cert.checkValidity();
-        } catch (CertificateExpiredException e) {
+        }
+        catch (CertificateExpiredException e) {
             LOGGER.error("证书已经过期");
             return false;
-        } catch (CertificateNotYetValidException e) {
+        }
+        catch (CertificateNotYetValidException e) {
             LOGGER.error("证书未激活");
             return false;
         }
@@ -169,7 +179,8 @@ public class AntCertificationUtil {
     private static void verifySignature(PublicKey publicKey, X509Certificate cert) {
         try {
             cert.verify(publicKey);
-        } catch (GeneralSecurityException e) {
+        }
+        catch (GeneralSecurityException e) {
             throw new PayErrorException(new PayException("证书校验失败", e.getMessage()));
         }
     }
@@ -276,10 +287,12 @@ public class AntCertificationUtil {
     private static X509Certificate[] readPemCertChain(String cert) {
         ByteArrayInputStream inputStream = new ByteArrayInputStream(cert.getBytes());
         try {
-            CertificateFactory factory = CertificateFactory.getInstance("X.509", "BC");;
+            CertificateFactory factory = CertificateFactory.getInstance("X.509", "BC");
+            ;
             Collection<? extends Certificate> certificates = factory.generateCertificates(inputStream);
             return certificates.toArray(new X509Certificate[certificates.size()]);
-        }  catch (GeneralSecurityException e) {
+        }
+        catch (GeneralSecurityException e) {
             LOGGER.error("提取根证书失败", e);
         }
         return null;
@@ -308,13 +321,15 @@ public class AntCertificationUtil {
                     certSN = fillMD5(certSN);
                     if (StringUtils.isEmpty(rootCertSN)) {
                         rootCertSN = certSN;
-                    } else {
+                    }
+                    else {
                         rootCertSN = rootCertSN + "_" + certSN;
                     }
                 }
 
             }
-        }  catch (NoSuchAlgorithmException e) {
+        }
+        catch (NoSuchAlgorithmException e) {
             LOGGER.error("提取根证书失败", e);
         }
         return rootCertSN;
@@ -332,7 +347,8 @@ public class AntCertificationUtil {
             CertificateFactory factory = CertificateFactory.getInstance("X.509", "BC");
             X509Certificate cert = (X509Certificate) factory.generateCertificate(inputStream);
             return md5((cert.getIssuerX500Principal().getName() + cert.getSerialNumber()).getBytes());
-        }  catch (GeneralSecurityException e) {
+        }
+        catch (GeneralSecurityException e) {
             throw new PayErrorException(new PayException(" 获取公钥证书序列号异常", e.getMessage()));
         }
     }
@@ -368,7 +384,8 @@ public class AntCertificationUtil {
             CertificateFactory factory = CertificateFactory.getInstance("X.509", "BC");
             X509Certificate cert = (X509Certificate) factory.generateCertificate(inputStream);
             return Base64.encode(cert.getPublicKey().getEncoded());
-        } catch (GeneralSecurityException e) {
+        }
+        catch (GeneralSecurityException e) {
             throw new PayErrorException(new PayException(" 提取公钥证书中的公钥异常", e.getMessage()));
         }
     }
@@ -377,7 +394,8 @@ public class AntCertificationUtil {
     public static String readFromInputStream(InputStream cert) {
         try {
             return new String(IOUtils.toByteArray(cert), StandardCharsets.UTF_8);
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new PayErrorException(new PayException("读取证书异常", e.getMessage()));
         }
     }

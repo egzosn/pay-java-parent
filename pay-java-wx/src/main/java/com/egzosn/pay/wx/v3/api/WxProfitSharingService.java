@@ -69,10 +69,10 @@ public class WxProfitSharingService extends WxPayService implements ProfitSharin
      */
     @Override
     protected void initAfter() {
-        new Thread(() -> {
+//        new Thread(() -> {
             payConfigStorage.loadCertEnvironment();
             getAssistService();
-        }).start();
+//        }).start();
 
     }
 
