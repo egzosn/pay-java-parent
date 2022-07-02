@@ -12,6 +12,7 @@ import java.security.GeneralSecurityException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.zip.GZIPInputStream;
@@ -44,7 +45,6 @@ import com.egzosn.pay.common.bean.BillType;
 import com.egzosn.pay.common.bean.MethodType;
 import com.egzosn.pay.common.bean.NoticeParams;
 import com.egzosn.pay.common.bean.NoticeRequest;
-import com.egzosn.pay.common.bean.Order;
 import com.egzosn.pay.common.bean.OrderParaStructure;
 import com.egzosn.pay.common.bean.PayMessage;
 import com.egzosn.pay.common.bean.PayOrder;
@@ -155,27 +155,23 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
      * @param noticeParams 回调回来的参数集
      * @return 签名校验 true通过
      */
+    @Override
     public boolean verify(NoticeParams noticeParams) {
         final Map<String, Object> params = noticeParams.getBody();
         //如果为退款不需要校验, 直接返回，
-        if (params.containsKey(REQ_INFO)){
+        if (params.containsKey(REQ_INFO)) {
             return true;
         }
 
-        if (null == params.get(SIGN) || !(SUCCESS.equals(params.get(RETURN_CODE)) && SUCCESS.equals(params.get(RESULT_CODE)))) {
+        if (Objects.isNull(params.get(SIGN)) || !(SUCCESS.equals(params.get(RETURN_CODE)) && SUCCESS.equals(params.get(RESULT_CODE)))) {
             if (LOG.isErrorEnabled()) {
                 LOG.error(String.format("微信支付异常：return_code=%s,参数集=%s", params.get(RETURN_CODE), params));
             }
             return false;
         }
 
-        try {
-            return signVerify(params, (String) params.get(SIGN));
-        }
-        catch (PayErrorException e) {
-            LOG.error("", e);
-        }
-        return false;
+        return signVerify(params, (String) params.get(SIGN));
+
     }
 
 
@@ -186,7 +182,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
      * @param sign   比对的签名结果
      * @return 生成的签名结果
      */
-    public boolean signVerify(Map<String, Object> params, String sign) {
+    private boolean signVerify(Map<String, Object> params, String sign) {
         return signVerify(params, sign, payConfigStorage.isTest());
     }
 
@@ -207,7 +203,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
      */
     private Map<String, Object> getPublicParameters() {
 
-        Map<String, Object> parameters = new TreeMap<String, Object>();
+        Map<String, Object> parameters = new TreeMap<>();
         parameters.put(APPID, payConfigStorage.getAppId());
         parameters.put(MCH_ID, payConfigStorage.getMchId());
         //判断如果是服务商模式信息则加入
@@ -298,7 +294,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
                 return result;
             }
 
-            Map<String, Object> params = new TreeMap<String, Object>();
+            Map<String, Object> params = new TreeMap<>();
 
             if (WxTransactionType.JSAPI == order.getTransactionType()) {
                 params.put("signType", payConfigStorage.getSignType());
@@ -653,6 +649,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
      *                 RECHARGE_REFUND，返回当日充值退款订单
      * @return 返回支付方下载对账单的结果
      */
+    @Override
     public Map<String, Object> downloadBill(Date billDate, String billType) {
         return downloadBill(billDate, WxPayBillType.valueOf(billType));
     }
@@ -668,6 +665,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
      *                 RECHARGE_REFUND，返回当日充值退款订单
      * @return 返回支付方下载对账单的结果, 如果【账单类型】为gzip的话则返回值中key为data值为gzip的输入流
      */
+    @Override
     public Map<String, Object> downloadBill(Date billDate, BillType billType) {
         //获取公共参数
         Map<String, Object> parameters = getPublicParameters();
@@ -710,24 +708,19 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
         //设置签名
         setSign(parameters);
         InputStream inputStream = requestTemplate.postForObject(getReqUrl(WxTransactionType.DOWNLOADBILL), XML.getMap2Xml(parameters), InputStream.class);
-        try {
-            //解压流
-            inputStream = uncompress(inputStream);
-            writeToLocal(path + DateUtils.formatDate(new Date(), DateUtils.YYYYMM) + "/" + DateUtils.formatDate(new Date(), DateUtils.YYYYMMDDHHMMSS) + ".txt", inputStream);
-            Map<String, Object> ret = new HashMap<String, Object>(3);
+        //解压流
+        try (InputStream fileIs = uncompress(inputStream);) {
+            writeToLocal(path + DateUtils.formatDate(new Date(), DateUtils.YYYYMM) + "/" + DateUtils.formatDate(new Date(), DateUtils.YYYYMMDDHHMMSS) + ".txt", fileIs);
+            Map<String, Object> ret = new HashMap<>(3);
             ret.put(RETURN_CODE, SUCCESS);
             ret.put(RETURN_MSG_CODE, "ok");
             ret.put("data", path);
             return ret;
         }
-        catch (Exception e) {
-            e.printStackTrace();
-            Map<String, Object> ret = new HashMap<String, Object>(3);
-            ret.put(RETURN_CODE, FAIL);
-            ret.put(RETURN_MSG_CODE, "fail");
-            ret.put("data", e.getMessage());
-            return ret;
+        catch (IOException e) {
+            throw new PayErrorException(new WxPayError(FAIL, e.getMessage()), e);
         }
+
     }
 
     /**
@@ -739,15 +732,15 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
      */
     @Deprecated
     public static InputStream uncompress(InputStream input) throws IOException {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        GZIPInputStream ungzip = new GZIPInputStream(input);
-        byte[] buffer = new byte[1024];
-        int n;
-        while ((n = ungzip.read(buffer)) >= 0) {
-            out.write(buffer, 0, n);
+        try (GZIPInputStream ungZip = new GZIPInputStream(input); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            byte[] buffer = new byte[1024];
+            int n;
+            while ((n = ungZip.read(buffer)) >= 0) {
+                out.write(buffer, 0, n);
+            }
+            return new ByteArrayInputStream(out.toByteArray());
         }
-        InputStream is = new ByteArrayInputStream(out.toByteArray());
-        return is;
+
     }
 
     /**
@@ -758,12 +751,11 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
      * @throws IOException IOException
      */
     @Deprecated
-    private void writeToLocal(String destination, InputStream inputStream)
-            throws IOException {
+    private void writeToLocal(String destination, InputStream inputStream) throws IOException {
 
         // 判断字节大小
         if (inputStream.available() != 0) {
-            System.out.println("结果大小:" + inputStream.available());
+            LOG.debug("结果大小:{}", inputStream.available());
             File file = new File(destination);
             if (!file.getParentFile().exists()) {
                 boolean result = file.getParentFile().mkdirs();
@@ -771,17 +763,17 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
                     LOG.warn("创建失败");
                 }
             }
-            OutputStream out = new FileOutputStream(file);
-            int size = 0;
-            int len = 0;
-            byte[] buf = new byte[1024];
-            while ((size = inputStream.read(buf)) != -1) {
-                len += size;
-                out.write(buf, 0, size);
+            try (OutputStream out = new FileOutputStream(file)) {
+                int size = 0;
+                int len = 0;
+                byte[] buf = new byte[1024];
+                while ((size = inputStream.read(buf)) != -1) {
+                    len += size;
+                    out.write(buf, 0, size);
+                }
+                LOG.debug("最终写入字节数大小:{}", len);
             }
-            LOG.info("最终写入字节数大小:" + len);
-            inputStream.close();
-            out.close();
+
         }
     }
 
@@ -813,7 +805,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
      * @param transactionType         交易类型
      * @return 返回支付方对应接口的结果
      */
-    public Map<String, Object> secondaryInterface(Object transactionIdOrBillDate, String outTradeNoBillType, TransactionType transactionType) {
+    private Map<String, Object> secondaryInterface(Object transactionIdOrBillDate, String outTradeNoBillType, TransactionType transactionType) {
 
         if (transactionType == WxTransactionType.REFUND) {
             throw new PayErrorException(new PayException(FAILURE, "通用接口不支持:" + transactionType));
@@ -844,18 +836,11 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
      *
      * @param order 转账订单
      *              <pre>
-     *
-     * 注意事项：
-     * ◆ 当返回错误码为“SYSTEMERROR”时，请不要更换商户订单号，一定要使用原商户订单号重试，否则可能造成重复支付等资金风险。
-     * ◆ XML具有可扩展性，因此返回参数可能会有新增，而且顺序可能不完全遵循此文档规范，如果在解析回包的时候发生错误，请商户务必不要换单重试，请商户联系客服确认付款情况。如果有新回包字段，会更新到此API文档中。
-     * ◆ 因为错误代码字段err_code的值后续可能会增加，所以商户如果遇到回包返回新的错误码，请商户务必不要换单重试，请商户联系客服确认付款情况。如果有新的错误码，会更新到此API文档中。
-     * ◆ 错误代码描述字段err_code_des只供人工定位问题时做参考，系统实现时请不要依赖这个字段来做自动化处理。
-     * </pre>
-     * @return 对应的转账结果
+     *              @return 对应的转账结果
      */
     @Override
     public Map<String, Object> transfer(TransferOrder order) {
-        Map<String, Object> parameters = new TreeMap<String, Object>();
+        Map<String, Object> parameters = new TreeMap<>();
 
 
         parameters.put("partner_trade_no", order.getOutNo());
@@ -889,7 +874,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
      * <a href="https://pay.weixin.qq.com/wiki/doc/api/tools/mch_pay.php?chapter=24_2">商户企业付款到银行卡</a>
      * </p>
      */
-    public Map<String, Object> transfers(Map<String, Object> parameters, TransferOrder order) {
+    private Map<String, Object> transfers(Map<String, Object> parameters, TransferOrder order) {
         //转账到余额, 申请商户号的appid或商户号绑定的appid
         parameters.put("mch_appid", payConfigStorage.getAppId());
         parameters.put("openid", order.getPayeeAccount());
@@ -911,7 +896,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
      * @param order      转账订单
      * @return 包装后参数信息
      */
-    public Map<String, Object> payBank(Map<String, Object> parameters, TransferOrder order) {
+    private Map<String, Object> payBank(Map<String, Object> parameters, TransferOrder order) {
 
         parameters.put("enc_bank_no", keyPublic(order.getPayeeAccount()));
         parameters.put("enc_true_name", keyPublic(order.getPayeeName()));
@@ -952,7 +937,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
     }
 
 
-    public String keyPublic(String content) {
+    private String keyPublic(String content) {
         try {
             return RSA2.encrypt(content, payConfigStorage.getKeyPublic(), CIPHER_ALGORITHM, payConfigStorage.getInputCharset());
         }
@@ -981,7 +966,19 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
      */
     @Override
     public Map<String, Object> sendredpack(RedpackOrder redpackOrder) {
-        Map<String, Object> parameters = new TreeMap<String, Object>();
+        return sendRedPack(redpackOrder);
+    }
+
+    /**
+     * 微信发红包
+     *
+     * @param redpackOrder 红包实体
+     * @return 返回发红包实体后的结果
+     * @author faymanwang 1057438332@qq.com
+     */
+    @Override
+    public Map<String, Object> sendRedPack(RedpackOrder redpackOrder) {
+        Map<String, Object> parameters = new TreeMap<>();
         redPackParam(redpackOrder, parameters);
         final TransferType transferType = redpackOrder.getTransferType();
         if (WxSendredpackType.SENDGROUPREDPACK == transferType) {
@@ -998,7 +995,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
         if (WxSendredpackType.SENDMINIPROGRAMHB != transferType || FAIL.equals(resp.getString(RESULT_CODE))) {
             return resp;
         }
-        Map<String, Object> params = new TreeMap<String, Object>();
+        Map<String, Object> params = new TreeMap<>();
         params.put("appId", payConfigStorage.getAppId());
         params.put("timeStamp", System.currentTimeMillis() / 1000 + "");
         params.put("nonceStr", parameters.get(NONCE_STR));
@@ -1021,8 +1018,22 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
      */
     @Override
     public Map<String, Object> gethbinfo(String mchBillno) {
+        return getHbInfo(mchBillno);
+    }
+
+    /**
+     * 查询红包记录
+     * 用于商户对已发放的红包进行查询红包的具体信息，可支持普通红包和裂变包
+     * 查询红包记录API只支持查询30天内的红包订单，30天之前的红包订单请登录商户平台查询。
+     *
+     * @param mchBillNo 商户发放红包的商户订单号
+     * @return 返回查询结果
+     * @author faymanwang 1057438332@qq.com
+     */
+    @Override
+    public Map<String, Object> getHbInfo(String mchBillNo) {
         Map<String, Object> parameters = this.getPublicParameters();
-        parameters.put("mch_billno", mchBillno);
+        parameters.put("mch_billno", mchBillNo);
         parameters.put("bill_type", "MCHT");
         parameters.put(SIGN, createSign(SignTextUtils.parameterText(parameters, "&", SIGN), payConfigStorage.getInputCharset()));
         return requestTemplate.postForObject(getReqUrl(WxSendredpackType.GETHBINFO), XML.getMap2Xml(parameters), JSONObject.class);
@@ -1037,10 +1048,13 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
     private void redPackParam(RedpackOrder redpackOrder, Map<String, Object> parameters) {
         parameters.put(NONCE_STR, SignTextUtils.randomStr());
         parameters.put(MCH_ID, payConfigStorage.getPid());
-        parameters.put("wxappid", payConfigStorage.getAppId());
+        if (StringUtils.isEmpty(redpackOrder.getWxAppId())) {
+            throw new PayErrorException(new WxPayError(FAIL, "RedpackOrder#getWxAppId()公众账号appid 必填"));
+        }
+        parameters.put("wxappid", redpackOrder.getWxAppId());
         parameters.put("send_name", redpackOrder.getSendName());
         parameters.put("re_openid", redpackOrder.getReOpenid());
-        parameters.put("mch_billno", redpackOrder.getMchBillno());
+        parameters.put("mch_billno", redpackOrder.getMchBillNo());
         parameters.put("total_amount", Util.conversionCentAmount(redpackOrder.getTotalAmount()));
         parameters.put("total_num", 1);
         parameters.put("wishing", redpackOrder.getWishing());
