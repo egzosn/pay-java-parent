@@ -3,6 +3,7 @@ package com.egzosn.pay.common.api;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.apache.http.Consts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,6 +61,7 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
      */
     protected List<PayMessageInterceptor<PayMessage, PayService>> interceptors = new ArrayList<PayMessageInterceptor<PayMessage, PayService>>();
 
+    private Charset inputCharset = Consts.UTF_8;
 
     /**
      * 设置支付配置
@@ -68,6 +71,10 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
     @Override
     public BasePayService setPayConfigStorage(PC payConfigStorage) {
         this.payConfigStorage = payConfigStorage;
+
+        if (StringUtils.isNotEmpty(payConfigStorage.getInputCharset())) {
+            this.inputCharset = Charset.forName(payConfigStorage.getInputCharset());
+        }
         return this;
     }
 
@@ -94,7 +101,6 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
     }
 
 
-
     public BasePayService(PC payConfigStorage) {
         this(payConfigStorage, null);
     }
@@ -104,7 +110,6 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
         setRequestTemplateConfigStorage(configStorage);
 
     }
-
 
 
     /**
@@ -159,11 +164,11 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
      */
     @Override
     public <O extends PayOrder> String toPay(O order) {
-        if (StringUtils.isNotEmpty(order.getSubject()) && order.getSubject().contains("'")){
-            order.setSubject(order.getSubject().replace("'",""));
+        if (StringUtils.isNotEmpty(order.getSubject()) && order.getSubject().contains("'")) {
+            order.setSubject(order.getSubject().replace("'", ""));
         }
-        if (StringUtils.isNotEmpty(order.getBody()) && order.getBody().contains("'")){
-            order.setBody(order.getBody().replace("'",""));
+        if (StringUtils.isNotEmpty(order.getBody()) && order.getBody().contains("'")) {
+            order.setBody(order.getBody().replace("'", ""));
         }
         Map<String, Object> orderInfo = orderInfo(order);
         return buildRequest(orderInfo, MethodType.POST);
@@ -203,6 +208,7 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
     public Map<String, Object> getParameter2Map(Map<String, String[]> parameterMap, InputStream is) {
         return getNoticeParams(new DefaultNoticeRequest(parameterMap, is)).getBody();
     }
+
     /**
      * 将请求参数或者请求流转化为 Map
      *
@@ -213,22 +219,18 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
     public NoticeParams getNoticeParams(NoticeRequest request) {
         final Map<String, String[]> parameterMap = request.getParameterMap();
 
-        Map<String, Object> params = new TreeMap<String, Object>();
+        Map<String, Object> params = new TreeMap<>();
         for (Map.Entry<String, String[]> entry : parameterMap.entrySet()) {
             String name = entry.getKey();
             String[] values = entry.getValue();
-            String valueStr = "";
+            StringBuilder sb = new StringBuilder();
             for (int i = 0, len = values.length; i < len; i++) {
-                valueStr += (i == len - 1) ? values[i] : values[i] + ",";
+                sb.append(values[i]).append((i == len - 1) ? "" : ',');
             }
+            String valueStr = sb.toString();
             if (StringUtils.isNotEmpty(payConfigStorage.getInputCharset()) && !valueStr.matches("\\w+")) {
-                try {
-                    if (valueStr.equals(new String(valueStr.getBytes("iso8859-1"), "iso8859-1"))) {
-                        valueStr = new String(valueStr.getBytes("iso8859-1"), payConfigStorage.getInputCharset());
-                    }
-                }
-                catch (UnsupportedEncodingException e) {
-                    LOG.error("", e);
+                if (valueStr.equals(new String(valueStr.getBytes(Consts.ISO_8859_1), Consts.ISO_8859_1))) {
+                    valueStr = new String(valueStr.getBytes(Consts.ISO_8859_1), inputCharset);
                 }
             }
             params.put(name, valueStr);
@@ -329,9 +331,10 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
      * @return 返回支付方下载对账单的结果
      */
     @Override
-    public Map<String, Object> downloadBill(Date billDate, String billType){
+    public Map<String, Object> downloadBill(Date billDate, String billType) {
         return Collections.emptyMap();
     }
+
     /**
      * 转账
      *
@@ -421,7 +424,6 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
     }
 
 
-
     /**
      * 将请求参数或者请求流转化为 Map
      *
@@ -432,7 +434,7 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
     @Deprecated
     @Override
     public PayOutMessage payBack(Map<String, String[]> parameterMap, InputStream is) {
-     return payBack(new DefaultNoticeRequest(parameterMap, is));
+        return payBack(new DefaultNoticeRequest(parameterMap, is));
     }
 
     /**
@@ -445,7 +447,7 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
     public PayOutMessage payBack(NoticeRequest request) {
         final NoticeParams noticeParams = getNoticeParams(request);
         if (LOG.isDebugEnabled()) {
-            LOG.debug("回调响应:{}" , JSON.toJSONString(noticeParams));
+            LOG.debug("回调响应:{}", JSON.toJSONString(noticeParams));
         }
         if (!verify(noticeParams)) {
             return getPayOutMessage("fail", "失败");
@@ -480,26 +482,30 @@ public abstract class BasePayService<PC extends PayConfigStorage> implements Pay
      * @param orderInfo 订单信息
      * @return 处理后订单信息
      */
+    @Override
     public <O extends PayOrder> Map<String, Object> preOrderHandler(Map<String, Object> orderInfo, O payOrder) {
         return orderInfo;
     }
 
     /**
      * 过时
+     *
      * @param parameters 参数map
-     * @param key key
-     * @param value 值
+     * @param key        key
+     * @param value      值
      * @return 返回订单参数
      */
     @Deprecated
     protected Map<String, Object> setParameters(Map<String, Object> parameters, String key, String value) {
         return OrderParaStructure.loadParameters(parameters, key, value);
     }
+
     /**
      * 过时
+     *
      * @param parameters 参数map
-     * @param key key
-     * @param order 订单对象
+     * @param key        key
+     * @param order      订单对象
      * @return 返回订单参数
      */
     @Deprecated

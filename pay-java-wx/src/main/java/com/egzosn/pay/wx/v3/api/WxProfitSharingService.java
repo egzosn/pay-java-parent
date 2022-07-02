@@ -94,6 +94,7 @@ public class WxProfitSharingService extends WxPayService implements ProfitSharin
      * @param noticeParams 通知参数
      * @return the boolean
      */
+    @Override
     public boolean verify(NoticeParams noticeParams) {
         throw new PayErrorException(new WxPayError("", "分账不支持方式"));
     }
@@ -105,6 +106,7 @@ public class WxProfitSharingService extends WxPayService implements ProfitSharin
      * @param order 支付订单集
      * @return 下单结果
      */
+    @Override
     public JSONObject unifiedOrder(PayOrder order) {
 
         Map<String, Object> parameters = new MapGen<String, Object>(WxConst.APPID, payConfigStorage.getAppId())
@@ -336,6 +338,7 @@ public class WxProfitSharingService extends WxPayService implements ProfitSharin
      * @param billType 账单类型  {@link ProfitSharingBillType}
      * @return 返回支付方下载对账单的结果, 如果【账单类型】为gzip的话则返回值中key为data值为gzip的输入流
      */
+    @Override
     public Map<String, Object> downloadBill(Date billDate, BillType billType) {
 
         Map<String, Object> parameters = new MapGen<String, Object>(WxConst.BILL_DATE, DateUtils.formatDate(billDate, DateUtils.YYYY_MM_DD))

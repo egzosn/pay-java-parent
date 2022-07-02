@@ -628,6 +628,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> implement
      * @param billType 账单类型，商户通过接口或商户经开放平台授权后其所属服务商通过接口可以获取以下账单类型：trade、signcustomer；trade指商户基于支付宝交易收单的业务账单；signcustomer是指基于商户支付宝余额收入及支出等资金变动的帐务账单；
      * @return 返回支付方下载对账单的结果
      */
+    @Override
     public Map<String, Object> downloadBill(Date billDate, String billType) {
 
         return this.downloadBill(billDate, "trade".equals(billType) ? AliPayBillType.TRADE_DAY : AliPayBillType.SIGNCUSTOMER_DAY);
@@ -640,6 +641,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> implement
      * @param billType 账单类型，商户通过接口或商户经开放平台授权后其所属服务商通过接口可以获取以下账单类型：trade、signcustomer；trade指商户基于支付宝交易收单的业务账单；signcustomer是指基于商户支付宝余额收入及支出等资金变动的帐务账单；
      * @return 返回支付方下载对账单的结果
      */
+    @Override
     public Map<String, Object> downloadBill(Date billDate, BillType billType) {
         //获取公共参数
         Map<String, Object> parameters = getPublicParameters(AliTransactionType.DOWNLOADBILL);

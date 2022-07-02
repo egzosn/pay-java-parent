@@ -45,7 +45,7 @@ public class WxV3PayController {
     private WxPayService service = null;
 
 
-    @PostConstruct  //没有证书的情况下注释掉，避免启动报错
+//    @PostConstruct  //没有证书的情况下注释掉，避免启动报错
     public void init() {
         WxPayConfigStorage wxPayConfigStorage = new WxPayConfigStorage();
         wxPayConfigStorage.setAppId("wxc7b993ff15a9f26c");

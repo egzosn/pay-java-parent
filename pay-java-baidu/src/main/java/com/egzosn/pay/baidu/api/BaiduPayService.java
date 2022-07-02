@@ -542,6 +542,7 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
      * @param accessToken 用户token
      * @return 对账单
      */
+    @Override
     public Map<String, Object> downloadBill(Date billDate, String accessToken) {
         return downloadBill(billDate, new BaiduBillType(accessToken, BaiduTransactionType.DOWNLOAD_ORDER_BILL.name()));
     }
@@ -553,6 +554,7 @@ public class BaiduPayService extends BasePayService<BaiduPayConfigStorage> {
      * @param billType 账单类型 {@link BaiduBillType}
      * @return 返回支付方下载对账单的结果
      */
+    @Override
     public Map<String, Object> downloadBill(Date billDate, BillType billType) {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("access_token", billType.getCustom());

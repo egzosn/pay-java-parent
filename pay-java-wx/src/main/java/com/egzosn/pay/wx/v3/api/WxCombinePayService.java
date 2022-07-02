@@ -81,6 +81,7 @@ public class WxCombinePayService extends WxPayService {
      * @param order 支付订单集
      * @return 下单结果
      */
+    @Override
     public JSONObject unifiedOrder(PayOrder order) {
 
         //统一下单

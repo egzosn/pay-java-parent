@@ -518,7 +518,7 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage> implem
         JSONObject resp = getHttpRequestTemplate().getForObject(getReqUrl(PayPalTransactionType.REFUND_GET), authHeader(), JSONObject.class, refundOrder.getRefundNo());
         return resp;
     }
-
+    @Override
     public Map<String, Object> downloadBill(Date billDate, BillType billType) {
         return Collections.emptyMap();
     }

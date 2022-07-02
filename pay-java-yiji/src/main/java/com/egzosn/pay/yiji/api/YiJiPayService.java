@@ -11,7 +11,6 @@ import com.egzosn.pay.common.api.BasePayService;
 import com.egzosn.pay.common.bean.AssistOrder;
 import com.egzosn.pay.common.bean.BaseRefundResult;
 import com.egzosn.pay.common.bean.BillType;
-
 import com.egzosn.pay.common.bean.CurType;
 import com.egzosn.pay.common.bean.DefaultCurType;
 import com.egzosn.pay.common.bean.MethodType;
@@ -94,7 +93,7 @@ public class YiJiPayService extends BasePayService<YiJiPayConfigStorage> {
     @Override
     public boolean verify(Map<String, Object> params) {
 
-     return verify(new NoticeParams(params));
+        return verify(new NoticeParams(params));
 
     }
 
@@ -104,10 +103,11 @@ public class YiJiPayService extends BasePayService<YiJiPayConfigStorage> {
      * @param noticeParams 回调回来的参数集
      * @return 签名校验 true通过
      */
-    public boolean verify(NoticeParams noticeParams){
+    @Override
+    public boolean verify(NoticeParams noticeParams) {
         final Map<String, Object> params = noticeParams.getBody();
         if (params.get(SIGN) == null) {
-            LOG.debug("易极付支付异常：params：" + params);
+            LOG.debug("易极付支付异常：params：{}", params);
             return false;
         }
 
@@ -311,14 +311,15 @@ public class YiJiPayService extends BasePayService<YiJiPayConfigStorage> {
     public Map<String, Object> close(String tradeNo, String outTradeNo) {
         return Collections.emptyMap();
     }
+
     /**
      * 交易关闭接口
      *
-     * @param assistOrder    关闭订单
+     * @param assistOrder 关闭订单
      * @return 返回支付方交易关闭后的结果
      */
     @Override
-    public Map<String, Object> close(AssistOrder assistOrder){
+    public Map<String, Object> close(AssistOrder assistOrder) {
         return Collections.emptyMap();
     }
 
@@ -400,7 +401,6 @@ public class YiJiPayService extends BasePayService<YiJiPayConfigStorage> {
 
 
     /**
-     *
      * @param billDate 账单类型，商户通过接口或商户经开放平台授权后其所属服务商通过接口可以获取以下账单类型：trade、signcustomer；trade指商户基于易极付交易收单的业务账单；signcustomer是指基于商户易极付余额收入及支出等资金变动的帐务账单；
      * @param billType 账单时间：日账单格式为yyyy-MM-dd，月账单格式为yyyy-MM。
      * @return 返回支付方下载对账单的结果

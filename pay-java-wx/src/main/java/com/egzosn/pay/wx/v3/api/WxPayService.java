@@ -200,6 +200,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
      * @param noticeParams 通知参数
      * @return the boolean
      */
+    @Override
     public boolean verify(NoticeParams noticeParams) {
 
         //当前使用的微信平台证书序列号
@@ -238,7 +239,6 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
 
         //统一下单
         Map<String, Object> parameters = wxParameterStructure.initPartner(null);
-        ;
 //        wxParameterStructure.getPublicParameters(parameters);
         // 商品描述
         OrderParaStructure.loadParameters(parameters, WxConst.DESCRIPTION, order.getSubject());
@@ -573,6 +573,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
      * @param billType 账单类型 {@link WxBillType} 与 {@link WxAccountType}
      * @return 返回支付方下载对账单的结果, 如果【账单类型】为gzip的话则返回值中key为data值为gzip的输入流
      */
+    @Override
     public Map<String, Object> downloadBill(Date billDate, BillType billType) {
         //获取公共参数
         Map<String, Object> parameters = new HashMap<>(5);

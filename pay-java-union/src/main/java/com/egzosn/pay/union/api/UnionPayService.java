@@ -231,6 +231,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
      * @param noticeParams 回调回来的参数集
      * @return 签名校验 true通过
      */
+    @Override
     public boolean verify(NoticeParams noticeParams) {
         final Map<String, Object> result = noticeParams.getBody();
         if (null == result || result.get(SDKConstants.param_signature) == null) {
@@ -719,6 +720,7 @@ public class UnionPayService extends BasePayService<UnionPayConfigStorage> {
      * @param fileType 文件类型 文件类型，一般商户填写00即可
      * @return 返回fileContent 请自行将数据落地
      */
+    @Override
     public Map<String, Object> downloadBill(Date billDate, String fileType) {
         return downloadBill(billDate, new UnionPayBillType(fileType));
     }

@@ -146,7 +146,8 @@ public final class UriVariables {
         boolean isOpen = false;//值里有嵌套
         char openName = 0;
         if (len > 0) {
-            for (int i = 0; i < len; i++) {// 遍历整个带解析的字符串
+            // 遍历整个带解析的字符串
+            for (int i = 0; i < len; i++) {
                 curChar = str.charAt(i);// 取当前字符
                 if (isKey) {// 如果当前生成的是key
 
@@ -177,7 +178,7 @@ public final class UriVariables {
                         }
                     }
                     if (curChar == '&' && !isOpen) {// 如果读取到&分割符,同时这个分割符不是值域，这时将map里添加
-                        putKeyValueToMap(temp, isKey, key, map);
+                        putKeyValueToMap(temp, false, key, map);
                         temp.setLength(0);
                         isKey = true;
                     }

@@ -1,10 +1,8 @@
 package com.egzosn.pay.wx.youdian.api;
 
-import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.locks.Lock;
@@ -15,11 +13,9 @@ import com.egzosn.pay.common.api.BasePayService;
 import com.egzosn.pay.common.bean.AssistOrder;
 import com.egzosn.pay.common.bean.BaseRefundResult;
 import com.egzosn.pay.common.bean.BillType;
-
 import com.egzosn.pay.common.bean.CurType;
 import com.egzosn.pay.common.bean.MethodType;
 import com.egzosn.pay.common.bean.NoticeParams;
-import com.egzosn.pay.common.bean.NoticeRequest;
 import com.egzosn.pay.common.bean.PayMessage;
 import com.egzosn.pay.common.bean.PayOrder;
 import com.egzosn.pay.common.bean.PayOutMessage;
@@ -47,21 +43,19 @@ import com.egzosn.pay.wx.youdian.bean.YoudianTransactionType;
  */
 public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorage> {
 
-    private final static String URL = "http://life.51youdian.com/Api/CheckoutCounter/";
-
+    private static final String URL = "http://life.51youdian.com/Api/CheckoutCounter/";
+    private static final String ACCESS_TOKEN = "access_token";
+    private static final String RETURN_CODE = "return_code";
+    private static final String ERROR_CODE = "errorcode";
+    private static final String ORDER_SN = "order_sn";
 
     /**
      * 获取请求token
      *
      * @return 授权令牌
      */
-    public String getAccessToken() {
-        try {
-            return getAccessToken(false);
-        }
-        catch (PayErrorException e) {
-            throw e;
-        }
+    private String getAccessToken() {
+        return getAccessToken(false);
     }
 
     /**
@@ -71,7 +65,7 @@ public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorag
      * @return 新的授权令牌
      * @throws PayErrorException 支付异常
      */
-    public String getAccessToken(boolean forceRefresh) throws PayErrorException {
+    private String getAccessToken(boolean forceRefresh) throws PayErrorException {
         Lock lock = payConfigStorage.getAccessTokenLock();
         try {
             lock.lock();
@@ -90,7 +84,7 @@ public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorag
                 String sign = createSign(param.toString() + apbNonce, payConfigStorage.getInputCharset());
                 param.append("&apb_nonce=").append(apbNonce).append("&sign=").append(sign);
                 JSONObject json = execute(getReqUrl(YoudianTransactionType.RESET_LOGIN) + "?" + param.toString(), MethodType.GET, null);
-                int errorcode = json.getIntValue("errorcode");
+                int errorcode = json.getIntValue(ERROR_CODE);
                 if (0 == errorcode) {
                     payConfigStorage.updateAccessToken(payConfigStorage.getAccessToken(), 7200);
                 }
@@ -112,7 +106,7 @@ public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorag
      * @return 登陆信息
      * @throws PayErrorException 支付异常
      */
-    public JSONObject login() throws PayErrorException {
+    private JSONObject login() throws PayErrorException {
         TreeMap<String, String> data = new TreeMap<>();
         data.put("username", payConfigStorage.getSeller());
         data.put("password", payConfigStorage.getKeyPrivate());
@@ -125,7 +119,7 @@ public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorag
         String queryParam = SignTextUtils.parameterText(data) + "&apb_nonce=" + apbNonce + "&sign=" + sign;
 
         JSONObject json = execute(getReqUrl(YoudianTransactionType.LOGIN) + "?" + queryParam, MethodType.GET, null);
-        payConfigStorage.updateAccessToken(json.getString("access_token"), json.getLongValue("viptime"));
+        payConfigStorage.updateAccessToken(json.getString(ACCESS_TOKEN), json.getLongValue("viptime"));
         return json;
     }
 
@@ -149,24 +143,19 @@ public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorag
      * @param noticeParams 回调回来的参数集
      * @return 签名校验 true通过
      */
+    @Override
     public boolean verify(NoticeParams noticeParams) {
         final Map<String, Object> params = noticeParams.getBody();
 
-        if (!"SUCCESS".equals(params.get("return_code"))) {
-            LOG.debug(String.format("友店微信支付异常：return_code=%s,参数集=%s", params.get("return_code"), params));
+        if (!"SUCCESS".equals(params.get(RETURN_CODE))) {
+            LOG.debug("友店微信支付异常：return_code={},参数集={}", params.get(RETURN_CODE), params);
             return false;
         }
         if (params.get("sign") == null) {
-            LOG.debug("友店微信支付异常：签名为空！out_trade_no=" + params.get("out_trade_no"));
+            LOG.debug("友店微信支付异常：签名为空！out_trade_no={}", params.get("out_trade_no"));
         }
 
-        try {
-            return signVerify(params, (String) params.get("sign")) && verifySource((String) params.get("out_trade_no"));
-        }
-        catch (PayErrorException e) {
-            LOG.error(e.getMessage());
-        }
-        return false;
+        return signVerify(params, (String) params.get("sign")) && verifySource((String) params.get("out_trade_no"));
     }
 
     /**
@@ -176,7 +165,7 @@ public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorag
      * @param sign   比对的签名结果
      * @return 生成的签名结果
      */
-    public boolean signVerify(Map<String, Object> params, String sign) {
+    private boolean signVerify(Map<String, Object> params, String sign) {
         return SignUtils.valueOf(payConfigStorage.getSignType()).verify(params, sign, "&key=" + payConfigStorage.getKeyPublic(), payConfigStorage.getInputCharset());
     }
 
@@ -188,12 +177,12 @@ public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorag
      * @param id id 商户订单号（扫码收款返回的order_sn）
      * @return true通过
      */
-    public boolean verifySource(String id) {
+    private boolean verifySource(String id) {
 
         try {
             JSONObject jsonObject = (JSONObject) query(id, null);
 
-            return 0 == jsonObject.getIntValue("errorcode");
+            return 0 == jsonObject.getIntValue(ERROR_CODE);
         }
         catch (PayErrorException e) {
             if (Integer.parseInt(e.getPayError().getErrorCode()) >= 400) {
@@ -216,13 +205,13 @@ public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorag
      * @see MethodType#GET
      * @see MethodType#POST
      */
-    public JSONObject execute(String uri, MethodType method, Object request) throws PayErrorException {
+    private JSONObject execute(String uri, MethodType method, Object request) throws PayErrorException {
         int retryTimes = 0;
         do {
             try {
                 JSONObject result = requestTemplate.doExecute(uri, request, JSONObject.class, method);
-                if (0 != result.getIntValue("errorcode")) {
-                    throw new PayErrorException(new YdPayError(result.getIntValue("errorcode"), result.getString("msg"), result.toJSONString()));
+                if (0 != result.getIntValue(ERROR_CODE)) {
+                    throw new PayErrorException(new YdPayError(result.getIntValue(ERROR_CODE), result.getString("msg"), result.toJSONString()));
                 }
                 return result;
             }
@@ -263,7 +252,7 @@ public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorag
     @Override
     public JSONObject orderInfo(PayOrder order) {
         Map<String, Object> data = new TreeMap<>();
-        data.put("access_token", getAccessToken());
+        data.put(ACCESS_TOKEN, getAccessToken());
         data.put("paymoney", Util.conversionAmount(order.getPrice()).toString());
         data.putAll(order.getAttrs());
         data = preOrderHandler(data, order);
@@ -271,15 +260,10 @@ public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorag
         String sign = createSign(SignTextUtils.parameterText(data, "") + apbNonce, payConfigStorage.getInputCharset());
         data.put("PayMoney", data.remove("paymoney"));
         String params = SignTextUtils.parameterText(data) + "&apb_nonce=" + apbNonce + "&sign=" + sign;
-        try {
-            JSONObject json = execute(getReqUrl(order.getTransactionType()) + "?" + params, MethodType.GET, null);
-            //友店比较特殊，需要在下完预订单后，自己存储 order_sn 对应 微信官方文档 out_trade_no
-            order.setTradeNo(json.getString("order_sn"));
-            return json;
-        }
-        catch (PayErrorException e) {
-            throw e;
-        }
+        JSONObject json = execute(getReqUrl(order.getTransactionType()) + "?" + params, MethodType.GET, null);
+        //友店比较特殊，需要在下完预订单后，自己存储 order_sn 对应 微信官方文档 out_trade_no
+        order.setTradeNo(json.getString(ORDER_SN));
+        return json;
     }
 
 
@@ -301,31 +285,6 @@ public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorag
     }
 
 
-
-    /**
-     * 将请求参数或者请求流转化为 Map
-     *
-     * @param request 通知请求
-     * @return 获得回调的请求参数
-     */
-    @Override
-    public NoticeParams getNoticeParams(NoticeRequest request) {
-        final Map<String, String[]> parameterMap = request.getParameterMap();
-        Map<String, Object> params = new TreeMap<String, Object>();
-        for (Iterator iter = parameterMap.keySet().iterator(); iter.hasNext(); ) {
-            String name = (String) iter.next();
-            String[] values = parameterMap.get(name);
-            String valueStr = "";
-            for (int i = 0; i < values.length; i++) {
-                valueStr = (i == values.length - 1) ? valueStr + values[i] : valueStr + values[i] + ",";
-            }
-            params.put(name, valueStr.trim());
-        }
-
-        return new NoticeParams(params);
-
-    }
-
     /**
      * 具体需要返回的数据为
      * return_code 返回码只有SUCCESS和FAIL
@@ -342,11 +301,11 @@ public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorag
     @Override
     public PayOutMessage getPayOutMessage(String code, String message) {
         Map<String, Object> builder = new TreeMap<>();
-        builder.put("return_code", code.toUpperCase());
+        builder.put(RETURN_CODE, code.toUpperCase());
         builder.put("return_msg", message);
         builder.put("nonce_str", SignTextUtils.randomStr());
         String sgin = SignUtils.valueOf(payConfigStorage.getSignType()).sign(builder, "&key=" + payConfigStorage.getKeyPrivate(), payConfigStorage.getInputCharset());
-        return PayOutMessage.TEXT().content("{\"return_code\":\"" + builder.get("return_code") + "\",\"return_msg\":\"" + builder.get("return_msg") + "\",\"nonce_str\":\"" + builder.get("nonce_str") + "\",\"sign\":\"" + sgin + "\"}").build();
+        return PayOutMessage.TEXT().content("{\"return_code\":\"" + builder.get(RETURN_CODE) + "\",\"return_msg\":\"" + builder.get("return_msg") + "\",\"nonce_str\":\"" + builder.get("nonce_str") + "\",\"sign\":\"" + sgin + "\"}").build();
     }
 
 
@@ -393,8 +352,7 @@ public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorag
     @Override
     public Map<String, Object> microPay(PayOrder order) {
         order.setTransactionType(YoudianTransactionType.MICROPAY);
-        JSONObject orderInfo = orderInfo(order);
-        return orderInfo;
+        return orderInfo(order);
     }
 
     /**
@@ -406,7 +364,7 @@ public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorag
      */
     @Override
     public Map<String, Object> query(String tradeNo, String outTradeNo) {
-      return query(new AssistOrder(tradeNo, outTradeNo));
+        return query(new AssistOrder(tradeNo, outTradeNo));
     }
 
     /**
@@ -419,18 +377,17 @@ public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorag
     public Map<String, Object> query(AssistOrder assistOrder) {
         String apbNonce = SignTextUtils.randomStr();
         TreeMap<String, String> data = new TreeMap<>();
-        data.put("access_token", payConfigStorage.getAccessToken());
+        data.put(ACCESS_TOKEN, payConfigStorage.getAccessToken());
 
         if (StringUtils.isEmpty(assistOrder.getTradeNo())) {
-            data.put("order_sn", assistOrder.getOutTradeNo());
+            data.put(ORDER_SN, assistOrder.getOutTradeNo());
         }
         else {
-            data.put("order_sn", assistOrder.getTradeNo());
+            data.put(ORDER_SN, assistOrder.getTradeNo());
         }
         String sign = createSign(SignTextUtils.parameterText(data, "") + apbNonce, payConfigStorage.getInputCharset());
         String queryParam = SignTextUtils.parameterText(data) + "&apb_nonce=" + apbNonce + "&sign=" + sign;
-        JSONObject jsonObject = execute(getReqUrl(YoudianTransactionType.NATIVE_STATUS) + "?" + queryParam, MethodType.GET, null);
-        return jsonObject;
+        return execute(getReqUrl(YoudianTransactionType.NATIVE_STATUS) + "?" + queryParam, MethodType.GET, null);
     }
 
 
@@ -438,14 +395,15 @@ public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorag
     public Map<String, Object> close(String tradeNo, String outTradeNo) {
         return Collections.emptyMap();
     }
+
     /**
      * 交易关闭接口
      *
-     * @param assistOrder    关闭订单
+     * @param assistOrder 关闭订单
      * @return 返回支付方交易关闭后的结果
      */
     @Override
-    public Map<String, Object> close(AssistOrder assistOrder){
+    public Map<String, Object> close(AssistOrder assistOrder) {
         return Collections.emptyMap();
     }
 
@@ -459,13 +417,13 @@ public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorag
     public RefundResult refund(RefundOrder refundOrder) {
         String apbNonce = SignTextUtils.randomStr();
         TreeMap<String, String> data = new TreeMap<>();
-        data.put("access_token", payConfigStorage.getAccessToken());
+        data.put(ACCESS_TOKEN, payConfigStorage.getAccessToken());
 
         if (StringUtils.isEmpty(refundOrder.getOutTradeNo())) {
-            data.put("order_sn", refundOrder.getOutTradeNo());
+            data.put(ORDER_SN, refundOrder.getOutTradeNo());
         }
         else {
-            data.put("order_sn", refundOrder.getTradeNo());
+            data.put(ORDER_SN, refundOrder.getTradeNo());
         }
         //支付类型刷卡为3扫码为4
         data.put("type", "4");
@@ -476,7 +434,7 @@ public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorag
         return new BaseRefundResult(jsonObject) {
             @Override
             public String getCode() {
-                return getAttrString("errorcode");
+                return getAttrString(ERROR_CODE);
             }
 
             @Override
