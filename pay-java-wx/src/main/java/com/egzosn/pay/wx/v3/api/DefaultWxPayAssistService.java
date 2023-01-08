@@ -60,6 +60,7 @@ public class DefaultWxPayAssistService implements WxPayAssistService {
      * @param transactionType 交易类型
      * @return 响应内容体
      */
+    @Override
     public JSONObject doExecute(Map<String, Object> parameters, TransactionType transactionType) {
 //        String requestBody = JSON.toJSONString(parameters, SerializerFeature.WriteMapNullValue);
         String requestBody = JSON.toJSONString(parameters);
@@ -75,6 +76,7 @@ public class DefaultWxPayAssistService implements WxPayAssistService {
      * @param uriVariables    用于匹配表达式
      * @return 响应内容体
      */
+    @Override
     public ResponseEntity<JSONObject> doExecuteEntity(String body, TransactionType transactionType, Object... uriVariables) {
         String reqUrl = UriVariables.getUri(wxPayService.getReqUrl(transactionType), uriVariables);
         MethodType method = MethodType.valueOf(transactionType.getMethod());
@@ -95,6 +97,7 @@ public class DefaultWxPayAssistService implements WxPayAssistService {
      * @param uriVariables    用于匹配表达式
      * @return 响应内容体
      */
+    @Override
     public JSONObject doExecute(String body, TransactionType transactionType, Object... uriVariables) {
         final ResponseEntity<JSONObject> responseEntity = doExecuteEntity(body, transactionType, uriVariables);
         int statusCode = responseEntity.getStatusCode();
@@ -112,6 +115,7 @@ public class DefaultWxPayAssistService implements WxPayAssistService {
      * @param order      订单
      * @return 请求响应
      */
+    @Override
     public JSONObject doExecute(Map<String, Object> parameters, PayOrder order) {
         TransactionType transactionType = order.getTransactionType();
         return doExecute(parameters, transactionType);
@@ -127,6 +131,7 @@ public class DefaultWxPayAssistService implements WxPayAssistService {
      * @param method 请求方法
      * @return 请求实体
      */
+    @Override
     public HttpEntity buildHttpEntity(String url, String body, String method) {
         String nonceStr = SignTextUtils.randomStr();
         long timestamp = DateUtils.toEpochSecond();

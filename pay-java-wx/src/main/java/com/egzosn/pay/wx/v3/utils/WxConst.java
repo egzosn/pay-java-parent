@@ -69,4 +69,20 @@ public final class WxConst {
     public static final String FAILURE = "failure";
 
     public static final String RESP_BODY = WxPayService.class.getName() + "$RESP_BODY";
+    public static final String OUT_BATCH_NO = "out_batch_no";
+    public static final String OUT_DETAIL_NO = "out_detail_no";
+    public static final String DETAIL_ID = "detail_id";
+    public static final String BATCH_NAME = "batch_name";
+    public static final String BATCH_REMARK = "batch_remark";
+    public static final String TRANSFER_DETAIL_LIST = "transfer_detail_list";
+    public static final String TOTAL_AMOUNT = "total_amount";
+    public static final String TOTAL_NUM = "total_num";
+    public static final String TRANSFER_SCENE_ID = "transfer_scene_id";
+    public static final String BATCH_ID = "batch_id";
+    public static final String NEED_QUERY_DETAIL = "need_query_detail";
+    public static final String OFFSET = "offset";
+    public static final String LIMIT = "limit";
+    public static final String DETAIL_STATUS = "detail_status";
+
+
 }

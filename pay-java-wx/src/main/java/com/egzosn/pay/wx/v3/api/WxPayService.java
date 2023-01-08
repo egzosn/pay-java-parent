@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
@@ -11,6 +12,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.http.HttpEntity;
 
@@ -21,9 +23,9 @@ import static com.egzosn.pay.wx.v3.utils.WxConst.FAILURE;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.api.BasePayService;
+import com.egzosn.pay.common.api.TransferService;
 import com.egzosn.pay.common.bean.AssistOrder;
 import com.egzosn.pay.common.bean.BillType;
-
 import com.egzosn.pay.common.bean.CurType;
 import com.egzosn.pay.common.bean.MethodType;
 import com.egzosn.pay.common.bean.NoticeParams;
@@ -50,16 +52,17 @@ import com.egzosn.pay.common.util.sign.SignUtils;
 import com.egzosn.pay.common.util.sign.encrypt.RSA2;
 import com.egzosn.pay.common.util.str.StringUtils;
 import com.egzosn.pay.wx.bean.WxPayError;
-import com.egzosn.pay.wx.bean.WxTransferType;
 import com.egzosn.pay.wx.v3.bean.WxAccountType;
 import com.egzosn.pay.wx.v3.bean.WxBillType;
 import com.egzosn.pay.wx.v3.bean.WxTransactionType;
+import com.egzosn.pay.wx.v3.bean.WxTransferType;
 import com.egzosn.pay.wx.v3.bean.order.Amount;
 import com.egzosn.pay.wx.v3.bean.order.RefundAmount;
 import com.egzosn.pay.wx.v3.bean.response.Resource;
 import com.egzosn.pay.wx.v3.bean.response.WxNoticeParams;
 import com.egzosn.pay.wx.v3.bean.response.WxPayMessage;
 import com.egzosn.pay.wx.v3.bean.response.WxRefundResult;
+import com.egzosn.pay.wx.v3.bean.transfer.TransferDetail;
 import com.egzosn.pay.wx.v3.utils.AntCertificationUtil;
 import com.egzosn.pay.wx.v3.utils.WxConst;
 
@@ -72,7 +75,7 @@ import com.egzosn.pay.wx.v3.utils.WxConst;
  * date 2021/10/6
  * </pre>
  */
-public class WxPayService extends BasePayService<WxPayConfigStorage> {
+public class WxPayService extends BasePayService<WxPayConfigStorage> implements TransferService {
 
 
     /**
@@ -91,14 +94,14 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
      */
     private volatile WxParameterStructure wxParameterStructure;
 
+
     /**
      * 创建支付服务
      *
      * @param payConfigStorage 微信对应的支付配置
      */
     public WxPayService(WxPayConfigStorage payConfigStorage) {
-        super(payConfigStorage);
-
+        this(payConfigStorage, null);
     }
 
     /**
@@ -110,6 +113,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
     public WxPayService(WxPayConfigStorage payConfigStorage, HttpConfigStorage configStorage) {
         super(payConfigStorage, configStorage);
     }
+
     {
         initAfter();
     }
@@ -613,14 +617,100 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> {
 
 
     /**
-     * 转账
+     * 发起商家转账, 转账账单电子回单申请受理接口
      *
-     * @param order 转账订单
+     * @param transferOrder 转账订单
      * @return 对应的转账结果
      */
     @Override
-    public Map<String, Object> transfer(TransferOrder order) {
-        throw new PayErrorException(new WxPayError("", "V3不支持转账"));
+    public Map<String, Object> transfer(TransferOrder transferOrder) {
+        //转账账单电子回单申请受理接口
+        if (transferOrder.getTransferType() == WxTransferType.TRANSFER_BILL_RECEIPT) {
+            Map<String, Object> attr = new MapGen<String, Object>(WxConst.OUT_BATCH_NO, transferOrder.getBatchNo()).getAttr();
+            return getAssistService().doExecute(attr, transferOrder.getTransferType());
+        }
+
+        Map<String, Object> parameters = new HashMap<>(12);
+        parameters.put(WxConst.APPID, payConfigStorage.getAppId());
+        parameters.put(WxConst.OUT_BATCH_NO, transferOrder.getBatchNo());
+        OrderParaStructure.loadParameters(parameters, WxConst.BATCH_NAME, transferOrder);
+        parameters.put(WxConst.BATCH_REMARK, transferOrder.getRemark());
+        parameters.put(WxConst.TOTAL_AMOUNT, Util.conversionCentAmount(transferOrder.getAmount()));
+        parameters.put(WxConst.TOTAL_NUM, transferOrder.getAttr(WxConst.TOTAL_NUM));
+        Object transferDetailListAttr = transferOrder.getAttr(WxConst.TRANSFER_DETAIL_LIST);
+        List<TransferDetail> transferDetails = initTransferDetailListAttr(transferDetailListAttr);
+        parameters.put(WxConst.TRANSFER_DETAIL_LIST, transferDetails);
+        OrderParaStructure.loadParameters(parameters, WxConst.TRANSFER_SCENE_ID, transferOrder);
+        return getAssistService().doExecute(parameters, transferOrder.getTransferType());
+    }
+
+    private List<TransferDetail> initTransferDetailListAttr(Object transferDetailListAttr) {
+        List<TransferDetail> transferDetails = null;
+        if (transferDetailListAttr instanceof String) {
+            transferDetails = JSON.parseArray((String) transferDetailListAttr, TransferDetail.class);
+        }
+        else if (null != transferDetailListAttr) {
+            //偷懒的做法
+            transferDetails = JSON.parseArray(JSON.toJSONString(transferDetailListAttr), TransferDetail.class);
+        }
+        else {
+            return null;
+        }
+
+        String serialNumber = payConfigStorage.getCertEnvironment().getSerialNumber();
+        Certificate certificate = getAssistService().getCertificate(serialNumber);
+        return transferDetails.stream()
+                .peek(transferDetailListItem -> {
+                    String userName = transferDetailListItem.getUserName();
+                    if (StringUtils.isNotEmpty(userName)) {
+                        String encryptedUserName = AntCertificationUtil.encryptToString(userName, certificate);
+                        transferDetailListItem.setUserName(encryptedUserName);
+                    }
+                    String userIdCard = transferDetailListItem.getUserIdCard();
+                    if (StringUtils.isNotEmpty(userIdCard)) {
+                        String encryptedUserIdCard = AntCertificationUtil.encryptToString(userIdCard, certificate);
+                        transferDetailListItem.setUserIdCard(encryptedUserIdCard);
+                    }
+                }).collect(Collectors.toList());
+    }
+
+    /**
+     * 转账查询API
+     * 通过批次单号查询批次单 与 通过明细单号查询明细单
+     *
+     * @param assistOrder 辅助交易订单
+     * @return 对应的转账订单
+     */
+    @Override
+    public Map<String, Object> transferQuery(AssistOrder assistOrder) {
+        Map<String, Object> parameters = new HashMap<>(6);
+        TransactionType transactionType = assistOrder.getTransactionType();
+        List<Object> uriVariables = new ArrayList<>(3);
+
+        if (StringUtils.isNotEmpty(assistOrder.getTradeNo())) {
+            uriVariables.add(assistOrder.getTradeNo());
+            String detailId = assistOrder.getAttrForString(WxConst.DETAIL_ID);
+            if (StringUtils.isNotEmpty(detailId)) {
+                uriVariables.add(detailId);
+            }
+        }
+        else if (StringUtils.isNotEmpty(assistOrder.getOutTradeNo())) {
+            uriVariables.add(assistOrder.getOutTradeNo());
+            String outDetailNo = assistOrder.getAttrForString(WxConst.OUT_DETAIL_NO);
+            if (StringUtils.isNotEmpty(outDetailNo)) {
+                uriVariables.add(outDetailNo);
+            }
+        }
+
+        if (transactionType == com.egzosn.pay.wx.v3.bean.WxTransferType.QUERY_BATCH_BY_BATCH_ID || transactionType == com.egzosn.pay.wx.v3.bean.WxTransferType.QUERY_BATCH_BY_OUT_BATCH_NO) {
+            OrderParaStructure.loadParameters(parameters, WxConst.NEED_QUERY_DETAIL, assistOrder);
+            OrderParaStructure.loadParameters(parameters, WxConst.OFFSET, assistOrder);
+            OrderParaStructure.loadParameters(parameters, WxConst.LIMIT, assistOrder);
+            OrderParaStructure.loadParameters(parameters, WxConst.DETAIL_STATUS, assistOrder);
+        }
+
+        String requestBody = JSON.toJSONString(parameters);
+        return getAssistService().doExecute(requestBody, assistOrder.getTransactionType(), uriVariables.toArray());
     }
 
 

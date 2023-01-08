@@ -153,7 +153,7 @@ public enum WxTransactionType implements TransactionType {
     /**
      * 合单关闭订单
      */
-    COMBINE_CLOSE("/v3/combine-transactions/out-trade-no/{combine_out_trade_no}/close", MethodType.POST),
+    COMBINE_CLOSE("/v3/combine-transactions/out-trade-no/{combine_out_trade_no}/close", MethodType.POST)
     ;
 
     WxTransactionType(String type, MethodType method) {
