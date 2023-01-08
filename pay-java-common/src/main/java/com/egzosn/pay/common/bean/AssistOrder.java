@@ -18,11 +18,11 @@ public class AssistOrder implements Order {
 
 
     /**
-     * 支付平台订单号,交易号
+     * 支付平台订单号,交易号, 平台批次单号
      */
     private String tradeNo;
     /**
-     * 商户订单号
+     * 商户订单号,商家批次单号
      */
     private String outTradeNo;
     /**
@@ -77,18 +77,18 @@ public class AssistOrder implements Order {
     }
 
     /**
-     * 获取商户订单号
+     * 获取商户订单号,商家批次单号
      *
-     * @return 商户订单号
+     * @return 商户订单号, 商家批次单号
      */
     public String getOutTradeNo() {
         return outTradeNo;
     }
 
     /**
-     * 设置商户订单号
+     * 设置商户订单号,商家批次单号
      *
-     * @param outTradeNo 商户订单号
+     * @param outTradeNo 商户订单号,商家批次单号
      */
     public void setOutTradeNo(String outTradeNo) {
         this.outTradeNo = outTradeNo;
