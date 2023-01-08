@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2021 the original  Egan.
+ * Copyright 2017-2023 the original  Egan.
  * email egzosn@gmail.com
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,19 +59,34 @@ public class NoticeParams {
         this.headers = headers;
     }
 
+    private <T> T getValueMatchingKey(Map<String, T> values, String key) {
+        T value = values.get(key);
+        if (null != value) {
+            return value;
+        }
+
+        for (Map.Entry<String, T> entry : values.entrySet()) {
+            if (entry.getKey().equalsIgnoreCase(key)) {
+                return entry.getValue();
+            }
+        }
+        return null;
+    }
+
+
     public String getHeader(String name) {
-        List<String> value = this.headers.get(name);
+        List<String> value = getValueMatchingKey(headers, name);
         return (null == value || value.isEmpty()) ? null : value.get(0);
     }
 
     public Enumeration<String> getHeaders(String name) {
-        List<String> value = this.headers.get(name);
+        List<String> value = getValueMatchingKey(headers, name);
         return (Collections.enumeration(value != null ? value : Collections.<String>emptySet()));
     }
 
     public Enumeration<String> getHeaderNames() {
-        if (null == headers){
-            return  Collections.enumeration(Collections.emptySet());
+        if (null == headers) {
+            return Collections.enumeration(Collections.emptySet());
         }
         return Collections.enumeration(this.headers.keySet());
     }
