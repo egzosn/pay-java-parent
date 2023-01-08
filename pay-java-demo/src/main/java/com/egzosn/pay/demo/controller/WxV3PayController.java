@@ -5,11 +5,11 @@ package com.egzosn.pay.demo.controller;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import javax.annotation.PostConstruct;
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 
@@ -27,8 +27,12 @@ import com.egzosn.pay.web.support.HttpRequestNoticeParams;
 import com.egzosn.pay.wx.v3.api.WxPayConfigStorage;
 import com.egzosn.pay.wx.v3.api.WxPayService;
 import com.egzosn.pay.wx.v3.bean.WxTransactionType;
+import com.egzosn.pay.wx.v3.bean.WxTransferType;
 import com.egzosn.pay.wx.v3.bean.order.H5Info;
 import com.egzosn.pay.wx.v3.bean.order.SceneInfo;
+import com.egzosn.pay.wx.v3.bean.transfer.TransferDetail;
+import com.egzosn.pay.wx.v3.bean.transfer.WxTransferOrder;
+import com.egzosn.pay.wx.v3.bean.transfer.WxTransferQueryOrder;
 import com.egzosn.pay.wx.v3.utils.WxConst;
 
 /**
@@ -233,5 +237,137 @@ public class WxV3PayController {
         return service.downloadBill(order.getBillDate(), order.getBillType());
     }
 
+    /**
+     * 转账到余额
+     *
+     *
+     * @return 对应的转账结果
+     */
+    @RequestMapping("transfer")
+    public Map<String, Object> transfer() {
+
+        WxTransferOrder order = new WxTransferOrder();
+        order.setOutBatchNo("商户系统内部的商家批次单号，要求此参数只能由数字、大小写字母组成，在商户系统内部唯一");
+        order.setBatchName("该笔批量转账的名称");
+        order.setBatchRemark("转账说明，UTF8编码，最多允许32个字符");
+        // 转账金额单位为“分”。转账总金额必须与批次内所有明细转账金额之和保持一致，否则无法发起转账操作
+        order.setTotalAmount(100);
+        //一个转账批次单最多发起一千笔转账。转账总笔数必须与批次内所有明细之和保持一致，否则无法发起转账操作
+        order.setTotalNum(1);
+        TransferDetail transferDetail = new TransferDetail();
+        transferDetail.setOutDetailNo("商户系统内部区分转账批次单下不同转账明细单的唯一标识，要求此参数只能由数字、大小写字母组成");
+        // 转账金额单位为“分”。转账总金额必须与批次内所有明细转账金额之和保持一致，否则无法发起转账操作
+        transferDetail.setTransferAmount(100);
+        transferDetail.setTransferRemark("单条转账备注（微信用户会收到该备注），UTF8编码，最多允许32个字符");
+        transferDetail.setOpenid("商户appid下，某用户的openid");
+        transferDetail.setUserName("收款方真实姓名: 张三");
+        transferDetail.setUserIdCard("当填入收款方身份证号时，姓名字段必须填入。");
+        order.setTransferDetailList(Collections.singletonList(transferDetail));
+        //发起商家转账,转账到零钱
+        order.setTransferType(WxTransferType.TRANSFER_BATCHES);
+        order.setTransferSceneId("必填，指定该笔转账使用的转账场景ID");
+        return service.transfer(order);
+    }
+    /**
+     * 转账账单电子回单申请受理接口
+     *
+     *
+     * @return 转账账单电子回单申请受理接口结果
+     */
+    @RequestMapping("billReceipt")
+    public Map<String, Object> billReceipt() {
+        WxTransferOrder order = new WxTransferOrder();
+        order.setOutBatchNo("商户系统内部的商家批次单号，要求此参数只能由数字、大小写字母组成，在商户系统内部唯一");
+        //转账账单电子回单申请受理接口
+        order.setTransferType(WxTransferType.TRANSFER_BILL_RECEIPT);
+        return service.transfer(order);
+    }
+
+
+    /**
+     * 通过微信批次单号查询批次单
+     *
+     * <p>
+     *  <a href="https://pay.weixin.qq.com/docs/merchant/apis/batch-transfer-to-balance/transfer-batch/get-transfer-batch-by-no.html">通过微信批次单号查询批次单</a>
+     * </p>
+     * @return 对应的转账订单
+     */
+    @RequestMapping("getTransferBatchByNo")
+    public Map<String, Object> getTransferBatchByNo() {
+        WxTransferQueryOrder queryOrder = new WxTransferQueryOrder();
+        queryOrder.setBatchId("1030000071100999991182020050700019480001");
+        queryOrder.setNeedQueryDetail(true);
+        queryOrder.setOffset(0);
+        queryOrder.setLimit(20);
+        queryOrder.setDetailStatus("FAIL");
+        queryOrder.setTransactionType(WxTransferType.QUERY_BATCH_BY_BATCH_ID);
+        return service.transferQuery(queryOrder);
+    }
+    /**
+     * 通过微信批次单号查询批次单
+     *
+     * <p>
+     *  <a href="https://pay.weixin.qq.com/docs/merchant/apis/batch-transfer-to-balance/transfer-batch/get-transfer-batch-by-out-no.html">通过商家批次单号查询批次单</a>
+     * </p>
+     * @return 对应的转账订单
+     */
+    @RequestMapping("getTransferBatchByOutNo")
+    public Map<String, Object> getTransferBatchByOutNo() {
+        WxTransferQueryOrder queryOrder = new WxTransferQueryOrder();
+        queryOrder.setOutBatchNo("1030000071100999991182020050700019480001");
+        queryOrder.setNeedQueryDetail(true);
+        queryOrder.setOffset(0);
+        queryOrder.setLimit(20);
+        queryOrder.setDetailStatus("FAIL");
+        queryOrder.setTransactionType(WxTransferType.QUERY_BATCH_BY_OUT_BATCH_NO);
+        return service.transferQuery(queryOrder);
+    }
+    /**
+     * 通过微信明细单号查询明细单
+     *
+     * <p>
+     *  <a href="https://pay.weixin.qq.com/docs/merchant/apis/batch-transfer-to-balance/transfer-detail/get-transfer-detail-by-no.html">通过微信明细单号查询明细单</a>
+     * </p>
+     * @return 对应的转账订单
+     */
+    @RequestMapping("getTransferDetailByNo")
+    public Map<String, Object> getTransferDetailByNo() {
+        WxTransferQueryOrder queryOrder = new WxTransferQueryOrder();
+        queryOrder.setBatchId("1030000071100999991182020050700019480001");
+        queryOrder.setDetailId("1040000071100999991182020050700019500100");
+        queryOrder.setTransactionType(WxTransferType.QUERY_BATCH_DETAIL_BY_BATCH_ID);
+        return service.transferQuery(queryOrder);
+    }
+    /**
+     * 通过商家明细单号查询明细单
+     *
+     * <p>
+     *  <a href="https://pay.weixin.qq.com/docs/merchant/apis/batch-transfer-to-balance/transfer-detail/get-transfer-detail-by-out-no.html">通过商家明细单号查询明细单</a>
+     * </p>
+     * @return 对应的转账订单
+     */
+    @RequestMapping("getTransferDetailByOutNo")
+    public Map<String, Object> getTransferDetailByOutNo() {
+        WxTransferQueryOrder queryOrder = new WxTransferQueryOrder();
+        queryOrder.setOutDetailNo("x23zy545Bd5436");
+        queryOrder.setOutBatchNo("plfk2020042013");
+        queryOrder.setTransactionType(WxTransferType.QUERY_BATCH_DETAIL_BY_OUT_BATCH_NO);
+        return service.transferQuery(queryOrder);
+    }
+    /**
+     * 查询转账账单电子回单接口
+     *
+     * <p>
+     *  <a href="https://pay.weixin.qq.com/docs/merchant/apis/batch-transfer-to-balance/transfer-detail/get-transfer-detail-by-out-no.html">查询转账账单电子回单接口</a>
+     * </p>
+     * @return 对应的转账订单
+     */
+    @RequestMapping("getElectronicSignatureByOutNo")
+    public Map<String, Object> getElectronicSignatureByOutNo() {
+        WxTransferQueryOrder queryOrder = new WxTransferQueryOrder();
+        queryOrder.setOutBatchNo("plfk2020042013");
+        queryOrder.setTransactionType(WxTransferType.QUERY_TRANSFER_BILL_RECEIPT);
+        return service.transferQuery(queryOrder);
+    }
 
 }
