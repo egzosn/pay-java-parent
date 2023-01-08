@@ -216,7 +216,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> implement
     private void setNotifyUrl(Map<String, Object> orderInfo, AssistOrder order) {
 //        orderInfo.put(NOTIFY_URL, payConfigStorage.getNotifyUrl());
         OrderParaStructure.loadParameters(orderInfo, NOTIFY_URL, payConfigStorage.getNotifyUrl());
-        OrderParaStructure.loadParameters(orderInfo, NOTIFY_URL,  order.getNotifyUrl());
+        OrderParaStructure.loadParameters(orderInfo, NOTIFY_URL, order.getNotifyUrl());
         OrderParaStructure.loadParameters(orderInfo, NOTIFY_URL, order);
     }
 
@@ -497,7 +497,16 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> implement
      */
     @Override
     public Map<String, Object> query(AssistOrder assistOrder) {
-        return secondaryInterface(assistOrder.getTradeNo(), assistOrder.getOutTradeNo(), AliTransactionType.QUERY);
+        //获取公共参数
+        Map<String, Object> parameters = getPublicParameters(assistOrder.getTransactionType());
+        Map<String, Object> bizContent = new TreeMap<>();
+        OrderParaStructure.loadParameters(bizContent, "query_options", assistOrder);
+
+        //设置请求参数的集合
+        parameters.put(BIZ_CONTENT, JSON.toJSONString(getBizContent(assistOrder.getOutTradeNo(), assistOrder.getTradeNo(), bizContent)));
+        //设置签名
+        setSign(parameters);
+        return requestTemplate.getForObject(getReqUrl(assistOrder.getTransactionType()) + "?" + UriVariables.getMapToParameters(parameters), JSONObject.class);
     }
 
 
