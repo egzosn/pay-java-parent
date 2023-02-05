@@ -10,8 +10,10 @@ import com.egzosn.pay.wx.v3.utils.WxConst;
  * 发起商家转账
  *
  * @author Egan
- * @email egan@egzosn.com
- * @date 2023/1/8
+ * <pre>
+ * email egan@egzosn.com
+ * date 2023/1/8
+ * </pre>
  */
 public class WxTransferOrder extends TransferOrder {
 

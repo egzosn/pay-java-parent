@@ -9,8 +9,10 @@ import com.egzosn.pay.common.bean.TransferOrder;
  * 转账服务
  *
  * @author Egan
- * @email egan@egzosn.com
- * @date 2023/1/8
+ * <pre>
+ *  email egan@egzosn.com
+ *  date 2023/1/8
+ *  </pre>
  */
 public interface TransferService {
 

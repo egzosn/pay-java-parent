@@ -28,7 +28,7 @@ public class WxParameterStructure {
 
     /**
      * 获取公共参数
-     *
+     * @param parameters 参数
      * @return 公共参数
      */
     public Map<String, Object> getPublicParameters(Map<String, Object> parameters) {
@@ -93,6 +93,7 @@ public class WxParameterStructure {
      * 初始化商户相关信息
      *
      * @param parameters 参数信息
+     * @return 参数信息
      */
     public Map<String, Object> initPartner(Map<String, Object> parameters) {
         if (null == parameters) {

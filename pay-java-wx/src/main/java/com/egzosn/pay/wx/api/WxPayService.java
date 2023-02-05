@@ -835,8 +835,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
      * 转账
      *
      * @param order 转账订单
-     *              <pre>
-     *              @return 对应的转账结果
+     * @return 对应的转账结果
      */
     @Override
     public Map<String, Object> transfer(TransferOrder order) {

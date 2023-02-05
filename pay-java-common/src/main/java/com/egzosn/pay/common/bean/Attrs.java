@@ -73,6 +73,7 @@ public interface Attrs extends Serializable {
      * 获取属性 这里可用做覆盖已设置的属性信息属性。
      *
      * @param key 属性名
+     * @param defaultValue 默认值
      * @return 属性
      */
     default Integer getAttrForInt(String key, Integer defaultValue) {

@@ -6,8 +6,10 @@ import com.alibaba.fastjson.annotation.JSONField;
  *
  * 转账明细
  * @author Egan
- * @email egan@egzosn.com
- * @date 2023/1/8
+ * <pre>
+ * email egan@egzosn.com
+ * date 2023/1/8
+ * </pre>
  */
 public class TransferDetail {
     /**
