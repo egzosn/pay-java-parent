@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.cert.Certificate;
 import java.util.Map;
 
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.message.BasicHeader;
@@ -104,6 +105,17 @@ public class DefaultWxPayAssistService implements WxPayAssistService {
         JSONObject responseBody = responseEntity.getBody();
         if (statusCode >= 400) {
             throw new PayErrorException(new WxPayError(responseBody.getString(WxConst.CODE), responseBody.getString(WxConst.MESSAGE), responseBody.toJSONString()));
+        }
+        Header[] headers = responseEntity.getHeaders();
+        if (headers == null) {
+            return responseBody;
+        }
+        for (Header header : headers) {
+            if ("Wechatpay-Serial".equals(header.getName())) {
+                // 更新平台证书的序列号，需要每次都更新，因为这个可能会改变
+                payConfigStorage.getCertEnvironment().setPlatformSerialNumber(header.getValue());
+                break;
+            }
         }
         return responseBody;
     }

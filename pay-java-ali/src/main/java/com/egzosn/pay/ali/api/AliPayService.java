@@ -503,7 +503,7 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> implement
         OrderParaStructure.loadParameters(bizContent, "query_options", assistOrder);
 
         //设置请求参数的集合
-        parameters.put(BIZ_CONTENT, JSON.toJSONString(getBizContent(assistOrder.getOutTradeNo(), assistOrder.getTradeNo(), bizContent)));
+        parameters.put(BIZ_CONTENT, JSON.toJSONString(getBizContent(assistOrder.getTradeNo(), assistOrder.getOutTradeNo(), bizContent)));
         //设置签名
         setSign(parameters);
         return requestTemplate.getForObject(getReqUrl(assistOrder.getTransactionType()) + "?" + UriVariables.getMapToParameters(parameters), JSONObject.class);

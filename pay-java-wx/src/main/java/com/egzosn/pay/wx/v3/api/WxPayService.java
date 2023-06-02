@@ -657,7 +657,8 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
             return null;
         }
 
-        String serialNumber = payConfigStorage.getCertEnvironment().getSerialNumber();
+        // 商户上送敏感信息时使用`微信支付平台公钥`加密
+        String serialNumber = payConfigStorage.getCertEnvironment().getPlatformSerialNumber();
         Certificate certificate = getAssistService().getCertificate(serialNumber);
         return transferDetails.stream()
                 .peek(transferDetailListItem -> {
