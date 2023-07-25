@@ -26,7 +26,10 @@ public class CertEnvironment {
      */
     private String serialNumber;
 
-
+    /**
+     * 微信平台证书序列号
+     */
+    private String platformSerialNumber;
 
 
 
@@ -62,5 +65,13 @@ public class CertEnvironment {
 
     public void setSerialNumber(String serialNumber) {
         this.serialNumber = serialNumber;
+    }
+
+    public String getPlatformSerialNumber() {
+        return platformSerialNumber;
+    }
+
+    public void setPlatformSerialNumber(String platformSerialNumber) {
+        this.platformSerialNumber = platformSerialNumber;
     }
 }
