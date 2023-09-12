@@ -29,8 +29,12 @@ import java.util.Map;
  * email egzosn@gmail.com
  * date 2021/8/8
  */
-public class NoticeParams {
+public class NoticeParams implements Attrs {
 
+    /**
+     * body原始字符串
+     */
+    private String bodyStr;
 
     /**
      * 为了获取request里面传过来的动态参数
@@ -57,6 +61,14 @@ public class NoticeParams {
     public NoticeParams(Map<String, Object> body, Map<String, List<String>> headers) {
         this.body = body;
         this.headers = headers;
+    }
+
+    public String getBodyStr() {
+        return bodyStr;
+    }
+
+    public void setBodyStr(String bodyStr) {
+        this.bodyStr = bodyStr;
     }
 
     private <T> T getValueMatchingKey(Map<String, T> values, String key) {
@@ -114,5 +126,16 @@ public class NoticeParams {
 
     public void setAttr(Map<String, Object> attr) {
         this.attr = attr;
+    }
+
+
+    /**
+     * 获取属性 这里可用做覆盖已设置的信息属性，订单信息在签名前进行覆盖。
+     *
+     * @return 属性
+     */
+    @Override
+    public Map<String, Object> getAttrs() {
+        return attr;
     }
 }

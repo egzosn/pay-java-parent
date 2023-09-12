@@ -156,6 +156,7 @@ public enum SignUtils implements SignType {
      * @param characterEncoding 编码格式
      * @return 签名值
      */
+    @Override
     public String sign(Map parameters, String key, String characterEncoding) {
 
         return createSign(parameterText(parameters, "&"), key, characterEncoding);
@@ -170,6 +171,7 @@ public enum SignUtils implements SignType {
      * @param characterEncoding 编码格式
      * @return 签名值
      */
+    @Override
     public String sign(Map parameters, String key, String separator, String characterEncoding) {
 
         return createSign(parameterText(parameters, separator), key, characterEncoding);
@@ -186,6 +188,7 @@ public enum SignUtils implements SignType {
      * @param characterEncoding 编码格式
      * @return 签名结果
      */
+    @Override
     public boolean verify(Map params, String sign, String key, String characterEncoding) {
         //判断是否一样
         return this.verify(parameterText(params), sign, key, characterEncoding);

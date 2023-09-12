@@ -7,7 +7,6 @@ import java.util.Map;
 
 import com.egzosn.pay.common.bean.AssistOrder;
 import com.egzosn.pay.common.bean.BillType;
-
 import com.egzosn.pay.common.bean.MethodType;
 import com.egzosn.pay.common.bean.NoticeParams;
 import com.egzosn.pay.common.bean.NoticeRequest;
@@ -223,12 +222,10 @@ public interface PayService<PC extends PayConfigStorage> {
     /**
      * 交易查询接口
      *
-     * @param assistOrder   查询条件
+     * @param assistOrder 查询条件
      * @return 返回查询回来的结果集，支付方原值返回
      */
     Map<String, Object> query(AssistOrder assistOrder);
-
-
 
 
     /**
@@ -241,10 +238,11 @@ public interface PayService<PC extends PayConfigStorage> {
      */
     @Deprecated
     Map<String, Object> close(String tradeNo, String outTradeNo);
+
     /**
      * 交易关闭接口
      *
-     * @param assistOrder    关闭订单
+     * @param assistOrder 关闭订单
      * @return 返回支付方交易关闭后的结果
      */
     Map<String, Object> close(AssistOrder assistOrder);
@@ -343,7 +341,6 @@ public interface PayService<PC extends PayConfigStorage> {
     Map<String, Object> downloadBill(Date billDate, BillType billType);
 
 
-
     /**
      * 转账
      *
@@ -370,7 +367,9 @@ public interface PayService<PC extends PayConfigStorage> {
      * @param outNo   商户转账订单号
      * @param tradeNo 支付平台转账订单号
      * @return 对应的转账订单
+     * @deprecated 替代{@link TransferService#transferQuery(com.egzosn.pay.common.bean.AssistOrder)}
      */
+    @Deprecated
     Map<String, Object> transferQuery(String outNo, String tradeNo);
 
     /**
@@ -395,13 +394,14 @@ public interface PayService<PC extends PayConfigStorage> {
      */
     @Deprecated
     PayOutMessage payBack(Map<String, String[]> parameterMap, InputStream is);
+
     /**
-     *  回调处理
+     * 回调处理
+     *
      * @param request 请求参数
      * @return 获得回调响应信息
      */
     PayOutMessage payBack(NoticeRequest request);
-
 
 
     /**
