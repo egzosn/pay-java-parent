@@ -75,7 +75,7 @@ import com.egzosn.pay.wx.v3.utils.WxConst;
  * date 2021/10/6
  * </pre>
  */
-public class WxPayService extends BasePayService<WxPayConfigStorage> implements TransferService {
+public class WxPayService extends BasePayService<WxPayConfigStorage> implements TransferService, WxPayServiceInf {
 
 
     /**
@@ -123,12 +123,13 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
      *
      * @return 辅助api
      */
+    @Override
     public WxPayAssistService getAssistService() {
         if (null == assistService) {
             assistService = new DefaultWxPayAssistService(this);
-            //在这预先进行初始化
-            assistService.refreshCertificate();
         }
+        //在这预先进行初始化
+        assistService.refreshCertificate();
         return assistService;
     }
 
@@ -144,7 +145,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
 //        new Thread(() -> {
         payConfigStorage.loadCertEnvironment();
         wxParameterStructure = new WxParameterStructure(payConfigStorage);
-        getAssistService();
+        setApiServerUrl(WxConst.URI);
 //        }).start();
 
     }
@@ -155,11 +156,14 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
      * @param apiServerUrl api服务器地址
      * @return 自身
      */
+    @Override
     public WxPayService setApiServerUrl(String apiServerUrl) {
         this.apiServerUrl = apiServerUrl;
+        getAssistService();
         return this;
     }
 
+    @Override
     public String getApiServerUrl() {
         return apiServerUrl;
     }
@@ -218,14 +222,9 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
 
         Certificate certificate = getAssistService().getCertificate(serial);
 
-        Map<String, Object> attr = noticeParams.getAttr();
-
-        if (Util.isEmpty(attr)) {
-            throw new PayErrorException(new WxPayError(FAILURE, "请勿置空NoticeParams.attr中的数据"));
-        }
 
         //这里为微信回调时的请求内容体，原值数据
-        String body = (String) attr.get(WxConst.RESP_BODY);
+        String body = noticeParams.getBodyStr();
         //签名信息
         String signText = StringUtils.joining("\n", timestamp, nonce, body);
 
@@ -362,6 +361,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
             String body = IOUtils.toString(is);
             noticeParams = JSON.parseObject(body, WxNoticeParams.class);
             noticeParams.setAttr(new MapGen<String, Object>(WxConst.RESP_BODY, body).getAttr());
+            noticeParams.setBodyStr(body);
             Resource resource = noticeParams.getResource();
             String associatedData = resource.getAssociatedData();
             String nonce = resource.getNonce();
@@ -703,14 +703,15 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
             }
         }
 
-        if (transactionType == com.egzosn.pay.wx.v3.bean.WxTransferType.QUERY_BATCH_BY_BATCH_ID || transactionType == com.egzosn.pay.wx.v3.bean.WxTransferType.QUERY_BATCH_BY_OUT_BATCH_NO) {
+        if (transactionType == WxTransferType.QUERY_BATCH_BY_BATCH_ID || transactionType == WxTransferType.QUERY_BATCH_BY_OUT_BATCH_NO) {
             OrderParaStructure.loadParameters(parameters, WxConst.NEED_QUERY_DETAIL, assistOrder);
             OrderParaStructure.loadParameters(parameters, WxConst.OFFSET, assistOrder);
             OrderParaStructure.loadParameters(parameters, WxConst.LIMIT, assistOrder);
             OrderParaStructure.loadParameters(parameters, WxConst.DETAIL_STATUS, assistOrder);
         }
 
-        String requestBody = JSON.toJSONString(parameters);
+
+        String requestBody = UriVariables.getMapToParameters(parameters);
         return getAssistService().doExecute(requestBody, assistOrder.getTransactionType(), uriVariables.toArray());
     }
 
@@ -728,7 +729,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
      */
     @Override
     public Map<String, Object> transferQuery(String outNo, String wxTransferType) {
-        throw new PayErrorException(new WxPayError("", "V3不支持转账查询"));
+        throw new PayErrorException(new WxPayError("", "V3不支持此转账查询：替代方法transferQuery(AssistOrder assistOrder)"));
     }
 
 

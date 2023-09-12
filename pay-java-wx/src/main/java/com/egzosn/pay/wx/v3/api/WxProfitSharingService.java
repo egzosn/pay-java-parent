@@ -1,30 +1,29 @@
 package com.egzosn.pay.wx.v3.api;
 
 import java.io.InputStream;
-import java.security.PrivateKey;
 import java.util.Date;
 import java.util.Map;
+
+import org.apache.http.message.BasicHeader;
 
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.bean.AssistOrder;
 import com.egzosn.pay.common.bean.BillType;
 import com.egzosn.pay.common.bean.MethodType;
 import com.egzosn.pay.common.bean.NoticeParams;
-import com.egzosn.pay.common.bean.NoticeRequest;
 import com.egzosn.pay.common.bean.OrderParaStructure;
 import com.egzosn.pay.common.bean.PayMessage;
 import com.egzosn.pay.common.bean.PayOrder;
-import com.egzosn.pay.common.bean.PayOutMessage;
 import com.egzosn.pay.common.bean.RefundOrder;
 import com.egzosn.pay.common.bean.RefundResult;
 import com.egzosn.pay.common.bean.TransferOrder;
 import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpConfigStorage;
+import com.egzosn.pay.common.http.HttpStringEntity;
 import com.egzosn.pay.common.http.UriVariables;
 import com.egzosn.pay.common.util.DateUtils;
 import com.egzosn.pay.common.util.MapGen;
-import com.egzosn.pay.common.util.sign.encrypt.RSA2;
 import com.egzosn.pay.wx.bean.WxPayError;
 import com.egzosn.pay.wx.bean.WxTransferType;
 import com.egzosn.pay.wx.v3.bean.WxProfitSharingTransactionType;
@@ -70,8 +69,8 @@ public class WxProfitSharingService extends WxPayService implements ProfitSharin
     @Override
     protected void initAfter() {
 //        new Thread(() -> {
-            payConfigStorage.loadCertEnvironment();
-            getAssistService();
+        payConfigStorage.loadCertEnvironment();
+        setApiServerUrl(WxConst.URI);
 //        }).start();
 
     }
@@ -121,6 +120,17 @@ public class WxProfitSharingService extends WxPayService implements ProfitSharin
         return getAssistService().doExecute(parameters, order);
     }
 
+    /**
+     * http 实体 钩子
+     *
+     * @param entity 实体
+     * @return 返回处理后的实体
+     */
+    @Override
+    public HttpStringEntity hookHttpEntity(HttpStringEntity entity) {
+        entity.addHeader(new BasicHeader(WxConst.WECHATPAY_SERIAL, payConfigStorage.getCertEnvironment().getPlatformSerialNumber()));
+        return entity;
+    }
 
     /**
      * 返回创建的订单信息
@@ -147,19 +157,6 @@ public class WxProfitSharingService extends WxPayService implements ProfitSharin
         }
     }
 
-
-    /**
-     * 签名
-     *
-     * @param content           需要签名的内容 不包含key
-     * @param characterEncoding 字符编码
-     * @return 签名结果
-     */
-    @Override
-    public String createSign(String content, String characterEncoding) {
-        PrivateKey privateKey = payConfigStorage.getCertEnvironment().getPrivateKey();
-        return RSA2.sign(content, privateKey, characterEncoding);
-    }
 
     /**
      * 将请求参数或者请求流转化为 Map

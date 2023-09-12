@@ -16,7 +16,7 @@ public interface WxConst {
     /**
      * 沙箱
      */
-    String SANDBOXNEW = "sandboxnew/";
+    String SANDBOXNEW = "xdc/apiv2sandbox/";
 
     String SUCCESS = "SUCCESS";
     String FAIL = "FAIL";

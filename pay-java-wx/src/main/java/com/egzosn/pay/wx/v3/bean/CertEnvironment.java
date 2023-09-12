@@ -3,6 +3,8 @@ package com.egzosn.pay.wx.v3.bean;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 
+import com.egzosn.pay.common.util.str.StringUtils;
+
 /**
  * 证书模式运行时环境
  *
@@ -30,8 +32,6 @@ public class CertEnvironment {
      * 微信平台证书序列号
      */
     private String platformSerialNumber;
-
-
 
 
     public CertEnvironment() {
@@ -68,6 +68,9 @@ public class CertEnvironment {
     }
 
     public String getPlatformSerialNumber() {
+        if (StringUtils.isEmpty(platformSerialNumber)) {
+            setPlatformSerialNumber(serialNumber);
+        }
         return platformSerialNumber;
     }
 

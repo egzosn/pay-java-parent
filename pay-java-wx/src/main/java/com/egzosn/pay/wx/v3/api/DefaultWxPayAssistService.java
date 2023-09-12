@@ -43,10 +43,10 @@ public class DefaultWxPayAssistService implements WxPayAssistService {
 
     private HttpRequestTemplate requestTemplate;
 
-    private WxPayService wxPayService;
+    private WxPayServiceInf wxPayService;
 
 
-    public DefaultWxPayAssistService(WxPayService wxPayService) {
+    public DefaultWxPayAssistService(WxPayServiceInf wxPayService) {
         this.wxPayService = wxPayService;
         payConfigStorage = wxPayService.getPayConfigStorage();
         requestTemplate = wxPayService.getHttpRequestTemplate();
@@ -111,7 +111,7 @@ public class DefaultWxPayAssistService implements WxPayAssistService {
             return responseBody;
         }
         for (Header header : headers) {
-            if ("Wechatpay-Serial".equals(header.getName())) {
+            if (WxConst.WECHATPAY_SERIAL.equals(header.getName())) {
                 // 更新平台证书的序列号，需要每次都更新，因为这个可能会改变
                 payConfigStorage.getCertEnvironment().setPlatformSerialNumber(header.getValue());
                 break;
@@ -138,7 +138,7 @@ public class DefaultWxPayAssistService implements WxPayAssistService {
      * 构建请求实体
      * 这里也做签名处理
      *
-     * @param url   url
+     * @param url    url
      * @param body   请求内容体
      * @param method 请求方法
      * @return 请求实体
@@ -158,7 +158,9 @@ public class DefaultWxPayAssistService implements WxPayAssistService {
         entity.addHeader(new BasicHeader("Authorization", WxConst.SCHEMA.concat(token)));
         entity.addHeader(new BasicHeader("User-Agent", "Pay-Java-Parent"));
         entity.addHeader(new BasicHeader("Accept", APPLICATION_JSON.getMimeType()));
-        return entity;
+
+
+        return wxPayService.hookHttpEntity(entity);
     }
 
 
@@ -208,7 +210,6 @@ public class DefaultWxPayAssistService implements WxPayAssistService {
 
         return certificate;
     }
-
 
 
 }
