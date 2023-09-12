@@ -20,7 +20,7 @@ public final class AliPayConst {
     /**
      * 沙箱测试环境账号
      */
-    public static final String DEV_REQ_URL = "https://openapi.alipaydev.com/gateway.do";
+    public static final String DEV_REQ_URL = "https://openapi-sandbox.dl.alipaydev.com/gateway.do";
 
     public static final String SIGN = "sign";
 

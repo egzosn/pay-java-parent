@@ -66,12 +66,20 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> implement
 
 
     /**
+     * api服务地址，默认为国内
+     */
+    private String apiServerUrl;
+
+    /**
      * 获取对应的请求地址
      *
      * @return 请求地址
      */
     @Override
     public String getReqUrl(TransactionType transactionType) {
+        if (StringUtils.isNotEmpty(apiServerUrl)) {
+            return apiServerUrl;
+        }
         return payConfigStorage.isTest() ? AliPayConst.DEV_REQ_URL : HTTPS_REQ_URL;
     }
 
@@ -848,6 +856,18 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> implement
         setSign(parameters);
 
         return null;
+    }
+
+    /**
+     * 设置api服务器地址
+     *
+     * @param apiServerUrl api服务器地址
+     * @return 自身
+     */
+    @Override
+    public AliPayServiceInf setApiServerUrl(String apiServerUrl) {
+        this.apiServerUrl = apiServerUrl;
+        return this;
     }
 
 

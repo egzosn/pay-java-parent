@@ -19,4 +19,13 @@ public interface AliPayServiceInf {
      * @return fail    消息获取失败	是  success	消息获取成功	否
      */
     String refundDepositBackCompleted(RefundOrder refundOrder);
+
+
+    /**
+     * 设置api服务器地址
+     *
+     * @param apiServerUrl api服务器地址
+     * @return 自身
+     */
+    AliPayServiceInf setApiServerUrl(String apiServerUrl);
 }
