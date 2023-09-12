@@ -1,13 +1,16 @@
 package com.egzosn.pay.paypal.v2.api;
 
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -23,11 +26,11 @@ import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.api.BasePayService;
 import com.egzosn.pay.common.bean.AssistOrder;
 import com.egzosn.pay.common.bean.BillType;
-
 import com.egzosn.pay.common.bean.CurType;
 import com.egzosn.pay.common.bean.DefaultCurType;
 import com.egzosn.pay.common.bean.MethodType;
 import com.egzosn.pay.common.bean.NoticeParams;
+import com.egzosn.pay.common.bean.NoticeRequest;
 import com.egzosn.pay.common.bean.PayMessage;
 import com.egzosn.pay.common.bean.PayOrder;
 import com.egzosn.pay.common.bean.PayOutMessage;
@@ -38,10 +41,13 @@ import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpHeader;
 import com.egzosn.pay.common.http.HttpStringEntity;
+import com.egzosn.pay.common.http.ResponseEntity;
 import com.egzosn.pay.common.http.UriVariables;
+import com.egzosn.pay.common.util.IOUtils;
 import com.egzosn.pay.common.util.Util;
 import com.egzosn.pay.common.util.str.StringUtils;
 import com.egzosn.pay.paypal.api.PayPalConfigStorage;
+import com.egzosn.pay.paypal.v2.bean.Constants;
 import com.egzosn.pay.paypal.v2.bean.PayPalRefundResult;
 import com.egzosn.pay.paypal.v2.bean.PayPalTransactionType;
 import com.egzosn.pay.paypal.v2.bean.order.ApplicationContext;
@@ -49,6 +55,7 @@ import com.egzosn.pay.paypal.v2.bean.order.Money;
 import com.egzosn.pay.paypal.v2.bean.order.OrderRequest;
 import com.egzosn.pay.paypal.v2.bean.order.PurchaseUnitRequest;
 import com.egzosn.pay.paypal.v2.bean.order.ShippingDetail;
+import com.egzosn.pay.paypal.v2.utils.PayPalUtil;
 
 
 /**
@@ -60,6 +67,7 @@ import com.egzosn.pay.paypal.v2.bean.order.ShippingDetail;
  * date 2021-1-16 ‏‎22:15:09
  */
 public class PayPalPayService extends BasePayService<PayPalConfigStorage> implements PayPalPayServiceInf {
+
 
     /**
      * 沙箱环境
@@ -161,12 +169,18 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage> implem
     @Deprecated
     @Override
     public boolean verify(Map<String, Object> params) {
-        return verify(new NoticeParams(params));
+
+        throw new PayErrorException(new PayException("failure", "payPal V2版本不支持此校验方式"));
 
     }
 
-    @Override
-    public boolean verify(NoticeParams noticeParams) {
+
+    /**
+     * 保留IPN的校验方式
+     * @param noticeParams 参数
+     * @return 结果
+     */
+    public boolean verifyIpn(NoticeParams noticeParams) {
         final Map<String, Object> params = noticeParams.getBody();
         Object paymentStatus = params.get("payment_status");
         if (!"Completed".equals(paymentStatus)) {
@@ -177,6 +191,64 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage> implem
         return "VERIFIED".equals(resp);
 
     }
+    @Override
+    public boolean verify(NoticeParams noticeParams) {
+
+        final Map<String, List<String>> headers = noticeParams.getHeaders();
+        if (null == headers || headers.isEmpty()) {
+            throw new PayErrorException(new PayException("failure", "校验失败，请求头不能为空"));
+        }
+
+
+        String clientCertificateLocation = noticeParams.getHeader(Constants.PAYPAL_HEADER_CERT_URL);
+        ResponseEntity<InputStream> clientCertificateResponseEntity = requestTemplate.getForObjectEntity(clientCertificateLocation, InputStream.class);
+        if (clientCertificateResponseEntity.getStatusCode() > 400) {
+            LOG.error("获取证书信息失败，无法进行webHook校验:{}", clientCertificateLocation);
+            return false;
+        }
+        InputStream inputStream = clientCertificateResponseEntity.getBody();
+        Collection<X509Certificate> clientCerts = PayPalUtil.getCertificateFromStream(inputStream);
+        Map<String, Object> body = noticeParams.getBody();
+        String webHookId = (String) body.get(Constants.ID);
+        String actualSignatureEncoded = noticeParams.getHeader(Constants.PAYPAL_HEADER_TRANSMISSION_SIG);
+        String authAlgo = noticeParams.getHeader(Constants.PAYPAL_HEADER_AUTH_ALGO);
+        String transmissionId = noticeParams.getHeader(Constants.PAYPAL_HEADER_TRANSMISSION_ID);
+        String transmissionTime = noticeParams.getHeader(Constants.PAYPAL_HEADER_TRANSMISSION_TIME);
+        String requestBody = noticeParams.getBodyStr();
+        String expectedSignature = String.format("%s|%s|%s|%s", transmissionId, transmissionTime, webHookId, PayPalUtil.crc32(requestBody));
+        boolean isDataValid = PayPalUtil.validateData(clientCerts, authAlgo, actualSignatureEncoded, expectedSignature);
+        LOG.debug("数据校验结果: {}", isDataValid);
+        return isDataValid;
+
+    }
+
+    /**
+     * 将请求参数或者请求流转化为 Map
+     *
+     * @param request 通知请求
+     * @return 获得回调的请求参数
+     */
+    @Override
+    public NoticeParams getNoticeParams(NoticeRequest request) {
+        NoticeParams noticeParams = new NoticeParams();
+        try (InputStream is = request.getInputStream()) {
+            String body = IOUtils.toString(is);
+            noticeParams.setBodyStr(body);
+            noticeParams.setBody(JSON.parseObject(body));
+        }
+        catch (IOException e) {
+            throw new PayErrorException(new PayException("failure", "获取回调参数异常"), e);
+        }
+        Map<String, List<String>> headers = new HashMap<>();
+        Enumeration<String> headerNames = request.getHeaderNames();
+        while (headerNames.hasMoreElements()) {
+            String name = headerNames.nextElement();
+            headers.put(name, Collections.list(request.getHeaders(name)));
+        }
+        noticeParams.setHeaders(headers);
+        return noticeParams;
+    }
+
     /**
      * 获取授权请求头
      *
@@ -305,14 +377,14 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage> implem
 
     @Override
     public PayOutMessage getPayOutMessage(String code, String message) {
-        String out = "The response from IPN was: <b>" + code + "</b>";
-        return PayOutMessage.TEXT().content(out).build();
+
+        return PayOutMessage.TEXT().content(code).build();
     }
 
     @Override
     public PayOutMessage successPayOutMessage(PayMessage payMessage) {
-        Map<String, Object> message = payMessage.getPayMessage();
-        return new PayPalOutMessageBuilder(message).build();
+
+        return PayOutMessage.TEXT().content("200").build();
     }
 
     @Override
@@ -367,16 +439,18 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage> implem
     public Map<String, Object> close(String tradeNo, String outTradeNo) {
         return null;
     }
+
     /**
      * 交易关闭接口
      *
-     * @param assistOrder    关闭订单
+     * @param assistOrder 关闭订单
      * @return 返回支付方交易关闭后的结果
      */
     @Override
-    public Map<String, Object> close(AssistOrder assistOrder){
+    public Map<String, Object> close(AssistOrder assistOrder) {
         throw new UnsupportedOperationException("不支持该操作");
     }
+
     /**
      * 注意：最好在付款成功之后回调时进行调用
      * 确认订单并返回确认后订单信息
@@ -518,13 +592,11 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage> implem
         JSONObject resp = getHttpRequestTemplate().getForObject(getReqUrl(PayPalTransactionType.REFUND_GET), authHeader(), JSONObject.class, refundOrder.getRefundNo());
         return resp;
     }
+
     @Override
     public Map<String, Object> downloadBill(Date billDate, BillType billType) {
         return Collections.emptyMap();
     }
-
-
-
 
 
 }
