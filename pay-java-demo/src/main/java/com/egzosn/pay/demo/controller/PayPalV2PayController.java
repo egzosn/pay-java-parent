@@ -1,15 +1,14 @@
 package com.egzosn.pay.demo.controller;
 
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -117,49 +116,15 @@ public class PayPalV2PayController {
         order.setRefundNo("退款成功之后返回的退款单号");
         return service.refundquery(order);
     }
-    /**
-     * 注意：这里不是异步回调的通知 IPN 地址设置的路径：https://developer.paypal.com/developer/ipnSimulator/
-     * PayPal确认付款调用的接口
-     * 用户确认付款后，paypal调用的这个方法执行付款
-     *
-     * @param request 请求
-     * @return 付款成功信息
-     * @throws IOException IOException
-     */
-    @GetMapping(value = "payBackBefore.json")
-    public String payBackBefore(HttpServletRequest request) throws IOException {
-        try (InputStream is = request.getInputStream()) {
-            // 参数解析与校验  https://developer.paypal.com/docs/api-basics/notifications/ipn/IPNIntro/#id08CKFJ00JYK
-            if (service.verify(service.getParameter2Map(request.getParameterMap(), is))) {
-                // TODO 这里进行成功后的订单业务处理
-                // TODO 返回成功付款页面，这个到时候再做一个漂亮的页面显示，并使用前后端分离的模式
-                return service.successPayOutMessage(null).toMessage();
-            }
-        }
-        return "failure";
-    }
+
 
     /**
      * 支付回调地址
+     * 请求方式必须为post, 回调详情文档：https://developer.paypal.com/api/rest/webhooks
+     * 回调成功之后必须返回http状态码 200 才能行，不然一直会重复回调，注意:如果您的应用程序以任何其他状态码响应，贝宝会在三天内重试25次通知消息
      *
-     * @param request 请求
-     *
-     * @return 是否成功
-     *
-     * 业务处理在对应的PayMessageHandler里面处理，在哪里设置PayMessageHandler，详情查看{@link com.egzosn.pay.common.api.PayService#setPayMessageHandler(com.egzosn.pay.common.api.PayMessageHandler)}
-     *
-     * 如果未设置 {@link com.egzosn.pay.common.api.PayMessageHandler} 那么会使用默认的 {@link com.egzosn.pay.common.api.DefaultPayMessageHandler}
-     * @throws IOException IOException
-     */
-    @RequestMapping(value = "payBackOld.json")
-    public String payBackOld(HttpServletRequest request) throws IOException {
-        //业务处理在对应的PayMessageHandler里面处理，在哪里设置PayMessageHandler，详情查看com.egzosn.pay.common.api.PayService.setPayMessageHandler()
-        return service.payBack(request.getParameterMap(), request.getInputStream()).toMessage();
-    }
-    /**
-     * 支付回调地址
-     *
-     * @param request 请求
+     * @param request  请求
+     * @param response 响应
      * @return 是否成功
      * <p>
      * 业务处理在对应的PayMessageHandler里面处理，在哪里设置PayMessageHandler，详情查看{@link com.egzosn.pay.common.api.PayService#setPayMessageHandler(com.egzosn.pay.common.api.PayMessageHandler)}
@@ -171,12 +136,15 @@ public class PayPalV2PayController {
      * <b>注意：此方法一个订单只能调用一次, 建议在支付回调时进行调用</b>
      * 这里主要用来获取captureId使用，后续退款，查订单等等使用，用来替换下单返回的id
      * 详情： https://developer.paypal.com/docs/api/orders/v2/#orders_capture
-     *
      */
-    @RequestMapping(value = "payBack.json")
-    public String payBack(HttpServletRequest request)  {
+    @PostMapping(value = "payBack.json")
+    public String payBack(HttpServletRequest request, HttpServletResponse response) {
         //业务处理在对应的PayMessageHandler里面处理，在哪里设置PayMessageHandler，详情查看com.egzosn.pay.common.api.PayService.setPayMessageHandler()
-        return service.payBack(new HttpRequestNoticeParams(request)).toMessage();
+        final String message = service.payBack(new HttpRequestNoticeParams(request)).toMessage();
+        if (!"200".equals(message)) {
+            response.setStatus(400);
+        }
+        return message;
     }
 
 
