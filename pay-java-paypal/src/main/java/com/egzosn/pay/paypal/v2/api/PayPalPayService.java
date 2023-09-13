@@ -367,6 +367,7 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage> implem
         HttpStringEntity entity = new HttpStringEntity(JSON.toJSONString(orderRequest), ContentType.APPLICATION_JSON);
         HttpHeader header = authHeader();
         header.addHeader(new BasicHeader("prefer", "return=representation"));
+
         entity.setHeaders(header);
         JSONObject resp = getHttpRequestTemplate().postForObject(getReqUrl(order.getTransactionType()), entity, JSONObject.class);
         if ("created".equalsIgnoreCase(resp.getString("status")) && StringUtils.isNotEmpty(resp.getString("id"))) {
@@ -464,7 +465,9 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage> implem
      */
     @Override
     public Map<String, Object> ordersCapture(String tradeNo) {
-        JSONObject ordersCaptureInfo = getHttpRequestTemplate().postForObject(getReqUrl(PayPalTransactionType.ORDERS_CAPTURE), authHeader(), JSONObject.class, tradeNo);
+        final HttpHeader header = authHeader();
+        header.addHeader(new BasicHeader("Content-Type","application/json"));
+        JSONObject ordersCaptureInfo = getHttpRequestTemplate().postForObject(getReqUrl(PayPalTransactionType.ORDERS_CAPTURE), header, JSONObject.class, tradeNo);
 //        String captureId = ordersCaptureInfo.getJSONArray("purchaseUnits").getJSONObject(0).getJSONObject("payments").getJSONArray("captures").getJSONObject(0).getString("id");
         return ordersCaptureInfo;
     }
