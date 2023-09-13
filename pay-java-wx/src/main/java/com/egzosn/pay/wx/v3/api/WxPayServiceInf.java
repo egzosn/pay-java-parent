@@ -6,9 +6,10 @@ import com.egzosn.pay.common.bean.TransactionType;
 import com.egzosn.pay.common.http.HttpStringEntity;
 
 /**
+ * 微信支付接口
  * @author Egan
- * @email egan@egzosn.com
- * @date 2023/9/11
+ * email egan@egzosn.com
+ * date 2023/9/11
  */
 public interface WxPayServiceInf extends PayService<WxPayConfigStorage> {
     /**

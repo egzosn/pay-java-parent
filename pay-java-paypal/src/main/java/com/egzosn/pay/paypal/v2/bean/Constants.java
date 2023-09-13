@@ -2,8 +2,8 @@ package com.egzosn.pay.paypal.v2.bean;
 
 /**
  * @author Egan
- * @email egan@egzosn.com
- * @date 2023/9/12
+ * email egan@egzosn.com
+ * date 2023/9/12
  */
 public final class Constants {
     private Constants() {

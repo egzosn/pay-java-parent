@@ -20,8 +20,8 @@ import com.egzosn.pay.common.exception.PayErrorException;
 
 /**
  * @author Egan
- * @email egan@egzosn.com
- * @date 2023/9/12
+ * email egan@egzosn.com
+ * date 2023/9/12
  */
 public final class PayPalUtil {
     private static final Logger LOG = LoggerFactory.getLogger(PayPalUtil.class);

@@ -288,11 +288,11 @@ public class HttpRequestTemplate {
      * @return 类型对象
      * <code>
      * Map&lt;String, String&gt; uriVariables = new HashMap&lt;String, String&gt;();<br>
-     * <p>
+     *
      * uriVariables.put(&quot;id&quot;, &quot;1&quot;);<br>
-     * <p>
+     *
      * uriVariables.put(&quot;type&quot;, &quot;APP&quot;);<br>
-     * <p>
+     *
      * getForObject(&quot;http://egan.in/pay/{id}/f/{type}&quot;, String.class, uriVariables)<br>
      * </code>
      */
@@ -368,11 +368,11 @@ public class HttpRequestTemplate {
      * @return 类型对象
      * <code>
      * Map&lt;String, String&gt; uriVariables = new HashMap&lt;String, String&gt;();<br>
-     * <p>
+     *
      * uriVariables.put(&quot;id&quot;, &quot;1&quot;);<br>
-     * <p>
+     *
      * uriVariables.put(&quot;type&quot;, &quot;APP&quot;);<br>
-     * <p>
+     *
      * getForObject(&quot;http://egan.in/pay/{id}/f/{type}&quot;, String.class, uriVariables)<br>
      * </code>
      */
@@ -391,11 +391,11 @@ public class HttpRequestTemplate {
      * @return 类型对象
      * <code>
      * Map&lt;String, String&gt; uriVariables = new HashMap&lt;String, String&gt;();<br>
-     * <p>
+     *
      * uriVariables.put(&quot;id&quot;, &quot;1&quot;);<br>
-     * <p>
+     *
      * uriVariables.put(&quot;type&quot;, &quot;APP&quot;);<br>
-     * <p>
+     *
      * getForObject(&quot;http://egan.in/pay/{id}/f/{type}&quot;, String.class, uriVariables)<br>
      * </code>
      */

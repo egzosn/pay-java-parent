@@ -62,7 +62,7 @@ import com.egzosn.pay.paypal.v2.utils.PayPalUtil;
  * 贝宝支付配置存储
  *
  * @author egan
- * <p>
+ *
  * email egzosn@gmail.com
  * date 2021-1-16 ‏‎22:15:09
  */
