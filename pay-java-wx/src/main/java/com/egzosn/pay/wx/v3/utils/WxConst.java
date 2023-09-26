@@ -84,6 +84,5 @@ public final class WxConst {
     public static final String LIMIT = "limit";
     public static final String DETAIL_STATUS = "detail_status";
     public static final String WECHATPAY_SERIAL = "Wechatpay-Serial";
-
-
+    public static final String AUTHORIZATION_CODE = "authorization_code";
 }
