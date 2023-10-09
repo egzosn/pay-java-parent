@@ -397,6 +397,6 @@ public class AliPayController {
      */
     @RequestMapping("transferQuery")
     public Map<String, Object> transferQuery(String outNo, String tradeNo) {
-        return service.transferQuery(outNo, tradeNo);
+        return service.transferQuery(new AssistOrder(tradeNo, outNo));
     }
 }
