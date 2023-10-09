@@ -78,8 +78,10 @@ public class WxPayConfigStorage extends BasePayConfigStorage {
      * 是否为服务商模式, 默认为false
      */
     private boolean partner = false;
-
-
+    /**
+     * 微信支付分服务服务ID
+     */
+    private String serviceId;
 
     @Deprecated
     @Override
@@ -262,5 +264,13 @@ public class WxPayConfigStorage extends BasePayConfigStorage {
 
     public void setPartner(boolean partner) {
         this.partner = partner;
+    }
+
+    public String getServiceId() {
+        return serviceId;
+    }
+
+    public void setServiceId(String serviceId) {
+        this.serviceId = serviceId;
     }
 }
