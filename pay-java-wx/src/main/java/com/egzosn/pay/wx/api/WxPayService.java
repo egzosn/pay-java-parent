@@ -40,6 +40,7 @@ import static com.egzosn.pay.wx.bean.WxTransferType.TRANSFERS;
 
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.api.BasePayService;
+import com.egzosn.pay.common.api.TransferService;
 import com.egzosn.pay.common.bean.AssistOrder;
 import com.egzosn.pay.common.bean.BillType;
 import com.egzosn.pay.common.bean.MethodType;
@@ -86,7 +87,7 @@ import com.egzosn.pay.wx.bean.WxTransferType;
  * date 2016-5-18 14:09:01
  * </pre>
  */
-public class WxPayService extends BasePayService<WxPayConfigStorage> implements WxRedPackService, WxBillService {
+public class WxPayService extends BasePayService<WxPayConfigStorage> implements WxRedPackService, WxBillService, TransferService {
 
 
     /**
@@ -862,6 +863,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
         return getHttpRequestTemplate().postForObject(getReqUrl(order.getTransferType()), XML.getMap2Xml(parameters), JSONObject.class);
     }
 
+
     /**
      * 转账到余额所需要参数
      *
@@ -914,18 +916,37 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
      *                       <a href="https://pay.weixin.qq.com/wiki/doc/api/tools/mch_pay.php?chapter=24_3">商户企业付款到银行卡</a>
      *                       </p>
      * @return 对应的转账订单
+     * @deprecated {@link #transferQuery(AssistOrder)}
      */
+    @Deprecated
     @Override
     public Map<String, Object> transferQuery(String outNo, String wxTransferType) {
+        if (StringUtils.isEmpty(wxTransferType)) {
+            throw new PayErrorException(new WxPayError(FAILURE, "微信转账类型必填，详情com.egzosn.pay.wx.bean.WxTransferType"));
+        }
+        AssistOrder assistOrder = new AssistOrder(outNo);
+
+        assistOrder.setTransactionType(WxTransferType.valueOf(wxTransferType));
+        return transferQuery(assistOrder);
+    }
+
+    /**
+     * 转账查询
+     *
+     * @param assistOrder 辅助交易订单
+     * @return 对应的转账订单
+     */
+    @Override
+    public Map<String, Object> transferQuery(AssistOrder assistOrder) {
         Map<String, Object> parameters = new TreeMap<String, Object>();
         parameters.put(MCH_ID, payConfigStorage.getPid());
-        parameters.put("partner_trade_no", outNo);
+        parameters.put("partner_trade_no", assistOrder.getOutTradeNo());
         parameters.put(NONCE_STR, SignTextUtils.randomStr());
-        if (StringUtils.isEmpty(wxTransferType)) {
-            throw new PayErrorException(new WxPayError(FAILURE, "微信转账类型 #transferQuery(String outNo, String wxTransferType) 必填，详情com.egzosn.pay.wx.bean.WxTransferType"));
+        if (null == assistOrder.getTransactionType()) {
+            throw new PayErrorException(new WxPayError(FAILURE, "微信转账类型必填，详情com.egzosn.pay.wx.bean.WxTransferType"));
         }
         //如果类型为余额方式
-        if (TRANSFERS.getType().equals(wxTransferType) || GETTRANSFERINFO.getType().equals(wxTransferType)) {
+        if (TRANSFERS == assistOrder.getTransactionType() || GETTRANSFERINFO == assistOrder.getTransactionType()) {
             parameters.put(APPID, payConfigStorage.getAppId());
             parameters.put(SIGN, createSign(SignTextUtils.parameterText(parameters, "&", SIGN), payConfigStorage.getInputCharset()));
             return getHttpRequestTemplate().postForObject(getReqUrl(GETTRANSFERINFO), XML.getMap2Xml(parameters), JSONObject.class);
@@ -934,7 +955,6 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
         //默认查询银行卡的记录
         return getHttpRequestTemplate().postForObject(getReqUrl(QUERY_BANK), XML.getMap2Xml(parameters), JSONObject.class);
     }
-
 
     private String keyPublic(String content) {
         try {

@@ -15,10 +15,10 @@ import org.apache.http.message.BasicHeader;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.api.BasePayService;
+import com.egzosn.pay.common.api.TransferService;
 import com.egzosn.pay.common.bean.AssistOrder;
 import com.egzosn.pay.common.bean.BaseRefundResult;
 import com.egzosn.pay.common.bean.BillType;
-
 import com.egzosn.pay.common.bean.CurType;
 import com.egzosn.pay.common.bean.DefaultCurType;
 import com.egzosn.pay.common.bean.MethodType;
@@ -52,7 +52,7 @@ import com.egzosn.pay.payoneer.bean.PayoneerTransactionType;
  *         create 2018-01-19
  *                 </pre>
  */
-public class PayoneerPayService extends BasePayService<PayoneerConfigStorage> implements AdvancedPayService {
+public class PayoneerPayService extends BasePayService<PayoneerConfigStorage> implements AdvancedPayService, TransferService {
     /**
      * 测试地址
      */
@@ -150,6 +150,7 @@ public class PayoneerPayService extends BasePayService<PayoneerConfigStorage> im
 
         return verify(new NoticeParams(params));
     }
+
     /**
      * 回调校验
      *
@@ -318,16 +319,18 @@ public class PayoneerPayService extends BasePayService<PayoneerConfigStorage> im
     public Map<String, Object> close(String tradeNo, String outTradeNo) {
         return secondaryInterface(tradeNo, outTradeNo, PayoneerTransactionType.CHARGE_CANCEL);
     }
+
     /**
      * 交易关闭接口
      *
-     * @param assistOrder    关闭订单
+     * @param assistOrder 关闭订单
      * @return 返回支付方交易关闭后的结果
      */
     @Override
-    public Map<String, Object> close(AssistOrder assistOrder){
+    public Map<String, Object> close(AssistOrder assistOrder) {
         return secondaryInterface(assistOrder.getTradeNo(), assistOrder.getOutTradeNo(), PayoneerTransactionType.CHARGE_CANCEL);
     }
+
     /**
      * 交易交易撤销
      *
@@ -466,6 +469,17 @@ public class PayoneerPayService extends BasePayService<PayoneerConfigStorage> im
     }
 
     /**
+     * 转账查询
+     *
+     * @param assistOrder 辅助交易订单
+     * @return 对应的转账订单
+     */
+    @Override
+    public Map<String, Object> transferQuery(AssistOrder assistOrder) {
+        return secondaryInterface(assistOrder.getTradeNo(), assistOrder.getOutTradeNo(), PayoneerTransactionType.PAYOUT_STATUS);
+    }
+
+    /**
      * 转账
      *
      * @param outNo   商户转账订单号
@@ -482,6 +496,7 @@ public class PayoneerPayService extends BasePayService<PayoneerConfigStorage> im
      *
      * @return 请求地址
      */
+    @Override
     public String getReqUrl(TransactionType type) {
         return (payConfigStorage.isTest() ? SANDBOX_DOMAIN : RELEASE_DOMAIN) + payConfigStorage.getPid() + "/" + type.getMethod();
     }
