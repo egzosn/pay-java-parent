@@ -31,6 +31,7 @@ import com.egzosn.pay.ali.bean.AliTransferType;
 import com.egzosn.pay.ali.bean.CertEnvironment;
 import com.egzosn.pay.ali.bean.OrderSettle;
 import com.egzosn.pay.common.api.BasePayService;
+import com.egzosn.pay.common.api.TransferService;
 import com.egzosn.pay.common.bean.AssistOrder;
 import com.egzosn.pay.common.bean.BillType;
 import com.egzosn.pay.common.bean.MethodType;
@@ -62,7 +63,7 @@ import com.egzosn.pay.common.util.str.StringUtils;
  * email egzosn@gmail.com
  * date 2017-2-22 20:09
  */
-public class AliPayService extends BasePayService<AliPayConfigStorage> implements AliPayServiceInf {
+public class AliPayService extends BasePayService<AliPayConfigStorage> implements TransferService, AliPayServiceInf {
 
 
     /**
@@ -505,6 +506,9 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> implement
      */
     @Override
     public Map<String, Object> query(AssistOrder assistOrder) {
+        if (null == assistOrder.getTransactionType()) {
+            assistOrder.setTransactionType(AliTransactionType.QUERY);
+        }
         //获取公共参数
         Map<String, Object> parameters = getPublicParameters(assistOrder.getTransactionType());
         Map<String, Object> bizContent = new TreeMap<>();
@@ -739,6 +743,32 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> implement
         return getHttpRequestTemplate().postForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(parameters), null, JSONObject.class);
     }
 
+    /**
+     * 转账查询
+     *
+     * @param assistOrder 辅助交易订单
+     * @return 对应的转账订单
+     */
+    @Override
+    public Map<String, Object> transferQuery(AssistOrder assistOrder) {
+        //获取公共参数
+        Map<String, Object> parameters = getPublicParameters(AliTransferType.TRANS_QUERY);
+
+        Map<String, Object> bizContent = new TreeMap<String, Object>();
+        if (StringUtils.isEmpty(assistOrder.getOutTradeNo())) {
+            bizContent.put("order_id", assistOrder.getTradeNo());
+        }
+        else {
+            bizContent.put("out_biz_no", assistOrder.getOutTradeNo());
+        }
+        //设置请求参数的集合
+        parameters.put(BIZ_CONTENT, JSON.toJSONString(bizContent));
+        //设置签名
+        setSign(parameters);
+        return getHttpRequestTemplate().postForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(parameters), null, JSONObject.class);
+
+    }
+
     private Map<String, Object> setPayeeInfo(Map<String, Object> bizContent, Order order) {
         final Object attr = order.getAttr(PAYEE_INFO);
 
@@ -765,21 +795,8 @@ public class AliPayService extends BasePayService<AliPayConfigStorage> implement
      */
     @Override
     public Map<String, Object> transferQuery(String outNo, String tradeNo) {
-        //获取公共参数
-        Map<String, Object> parameters = getPublicParameters(AliTransferType.TRANS_QUERY);
 
-        Map<String, Object> bizContent = new TreeMap<String, Object>();
-        if (StringUtils.isEmpty(outNo)) {
-            bizContent.put("order_id", tradeNo);
-        }
-        else {
-            bizContent.put("out_biz_no", outNo);
-        }
-        //设置请求参数的集合
-        parameters.put(BIZ_CONTENT, JSON.toJSONString(bizContent));
-        //设置签名
-        setSign(parameters);
-        return getHttpRequestTemplate().postForObject(getReqUrl() + "?" + UriVariables.getMapToParameters(parameters), null, JSONObject.class);
+        return transferQuery(new AssistOrder(tradeNo, outNo));
     }
 
 
