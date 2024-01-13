@@ -62,7 +62,7 @@ import com.egzosn.pay.paypal.v2.utils.PayPalUtil;
  * 贝宝支付配置存储
  *
  * @author egan
- *
+ * <p>
  * email egzosn@gmail.com
  * date 2021-1-16 ‏‎22:15:09
  */
@@ -177,6 +177,7 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage> implem
 
     /**
      * 保留IPN的校验方式
+     *
      * @param noticeParams 参数
      * @return 结果
      */
@@ -191,6 +192,7 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage> implem
         return "VERIFIED".equals(resp);
 
     }
+
     @Override
     public boolean verify(NoticeParams noticeParams) {
 
@@ -208,8 +210,7 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage> implem
         }
         InputStream inputStream = clientCertificateResponseEntity.getBody();
         Collection<X509Certificate> clientCerts = PayPalUtil.getCertificateFromStream(inputStream);
-        Map<String, Object> body = noticeParams.getBody();
-        String webHookId = (String) body.get(Constants.ID);
+        String webHookId = payConfigStorage.getWebHookId();
         String actualSignatureEncoded = noticeParams.getHeader(Constants.PAYPAL_HEADER_TRANSMISSION_SIG);
         String authAlgo = noticeParams.getHeader(Constants.PAYPAL_HEADER_AUTH_ALGO);
         String transmissionId = noticeParams.getHeader(Constants.PAYPAL_HEADER_TRANSMISSION_ID);
@@ -466,7 +467,7 @@ public class PayPalPayService extends BasePayService<PayPalConfigStorage> implem
     @Override
     public Map<String, Object> ordersCapture(String tradeNo) {
         final HttpHeader header = authHeader();
-        header.addHeader(new BasicHeader("Content-Type","application/json"));
+        header.addHeader(new BasicHeader("Content-Type", "application/json"));
         JSONObject ordersCaptureInfo = getHttpRequestTemplate().postForObject(getReqUrl(PayPalTransactionType.ORDERS_CAPTURE), header, JSONObject.class, tradeNo);
 //        String captureId = ordersCaptureInfo.getJSONArray("purchaseUnits").getJSONObject(0).getJSONObject("payments").getJSONArray("captures").getJSONObject(0).getString("id");
         return ordersCaptureInfo;

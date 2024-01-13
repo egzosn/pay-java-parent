@@ -16,6 +16,12 @@ public class PayPalConfigStorage extends BasePayConfigStorage {
 
     private String clientId;
 
+    /**
+     * 回调验签使用
+     */
+    private String webHookId;
+
+
     @Override
     @Deprecated
     public String getAppid() {
@@ -86,7 +92,6 @@ public class PayPalConfigStorage extends BasePayConfigStorage {
      * 获取取消页面的url
      * <pre>
      * 注意：这里不是异步回调的通知
-     * IPN 地址设置的路径：https://developer.paypal.com/developer/ipnSimulator/
      * </pre>
      *
      * @return 取消页面的url
@@ -97,5 +102,13 @@ public class PayPalConfigStorage extends BasePayConfigStorage {
 
     public PayPalConfigStorage() {
         setAccessTokenLock(new ReentrantLock());
+    }
+
+    public String getWebHookId() {
+        return webHookId;
+    }
+
+    public void setWebHookId(String webHookId) {
+        this.webHookId = webHookId;
     }
 }

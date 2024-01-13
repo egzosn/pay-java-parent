@@ -41,8 +41,10 @@ public class PayPalPayController {
     @PostConstruct
     public void init() {
         PayPalConfigStorage storage = new PayPalConfigStorage();
-        storage.setClientID("AZDS0IhUZvJTO99unlvSDMfbZIP-p-UecYXZdJoweha9LFuqKXKcQIGZgfVaX6oGiAOJAUuJD7JwyTl1");
+        storage.setClientId("AZDS0IhUZvJTO99unlvSDMfbZIP-p-UecYXZdJoweha9LFuqKXKcQIGZgfVaX6oGiAOJAUuJD7JwyTl1");
         storage.setClientSecret("EK2YaOrw3oLSDWIRzvb9BWGTjiPPhY1fFUu5ylhUsGYLc_h_dlpJ0hr_LDEkbO9MyKP2P83YcywbPaem");
+        //webhook回调时验签使用必须https://developer.paypal.com/dashboard/webhooksSimulator
+        storage.setWebHookId("AZDS0IhUZvJTO99unlvSDMfbZIP");
         storage.setTest(true);
         //发起付款后的页面转跳地址
         storage.setReturnUrl("http://www.egzosn.com/payPal/payBack.json");
