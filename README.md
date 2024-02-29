@@ -68,13 +68,12 @@ android 例子 [pay-java-android](https://gitee.com/egzosn/pay-java-android)
 
 非常欢迎和感谢对本项目发起Pull Request的同学，不过本项目基于git flow开发流程，因此在发起Pull Request的时候请选择develop分支。
 
-作者公众号(每周输出)
+作者公众号(未来输出)
 ![公众号](https://egzosn.gitee.io/pay-java-parent/gzh.png "gzh.png")
 
 E-Mail：egan@egzosn.com
 
  **QQ群：** 
-
 
 1. pay-java(1群): 542193977(已满)
 2. pay-java(2群)：766275051
