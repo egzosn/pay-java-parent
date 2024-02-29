@@ -79,5 +79,6 @@ E-Mail：egan@egzosn.com
 2. pay-java(2群)：766275051
 
 
-微信群: 
+微信群: 加我前拜托伸个小手关注公众号
+
 ![微信群](https://egzosn.gitee.io/pay-java-parent/wx.jpg "wx.jpg")
