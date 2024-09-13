@@ -13,7 +13,7 @@
     <artifactId>pay-java-demo</artifactId>
 
     <properties>
-        <spring.version>4.3.4.RELEASE</spring.version>
+        <spring.version>6.1.13</spring.version>
         <junit.version>4.10</junit.version>
         <hibernate.version>4.3.6.Final</hibernate.version>
         <servlet-api.version>4.0.1</servlet-api.version>
