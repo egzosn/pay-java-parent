@@ -5,6 +5,8 @@ package com.egzosn.pay.demo.controller;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.egzosn.pay.common.bean.AssistOrder;
-import com.egzosn.pay.common.bean.CertStoreType;
 import com.egzosn.pay.common.bean.PayOrder;
 import com.egzosn.pay.common.bean.RefundOrder;
 import com.egzosn.pay.common.bean.RefundResult;
@@ -49,25 +50,34 @@ public class WxV3PayController {
     private WxPayService service = null;
 
 
+
 //    @PostConstruct  //没有证书的情况下注释掉，避免启动报错
     public void init() {
-        WxPayConfigStorage wxPayConfigStorage = new WxPayConfigStorage();
-        wxPayConfigStorage.setAppId("wxc7b993ff15a9f26c");
-        wxPayConfigStorage.setMchId("1602947765");
+        com.egzosn.pay.wx.v3.api.WxPayConfigStorage wxPayConfigStorage = new com.egzosn.pay.wx.v3.api.WxPayConfigStorage();
+        wxPayConfigStorage.setAppId("wx5ce9f1a2****");
+        wxPayConfigStorage.setMchId("170330*****");
         //V3密钥 https://pay.weixin.qq.com/wiki/doc/apiv3/wechatpay/wechatpay3_2.shtml
-        wxPayConfigStorage.setV3ApiKey("9bd8f0e7af4841299d782406b7774f57");
-        //验签、转账等接口使用，9月份开始不允许获取证书方式了，直接通过公钥字符来做，
+        wxPayConfigStorage.setV3ApiKey("KDBX2tbrKi9eWFEZ*****");
+//        //验签、转账等接口使用，9月份开始不允许获取证书方式了，直接通过公钥字符来做或公钥证书
+//        wxPayConfigStorage.setPlatformCertificate(Files.readString(Paths.get("wechatpay//wechatpay_72C2EF0EE5095C6D************.pem")));
+//        wxPayConfigStorage.setPlatformSerialNumber("72C2EF0EE5095C6D************");
+        //验签、转账等接口使用，9月份开始不允许获取证书方式了，直接通过公钥字符来做或公钥证书
         wxPayConfigStorage.setKeyPublic("支付平台公钥(原为自动获取的证书)");
         wxPayConfigStorage.setKeyPublicId("支付平台公钥ID");
-        wxPayConfigStorage.setNotifyUrl("http://sailinmu.iok.la/wxV3/payBack.json");
-        wxPayConfigStorage.setReturnUrl("http://sailinmu.iok.la/wxV3/payBack.json");
+
+        wxPayConfigStorage.setNotifyUrl("https://pay.egzosn.com/wxV3/payBack.json");
+        wxPayConfigStorage.setReturnUrl("https://pay.egzosn.com/wxV3/payBack.json");
         wxPayConfigStorage.setInputCharset("utf-8");
         //使用证书时设置为true
 //        wxPayConfigStorage.setCertSign(true);
-        //商户API证书 https://pay.weixin.qq.com/wiki/doc/apiv3/wechatpay/wechatpay3_1.shtml
-        wxPayConfigStorage.setApiClientKeyP12("http://pay.egzosn.com/yifenli_mall.p12");
-        wxPayConfigStorage.setCertStoreType(CertStoreType.URL);
-        service = new WxPayService(wxPayConfigStorage);
+        /使用P12证书方式, 商户API证书 https://pay.weixin.qq.com/wiki/doc/apiv3/wechatpay/wechatpay3_1.shtml
+//        wxPayConfigStorage.setApiClientKeyP12("http://pay.egzosn.com/yifenli_mall.p12");
+//        wxPayConfigStorage.setCertStoreType(CertStoreType.URL);
+        //使用pem证书方式
+        wxPayConfigStorage.setKeyPrivate(Files.readString(Paths.get("wechatpay/apiclient_key.pem")));
+        wxPayConfigStorage.setMerchantSerialNumber("2C1230A7BA8C7B197FC90852CCA****");
+
+        com.egzosn.pay.wx.v3.api.WxPayService service = new com.egzosn.pay.wx.v3.api.WxPayService(wxPayConfigStorage);
         //微信海外支付：东南亚
 //        service.setApiServerUrl("https://apihk.mch.weixin.qq.com");
         //设置回调消息处理

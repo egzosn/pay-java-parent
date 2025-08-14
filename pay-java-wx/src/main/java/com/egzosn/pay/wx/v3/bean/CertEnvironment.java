@@ -26,7 +26,7 @@ public class CertEnvironment {
     /**
      * 公钥序列
      */
-    private String serialNumber;
+    private String merchantSerialNumber;
 
     /**
      * 微信平台证书序列号
@@ -37,10 +37,17 @@ public class CertEnvironment {
     public CertEnvironment() {
     }
 
-    public CertEnvironment(PrivateKey privateKey, PublicKey publicKey, String serialNumber) {
+    public CertEnvironment(PrivateKey privateKey, PublicKey publicKey, String merchantSerialNumber) {
         this.privateKey = privateKey;
         this.publicKey = publicKey;
-        this.serialNumber = serialNumber;
+        this.merchantSerialNumber = merchantSerialNumber;
+    }
+
+    public CertEnvironment(PrivateKey privateKey, String merchantSerialNumber, PublicKey publicKey, String publicSerialNumber) {
+        this.privateKey = privateKey;
+        this.publicKey = publicKey;
+        this.merchantSerialNumber = merchantSerialNumber;
+        this.platformSerialNumber = publicSerialNumber;
     }
 
     public PrivateKey getPrivateKey() {
@@ -59,17 +66,17 @@ public class CertEnvironment {
         this.publicKey = publicKey;
     }
 
-    public String getSerialNumber() {
-        return serialNumber;
+    public String getMerchantSerialNumber() {
+        return merchantSerialNumber;
     }
 
-    public void setSerialNumber(String serialNumber) {
-        this.serialNumber = serialNumber;
+    public void setMerchantSerialNumber(String merchantSerialNumber) {
+        this.merchantSerialNumber = merchantSerialNumber;
     }
 
     public String getPlatformSerialNumber() {
         if (StringUtils.isEmpty(platformSerialNumber)) {
-            setPlatformSerialNumber(serialNumber);
+            setPlatformSerialNumber(merchantSerialNumber);
         }
         return platformSerialNumber;
     }

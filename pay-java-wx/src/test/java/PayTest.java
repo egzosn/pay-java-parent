@@ -1,4 +1,3 @@
-
 import com.egzosn.pay.common.bean.CertStoreType;
 import com.egzosn.pay.common.bean.MethodType;
 import com.egzosn.pay.common.bean.PayOrder;
@@ -10,7 +9,10 @@ import com.egzosn.pay.wx.bean.WxSendredpackType;
 import com.egzosn.pay.wx.bean.WxTransactionType;
 
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.UUID;
 
@@ -24,7 +26,35 @@ import java.util.UUID;
  */
 public class PayTest {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
+        com.egzosn.pay.wx.v3.api.WxPayConfigStorage wxPayConfigStorage = new com.egzosn.pay.wx.v3.api.WxPayConfigStorage();
+        wxPayConfigStorage.setAppId("wx5ce9f1a2****");
+        wxPayConfigStorage.setMchId("170330*****");
+        //V3密钥 https://pay.weixin.qq.com/wiki/doc/apiv3/wechatpay/wechatpay3_2.shtml
+        wxPayConfigStorage.setV3ApiKey("KDBX2tbrKi9eWFEZ*****");
+        //验签、转账等接口使用，9月份开始不允许获取证书方式了，直接通过公钥字符来做，
+        wxPayConfigStorage.setPlatformCertificate(Files.readString(Paths.get("wechatpay//wechatpay_72C2EF0EE5095C6D************.pem")));
+        wxPayConfigStorage.setPlatformSerialNumber("72C2EF0EE5095C6D************");
+        wxPayConfigStorage.setNotifyUrl("https://pay.egzosn.com/wxV3/payBack.json");
+        wxPayConfigStorage.setReturnUrl("https://pay.egzosn.com/wxV3/payBack.json");
+        wxPayConfigStorage.setInputCharset("utf-8");
+        //使用证书时设置为true
+//        wxPayConfigStorage.setCertSign(true);
+        //商户API证书 https://pay.weixin.qq.com/wiki/doc/apiv3/wechatpay/wechatpay3_1.shtml
+//        wxPayConfigStorage.setApiClientKeyP12("http://pay.egzosn.com/yifenli_mall.p12");
+//        wxPayConfigStorage.setCertStoreType(CertStoreType.URL);
+        wxPayConfigStorage.setKeyPrivate(Files.readString(Paths.get("wechatpay/apiclient_key.pem")));
+        wxPayConfigStorage.setMerchantSerialNumber("2C1230A7BA8C7B197FC90852CCA****");
+
+        com.egzosn.pay.wx.v3.api.WxPayService service = new com.egzosn.pay.wx.v3.api.WxPayService(wxPayConfigStorage);
+        //微信海外支付：东南亚
+//        service.setApiServerUrl("https://apihk.mch.weixin.qq.com");
+        String qrPay = service.getQrPay(new PayOrder("测试订单", "测试商品", BigDecimal.valueOf(0.01), "2018091011111111"));
+        //设置回调消息处理
+        //TODO {@link com.egzosn.pay.demo.controller.WxPayController#payBack}
+        System.out.println();
+    }
+    public static void mainV2() {
         WxPayConfigStorage wxPayConfigStorage = new WxPayConfigStorage();
         wxPayConfigStorage.setAppId("公众账号ID");
 

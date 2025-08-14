@@ -1,15 +1,14 @@
 package com.egzosn.pay.common.util.sign;
 
 
+import com.egzosn.pay.common.bean.SignType;
+import com.egzosn.pay.common.util.sign.encrypt.HmacSha256;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
 import java.security.Security;
 import java.util.Map;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-
 import static com.egzosn.pay.common.util.sign.SignTextUtils.parameterText;
-
-import com.egzosn.pay.common.bean.SignType;
-import com.egzosn.pay.common.util.sign.encrypt.HmacSha256;
 
 /**
  * 签名 工具
@@ -197,12 +196,8 @@ public enum SignUtils implements SignType {
      * 初始化BC
      */
     public static void initBc() {
-        String javaVersion = System.getProperty("java.version");
-        if (javaVersion.contains("1.8") || javaVersion.startsWith("8")) {
-            if (null == Security.getProvider("BC")) {
-                Security.removeProvider("SunEC");
-                Security.addProvider(new BouncyCastleProvider());
-            }
+        if (null == Security.getProvider("BC")) {
+            Security.addProvider(new BouncyCastleProvider());
         }
 
     }

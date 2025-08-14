@@ -1,46 +1,10 @@
 package com.egzosn.pay.wx.v3.api;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.GeneralSecurityException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.cert.Certificate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.message.BasicHeader;
-
-import static com.egzosn.pay.wx.api.WxConst.OUT_TRADE_NO;
-import static com.egzosn.pay.wx.api.WxConst.SANDBOXNEW;
-import static com.egzosn.pay.wx.v3.utils.WxConst.FAILURE;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.api.BasePayService;
 import com.egzosn.pay.common.api.TransferService;
-import com.egzosn.pay.common.bean.AssistOrder;
-import com.egzosn.pay.common.bean.BillType;
-import com.egzosn.pay.common.bean.CurType;
-import com.egzosn.pay.common.bean.MethodType;
-import com.egzosn.pay.common.bean.NoticeParams;
-import com.egzosn.pay.common.bean.NoticeRequest;
-import com.egzosn.pay.common.bean.OrderParaStructure;
-import com.egzosn.pay.common.bean.PayMessage;
-import com.egzosn.pay.common.bean.PayOrder;
-import com.egzosn.pay.common.bean.PayOutMessage;
-import com.egzosn.pay.common.bean.RefundOrder;
-import com.egzosn.pay.common.bean.RefundResult;
-import com.egzosn.pay.common.bean.TransactionType;
-import com.egzosn.pay.common.bean.TransferOrder;
+import com.egzosn.pay.common.bean.*;
 import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpConfigStorage;
@@ -70,6 +34,21 @@ import com.egzosn.pay.wx.v3.bean.response.WxRefundResult;
 import com.egzosn.pay.wx.v3.bean.transfer.TransferDetail;
 import com.egzosn.pay.wx.v3.utils.AntCertificationUtil;
 import com.egzosn.pay.wx.v3.utils.WxConst;
+import org.apache.http.HttpEntity;
+import org.apache.http.message.BasicHeader;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.GeneralSecurityException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.cert.Certificate;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static com.egzosn.pay.wx.api.WxConst.OUT_TRADE_NO;
+import static com.egzosn.pay.wx.api.WxConst.SANDBOXNEW;
+import static com.egzosn.pay.wx.v3.utils.WxConst.FAILURE;
 
 /**
  * 微信支付服务
@@ -133,6 +112,7 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
         if (null == assistService) {
             assistService = new DefaultWxPayAssistService(this);
         }
+
         if (StringUtils.isEmpty(payConfigStorage.getKeyPublic())) {
             //在这预先进行初始化
             assistService.refreshCertificate();

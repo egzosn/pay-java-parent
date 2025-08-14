@@ -1,15 +1,19 @@
 package com.egzosn.pay.wx.v3.api;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 import com.egzosn.pay.common.api.BasePayConfigStorage;
 import com.egzosn.pay.common.bean.CertStoreType;
 import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
+import com.egzosn.pay.common.util.str.StringUtils;
 import com.egzosn.pay.wx.v3.bean.CertEnvironment;
 import com.egzosn.pay.wx.v3.utils.AntCertificationUtil;
 import com.egzosn.pay.wx.v3.utils.WxConst;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.security.cert.Certificate;
 
 /**
  * 微信配置存储
@@ -55,13 +59,25 @@ public class WxPayConfigStorage extends BasePayConfigStorage {
      * V2 Api密钥
      */
     private String apiKey;
+    /**
+     * 微信支付V3 Api密钥
+     */
+    private String v3ApiKey;
 
     /**
      * 商户API证书
      * 包含商户的商户号、公司名称、公钥信息
      * 详情 https://pay.weixin.qq.com/wiki/doc/apiv3/wechatpay/wechatpay3_1.shtml
      */
+    @Deprecated
     private Object apiClientKeyP12;
+
+
+    private String merchantSerialNumber;
+
+
+    private String platformCertificate;
+    private String platformSerialNumber;
 
     /**
      * 证书存储类型
@@ -134,16 +150,20 @@ public class WxPayConfigStorage extends BasePayConfigStorage {
         addAttr("apiKey", apiKey);
     }
 
-    public void setV3ApiKey(String v3ApiKey) {
-        setKeyPrivate(v3ApiKey);
-    }
-    /**
-     * 为商户平台设置的密钥key
-     *
-     * @return 微信v3密钥
-     */
     public String getV3ApiKey() {
-        return getKeyPrivate();
+        return v3ApiKey;
+    }
+
+    public void setV3ApiKey(String v3ApiKey) {
+        this.v3ApiKey = v3ApiKey;
+    }
+
+    public String getMerchantSerialNumber() {
+        return merchantSerialNumber;
+    }
+
+    public void setMerchantSerialNumber(String merchantSerialNumber) {
+        this.merchantSerialNumber = merchantSerialNumber;
     }
 
     public void setAppId(String appId) {
@@ -239,6 +259,22 @@ public class WxPayConfigStorage extends BasePayConfigStorage {
         return certEnvironment;
     }
 
+    public String getPlatformCertificate() {
+        return platformCertificate;
+    }
+
+    public void setPlatformCertificate(String platformCertificate) {
+        this.platformCertificate = platformCertificate;
+    }
+
+    public String getPlatformSerialNumber() {
+        return platformSerialNumber;
+    }
+
+    public void setPlatformSerialNumber(String platformSerialNumber) {
+        this.platformSerialNumber = platformSerialNumber;
+    }
+
     public void setCertEnvironment(CertEnvironment certEnvironment) {
         this.certEnvironment = certEnvironment;
     }
@@ -250,12 +286,27 @@ public class WxPayConfigStorage extends BasePayConfigStorage {
         if (null != this.certEnvironment) {
             return;
         }
-        try (InputStream apiKeyCert = certStoreType.getInputStream(getApiClientKeyP12())) {
-            this.certEnvironment = AntCertificationUtil.initCertification(apiKeyCert, WxConst.CERT_ALIAS, getMchId());
+
+        if (null != getApiClientKeyP12()) {
+            try (InputStream apiKeyCert = certStoreType.getInputStream(getApiClientKeyP12())) {
+                this.certEnvironment = AntCertificationUtil.initCertification(apiKeyCert, WxConst.CERT_ALIAS, getMchId());
+
+            } catch (IOException e) {
+                throw new PayErrorException(new PayException("读取证书异常", e.getMessage()));
+            }
+        } else if (null != getKeyPrivate()) {
+
+            this.certEnvironment = AntCertificationUtil.initCertification(getKeyPrivate(), getMerchantSerialNumber(), getKeyPublic(), getKeyPublicId());
+            if (StringUtils.isNotEmpty(getPlatformCertificate())) {
+                Certificate certificate = AntCertificationUtil.loadCertificate(getPlatformSerialNumber(), new ByteArrayInputStream(getPlatformCertificate().getBytes(StandardCharsets.UTF_8)));
+                this.certEnvironment.setPlatformSerialNumber(getPlatformSerialNumber());
+                this.certEnvironment.setPublicKey(certificate.getPublicKey());
+
+            }
+
         }
-        catch (IOException e) {
-            throw new PayErrorException(new PayException("读取证书异常", e.getMessage()));
-        }
+
+
     }
 
     public boolean isPartner() {

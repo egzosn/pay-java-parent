@@ -1,33 +1,28 @@
 package com.egzosn.pay.wx.v3.utils;
 
+import com.egzosn.pay.common.exception.PayErrorException;
+import com.egzosn.pay.common.util.sign.SignUtils;
+import com.egzosn.pay.common.util.sign.encrypt.Base64;
+import com.egzosn.pay.common.util.sign.encrypt.RSA;
+import com.egzosn.pay.common.util.str.StringUtils;
+import com.egzosn.pay.wx.bean.WxPayError;
+import com.egzosn.pay.wx.v3.bean.CertEnvironment;
+
+import javax.crypto.Cipher;
+import javax.crypto.spec.GCMParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+import javax.management.openmbean.InvalidKeyException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.security.GeneralSecurityException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.Security;
+import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import javax.crypto.Cipher;
-import javax.crypto.spec.GCMParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-import javax.management.openmbean.InvalidKeyException;
-
-import com.egzosn.pay.common.exception.PayErrorException;
-import com.egzosn.pay.common.util.sign.SignUtils;
-import com.egzosn.pay.common.util.sign.encrypt.Base64;
-import com.egzosn.pay.wx.bean.WxPayError;
-import com.egzosn.pay.wx.v3.bean.CertEnvironment;
 
 /**
  * 证书文件可信校验
@@ -46,29 +41,31 @@ public final class AntCertificationUtil {
     private AntCertificationUtil() {
     }
 
-    private static final KeyStore PKCS12_KEY_STORE;
+    private static KeyStore PKCS12_KEY_STORE;
 
-    private static final CertificateFactory CERTIFICATE_FACTORY;
+    private static CertificateFactory CERTIFICATE_FACTORY;
 
     static {
-        String javaVersion = System.getProperty("java.version");
-        if (javaVersion.contains("1.8") || javaVersion.startsWith("8")) {
+        init();
+    }
+
+    public synchronized static void init() {
+        if (null == PKCS12_KEY_STORE && null == CERTIFICATE_FACTORY) {
             Security.setProperty("crypto.policy", "unlimited");
-        }
-        SignUtils.initBc();
-        try {
-            PKCS12_KEY_STORE = KeyStore.getInstance("PKCS12");
-        }
-        catch (KeyStoreException e) {
-            throw new PayErrorException(new WxPayError(WxConst.FAILURE, " keystore 初始化失败"), e);
+            SignUtils.initBc();
+            try {
+                PKCS12_KEY_STORE = KeyStore.getInstance("PKCS12");
+            } catch (KeyStoreException e) {
+                throw new PayErrorException(new WxPayError(WxConst.FAILURE, " keystore 初始化失败"), e);
+            }
+
+            try {
+                CERTIFICATE_FACTORY = CertificateFactory.getInstance("X509", WxConst.BC_PROVIDER);
+            } catch (NoSuchProviderException | CertificateException e) {
+                throw new PayErrorException(new WxPayError(WxConst.FAILURE, " keystore 初始化失败"), e);
+            }
         }
 
-        try {
-            CERTIFICATE_FACTORY = CertificateFactory.getInstance("X509", WxConst.BC_PROVIDER);
-        }
-        catch (NoSuchProviderException | CertificateException e) {
-            throw new PayErrorException(new WxPayError(WxConst.FAILURE, " keystore 初始化失败"), e);
-        }
 
     }
 
@@ -85,8 +82,7 @@ public final class AntCertificationUtil {
             Certificate certificate = CERTIFICATE_FACTORY.generateCertificate(certificateStream);
             CERTIFICATE_MAP.put(serialNo, certificate);
             return certificate;
-        }
-        catch (CertificateException e) {
+        } catch (CertificateException e) {
             throw new PayErrorException(new WxPayError(WxConst.FAILURE, " 在生成微信v3证书时发生错误，原因是" + e.getMessage()), e);
         }
 
@@ -104,6 +100,36 @@ public final class AntCertificationUtil {
     }
 
     /**
+     * 初始化证书信息
+     *
+     * @param privateKey           商户API私钥
+     * @param merchantSerialNumber 商户证书序列号
+     * @param publicKey            商户API证书公钥
+     * @param publicKeyId          商户API证书公钥ID
+     * @return 证书信息集合
+     */
+    public static CertEnvironment initCertification(String privateKey, String merchantSerialNumber, String publicKey, String publicKeyId) {
+
+        try {
+
+            privateKey = privateKey.replace("-----BEGIN PRIVATE KEY-----", "").replace("-----END PRIVATE KEY-----", "").replaceAll("\\s+", "");
+            PrivateKey privateKeyObj = RSA.getPrivateKey(privateKey);
+            PublicKey publicKeyObj = null;
+            if (StringUtils.isNotEmpty(publicKey)) {
+                publicKey = publicKey.replace("-----BEGIN PUBLIC KEY-----", "").replace("-----END PUBLIC KEY-----", "").replaceAll("\\s+", "");
+                publicKeyObj = RSA.getPublicKey(publicKey);
+            }
+
+            return new CertEnvironment(privateKeyObj, merchantSerialNumber, publicKeyObj, publicKeyId);
+        } catch (GeneralSecurityException e) {
+            throw new PayErrorException(new WxPayError(WxConst.FAILURE, "获取公私钥失败"), e);
+        } catch (IOException e) {
+            throw new PayErrorException(new WxPayError(WxConst.FAILURE, "私钥证书流加载失败"), e);
+        }
+
+    }
+
+    /**
      * 获取公私钥.
      *
      * @param keyCertStream 商户API证书
@@ -112,7 +138,6 @@ public final class AntCertificationUtil {
      * @return 证书信息集合
      */
     public static CertEnvironment initCertification(InputStream keyCertStream, String keyAlias, String keyPass) {
-
         char[] pem = keyPass.toCharArray();
         try {
             PKCS12_KEY_STORE.load(keyCertStream, pem);
@@ -122,14 +147,11 @@ public final class AntCertificationUtil {
             PublicKey publicKey = certificate.getPublicKey();
             PrivateKey privateKey = (PrivateKey) PKCS12_KEY_STORE.getKey(keyAlias, pem);
             return new CertEnvironment(privateKey, publicKey, serialNumber);
-        }
-        catch (InvalidKeyException e) {
+        } catch (InvalidKeyException e) {
             throw new PayErrorException(new WxPayError(WxConst.FAILURE, "获取公私钥失败， 解决方式：替换jre包：local_policy.jar，US_export_policy.jar"), e);
-        }
-        catch (GeneralSecurityException e) {
+        } catch (GeneralSecurityException e) {
             throw new PayErrorException(new WxPayError(WxConst.FAILURE, "获取公私钥失败"), e);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new PayErrorException(new WxPayError(WxConst.FAILURE, "私钥证书流加载失败"), e);
         }
 
@@ -156,8 +178,7 @@ public final class AntCertificationUtil {
             cipher.updateAAD(associatedData.getBytes(Charset.forName(characterEncoding)));
             byte[] bytes = cipher.doFinal(Base64.decode(cipherText));
             return new String(bytes, Charset.forName(characterEncoding));
-        }
-        catch (GeneralSecurityException e) {
+        } catch (GeneralSecurityException e) {
             throw new PayErrorException(new WxPayError(WxConst.FAILURE, e.getMessage()), e);
         }
     }
@@ -189,8 +210,7 @@ public final class AntCertificationUtil {
             byte[] cipherData = cipher.doFinal(data);
             return Base64.encode(cipherData);
 
-        }
-        catch (GeneralSecurityException e) {
+        } catch (GeneralSecurityException e) {
             throw new PayErrorException(new WxPayError(WxConst.FAILURE, e.getMessage()), e);
         }
     }

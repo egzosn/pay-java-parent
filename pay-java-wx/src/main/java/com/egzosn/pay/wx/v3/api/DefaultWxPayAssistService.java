@@ -1,17 +1,5 @@
 package com.egzosn.pay.wx.v3.api;
 
-import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
-import java.security.cert.Certificate;
-import java.util.Map;
-
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.entity.ContentType;
-import org.apache.http.message.BasicHeader;
-
-import static org.apache.http.entity.ContentType.APPLICATION_JSON;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -30,6 +18,17 @@ import com.egzosn.pay.wx.bean.WxPayError;
 import com.egzosn.pay.wx.v3.bean.WxTransactionType;
 import com.egzosn.pay.wx.v3.utils.AntCertificationUtil;
 import com.egzosn.pay.wx.v3.utils.WxConst;
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.entity.ContentType;
+import org.apache.http.message.BasicHeader;
+
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
+import java.security.cert.Certificate;
+import java.util.Map;
+
+import static org.apache.http.entity.ContentType.APPLICATION_JSON;
 
 /**
  * 默认的微信支付辅助服务
@@ -151,7 +150,7 @@ public class DefaultWxPayAssistService implements WxPayAssistService {
         //签名信息
         String signText = StringUtils.joining("\n", method, canonicalUrl, String.valueOf(timestamp), nonceStr, body);
         String sign = wxPayService.createSign(signText, payConfigStorage.getInputCharset());
-        String serialNumber = payConfigStorage.getCertEnvironment().getSerialNumber();
+        String serialNumber = payConfigStorage.getCertEnvironment().getMerchantSerialNumber();
         // 生成token
         String token = String.format(WxConst.TOKEN_PATTERN, payConfigStorage.getMchId(), nonceStr, timestamp, serialNumber, sign);
         HttpStringEntity entity = new HttpStringEntity(body, ContentType.APPLICATION_JSON);
@@ -170,6 +169,14 @@ public class DefaultWxPayAssistService implements WxPayAssistService {
      */
     @Override
     public void refreshCertificate() {
+        if (null != payConfigStorage.getCertEnvironment().getPublicKey()){
+            return;
+        }
+        if (StringUtils.isNotEmpty(payConfigStorage.getPlatformCertificate()) && null == payConfigStorage.getCertEnvironment().getPublicKey()) {
+            AntCertificationUtil.loadCertificate(payConfigStorage.getPlatformSerialNumber(), new ByteArrayInputStream(payConfigStorage.getPlatformCertificate().getBytes(StandardCharsets.UTF_8)));
+            return;
+        }
+
         JSONObject responseEntity = doExecute("", WxTransactionType.CERT);
 
         if (null == responseEntity) {

@@ -38,7 +38,7 @@ import com.egzosn.pay.web.support.HttpRequestNoticeParams;
  * email egzosn@gmail.com
  * date 2016/11/18 0:25
  */
-@RestController
+//@RestController
 @RequestMapping("union")
 public class UnionPayController {
 
