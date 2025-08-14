@@ -10,7 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>pay-java-wx-youdian</artifactId>
 
-
+    <name>Pay Java - Wx-Youdian</name>
 
     <dependencies>
 

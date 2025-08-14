@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>pay-java-ali</artifactId>
-
+    <name>Pay Java - Ali</name>
 
     <dependencies>
 

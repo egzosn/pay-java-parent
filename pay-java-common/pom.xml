@@ -11,7 +11,7 @@
     <packaging>jar</packaging>
     <groupId>com.egzosn</groupId>
     <artifactId>pay-java-common</artifactId>
-
+    <name>Pay Java - Common</name>
 
     <dependencies>
         <!--httpcomponents-->

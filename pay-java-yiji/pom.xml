@@ -11,7 +11,7 @@
 
     <groupId>com.egzosn</groupId>
     <artifactId>pay-java-yiji</artifactId>
-
+    <name>Pay Java - Yiji</name>
     <dependencies>
 
         <!-- pay-java  -->

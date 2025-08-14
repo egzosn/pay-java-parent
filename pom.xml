@@ -59,7 +59,7 @@
         <module>pay-java-paypal</module>
         <module>pay-java-yiji</module>
         <module>pay-java-baidu</module>
-        <module>pay-java-demo</module>
+<!--        <module>pay-java-demo</module>-->
     </modules>
 
 
@@ -202,14 +202,24 @@
             <id>proc</id>
             <build>
                 <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>3.3.0</version>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
 
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-release-plugin</artifactId>
-                    </plugin>
-                    <plugin>
-                        <inherited>true</inherited>
                         <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>3.6.0</version>
                         <executions>
                             <execution>
                                 <id>attach-javadocs</id>
@@ -220,16 +230,27 @@
                         </executions>
                     </plugin>
                     <plugin>
-                        <inherited>true</inherited>
-                        <artifactId>maven-source-plugin</artifactId>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.6</version>
                         <executions>
                             <execution>
-                                <id>attach-sources</id>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
                                 <goals>
-                                    <goal>jar-no-fork</goal>
+                                    <goal>sign</goal>
                                 </goals>
                             </execution>
                         </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>0.5.0</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <publishingServerId>central</publishingServerId>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>

@@ -11,7 +11,7 @@
     <packaging>jar</packaging>
     <artifactId>pay-java-web-support</artifactId>
     <description>Pay Java Web 相关支持</description>
-
+    <name>Pay Java - Web Support</name>
     <properties>
         <servlet-api.version>4.0.1</servlet-api.version>
     </properties>
