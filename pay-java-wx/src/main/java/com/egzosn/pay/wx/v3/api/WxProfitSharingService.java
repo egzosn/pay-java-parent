@@ -1,26 +1,10 @@
 package com.egzosn.pay.wx.v3.api;
 
-import java.io.InputStream;
-import java.util.Date;
-import java.util.Map;
-
-import org.apache.http.message.BasicHeader;
-
 import com.alibaba.fastjson.JSONObject;
-import com.egzosn.pay.common.bean.AssistOrder;
-import com.egzosn.pay.common.bean.BillType;
-import com.egzosn.pay.common.bean.MethodType;
-import com.egzosn.pay.common.bean.NoticeParams;
-import com.egzosn.pay.common.bean.OrderParaStructure;
-import com.egzosn.pay.common.bean.PayMessage;
-import com.egzosn.pay.common.bean.PayOrder;
-import com.egzosn.pay.common.bean.RefundOrder;
-import com.egzosn.pay.common.bean.RefundResult;
-import com.egzosn.pay.common.bean.TransferOrder;
+import com.egzosn.pay.common.bean.*;
 import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpConfigStorage;
-import com.egzosn.pay.common.http.HttpStringEntity;
 import com.egzosn.pay.common.http.UriVariables;
 import com.egzosn.pay.common.util.DateUtils;
 import com.egzosn.pay.common.util.MapGen;
@@ -31,6 +15,10 @@ import com.egzosn.pay.wx.v3.bean.sharing.ProfitSharingBillType;
 import com.egzosn.pay.wx.v3.bean.sharing.ProfitSharingPayMessage;
 import com.egzosn.pay.wx.v3.bean.sharing.WxProfitSharingReturnResult;
 import com.egzosn.pay.wx.v3.utils.WxConst;
+
+import java.io.InputStream;
+import java.util.Date;
+import java.util.Map;
 
 /**
  * 微信分账API服务
@@ -119,7 +107,6 @@ public class WxProfitSharingService extends WxPayService implements ProfitSharin
         OrderParaStructure.loadParameters(parameters, WxConst.SUB_APPID, order);
         return getAssistService().doExecute(parameters, order);
     }
-
 
 
     /**

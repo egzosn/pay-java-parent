@@ -18,7 +18,7 @@ public class WxYouDianPayConfigStorage extends BasePayConfigStorage {
     /**
      * 账号
      */
-    public String seller;
+    public String pid;
 
 
     @Override
@@ -40,16 +40,20 @@ public class WxYouDianPayConfigStorage extends BasePayConfigStorage {
 
     @Override
     public String getPid() {
-        return null;
+        return pid;
     }
 
-    public void setSeller(String seller) {
-        this.seller = seller;
+    public void setPid(String pid) {
+        this.pid = pid;
     }
 
-    @Override
+    public void setSeller(String pid) {
+        this.pid = pid;
+    }
+
+
     public String getSeller() {
-        return seller;
+        return pid;
     }
 
 

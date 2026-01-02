@@ -66,6 +66,7 @@ import com.egzosn.pay.common.util.str.StringUtils;
 public class AliPayService extends BasePayService<AliPayConfigStorage> implements TransferService, AliPayServiceInf {
 
 
+
     /**
      * api服务地址，默认为国内
      */

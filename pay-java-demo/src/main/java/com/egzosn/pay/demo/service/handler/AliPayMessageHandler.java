@@ -3,10 +3,7 @@ package com.egzosn.pay.demo.service.handler;
 import com.egzosn.pay.ali.api.AliPayService;
 import com.egzosn.pay.ali.bean.AliPayMessage;
 import com.egzosn.pay.common.api.PayMessageHandler;
-import com.egzosn.pay.common.api.PayService;
-import com.egzosn.pay.common.bean.PayMessage;
 import com.egzosn.pay.common.bean.PayOutMessage;
-import com.egzosn.pay.common.bean.outbuilder.TextBuilder;
 import com.egzosn.pay.common.exception.PayErrorException;
 import org.springframework.stereotype.Component;
 

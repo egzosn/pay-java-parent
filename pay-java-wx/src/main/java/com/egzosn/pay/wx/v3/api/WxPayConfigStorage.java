@@ -121,11 +121,6 @@ public class WxPayConfigStorage extends BasePayConfigStorage {
     }
 
 
-    @Override
-    public String getSeller() {
-        return mchId;
-    }
-
 
     public String getMchId() {
         return mchId;

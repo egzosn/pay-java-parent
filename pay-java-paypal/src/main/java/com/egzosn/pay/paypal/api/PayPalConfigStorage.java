@@ -44,7 +44,6 @@ public class PayPalConfigStorage extends BasePayConfigStorage {
         return clientId;
     }
 
-    @Override
     public String getSeller() {
         return clientId;
     }

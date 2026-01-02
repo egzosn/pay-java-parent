@@ -1,14 +1,14 @@
 package com.egzosn.pay.wx.v3.api;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import com.egzosn.pay.common.bean.AssistOrder;
 import com.egzosn.pay.common.bean.OrderParaStructure;
 import com.egzosn.pay.common.bean.PayOrder;
 import com.egzosn.pay.common.util.MapGen;
 import com.egzosn.pay.wx.v3.utils.WxConst;
+
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * 微信参数构造器

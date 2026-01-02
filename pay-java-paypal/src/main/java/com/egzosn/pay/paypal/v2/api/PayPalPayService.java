@@ -64,7 +64,7 @@ import com.egzosn.pay.paypal.v2.utils.PayPalUtil;
  * @author egan
  * <p>
  * email egzosn@gmail.com
- * date 2021-1-16 ‏‎22:15:09
+ * date 2021-1-16 22:15:09
  */
 public class PayPalPayService extends BasePayService<PayPalConfigStorage> implements PayPalPayServiceInf {
 

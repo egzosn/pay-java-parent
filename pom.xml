@@ -64,16 +64,16 @@
 
 
     <properties>
-        <revision>2.14.9</revision>
+        <revision>2.14.10</revision>
         <httpmime.version>4.5.4</httpmime.version>
         <log4j.version>1.2.17</log4j.version>
         <fastjson.version>1.2.83</fastjson.version>
         <zxing.version>3.3.1</zxing.version>
         <servlet-api.version>4.0.1</servlet-api.version>
         <bcprov-jdk15on.version>1.59</bcprov-jdk15on.version>
-        <java.version>17</java.version>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <java.version>8</java.version>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <flatten-maven-plugin.version>1.1.0</flatten-maven-plugin.version>

@@ -1,16 +1,9 @@
 package com.egzosn.pay.wx.v3.api;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.egzosn.pay.common.bean.AssistOrder;
-import com.egzosn.pay.common.bean.Order;
-import com.egzosn.pay.common.bean.OrderParaStructure;
-import com.egzosn.pay.common.bean.PayMessage;
-import com.egzosn.pay.common.bean.PayOrder;
+import com.egzosn.pay.common.bean.*;
 import com.egzosn.pay.common.bean.result.PayException;
 import com.egzosn.pay.common.exception.PayErrorException;
 import com.egzosn.pay.common.http.HttpConfigStorage;
@@ -20,6 +13,9 @@ import com.egzosn.pay.common.util.str.StringUtils;
 import com.egzosn.pay.wx.v3.bean.WxTransactionType;
 import com.egzosn.pay.wx.v3.bean.combine.CombinePayMessage;
 import com.egzosn.pay.wx.v3.utils.WxConst;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * 微信合单支付服务

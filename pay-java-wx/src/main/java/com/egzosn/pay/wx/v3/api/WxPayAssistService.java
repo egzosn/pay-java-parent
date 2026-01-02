@@ -1,14 +1,13 @@
 package com.egzosn.pay.wx.v3.api;
 
-import java.security.cert.Certificate;
-import java.util.Map;
-
-import org.apache.http.HttpEntity;
-
 import com.alibaba.fastjson.JSONObject;
 import com.egzosn.pay.common.bean.PayOrder;
 import com.egzosn.pay.common.bean.TransactionType;
 import com.egzosn.pay.common.http.ResponseEntity;
+import org.apache.http.HttpEntity;
+
+import java.security.cert.Certificate;
+import java.util.Map;
 
 /**
  * 微信支付辅助服务

@@ -53,9 +53,5 @@ public class FuiouPayConfigStorage extends BasePayConfigStorage {
         this.mchntCd = mchntCd;
     }
 
-    @Override
-    public String getSeller() {
-        return null;
-    }
 
 }

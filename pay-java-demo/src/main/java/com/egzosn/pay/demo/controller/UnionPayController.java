@@ -13,7 +13,7 @@ import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+
 
 import static com.egzosn.pay.union.bean.UnionTransactionType.WEB;
 

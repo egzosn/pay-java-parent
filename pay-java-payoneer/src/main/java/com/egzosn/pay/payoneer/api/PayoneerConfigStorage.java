@@ -30,7 +30,7 @@ public class PayoneerConfigStorage extends BasePayConfigStorage {
     @Override
     @Deprecated
     public String getAppid() {
-        return null;
+        return programId;
     }
 
     /**
@@ -41,7 +41,7 @@ public class PayoneerConfigStorage extends BasePayConfigStorage {
      */
     @Override
     public String getAppId() {
-        return null;
+        return programId;
     }
 
 
@@ -50,13 +50,10 @@ public class PayoneerConfigStorage extends BasePayConfigStorage {
      */
     @Override
     public String getPid() {
-        return programId;
-    }
-
-    @Override
-    public String getSeller() {
         return userName;
     }
+
+
 
     /**
      * 获取商户Id

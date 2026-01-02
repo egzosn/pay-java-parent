@@ -87,7 +87,7 @@ public class PayoneerPayService extends BasePayService<PayoneerConfigStorage> im
     private HttpHeader authHeader() {
 
         List<Header> headers = new ArrayList<>();
-        headers.add(new BasicHeader("Authorization", "Basic " + authorizationString(getPayConfigStorage().getSeller(), getPayConfigStorage().getKeyPrivate())));
+        headers.add(new BasicHeader("Authorization", "Basic " + authorizationString(getPayConfigStorage().getPid(), getPayConfigStorage().getKeyPrivate())));
 
         return new HttpHeader(headers);
     }
@@ -498,7 +498,7 @@ public class PayoneerPayService extends BasePayService<PayoneerConfigStorage> im
      */
     @Override
     public String getReqUrl(TransactionType type) {
-        return (payConfigStorage.isTest() ? SANDBOX_DOMAIN : RELEASE_DOMAIN) + payConfigStorage.getPid() + "/" + type.getMethod();
+        return (payConfigStorage.isTest() ? SANDBOX_DOMAIN : RELEASE_DOMAIN) + payConfigStorage.getAppId() + "/" + type.getMethod();
     }
 
 

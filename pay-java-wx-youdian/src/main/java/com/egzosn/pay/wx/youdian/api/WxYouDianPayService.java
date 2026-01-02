@@ -108,7 +108,7 @@ public class WxYouDianPayService extends BasePayService<WxYouDianPayConfigStorag
      */
     private JSONObject login() throws PayErrorException {
         TreeMap<String, String> data = new TreeMap<>();
-        data.put("username", payConfigStorage.getSeller());
+        data.put("username", payConfigStorage.getPid());
         data.put("password", payConfigStorage.getKeyPrivate());
         String apbNonce = SignTextUtils.randomStr();
 //         1、确定请求主体为用户登录，即需要传登录的用户名username和密码password并且要生成唯一的随机数命名为apb_nonce，长度为32位

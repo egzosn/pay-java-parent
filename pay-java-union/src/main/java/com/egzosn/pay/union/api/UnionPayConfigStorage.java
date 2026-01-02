@@ -22,10 +22,6 @@ public class UnionPayConfigStorage extends BasePayConfigStorage {
      */
     private String merId;
 
-    /**
-     * 商户收款账号
-     */
-    private String seller;
 
     private String version = "5.1.0";
     /**
@@ -195,14 +191,6 @@ public class UnionPayConfigStorage extends BasePayConfigStorage {
         this.merId = pid;
     }
 
-    @Override
-    public String getSeller() {
-        return seller;
-    }
-
-    public void setSeller(String seller) {
-        this.seller = seller;
-    }
 
     public String getMerId() {
         return merId;

@@ -27,12 +27,6 @@ public class BaiduPayConfigStorage extends BasePayConfigStorage {
         return getDealId();
     }
 
-    //使用json序列化的时候会报错，所以不要直接抛出异常
-    @Override
-    public String getSeller() {
-        return getDealId();
-    }
-
     public String getDealId() {
         return dealId;
     }

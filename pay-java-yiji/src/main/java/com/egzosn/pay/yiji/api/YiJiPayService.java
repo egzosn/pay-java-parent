@@ -170,8 +170,8 @@ public class YiJiPayService extends BasePayService<YiJiPayConfigStorage> {
         orderInfo.put("orderNo", order.getOutTradeNo());
         orderInfo.put("outOrderNo", order.getOutTradeNo());
 
-        if (StringUtils.isNotEmpty(payConfigStorage.getSeller())) {
-            orderInfo.put("sellerUserId", payConfigStorage.getSeller());
+        if (StringUtils.isNotEmpty(payConfigStorage.getSellerUserId())) {
+            orderInfo.put("sellerUserId", payConfigStorage.getSellerUserId());
         }
 
         ((YiJiTransactionType) order.getTransactionType()).setAttribute(orderInfo, order);
@@ -195,7 +195,7 @@ public class YiJiPayService extends BasePayService<YiJiPayConfigStorage> {
      */
     private Map<String, Object> getPublicParameters(TransactionType transactionType) {
         Map<String, Object> orderInfo = new TreeMap<>();
-        orderInfo.put("partnerId", payConfigStorage.getPid());
+        orderInfo.put("partnerId", payConfigStorage.getPartnerId());
         orderInfo.put("returnUrl", payConfigStorage.getReturnUrl());
         orderInfo.put("notifyUrl", payConfigStorage.getNotifyUrl());
         orderInfo.put("service", transactionType.getMethod());

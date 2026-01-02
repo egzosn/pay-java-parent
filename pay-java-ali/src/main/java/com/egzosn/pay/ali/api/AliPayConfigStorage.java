@@ -107,7 +107,6 @@ public class AliPayConfigStorage extends BasePayConfigStorage {
         this.pid = pid;
     }
 
-    @Override
     public String getSeller() {
         return seller;
     }

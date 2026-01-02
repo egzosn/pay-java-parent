@@ -35,7 +35,7 @@ public class YiJiPayConfigStorage extends BasePayConfigStorage {
 
     @Override
     public String getAppid() {
-        return null;
+        return partnerId;
     }
 
     /**
@@ -46,7 +46,7 @@ public class YiJiPayConfigStorage extends BasePayConfigStorage {
      */
     @Override
     public String getAppId() {
-        return null;
+        return partnerId;
     }
 
 
@@ -55,14 +55,10 @@ public class YiJiPayConfigStorage extends BasePayConfigStorage {
      */
     @Override
     public String getPid() {
-        return partnerId;
-    }
-
-
-    @Override
-    public String getSeller() {
         return sellerUserId;
     }
+
+
 
     public String getSellerUserId() {
         return sellerUserId;
