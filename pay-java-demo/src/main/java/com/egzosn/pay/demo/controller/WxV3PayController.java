@@ -15,6 +15,7 @@ import java.util.UUID;
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 
+import com.egzosn.pay.wx.v3.api.WxPayConfigStorage;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -52,17 +53,17 @@ public class WxV3PayController {
 
 //    @PostConstruct  //没有证书的情况下注释掉，避免启动报错
     public void init() throws IOException {
-        com.egzosn.pay.wx.v3.api.WxPayConfigStorage wxPayConfigStorage = new com.egzosn.pay.wx.v3.api.WxPayConfigStorage();
-        wxPayConfigStorage.setAppId("wx5ce9f1a2****");
-        wxPayConfigStorage.setMchId("170330*****");
+        WxPayConfigStorage wxPayConfigStorage = new WxPayConfigStorage();
+        wxPayConfigStorage.setAppId("wxc8f2d26c249a6801");
+        wxPayConfigStorage.setMchId("1738563613");
         //V3密钥 https://pay.weixin.qq.com/wiki/doc/apiv3/wechatpay/wechatpay3_2.shtml
-        wxPayConfigStorage.setV3ApiKey("KDBX2tbrKi9eWFEZ*****");
+        wxPayConfigStorage.setV3ApiKey("f90e38d83cf941b3bc78fced177742fc");
 //        //验签、转账等接口使用，9月份开始不允许获取证书方式了，直接通过公钥字符来做或公钥证书
 //        wxPayConfigStorage.setPlatformCertificate(Files.readString(Paths.get("wechatpay//wechatpay_72C2EF0EE5095C6D************.pem")));
 //        wxPayConfigStorage.setPlatformSerialNumber("72C2EF0EE5095C6D************");
         //验签、转账等接口使用，9月份开始不允许获取证书方式了，直接通过公钥字符来做或公钥证书
-        wxPayConfigStorage.setKeyPublic("支付平台公钥(原为自动获取的证书)");
-        wxPayConfigStorage.setKeyPublicId("支付平台公钥ID");
+        wxPayConfigStorage.setKeyPublic("MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA2K3ohpaJ9edg+qhLPukZzLM+ZJcVpXg2f64C6ysa24Y4GuZtA4CXQvo+n/F/XQu2vH8hWfI2oE709/trMaGh3xVJCjX0bDXUOdKmjE10f3cn9+DUbq5AtIL/XZcEXXuGdVokG8gHIwHAVJySwoBEkKffRi99pOIUuVjFXfaW68VOyjN3vE7lVn9WTO1b5nHeR5F82HbuodvNpzkyofaGW8b1C4cmEhrr9G5fDt1nMP7JJNU3SKqFU8XEM15y3ADshDp9nLVJf27TtdN752aG/n5LIrwUNwZpcwMsRxT+GUV/JhEDU4trv0UAR3Tx4GP0SRxkzggGUrt0ASH/dcHvaQIDAQAB");
+        wxPayConfigStorage.setKeyPublicId("PUB_KEY_ID_0117385636132026012800111566000802");
 
         wxPayConfigStorage.setNotifyUrl("https://pay.egzosn.com/wxV3/payBack.json");
         wxPayConfigStorage.setReturnUrl("https://pay.egzosn.com/wxV3/payBack.json");

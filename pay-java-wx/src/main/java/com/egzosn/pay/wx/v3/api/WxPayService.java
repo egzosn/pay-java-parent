@@ -652,6 +652,30 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
 
         Map<String, Object> parameters = new HashMap<>(12);
         parameters.put(WxConst.APPID, payConfigStorage.getAppId());
+        parameters.put(WxConst.OUT_BILL_NO, transferOrder.getOutNo());
+        parameters.put(WxConst.OPENID, transferOrder.getPayeeAccount());
+        if (StringUtils.isNotEmpty(transferOrder.getPayeeName())){
+            parameters.put(WxConst.USER_NAME, transferOrder.getPayeeName());
+        }
+        parameters.put(WxConst.TRANSFER_AMOUNT, Util.conversionCentAmount(transferOrder.getAmount()));
+        parameters.put(WxConst.TRANSFER_REMARK, transferOrder.getRemark());
+        parameters.put(WxConst.TOTAL_NUM, transferOrder.getAttr(WxConst.TOTAL_NUM));
+        OrderParaStructure.loadParameters(parameters, WxConst.TRANSFER_SCENE_ID, transferOrder);
+        OrderParaStructure.loadParameters(parameters, WxConst.NOTIFY_URL, transferOrder);
+        OrderParaStructure.loadParameters(parameters, WxConst.USER_RECV_PERCEPTION, transferOrder);
+        OrderParaStructure.loadParameters(parameters, WxConst.TRANSFER_SCENE_REPORT_INFOS, transferOrder);
+        return getAssistService().doExecute(parameters, transferOrder.getTransferType());
+    }
+
+    public Map<String, Object> transferLooseChange(TransferOrder transferOrder) {
+        //转账账单电子回单申请受理接口
+        if (transferOrder.getTransferType() == WxTransferType.TRANSFER_BILL_RECEIPT) {
+            Map<String, Object> attr = new MapGen<String, Object>(WxConst.OUT_BATCH_NO, transferOrder.getBatchNo()).getAttr();
+            return getAssistService().doExecute(attr, transferOrder.getTransferType());
+        }
+
+        Map<String, Object> parameters = new HashMap<>(12);
+        parameters.put(WxConst.APPID, payConfigStorage.getAppId());
         parameters.put(WxConst.OUT_BATCH_NO, transferOrder.getBatchNo());
         OrderParaStructure.loadParameters(parameters, WxConst.BATCH_NAME, transferOrder);
         parameters.put(WxConst.BATCH_REMARK, transferOrder.getRemark());

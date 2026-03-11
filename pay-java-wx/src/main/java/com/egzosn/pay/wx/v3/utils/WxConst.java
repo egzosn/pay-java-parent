@@ -71,6 +71,7 @@ public final class WxConst {
     public static final String RESP_BODY = WxPayService.class.getName() + "$RESP_BODY";
     public static final String OUT_BATCH_NO = "out_batch_no";
     public static final String OUT_DETAIL_NO = "out_detail_no";
+    public static final String OUT_BILL_NO = "out_bill_no";
     public static final String DETAIL_ID = "detail_id";
     public static final String BATCH_NAME = "batch_name";
     public static final String BATCH_REMARK = "batch_remark";
@@ -82,7 +83,13 @@ public final class WxConst {
     public static final String NEED_QUERY_DETAIL = "need_query_detail";
     public static final String OFFSET = "offset";
     public static final String LIMIT = "limit";
+    public static final String OPENID = "openid";
+    public static final String USER_NAME = "user_name";
     public static final String DETAIL_STATUS = "detail_status";
+    public static final String TRANSFER_AMOUNT  = "transfer_amount";
+    public static final String TRANSFER_REMARK  = "transfer_remark";
+    public static final String USER_RECV_PERCEPTION  = "user_recv_perception";
+    public static final String TRANSFER_SCENE_REPORT_INFOS  = "transfer_scene_report_infos";
     public static final String WECHATPAY_SERIAL = "Wechatpay-Serial";
     public static final String AUTHORIZATION_CODE = "authorization_code";
 }
