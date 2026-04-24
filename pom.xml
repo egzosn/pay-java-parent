@@ -66,6 +66,7 @@
     <properties>
         <revision>2.14.9</revision>
         <httpmime.version>4.5.4</httpmime.version>
+        <commons-codec.version>1.17.1</commons-codec.version>
         <log4j.version>1.2.17</log4j.version>
         <fastjson.version>1.2.83</fastjson.version>
         <zxing.version>3.3.1</zxing.version>
@@ -101,6 +102,11 @@
                 <version>${httpmime.version}</version>
             </dependency>
             <!--/httpcomponents-->
+            <dependency>
+                <groupId>commons-codec</groupId>
+                <artifactId>commons-codec</artifactId>
+                <version>${commons-codec.version}</version>
+            </dependency>
             <dependency>
                 <groupId>com.alibaba</groupId>
                 <artifactId>fastjson</artifactId>
