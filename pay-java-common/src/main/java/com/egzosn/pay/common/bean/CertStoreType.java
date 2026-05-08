@@ -65,7 +65,7 @@ public enum CertStoreType implements CertStore {
          */
         @Override
         public InputStream getInputStream(Object cert) throws IOException {
-            return  Thread.currentThread().getContextClassLoader().getResourceAsStream((String) cert);
+            return  this.getClass().getResourceAsStream((String) cert);
         }
     },
     /**

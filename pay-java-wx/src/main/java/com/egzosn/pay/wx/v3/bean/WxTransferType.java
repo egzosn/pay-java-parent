@@ -18,6 +18,8 @@ public enum WxTransferType implements TransferType {
      * 转账到零钱
      */
     TRANSFER_BATCHES("/v3/transfer/batches", MethodType.POST),
+
+    TRANSFER_BILLS("/v3/fund-app/mch-transfer/transfer-bills", MethodType.POST),
     /**
      * 查询转账到零钱的记录,通过微信批次单号查询批次单
      */
@@ -51,6 +53,8 @@ public enum WxTransferType implements TransferType {
      */
     QUERY_TRANSFER_DETAIL_ELECTRONIC_RECEIPTS("/v3/transfer-detail/electronic-receipts"),
     ;
+    private String type;
+    private MethodType method;
 
     WxTransferType(String type, MethodType method) {
         this.type = type;
@@ -61,8 +65,6 @@ public enum WxTransferType implements TransferType {
         this(type, MethodType.GET);
     }
 
-    private String type;
-    private MethodType method;
 
 
     @Override

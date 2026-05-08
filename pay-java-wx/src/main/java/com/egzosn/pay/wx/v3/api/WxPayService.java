@@ -212,11 +212,15 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
         String body = noticeParams.getBodyStr();
         //签名信息
         String signText = StringUtils.joining("\n", timestamp, nonce, body);
+        LOG.debug("微信验签：{}", signText);
+
         if (StringUtils.isNotEmpty(payConfigStorage.getKeyPublic())) {
             return RSA2.verify(signText, signature, payConfigStorage.getKeyPublic(), payConfigStorage.getInputCharset());
         }
         Certificate certificate = getAssistService().getCertificate(serial);
-        return RSA2.verify(signText, signature, certificate, payConfigStorage.getInputCharset());
+        boolean verify = RSA2.verify(signText, signature, certificate, payConfigStorage.getInputCharset());
+        LOG.debug("微信验签：{}, verify:{}", signText, verify);
+        return verify;
     }
 
 
@@ -364,7 +368,8 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
     public NoticeParams getNoticeParams(NoticeRequest request) {
         WxNoticeParams noticeParams = null;
         try (InputStream is = request.getInputStream()) {
-            String body = IOUtils.toString(is);
+            String body = IOUtils.toString(is, payConfigStorage.getInputCharset());
+            LOG.debug("微信回调解析：{}", body);
             noticeParams = JSON.parseObject(body, WxNoticeParams.class);
             noticeParams.setAttr(new MapGen<String, Object>(WxConst.RESP_BODY, body).getAttr());
             noticeParams.setBodyStr(body);
@@ -374,8 +379,9 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
             String ciphertext = resource.getCiphertext();
             String data = AntCertificationUtil.decryptToString(associatedData, nonce, ciphertext, payConfigStorage.getV3ApiKey(), payConfigStorage.getInputCharset());
             noticeParams.setBody(JSON.parseObject(data));
-        }
-        catch (IOException e) {
+            LOG.debug("微信回调解析noticeParams：{}", JSON.toJSONString(noticeParams));
+        } catch (IOException | RuntimeException e) {
+            LOG.error("获取回调参数异常：{}", e.getMessage(), e);
             throw new PayErrorException(new WxPayError(FAILURE, "获取回调参数异常"), e);
         }
         Map<String, List<String>> headers = new HashMap<>();
@@ -659,7 +665,8 @@ public class WxPayService extends BasePayService<WxPayConfigStorage> implements 
         }
         parameters.put(WxConst.TRANSFER_AMOUNT, Util.conversionCentAmount(transferOrder.getAmount()));
         parameters.put(WxConst.TRANSFER_REMARK, transferOrder.getRemark());
-        parameters.put(WxConst.TOTAL_NUM, transferOrder.getAttr(WxConst.TOTAL_NUM));
+        parameters.put(WxConst.NOTIFY_URL, payConfigStorage.getNotifyUrl());
+        OrderParaStructure.loadParameters(parameters, WxConst.TOTAL_NUM, transferOrder);
         OrderParaStructure.loadParameters(parameters, WxConst.TRANSFER_SCENE_ID, transferOrder);
         OrderParaStructure.loadParameters(parameters, WxConst.NOTIFY_URL, transferOrder);
         OrderParaStructure.loadParameters(parameters, WxConst.USER_RECV_PERCEPTION, transferOrder);
