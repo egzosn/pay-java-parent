@@ -1,7 +1,10 @@
 package com.egzosn.pay.common.util;
 
+import com.egzosn.pay.common.bean.result.PayException;
+import com.egzosn.pay.common.exception.PayErrorException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.util.Collection;
 import java.util.Map;
 
@@ -590,7 +593,11 @@ public class Util {
      * @return 分的金额
      */
     public static int conversionCentAmount(BigDecimal amount) {
-        return amount.multiply(HUNDRED).setScale(0, BigDecimal.ROUND_HALF_UP).intValue();
+        final BigDecimal decimal = amount.multiply(HUNDRED).setScale(0, RoundingMode.HALF_UP);
+        if (decimal.longValue() > (long) Integer.MAX_VALUE) {
+            throw new PayErrorException(new PayException("illegal parameter", "订单金额过大"));
+        }
+        return decimal.intValue();
     }
 
     /**
