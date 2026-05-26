@@ -20,6 +20,12 @@
         <dependency>
             <groupId>com.egzosn</groupId>
             <artifactId>pay-java-common</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.httpcomponents</groupId>
+                    <artifactId>httpmime</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
